@@ -1,0 +1,15 @@
+.venv/
+.env
+.filingcopilot/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+artifacts/local/
+%SystemDrive%/
+.workbuddy/
+artifacts/*
+!artifacts/README.md

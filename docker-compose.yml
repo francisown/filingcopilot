@@ -1,0 +1,20 @@
+services:
+  filingcopilot:
+    build: .
+    ports:
+      - "127.0.0.1:${FC_PORT:-8159}:8123"
+    environment:
+      FC_HOME: /app/data
+      FC_API_BASE: "${FC_API_BASE:-}"
+      FC_API_KEY: "${FC_API_KEY:-}"
+      FC_MODEL: "${FC_MODEL:-}"
+      FC_REVIEW_MODEL: "${FC_REVIEW_MODEL:-}"
+      FC_SEC_USER_AGENT: "${FC_SEC_USER_AGENT:-}"
+      FC_EMBEDDING_MODE: "${FC_EMBEDDING_MODE:-off}"
+      FC_RERANK_MODE: "${FC_RERANK_MODE:-anchor}"
+    volumes:
+      - filingcopilot-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  filingcopilot-data:

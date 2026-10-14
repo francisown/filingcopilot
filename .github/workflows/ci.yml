@@ -1,0 +1,105 @@
+name: FilingCopilot verification
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.10', '3.12']
+    runs-on: ${{ matrix.os }}
+    # Two full runs plus installation; a cold run has been observed to exceed 20 minutes.
+    timeout-minutes: 60
+    env:
+      FC_EMBEDDING_MODE: 'off'
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: python -m pip install -e '.[dev,semantic]' wheel
+      - run: python -c "from importlib.metadata import version; from filingcopilot import __version__; assert version('filingcopilot') == __version__, (version('filingcopilot'), __version__)"
+      - run: python -m ruff check src scripts tests
+      - run: python scripts/check_mcp_readme_tools.py
+      - run: python scripts/build_locale_catalog.py --check
+      - run: python scripts/check_retrieval_gold.py
+      - run: python scripts/run_quality_checks.py --profile unit --output artifacts/ci/unit-tests.json
+      - run: python scripts/check_midnight_fixtures.py
+      - run: python scripts/run_quality_checks.py --profile full --output artifacts/ci/full-tests.json
+      - run: node --check src/filingcopilot/static/app.js
+      - run: node --check src/filingcopilot/static/company.js
+      - run: node --check src/filingcopilot/static/market.js
+      - run: node --check src/filingcopilot/static/format.js
+      - run: node --check src/filingcopilot/static/i18n.js
+      - run: node --check src/filingcopilot/static/locale-en.js
+      - run: node scripts/check_i18n_ui.cjs
+      - run: node --check src/filingcopilot/static/trend.js
+      - run: node scripts/check_trend_ui.cjs
+      - run: node --check src/filingcopilot/static/watchlist.js
+      - run: node scripts/check_watchlist_ui.cjs
+      - run: node --check src/filingcopilot/static/comparison.js
+      - run: node --check src/filingcopilot/static/research-extra.js
+      - run: node --check src/filingcopilot/static/company-workspace.js
+      - run: node scripts/check_company_workspace_ui.cjs
+      - run: node scripts/check_extended_research_ui.cjs
+      - run: node scripts/check_comparison_ui.cjs
+      - run: node scripts/check_comparison_questions_ui.cjs
+      - run: node scripts/check_research_ui.cjs
+      - run: node scripts/check_preview_ui.cjs
+      - run: node scripts/check_financial_ui.cjs
+      - run: node scripts/check_reporting_currency_ui.cjs
+      - run: node scripts/check_package_export.cjs
+      - run: node scripts/check_claim_periods_ui.cjs
+      - run: node scripts/check_deadline_ui.cjs
+      - run: node scripts/check_refresh_ui.cjs
+      - run: node scripts/check_updates_ui.cjs
+      - run: node scripts/check_company_market_ui.cjs
+      - run: node scripts/check_market_loading_ui.cjs
+      - run: node scripts/check_market_outage_ui.cjs
+      - run: python scripts/smoke_mcp.py --output artifacts/ci/mcp-smoke.json
+      - run: python -m filingcopilot evaluate --output artifacts/evaluation.json
+      - run: python -m pip wheel --no-deps . --wheel-dir dist
+      - run: python scripts/build_verifier_distribution.py
+      - name: Validate application wheel
+        shell: bash
+        run: |
+          version=$(python -c 'from filingcopilot import __version__; print(__version__)')
+          python scripts/validate_application_distribution.py \
+            --wheel "dist/filingcopilot-${version}-py3-none-any.whl" \
+            --output artifacts/ci/application-wheel.json
+      - name: Validate verifier wheel
+        shell: bash
+        run: |
+          version=$(python -c 'from filingcopilot import __version__; print(__version__)')
+          python scripts/validate_verifier_wheel.py \
+            --wheel "dist/filingcopilot_verify-${version}-py3-none-any.whl" \
+            --output artifacts/ci/verifier-wheel.json
+      - name: Summarize Python check failures
+        if: failure()
+        shell: pwsh
+        run: |
+          if (Test-Path artifacts/ci) {
+            $reports = Get-ChildItem artifacts/ci -File -ErrorAction SilentlyContinue | Sort-Object Name
+            foreach ($report in $reports) {
+              Write-Host "===== $($report.Name) ====="
+              if ($report.Extension -eq '.txt') {
+                Get-Content -LiteralPath $report.FullName -Tail 80
+              } else {
+                Get-Content -LiteralPath $report.FullName
+              }
+            }
+          }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: validation-${{ matrix.os }}-py${{ matrix.python }}
+          path: |
+            artifacts/evaluation.json
+            artifacts/ci/**
+            dist/*.whl

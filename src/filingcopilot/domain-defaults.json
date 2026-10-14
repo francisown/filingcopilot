@@ -1,0 +1,367 @@
+{
+  "companies": {
+    "AAPL": {"cik": "0000320193", "name": "Apple Inc.", "aliases": ["苹果", "Apple"]},
+    "MSFT": {"cik": "0000789019", "name": "Microsoft Corporation", "aliases": ["微软", "Microsoft"]},
+    "NVDA": {"cik": "0001045810", "name": "NVIDIA Corporation", "aliases": ["英伟达", "NVIDIA"]},
+    "BP": {"cik": "0000313807", "name": "BP p.l.c.", "aliases": ["BP", "bp", "英国石油"]},
+    "SHEL": {"cik": "0001306965", "name": "Shell plc", "aliases": ["Shell", "壳牌", "荷兰皇家壳牌"]},
+    "PDD": {
+      "cik": "0001737806",
+      "name": "PDD Holdings Inc.",
+      "aliases": [
+        "拼多多",
+        "拼多多集团",
+        "Pinduoduo",
+        "PDD Holdings"
+      ]
+    },
+    "BABA": {
+      "cik": "0001577552",
+      "name": "Alibaba Group Holding Limited",
+      "aliases": [
+        "阿里巴巴",
+        "阿里巴巴集团",
+        "Alibaba"
+      ]
+    },
+    "JD": {
+      "cik": "0001549802",
+      "name": "JD.com, Inc.",
+      "aliases": [
+        "京东",
+        "京东集团",
+        "JD.com"
+      ]
+    }
+  },
+  "metrics": {
+    "revenue": {"label": "营业收入", "concepts": ["RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues", "SalesRevenueNet"], "aliases": ["营收", "收入", "revenue", "revenues", "sales", "net sales"]},
+    "gross_profit": {"label": "毛利润", "concepts": ["GrossProfit"], "aliases": ["毛利金额", "gross profit"]},
+    "cost_of_revenue": {"label": "营业成本", "concepts": ["CostOfRevenue", "CostOfGoodsAndServicesSold"], "aliases": ["cost of revenue", "cost of sales"]},
+    "net_income": {"label": "净利润", "concepts": ["NetIncomeLoss"], "aliases": ["net income", "net profit"]},
+    "operating_income": {"label": "营业利润", "concepts": ["OperatingIncomeLoss"], "aliases": ["operating income", "operating profit"]},
+    "total_assets": {"label": "总资产", "concepts": ["Assets"], "aliases": ["total assets", "assets"]},
+    "operating_cash_flow": {"label": "经营活动现金流", "concepts": ["NetCashProvidedByUsedInOperatingActivities"], "aliases": ["经营现金流", "现金流", "operating cash flow", "cash flow"]},
+    "cash_capex": {"label": "现金资本开支（PP&E购置）", "concepts": ["PaymentsToAcquirePropertyPlantAndEquipment"], "aliases": ["资本开支", "现金资本开支", "capex", "capital expenditures", "cash PP&E purchases"]},
+    "ppe_sale_incentive_proceeds": {"label": "PP&E出售及激励收款", "concepts": ["amzn:ProceedsFromPropertyPlantAndEquipmentSalesAndIncentives"], "aliases": ["设备出售及激励收款"]},
+    "cash": {"label": "现金及现金等价物", "concepts": ["CashAndCashEquivalentsAtCarryingValue"], "aliases": ["现金余额", "cash balance", "cash and cash equivalents"]},
+    "diluted_eps": {"label": "稀释每股收益", "concepts": ["EarningsPerShareDiluted"], "aliases": ["EPS", "每股收益", "diluted earnings per share"], "unit": "USD/shares"},
+    "ads_diluted_eps": {"label": "美元ADS稀释每股收益（年报便利换算）", "concepts": ["ifrs-full:DilutedEarningsLossPerShare"], "aliases": ["ADS EPS", "ADS 稀释每股收益", "ADS稀释每股收益", "ADS 每股收益", "ADS每股收益"], "unit": "USD/ADS"}
+  },
+  "ratios": {
+    "gross_margin": {"label": "毛利率", "numerator": "gross_profit", "denominator": "revenue", "aliases": ["gross margin percentage", "gross margin", "gross profit margin"]},
+    "net_margin": {"label": "净利率", "numerator": "net_income", "denominator": "revenue", "aliases": ["net margin", "net profit margin"]},
+    "operating_margin": {"label": "营业利润率", "numerator": "operating_income", "denominator": "revenue", "aliases": ["operating margin", "operating income margin"]}
+  },
+  "query_expansions": {
+    "收入": "revenue sales", "营收": "revenue sales", "毛利": "gross margin gross profit",
+    "净利": "net income profit", "风险": "risk uncertainties", "管理层": "management discussion",
+    "增长": "growth increase", "下降": "decline decrease", "原因": "driven due primarily",
+    "供应链": "supply chain manufacturing", "人工智能": "artificial intelligence AI",
+    "数据中心": "data center", "现金流": "cash flow", "中国": "China Greater China",
+    "服务": "services", "产品": "products", "竞争": "competition", "出口": "export restrictions",
+    "业务": "business operations", "主要业务": "business overview",
+    "同比": "year over year yoy growth change", "季度": "quarterly quarter",
+    "估值": "valuation price earnings multiple", "市盈率": "price earnings ratio pe",
+    "市销率": "price sales ratio ps", "企业价值": "enterprise value ev",
+    "每股收益": "earnings per share eps", "自由现金流": "free cash flow fcf",
+    "现金": "cash liquidity", "资本开支": "capital expenditures capex"
+  },
+  "currencies": {"USD": "美元", "EUR": "欧元", "CNY": "人民币", "JPY": "日元", "GBP": "英镑", "HKD": "港元", "TWD": "新台币"},
+  "industry_profiles": {
+    "bank": {"label": "银行", "metrics": {
+      "net_interest_income": {"label": "净利息收入", "concepts": ["us-gaap:InterestIncomeExpenseNonoperatingNet"], "unit": "USD"},
+      "provision_credit_losses": {"label": "信用损失准备", "concepts": ["us-gaap:ProvisionForCreditLosses"], "unit": "USD"}
+    }},
+    "insurance": {"label": "保险", "metrics": {
+      "premiums_earned": {"label": "已赚保费", "concepts": ["us-gaap:PremiumsEarned"], "unit": "USD"},
+      "losses_benefits": {"label": "赔付及福利", "concepts": ["us-gaap:PolicyholderBenefitsAndClaimsIncurred"], "unit": "USD"}
+    }},
+    "software": {"label": "软件", "metrics": {
+      "remaining_performance_obligations": {"label": "剩余履约义务", "concepts": ["us-gaap:RemainingPerformanceObligation"], "unit": "USD"},
+      "deferred_revenue": {"label": "递延收入", "concepts": ["us-gaap:ContractWithCustomerLiabilityCurrent"], "unit": "USD"}
+    }},
+    "retail": {"label": "零售", "metrics": {
+      "same_store_sales": {"label": "同店销售额", "concepts": ["company:SameStoreSales"], "unit": "%"},
+      "inventory": {"label": "存货", "concepts": ["us-gaap:InventoryNet"], "unit": "USD"}
+    }}
+  },
+  "financial_profiles": {
+    "TSM": {
+      "cik": "0001046179", "currency": "TWD",
+      "metrics": {
+        "revenue": {"label": "营业收入", "concepts": ["ifrs-full:RevenueFromContractsWithCustomers"], "unit": "TWD"},
+        "gross_profit": {"label": "毛利润", "concepts": ["ifrs-full:GrossProfit"], "unit": "TWD"},
+        "cost_of_revenue": {"label": "营业成本", "concepts": ["ifrs-full:CostOfSales"], "unit": "TWD"},
+        "net_income": {"label": "归属于母公司净利润", "concepts": ["ifrs-full:ProfitLossAttributableToOwnersOfParent"], "unit": "TWD"},
+        "operating_income": {"label": "营业利润", "concepts": ["ifrs-full:ProfitLossFromOperatingActivities"], "unit": "TWD"},
+        "total_assets": {"label": "总资产", "concepts": ["ifrs-full:Assets"], "unit": "TWD"},
+        "cash": {"label": "现金及现金等价物", "concepts": ["ifrs-full:CashAndCashEquivalents"], "unit": "TWD"},
+        "diluted_eps": {"label": "普通股稀释每股收益", "concepts": ["ifrs-full:DilutedEarningsLossPerShare"], "unit": "TWD/shares"},
+        "ads_diluted_eps": {"label": "美元ADS稀释每股收益（年报便利换算）", "concepts": ["ifrs-full:DilutedEarningsLossPerShare"], "unit": "USD/ADS", "dimensions": {"ifrs-full:ClassesOfShareCapitalAxis": "tsm:AmericanDepositarySharesMember"}},
+        "operating_cash_flow": {"label": "经营活动现金流", "concepts": ["ifrs-full:CashFlowsFromUsedInOperatingActivities"], "unit": "TWD"},
+        "cash_capex": {"label": "现金PP&E购置毛额", "concepts": ["ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities"], "unit": "TWD"}
+      },
+      "ratio_labels": {"net_margin": "归母净利率"}
+    },
+    "BP": {
+      "cik": "0000313807", "currency": "USD",
+      "metrics": {
+        "revenue": {"label": "营业收入", "concepts": ["ifrs-full:Revenue"], "unit": "USD"},
+        "net_income": {"label": "归属于母公司净利润", "concepts": ["ifrs-full:ProfitLossAttributableToOwnersOfParent"], "unit": "USD"},
+        "operating_income": {"label": "营业利润", "concepts": ["ifrs-full:ProfitLossFromOperatingActivities"], "unit": "USD"},
+        "total_assets": {"label": "总资产", "concepts": ["ifrs-full:Assets"], "unit": "USD"},
+        "cash": {"label": "现金及现金等价物", "concepts": ["ifrs-full:CashAndCashEquivalents"], "unit": "USD"},
+        "diluted_eps": {"label": "普通股稀释每股收益", "concepts": ["ifrs-full:DilutedEarningsLossPerShare"], "unit": "USD/shares", "dimensions": {"ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"}},
+        "ads_diluted_eps": {"label": "美元ADS稀释每股收益", "concepts": ["ifrs-full:DilutedEarningsLossPerShare"], "unit": "USD/ADS", "dimensions": {"ifrs-full:ClassesOfShareCapitalAxis": "bp:AmericanDepositaryShareMember"}},
+        "operating_cash_flow": {"label": "经营活动现金流", "concepts": ["ifrs-full:CashFlowsFromUsedInOperatingActivities"], "unit": "USD"},
+        "cash_capex": {"label": "现金资本开支", "concepts": ["ifrs-full:PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwillInvestmentPropertyAndOtherNoncurrentAssets"], "unit": "USD"}
+      }
+    },
+    "SHEL": {
+      "cik": "0001306965", "currency": "USD",
+      "metrics": {
+        "revenue": {"label": "营业收入", "concepts": ["ifrs-full:Revenue"], "unit": "USD"},
+        "net_income": {"label": "归属于母公司净利润", "concepts": ["ifrs-full:ProfitLossAttributableToOwnersOfParent"], "unit": "USD"},
+        "total_assets": {"label": "总资产", "concepts": ["ifrs-full:Assets"], "unit": "USD"},
+        "cash": {"label": "现金及现金等价物", "concepts": ["ifrs-full:CashAndCashEquivalents"], "unit": "USD"},
+        "diluted_eps": {"label": "持续经营稀释每股收益", "concepts": ["ifrs-full:DilutedEarningsLossPerShareFromContinuingOperations"], "unit": "USD/shares"},
+        "operating_cash_flow": {"label": "经营活动现金流", "concepts": ["ifrs-full:CashFlowsFromUsedInOperatingActivities"], "unit": "USD"}
+      }
+    },
+    "PDD": {
+      "cik": "0001737806",
+      "currency": "CNY",
+      "taxonomy": "us-gaap",
+      "metrics": {
+        "diluted_eps": {
+          "label": "人民币普通股稀释每股收益",
+          "concepts": ["us-gaap:EarningsPerShareDiluted"],
+          "unit": "CNY/shares"
+        },
+        "revenue": {
+          "label": "营业收入",
+          "concepts": [
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap:Revenues",
+            "us-gaap:SalesRevenueNet"
+          ],
+          "unit": "CNY"
+        },
+        "gross_profit": {
+          "label": "毛利润",
+          "concepts": [
+            "us-gaap:GrossProfit"
+          ],
+          "unit": "CNY"
+        },
+        "cost_of_revenue": {
+          "label": "营业成本",
+          "concepts": [
+            "us-gaap:CostOfRevenue",
+            "us-gaap:CostOfGoodsAndServicesSold"
+          ],
+          "unit": "CNY"
+        },
+        "net_income": {
+          "label": "净利润",
+          "concepts": [
+            "us-gaap:NetIncomeLoss"
+          ],
+          "unit": "CNY"
+        },
+        "operating_income": {
+          "label": "营业利润",
+          "concepts": [
+            "us-gaap:OperatingIncomeLoss"
+          ],
+          "unit": "CNY"
+        },
+        "operating_cash_flow": {
+          "label": "经营活动现金流",
+          "concepts": [
+            "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+          ],
+          "unit": "CNY"
+        },
+        "cash_capex": {
+          "label": "现金资本开支（PP&E购置）",
+          "concepts": [
+            "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+          ],
+          "unit": "CNY"
+        },
+        "cash": {
+          "label": "现金及现金等价物",
+          "concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+          ],
+          "unit": "CNY"
+        },
+        "total_assets": {
+          "label": "总资产",
+          "concepts": [
+            "us-gaap:Assets"
+          ],
+          "unit": "CNY"
+        }
+      }
+    },
+    "BABA": {
+      "cik": "0001577552",
+      "currency": "CNY",
+      "taxonomy": "us-gaap",
+      "metrics": {
+        "diluted_eps": {
+          "label": "人民币普通股稀释每股收益",
+          "concepts": ["us-gaap:EarningsPerShareDiluted"],
+          "unit": "CNY/shares"
+        },
+        "revenue": {
+          "label": "营业收入",
+          "concepts": [
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap:Revenues",
+            "us-gaap:SalesRevenueNet"
+          ],
+          "unit": "CNY"
+        },
+        "gross_profit": {
+          "label": "毛利润",
+          "concepts": [
+            "us-gaap:GrossProfit"
+          ],
+          "unit": "CNY"
+        },
+        "cost_of_revenue": {
+          "label": "营业成本",
+          "concepts": [
+            "us-gaap:CostOfRevenue",
+            "us-gaap:CostOfGoodsAndServicesSold"
+          ],
+          "unit": "CNY"
+        },
+        "net_income": {
+          "label": "净利润",
+          "concepts": [
+            "us-gaap:NetIncomeLoss"
+          ],
+          "unit": "CNY"
+        },
+        "operating_income": {
+          "label": "营业利润",
+          "concepts": [
+            "us-gaap:OperatingIncomeLoss"
+          ],
+          "unit": "CNY"
+        },
+        "operating_cash_flow": {
+          "label": "经营活动现金流",
+          "concepts": [
+            "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+          ],
+          "unit": "CNY"
+        },
+        "cash_capex": {
+          "label": "现金资本开支（PP&E购置）",
+          "concepts": [
+            "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+          ],
+          "unit": "CNY"
+        },
+        "cash": {
+          "label": "现金及现金等价物",
+          "concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+          ],
+          "unit": "CNY"
+        },
+        "total_assets": {
+          "label": "总资产",
+          "concepts": [
+            "us-gaap:Assets"
+          ],
+          "unit": "CNY"
+        }
+      }
+    },
+    "JD": {
+      "cik": "0001549802",
+      "currency": "CNY",
+      "taxonomy": "us-gaap",
+      "metrics": {
+        "diluted_eps": {
+          "label": "人民币普通股稀释每股收益",
+          "concepts": ["us-gaap:EarningsPerShareDiluted"],
+          "unit": "CNY/shares"
+        },
+        "revenue": {
+          "label": "营业收入",
+          "concepts": [
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap:Revenues",
+            "us-gaap:SalesRevenueNet"
+          ],
+          "unit": "CNY"
+        },
+        "gross_profit": {
+          "label": "毛利润",
+          "concepts": [
+            "us-gaap:GrossProfit"
+          ],
+          "unit": "CNY"
+        },
+        "cost_of_revenue": {
+          "label": "营业成本",
+          "concepts": [
+            "us-gaap:CostOfRevenue",
+            "us-gaap:CostOfGoodsAndServicesSold"
+          ],
+          "unit": "CNY"
+        },
+        "net_income": {
+          "label": "净利润",
+          "concepts": [
+            "us-gaap:ProfitLoss"
+          ],
+          "unit": "CNY"
+        },
+        "operating_income": {
+          "label": "营业利润",
+          "concepts": [
+            "us-gaap:OperatingIncomeLoss"
+          ],
+          "unit": "CNY"
+        },
+        "operating_cash_flow": {
+          "label": "经营活动现金流",
+          "concepts": [
+            "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+          ],
+          "unit": "CNY"
+        },
+        "cash_capex": {
+          "label": "现金资本开支（PP&E购置）",
+          "concepts": [
+            "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+          ],
+          "unit": "CNY"
+        },
+        "cash": {
+          "label": "现金及现金等价物",
+          "concepts": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+          ],
+          "unit": "CNY"
+        },
+        "total_assets": {
+          "label": "总资产",
+          "concepts": [
+            "us-gaap:Assets"
+          ],
+          "unit": "CNY"
+        }
+      }
+    }
+  }
+}

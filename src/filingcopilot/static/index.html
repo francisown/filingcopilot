@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="application-version" content="1.0.0"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+  <title>FilingCopilot · Stock and Filing Research</title><link rel="stylesheet" href="/static/style.css?v=1.0.0-5b29c94cb4">
+<script src="/static/locale-en.js?v=1.0.0-92b82e2f68"></script><script src="/static/i18n.js?v=1.0.0-eabcd7a13a"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="FilingCopilot 首页"><span class="brand-icon">F</span><span class="brand-name">FilingCopilot<small>FINANCIAL RESEARCH</small></span></a>
+    <div class="workspace-label">研究空间</div>
+    <nav aria-label="主导航">
+      <button class="nav active" data-view="desk" aria-label="研究工作台"><span class="nav-icon">▦</span><span class="nav-label">研究工作台</span></button>
+      <button class="nav" data-view="company" aria-label="公司研究"><span class="nav-icon">▧</span><span class="nav-label">公司研究</span></button>
+      <button class="nav" data-view="watchlist" aria-label="自选观察列表"><span class="nav-icon">☆</span><span class="nav-label">自选观察列表</span></button>
+      <button class="nav" data-view="trend" aria-label="财务趋势"><span class="nav-icon">▥</span><span class="nav-label">财务趋势</span></button>
+      <button class="nav" data-view="comparison" aria-label="公司对比"><span class="nav-icon">⇄</span><span class="nav-label">公司对比</span></button>
+      <button class="nav" data-view="library" aria-label="财报资料库"><span class="nav-icon">▤</span><span class="nav-label">财报资料库</span></button>
+      <button class="nav" data-view="history" aria-label="研究记录"><span class="nav-icon">◷</span><span class="nav-label">研究记录</span></button>
+      <button class="nav" data-view="connect" aria-label="接入其他助手"><span class="nav-icon">⌘</span><span class="nav-label">接入其他助手</span></button>
+    </nav>
+    <div class="sidebar-bottom"><div class="status-dot">本地研究空间</div><p>公开披露 · 证据引用<br>财务事实 · 可复核计算</p><span class="version">FILINGCOPILOT / 正在核对版本</span></div>
+  </aside>
+  <main>
+    <header><span id="breadcrumb">工作空间 / 研究工作台</span><span class="header-right"><label class="language-control"><span class="sr-only">界面语言</span><select id="language-select" aria-label="界面语言"><option value="en" data-i18n-skip>English</option><option value="zh" data-i18n-skip>中文</option></select></label><i></i><span id="provider-status">正在连接</span></span></header>
+    <section id="desk-view" class="view">
+      <div class="desk-heading"><div><div class="eyebrow">EQUITY RESEARCH</div><h1>股票研究工作台</h1><p class="intro">长期行情、财务表现与公司披露，在一个研究空间中查看。</p></div><span class="desk-tag">公开资料 · 证据可追溯</span></div>
+      <section class="instrument-bar" aria-label="公司与研究日期">
+        <div id="company-discovery" class="company-discovery hidden"><label for="company-query">查找股票或公司</label><div class="company-search-row"><input id="company-query" maxlength="120" placeholder="公司名称或代码，如 亚马逊 / AMZN" autocomplete="off"><button id="find-company" class="secondary">查找股票</button></div><div id="company-matches" aria-live="polite"></div><div id="company-progress" class="company-progress hidden" aria-live="polite"></div><section id="company-preparation-preview" class="financial-preview hidden" aria-live="polite"></section></div>
+        <div class="instrument-controls"><label>研究范围<select id="ticker"><option value="">全部公司</option></select></label><label>知悉日期<input id="as-of" type="date"></label></div>
+      </section>
+      <div class="desk-grid">
+        <div class="market-column">
+          <section id="market-panel" class="market-panel" aria-label="股票行情与长期走势图">
+            <div class="market-heading"><div><span class="eyebrow">PRICE OVERVIEW</span><h2 id="market-name">选择股票查看行情</h2></div><div class="watch-current-actions"><button id="market-compare-benchmark" class="secondary" disabled>与 ETF 基准比较</button><button id="watch-save-current" class="secondary" disabled>加入自选 ☆</button><button id="market-refresh" class="secondary">刷新行情</button><button id="market-stop" class="secondary hidden" disabled>停止本页等待</button></div></div><p id="watch-current-status" class="company-help" role="status"></p>
+            <div id="market-status" class="company-help" aria-live="polite">选择上市市场后连接行情源；价格与图表无需下载财报。</div>
+            <div id="market-content" class="hidden">
+              <div class="quote-row"><div class="market-price"><strong id="market-price">—</strong><span id="market-currency"></span></div><div class="quote-context"><span>所选区间表现</span><strong id="market-return">—</strong></div></div>
+              <p id="market-time" class="company-help"></p><div id="valuation-preview" class="valuation-preview" role="group" aria-label="估值口径比较"></div>
+              <div class="chart-toolbar"><div id="chart-periods" role="group" aria-label="走势图周期"></div><label>刻度<select id="chart-scale" aria-label="图表价格刻度"><option value="linear">线性</option><option value="log">对数</option></select></label></div>
+              <div class="chart-container"><svg id="price-chart" viewBox="0 0 900 310" role="img" tabindex="0" aria-label="股票历史价格，左右方向键查看交易日"></svg><div id="chart-tooltip" class="chart-tooltip" aria-live="polite"></div></div>
+              <p id="chart-coverage-note" class="company-help hidden" role="status"></p>
+              <p id="chart-history-note" class="company-help hidden" role="status"></p>
+              <div id="market-metrics" class="market-metrics"></div><details class="market-source"><summary>数据来源与复权口径</summary><div id="market-source"></div></details>
+            </div>
+          </section>
+          <section id="busy" class="busy hidden" aria-live="polite"><div class="spinner"></div><div class="busy-content"><strong id="busy-title">正在开展研究</strong><p id="busy-detail">正在建立研究任务。</p><ol id="research-progress" class="research-progress"></ol><div class="busy-actions"><span id="elapsed">0 秒</span><button id="cancel-research" class="secondary hidden">取消研究</button><button id="resume-research" class="secondary hidden">重新连接进度</button><button id="leave-research" class="secondary hidden" title="仅结束本页等待，不取消可能已启动的后台任务">结束本页等待</button></div></div></section>
+          <section id="research-preview" class="financial-preview hidden" aria-live="polite"></section>
+          <section id="result" class="result hidden" aria-live="polite"></section><div id="error" class="error hidden" role="alert"></div>
+          <details class="scenario-controls"><summary>估值情景 · 输入假设</summary><p class="company-help">使用顶部所选证券和知悉日期。下方是可修改的示例假设；结果不代表公司指引或预测。</p>
+<div class="scenario-options"><label>EPS 口径<select id="scenario-basis"><option value="annual">SEC 年度普通股 EPS</option><option value="provider_ttm">供应商当前 TTM EPS</option></select></label><label>年限<input id="scenario-years" type="number" min="1" max="10" value="3"></label><label>年折现率 %<input id="scenario-discount" type="number" min="0" max="50" step="0.5" value="10"></label></div>
+<div class="scenario-case"><label>情景名称<input class="scenario-name" value="较低增长假设" maxlength="24"></label><label>EPS 年增长 %<input class="scenario-growth" type="number" min="-50" max="100" value="5"></label><label>期末 PE<input class="scenario-pe" type="number" min="1" max="100" value="15"></label></div>
+<div class="scenario-case"><label>情景名称<input class="scenario-name" value="中间增长假设" maxlength="24"></label><label>EPS 年增长 %<input class="scenario-growth" type="number" min="-50" max="100" value="10"></label><label>期末 PE<input class="scenario-pe" type="number" min="1" max="100" value="20"></label></div>
+<div class="scenario-case"><label>情景名称<input class="scenario-name" value="较高增长假设" maxlength="24"></label><label>EPS 年增长 %<input class="scenario-growth" type="number" min="-50" max="100" value="15"></label><label>期末 PE<input class="scenario-pe" type="number" min="1" max="100" value="25"></label></div>
+<button id="scenario-run" class="primary">使用这些假设生成情景 ↗</button><p id="scenario-status" class="company-help" role="status">数字由代码计算，输入和公式随研究包保存。</p></details>
+<div class="research-hint"><span class="hint-icon">↗</span><div><strong>从价格，走向公司基本面</strong><p>在研究提问中查看营收、利润率、现金流或近期公告。每个结果都可展开出处。</p></div></div>
+        </div>
+        <aside class="research-column" aria-label="财报研究提问">
+          <section class="research-card">
+            <div class="card-heading"><div><div class="eyebrow">RESEARCH</div><h2>研究提问</h2></div><span class="small-tag">证据核验</span></div><p class="research-intro">选择一个问题，或写下你关心的经营表现。</p>
+            <div class="question-guide"><strong>常用研究</strong><div id="question-presets" class="question-presets"></div></div>
+            <label for="question" class="field-label">研究问题</label><textarea id="question" placeholder="例如：这家公司经营表现如何？利润增长是否转化为现金流？"></textarea>
+            <div id="question-plan" class="question-plan company-help" aria-live="polite">输入问题后显示研究范围与执行方式。</div>
+            <div class="query-controls"><label>研究方式<select id="mode"><option value="agent">Agent 研究</option><option value="reference">无模型研究</option></select></label><button id="research" class="primary">开始研究 <span>↗</span></button></div><button id="company-report" class="secondary company-report-button">生成六部分文字总结 ↗</button><p class="company-help">完整研究会总结商业模式、增长、现金流、竞争、风险和估值条件；有模型时生成并审查文字，模型不可用时保留按主题整理的原文。</p><div class="query-note" id="mode-note">Agent 按问题选择工具，核验数字与原文，再形成回答。</div>
+            <details class="capability-details"><summary>查看数据覆盖范围</summary><p id="capability-note" class="company-help">正在读取可用研究能力…</p><p class="company-help">美国公司可准备 SEC 财报；其他市场当前支持行情。知悉日期按披露公开日期处理。</p></details>
+          </section>
+          <section class="workflow-note"><h3>研究依据</h3><div><span>01</span><p>公开申报与行情<small>保留时间、币种和来源</small></p></div><div><span>02</span><p>绑定事实与计算<small>年度、季度和 TTM 区分</small></p></div><div><span>03</span><p>引用与离线复核<small>结论可以回到原始证据</small></p></div></section>
+        </aside>
+      </div>
+      <details class="library-overview"><summary>资料库概览</summary><div class="stats" id="stats"><div><strong>—</strong><span>公司</span></div><div><strong>—</strong><span>公开申报</span></div><div><strong>—</strong><span>财务事实</span></div><div><strong>—</strong><span>原文段落</span></div></div></details>
+      <footer>研究基于所选知悉日期与公开资料。年度按公司财年处理；行情可能延迟，历史曲线使用供应商当前复权口径。</footer>
+    </section>
+    <section id="company-view" class="view hidden">
+      <div class="desk-heading"><div><div class="eyebrow">COMPANY RESEARCH</div><h1 class="page-title" id="company-workspace-title">公司研究</h1><p class="intro">从经营数据、公开原文与估值参照，逐步了解一家公司的业务。</p></div><button id="company-back" class="secondary">选择公司 / 查看行情</button></div>
+      <section class="company-workspace-toolbar"><p id="company-workspace-scope" class="company-help">使用工作台所选公司与知悉日期。</p><div class="watch-toolbar"><button id="company-workspace-load" class="secondary">读取已有资料</button><button id="company-workspace-refresh" class="secondary">检查最新披露</button><button id="company-workspace-report" class="primary">生成全部模块总结 ↗</button></div><p id="company-workspace-status" class="company-help" role="status"></p><div id="company-report-inline-result" class="company-inline-summary hidden" aria-live="polite"></div></section>
+      <section class="company-report-format"><div class="market-heading"><div><div class="eyebrow">REPORT FORMAT</div><h2>公司研究输出格式</h2></div><span class="small-tag">固定结构 · 可回到出处</span></div><p class="company-help">每个模块生成一篇有边界的短文，不把原文数字改写成未经核验的判断；「生成全部模块总结」会逐项生成下方全部九个模块，完成一项立即显示一项。</p><div class="company-report-format-grid"><div><strong>分析内容</strong><span>商业模式、经营变化、现金流、负债与流动性、风险、近期事件、估值、上市股份与币种、审计报告原文</span></div><div><strong>每节文章</strong><span>结论 → 证据与期间 → 边界 → 待补信息</span></div><div><strong>核验规则</strong><span>数字由代码绑定事实；叙述显示引用、公开日期和审查状态</span></div><div><strong>资料不足</strong><span>明确显示缺口，不猜测、不把原文摘录冒充结论</span></div></div></section>
+      <div id="company-key-figures" class="company-key-figures"></div>
+      <section class="company-peers"><div class="market-heading"><h2>同行参照</h2><button id="company-peers-compare" class="secondary" disabled>将所选公司加入对比</button></div><p id="company-peers-note" class="company-help"></p><div id="company-peers-options" class="company-peer-options"></div></section>
+      <div id="company-source-sections" class="company-source-grid" aria-live="polite"></div>
+      <section class="company-financial-browser"><div class="market-heading"><div><div class="eyebrow">REPORTED QUARTERS</div><h2>历史财季</h2></div><div class="watch-toolbar"><button id="company-quarters-load" class="secondary">读取历史财季</button><button id="company-quarters-refresh" class="secondary">检查并补充季报</button></div></div><p class="company-help">显示披露中的单季度营收与利润，按实际期末排列；现金流累计数不会混入单季度。缺失期间不补零。</p><p id="company-quarters-status" class="company-help" role="status"></p><div class="company-table-wrap"><table id="company-quarters-table"><caption class="sr-only">已披露单季度数据</caption></table></div></section>
+      <section class="company-financial-browser"><div class="market-heading"><div><div class="eyebrow">FILING STATEMENTS</div><h2>三表与分部资料</h2></div><button id="company-statements-load" class="secondary">读取报表</button></div><div class="company-statement-controls"><label>申报版本<select id="company-statement-filing"><option value="">最新可用申报</option></select></label><label>报表<select id="company-statement-type"><option value="all">全部报表</option><option value="income">利润表</option><option value="balance">资产负债表</option><option value="cashflow">现金流量表</option><option value="other">其他附注</option></select></label><label>维度<select id="company-statement-dimensions"><option value="all">全部项目</option><option value="consolidated">无维度项目</option><option value="segments">分部及其他维度</option></select></label></div><p class="company-help">保留原文项目、期间和维度。分部、地区及产品项目分别显示；结构化来源未覆盖的资料可在上方原文区查阅。</p><p id="company-statements-status" class="company-help" role="status"></p><div class="company-table-wrap"><table id="company-statements-table"><caption class="sr-only">原文结构化财务报表</caption></table></div></section>
+      <section class="company-valuation-reference"><div class="market-heading"><h2>估值参照与情景</h2><div class="watch-toolbar"><button id="company-historical-pe" class="secondary">研究历史年度市盈率</button><button id="company-open-scenarios" class="secondary">编辑 EPS 估值情景</button></div></div><p class="company-help">历史市盈率按当时已公开的年度 EPS 重建；与供应商当前 TTM 分开。增长、期末 PE 和折现率由你设定，结果可查看公式与来源。</p>
+        <details class="company-dcf"><summary>现金流敏感性分析</summary><p class="company-help">使用年度经营现金流减现金 PP&E 购置毛额，以及同一年报的普通股在外数量。先读取可核对的输入，再自行设定假设。</p><button id="company-dcf-inputs" class="secondary">读取现金流与股数出处</button><p id="company-dcf-status" class="company-help" role="status"></p><div id="company-dcf-sources"></div>
+          <form id="company-dcf-form" class="hidden"><div class="company-statement-controls"><label>预测年数<input id="company-dcf-years" type="number" min="1" max="10" step="1" value="5" required></label><label>基准年增长 %<input id="company-dcf-growth" type="number" min="-50" max="100" step="0.5" value="0" required></label><label>基准折现率 %<input id="company-dcf-discount" type="number" min="0.1" max="100" step="0.1" value="10" required></label><label>终值增长 %<input id="company-dcf-terminal" type="number" min="-20" max="20" step="0.5" value="2" required></label></div><div class="company-statement-controls"><label>增长率网格 %<input id="company-dcf-growth-grid" value="-5, 0, 5" required></label><label>折现率网格 %<input id="company-dcf-discount-grid" value="8, 10, 12" required></label></div><button id="company-dcf-run" class="primary" type="submit">计算这些假设下的敏感性</button></form><div id="company-dcf-result" aria-live="polite"></div>
+        </details></section>
+    </section>
+    <section id="watchlist-view" class="view hidden">
+      <div class="desk-heading"><div><div class="eyebrow">PERSONAL WATCHLIST</div><h1>自选观察列表</h1><p class="intro">保存常看的证券，快速查看行情，再进入财务研究。</p></div><span class="desk-tag">本机保存 · 各市场独立报价</span></div>
+      <section class="comparison-controls" aria-label="添加自选证券"><label for="watch-query" class="field-label">查找股票或公司</label><div class="company-search-row comparison-search"><input id="watch-query" maxlength="120" placeholder="公司名称或代码，如 亚马逊 / AMZN" autocomplete="off"><button id="watch-search" class="secondary">查找并添加</button></div><div id="watch-matches"></div><p id="watch-status" class="company-help" role="status">正在读取本机自选列表…</p></section>
+      <section class="watch-card"><div class="market-heading"><div><div class="eyebrow">MARKET WATCH</div><h2>观察中的证券 <span id="watch-count" class="small-tag">0 / 30</span></h2></div><div class="watch-toolbar"><button id="watch-compare" class="secondary" disabled>对比所选（0）</button><button id="watch-refresh" class="primary" disabled>刷新行情</button></div></div><p class="company-help">报价可能延迟。近一个月表现按供应商日线计算；各币种独立显示，报价日期与日线范围分别标注。打开行情无需准备年报。</p><div id="watch-empty" class="watch-empty">还没有自选证券。查找公司并选择明确的上市代码，或在行情卡片点击“加入自选”。</div><div class="comparison-table-wrap"><table id="watch-table"><caption class="sr-only">自选证券、当前报价、一个月日线表现、来源时间与研究入口</caption><thead><tr><th scope="col">对比</th><th scope="col">证券 / 市场</th><th scope="col">报价 / 币种</th><th scope="col">近一个月表现</th><th scope="col">数据时间与状态</th><th scope="col">研究入口</th></tr></thead><tbody id="watch-rows"></tbody></table></div></section>
+    </section>
+    <section id="trend-view" class="view hidden">
+      <div class="desk-heading"><div><div class="eyebrow">ANNUAL FINANCIAL TRENDS</div><h1>多年财务趋势</h1><p class="intro">从一个年度数字，走向多年的营收、盈利与现金生成。</p></div><span class="desk-tag">完整财年 · 原件引用</span></div>
+      <section class="comparison-controls" aria-label="选择财务趋势公司">
+        <label for="trend-query" class="field-label">查找股票或公司</label><div class="company-search-row comparison-search"><input id="trend-query" maxlength="120" placeholder="公司名称或代码，如 亚马逊 / AMZN" autocomplete="off"><button id="trend-search" class="secondary">查找公司</button></div><div id="trend-matches"></div><p id="trend-selected" class="trend-selected">AMZN · 已选证券，可替换公司</p>
+        <div class="comparison-options"><label>知悉日期<input id="trend-as-of" type="date"></label><label>年度范围<select id="trend-years"><option value="3">最近 3 个财年</option><option value="5" selected>最近 5 个财年</option></select></label><label class="comparison-check"><input id="trend-refresh" type="checkbox" checked>自动准备年报与比较数字</label><button id="trend-run" class="primary">查看财务趋势 ↗</button></div>
+        <p id="trend-status" class="company-help" role="status">年度财务可直接生成图表，不调用模型；首次准备可能需要几十秒。</p>
+      </section>
+      <div id="trend-result" class="hidden">
+        <section class="comparison-chart-card"><div class="market-heading"><div><div class="eyebrow">OPERATING HISTORY</div><h2 id="trend-title">年度经营表现</h2></div><div class="comparison-chart-tools"><label>指标<select id="trend-metric" aria-label="财务趋势指标"><option value="revenue">营业收入</option><option value="operating_income">营业利润</option><option value="net_income">净利润</option><option value="operating_cash_flow">经营现金流</option><option value="free_cash_flow">自由现金流 · 购置毛额</option></select></label><label>币种<select id="trend-unit" aria-label="财务趋势币种"></select></label></div></div>
+          <p id="trend-window" class="company-help"></p><div class="chart-container"><svg id="trend-chart" role="img" tabindex="0" viewBox="0 0 900 310" aria-label="年度财务趋势，左右方向键查看财年" aria-describedby="trend-window trend-chart-note"></svg><div id="trend-tooltip" class="chart-tooltip" aria-live="polite"></div></div><p id="trend-chart-note" class="company-help">缺少来源的年份保留空位；点柱形或下方数字查看报告出处。</p>
+        </section>
+        <section class="comparison-financials"><div class="market-heading"><div><div class="eyebrow">DATED ANNUAL SOURCES</div><h2>年度数据与来源</h2></div><span class="small-tag">点击数字查看出处</span></div><div class="comparison-table-wrap"><table id="trend-table"><caption class="sr-only">每年实际报告期间、申报版本与财务数字</caption></table></div><div id="trend-gaps"></div></section>
+        <section class="comparison-record"><div id="trend-record-actions" class="result-meta"></div><div id="trend-audit"></div><details><summary>年度趋势口径与资料边界</summary><p id="trend-method" class="company-help"></p></details></section>
+      </div>
+    </section>
+    <section id="comparison-view" class="view hidden">
+      <div class="desk-heading"><div><div class="eyebrow">COMPANY COMPARISON</div><h1>公司对比</h1><p class="intro">把走势与经营表现放在一起，比较增长、利润率、现金流与年度估值。</p></div><span class="desk-tag">多公司 / ETF 基准 · 原始证据</span></div>
+      <section class="comparison-controls" aria-label="选择对比证券">
+        <div class="comparison-search"><label for="comparison-query" class="field-label">添加股票或公司</label><div class="company-search-row"><input id="comparison-query" maxlength="120" placeholder="公司名称或代码，如 苹果 / AAPL" autocomplete="off"><button id="comparison-search" class="secondary">查找并添加</button></div><div id="comparison-matches" aria-live="polite"></div></div>
+        <div class="comparison-selection"><div id="comparison-selected" aria-label="已选证券"></div><button id="comparison-clear" class="secondary">清空选择</button></div>
+        <div class="comparison-options"><label>知悉日期<input id="comparison-as-of" type="date"></label><label>走势区间<select id="comparison-period"><option value="1Y">1年</option><option value="5Y" selected>5年</option><option value="MAX">全部</option></select></label><label>ETF 行情基准<select id="comparison-benchmark"><option value="">不添加基准</option><option value="SPY">SPY · 标普 500 ETF</option><option value="QQQ">QQQ · 纳斯达克 100 ETF</option></select></label><label class="comparison-check"><input id="comparison-refresh-sources" type="checkbox" checked>自动检查与准备年报</label><label class="comparison-check"><input id="comparison-ttm" type="checkbox">加入当前 TTM 估值</label><button id="comparison-run" class="primary">开始对比 ↗</button></div>
+        <p class="company-help">价格无需财报。缺少年度数字时自动尝试获取；其他市场可先比较走势。分别选择证券上市市场，不自动混合股份类别。可为单只股票或多家公司添加 SPY / QQQ ETF 行情基准。</p>
+        <p id="comparison-ttm-help" class="company-help"></p>
+        <div id="comparison-status" class="company-help" role="status">已选微软与亚马逊，可替换公司后开始。</div>
+      </section>
+      <div id="comparison-result" class="hidden">
+        <section class="comparison-chart-card"><div class="market-heading"><div><div class="eyebrow">RELATIVE PERFORMANCE</div><h2>走势对比</h2></div><div class="comparison-chart-tools"><div id="comparison-ranges" role="group" aria-label="对比走势图周期"></div><label>刻度<select id="comparison-scale" aria-label="对比走势图刻度"><option value="linear">线性</option><option value="log">对数</option></select></label></div></div><p id="comparison-window" class="company-help"></p><div id="comparison-legend" class="comparison-legend"></div><div id="comparison-benchmark-summary" class="benchmark-summary hidden" aria-live="polite"></div><div class="chart-container"><svg id="comparison-chart" viewBox="0 0 900 310" role="img" tabindex="0" aria-label="公司对比走势，方向键查看共同交易日" aria-describedby="comparison-chart-note comparison-window"></svg><div id="comparison-tooltip" class="chart-tooltip" aria-live="polite"></div></div><p id="comparison-chart-note" class="company-help"></p></section>
+        <section id="comparison-price-summary" class="comparison-price-summary hidden" aria-live="polite"></section>
+        <section id="comparison-valuations" class="comparison-financials hidden"><div class="market-heading"><div><div class="eyebrow">TRAILING VALUATION</div><h2>TTM 估值对比</h2></div><span class="small-tag">点击数字查看出处</span></div><p class="company-help">使用各列报价与供应商 TTM 稀释 EPS，期间标签与获取时间独立保留。公司由你选择；期末标签、业务和盈利质量可能不同，倍数高低不能单独判断贵贱。</p><div class="comparison-table-wrap"><table id="comparison-valuation-table"><caption class="sr-only">所选公司当前报价、供应商 TTM 每股收益与市盈率及来源</caption></table></div></section>
+        <section id="comparison-fundamentals" class="comparison-financials"><div class="market-heading"><div><div class="eyebrow">ANNUAL FUNDAMENTALS</div><h2>年度经营与估值</h2></div><span class="small-tag">点击数字查看出处</span></div><p class="company-help">金额使用各公司原币种；实际财年列在公司名下。市盈率使用年报稀释 EPS，不能当作 TTM。自由现金流统一为经营现金流减现金 PP&E 购置毛额。</p><div class="comparison-table-wrap"><table id="comparison-table"><caption class="sr-only">公司年度财务与估值对比</caption></table></div><p class="company-help">该自由现金流公式未另扣融资租赁本金、收购或其他投资。比较结果不自动推导哪只股票值得买。</p></section>
+        <div id="comparison-issues"></div>
+        <section class="comparison-record"><div id="comparison-record-actions" class="result-meta"></div><div id="comparison-audit"></div><details><summary>数据范围与比较方法</summary><p id="comparison-method" class="company-help"></p></details></section>
+      </div>
+    </section>
+    <section id="library-view" class="view hidden"><div class="eyebrow">SOURCE LIBRARY</div><h1 class="page-title">财报资料库</h1><p class="intro">查看公开申报、报告期间、申报版本与 SEC 原文。晚于知悉日期的资料将不可见。</p><div id="library" class="library-grid"></div></section>
+    <section id="history-view" class="view hidden"><div class="eyebrow">RESEARCH HISTORY</div><h1 class="page-title">研究记录</h1><p class="intro">在本机保存的回答、证据和研究步骤，可以重新查看与导出。</p><div id="history"></div></section>
+    <section id="connect-view" class="view hidden"><div class="eyebrow">CONNECTED RESEARCH</div><h1 class="page-title">接入其他助手</h1><p class="intro">通过 MCP，共享财报检索、财务计算与研究能力。</p><div class="connect-card"><h2>可用能力</h2><div class="capabilities"><span>财报资料检索</span><span>年度与季度财务</span><span>TTM 与利润率</span><span>行情与估值口径</span><span>公司对比</span><span>公司公告</span><span>Agent 研究</span><span>导出与离线复核</span></div><h2>本机 MCP 配置</h2><p>将配置加入支持 MCP 的客户端。Agent 研究使用已配置模型；无模型查询通过工具生成数字。</p><pre id="mcp-config">正在加载配置…</pre><button class="secondary" id="copy-mcp">复制配置</button><p class="fine">本地 stdio 连接。网页与 MCP 共用证据库及核验规则。</p></div></section>
+  </main>
+  <div id="drawer-overlay" class="drawer-overlay hidden"></div><aside id="drawer" class="drawer hidden" role="dialog" aria-modal="true" aria-label="原始证据"><button id="close-drawer" aria-label="关闭证据">×</button><div class="eyebrow">EVIDENCE RECORD</div><div id="drawer-content"></div></aside>
+  <script src="/static/format.js?v=1.0.0-692a83255e"></script><script src="/static/app.js?v=1.0.0-7c61fde1dc"></script><script src="/static/company.js?v=1.0.0-fbe7ff9391"></script><script src="/static/market.js?v=1.0.0-95c2cc2b55"></script><script src="/static/comparison.js?v=1.0.0-869dd177d3"></script><script src="/static/trend.js?v=1.0.0-9ddbfb8ff9"></script>
+<script src="/static/watchlist.js?v=1.0.0-1ac3c00950"></script>
+<script src="/static/research-extra.js?v=1.0.0-14f3790e23"></script>
+<script src="/static/company-workspace.js?v=1.0.0-496f7d0afb"></script>
+</body>
+</html>

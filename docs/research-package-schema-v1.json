@@ -1,0 +1,440 @@
+{
+  "$defs": {
+    "Company": {
+      "additionalProperties": false,
+      "properties": {
+        "cik": {
+          "pattern": "^\\d{10}$",
+          "title": "Cik",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cik",
+        "name"
+      ],
+      "title": "Company",
+      "type": "object"
+    },
+    "Domain": {
+      "additionalProperties": false,
+      "properties": {
+        "companies": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Company"
+          },
+          "title": "Companies",
+          "type": "object"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Metric"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "ratios": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Ratio"
+          },
+          "title": "Ratios",
+          "type": "object"
+        },
+        "query_expansions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Query Expansions",
+          "type": "object"
+        },
+        "currencies": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Currencies",
+          "type": "object"
+        },
+        "financial_profiles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FinancialProfile"
+          },
+          "title": "Financial Profiles",
+          "type": "object"
+        },
+        "industry_profiles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/IndustryProfile"
+          },
+          "title": "Industry Profiles",
+          "type": "object"
+        }
+      },
+      "required": [
+        "companies",
+        "metrics",
+        "ratios",
+        "query_expansions",
+        "currencies"
+      ],
+      "title": "Domain",
+      "type": "object"
+    },
+    "FinancialProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "cik": {
+          "pattern": "^\\d{10}$",
+          "title": "Cik",
+          "type": "string"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "taxonomy": {
+          "default": "ifrs-full",
+          "enum": [
+            "ifrs-full",
+            "us-gaap"
+          ],
+          "title": "Taxonomy",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Metric"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "ratio_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Ratio Labels",
+          "type": "object"
+        },
+        "industry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Industry"
+        }
+      },
+      "required": [
+        "cik",
+        "currency",
+        "metrics"
+      ],
+      "title": "FinancialProfile",
+      "type": "object"
+    },
+    "IndustryProfile": {
+      "additionalProperties": false,
+      "description": "Industry-specific KPI registry kept separate from the universal three tables.",
+      "properties": {
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Metric"
+          },
+          "title": "Metrics",
+          "type": "object"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "title": "IndustryProfile",
+      "type": "object"
+    },
+    "Metric": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "concepts": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Concepts",
+          "type": "array"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "unit": {
+          "default": "USD",
+          "title": "Unit",
+          "type": "string"
+        },
+        "dimensions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Dimensions",
+          "type": "object"
+        }
+      },
+      "required": [
+        "label",
+        "concepts"
+      ],
+      "title": "Metric",
+      "type": "object"
+    },
+    "Ratio": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "numerator": {
+          "title": "Numerator",
+          "type": "string"
+        },
+        "denominator": {
+          "title": "Denominator",
+          "type": "string"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "label",
+        "numerator",
+        "denominator",
+        "aliases"
+      ],
+      "title": "Ratio",
+      "type": "object"
+    },
+    "ResearchAnswer": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date",
+          "title": "As Of",
+          "type": "string"
+        },
+        "mode": {
+          "title": "Mode",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "answered",
+            "partial",
+            "abstained",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "answer": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Answer",
+          "type": "array"
+        },
+        "gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "trace": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Trace",
+          "type": "array"
+        },
+        "usage": {
+          "additionalProperties": true,
+          "title": "Usage",
+          "type": "object"
+        },
+        "elapsed_ms": {
+          "title": "Elapsed Ms",
+          "type": "integer"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "language": {
+          "default": "zh",
+          "enum": [
+            "zh",
+            "en"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "research_type": {
+          "default": "filing",
+          "enum": [
+            "filing",
+            "stock"
+          ],
+          "title": "Research Type",
+          "type": "string"
+        },
+        "contrarian": {
+          "additionalProperties": true,
+          "title": "Contrarian",
+          "type": "object"
+        },
+        "followup": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Followup"
+        }
+      },
+      "required": [
+        "id",
+        "question",
+        "as_of",
+        "mode",
+        "status",
+        "answer",
+        "gaps",
+        "evidence",
+        "trace",
+        "usage",
+        "elapsed_ms"
+      ],
+      "title": "ResearchAnswer",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "filingcopilot.research-package/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "producer_version": {
+      "title": "Producer Version",
+      "type": "string"
+    },
+    "domain_origin": {
+      "enum": [
+        "research_time",
+        "export_time_legacy"
+      ],
+      "title": "Domain Origin",
+      "type": "string"
+    },
+    "focus_ticker": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Focus Ticker"
+    },
+    "domain": {
+      "$ref": "#/$defs/Domain"
+    },
+    "research": {
+      "$ref": "#/$defs/ResearchAnswer"
+    },
+    "manifest": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Manifest",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "producer_version",
+    "domain_origin",
+    "focus_ticker",
+    "domain",
+    "research",
+    "manifest"
+  ],
+  "title": "Package",
+  "type": "object"
+}

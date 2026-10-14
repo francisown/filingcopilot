@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),vm=require('node:vm');
+const {harness}=require('./check_company_market_ui.cjs');
+const h=harness(),shown=[];h.context.showEvidence=e=>shown.push(e);
+vm.runInContext("companyState.selected={ticker:'PDD'}",h.context);
+const job={status:'running',message:'继续准备',progress:{completed_reports:1,total_reports:2,facts:20,indexed_passages:16,total_passages:100},preview:{ticker:'PDD',as_of:'2026-10-09',fiscal_year:2025,claims:[{text:'年度营收',evidence_ids:['f']}],evidence:[{id:'f'}]}};
+h.context.renderCompanyPreparation(job);
+const root=h.select('#company-preparation-preview');assert.equal(root.classList.contains('hidden'),false);
+assert.match(h.select('#company-progress').textContent,/原件 1\/2.*20 项数字.*16\/100/);
+root.children[1].children[1].click();assert.equal(shown[0].id,'f');
+h.context.renderCompanyPreparation({...job,status:'failed'});assert.match(root.children.at(-1).text,/数字保留/);
+h.select('#company-query').dispatchEvent(new Event('input'));assert.equal(root.children.length,0);assert.equal(root.classList.contains('hidden'),true);
+vm.runInContext("companyState.selected={ticker:'BABA'}",h.context);h.context.renderCompanyPreparation(job);assert.equal(root.classList.contains('hidden'),true);
+vm.runInContext("companyState.selected={ticker:'PDD'}",h.context);h.select('#as-of').value='2025-01-01';h.context.renderCompanyPreparation(job);assert.equal(root.classList.contains('hidden'),true);
+console.log('Preparation preview: 7 controlled cases; incremental counts, citation, partial failure and scope clearing.');

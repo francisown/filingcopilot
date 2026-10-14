@@ -1,0 +1,4672 @@
+{
+  "schema": "filingcopilot.retrieval-gold/v2",
+  "version": "2026-10-11-editorial",
+  "count": 200,
+  "notes": [
+    "Passage IDs are real IDs from the frozen local corpus, replacing v1 placeholder self-IDs.",
+    "Prompts mix Chinese and English and use natural question forms; this remains an editorial set, not human-validated truth.",
+    "The set is only meaningful with the same corpus snapshot used to build it."
+  ],
+  "items": [
+    {
+      "id": "gold-v2-0001",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明业务、产品、服务和客户？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-06f01df659199010a431"
+      ]
+    },
+    {
+      "id": "gold-v2-0002",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-722a0b2e656c4d4316dc"
+      ]
+    },
+    {
+      "id": "gold-v2-0003",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，业务、产品、服务和客户是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-b82030ebc4ada2eb6790"
+      ]
+    },
+    {
+      "id": "gold-v2-0004",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-b08fb737fe19e13cb216"
+      ]
+    },
+    {
+      "id": "gold-v2-0005",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明收入和营业利润变化原因？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-06f01df659199010a431"
+      ]
+    },
+    {
+      "id": "gold-v2-0006",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3a77a338fa0363a0a5b0"
+      ]
+    },
+    {
+      "id": "gold-v2-0007",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，收入和营业利润变化原因是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-21199bd62c760965a2ea"
+      ]
+    },
+    {
+      "id": "gold-v2-0008",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-50f5eadd196e4fa4b558"
+      ]
+    },
+    {
+      "id": "gold-v2-0009",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明经营现金流和资本开支？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-d7da9c9dedec3eaab8b9"
+      ]
+    },
+    {
+      "id": "gold-v2-0010",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-50f5eadd196e4fa4b558"
+      ]
+    },
+    {
+      "id": "gold-v2-0011",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，经营现金流和资本开支是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-12b8c4dc1e0c75c01f7d"
+      ]
+    },
+    {
+      "id": "gold-v2-0012",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1a771c597056cfc5d205"
+      ]
+    },
+    {
+      "id": "gold-v2-0013",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明风险、需求和监管因素？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-6ff6f1e6bffb31da0620"
+      ]
+    },
+    {
+      "id": "gold-v2-0014",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2cb9e61c74f5253325ca"
+      ]
+    },
+    {
+      "id": "gold-v2-0015",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，风险、需求和监管因素是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-02e2d78dec7456eb5ffd"
+      ]
+    },
+    {
+      "id": "gold-v2-0016",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-402f31834a6a14c379d4"
+      ]
+    },
+    {
+      "id": "gold-v2-0017",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple FY2025 年报里，哪些段落说明竞争和竞争优势？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1828eea6d82e1cb14b74"
+      ]
+    },
+    {
+      "id": "gold-v2-0018",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Review Apple's FY2024 filing: where does it discuss competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2e00556fe4ad080749d0"
+      ]
+    },
+    {
+      "id": "gold-v2-0019",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "在 Apple FY2025 的申报中，竞争和竞争优势是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-abef03924727c54b97ae"
+      ]
+    },
+    {
+      "id": "gold-v2-0020",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "What does Apple's FY2024 annual filing say about competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-ebee1b9063f9b5a07e4d"
+      ]
+    },
+    {
+      "id": "gold-v2-0021",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明展望、预期和需求？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-f10b2aba97ff76d5d69f"
+      ]
+    },
+    {
+      "id": "gold-v2-0022",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-279672a499595640984d"
+      ]
+    },
+    {
+      "id": "gold-v2-0023",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，展望、预期和需求是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-12b8c4dc1e0c75c01f7d"
+      ]
+    },
+    {
+      "id": "gold-v2-0024",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-569611233443fa3f6148"
+      ]
+    },
+    {
+      "id": "gold-v2-0025",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明分部、地域和收入？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-9a14c40d99092b452f0e"
+      ]
+    },
+    {
+      "id": "gold-v2-0026",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-06107b6702e2540bdd1a"
+      ]
+    },
+    {
+      "id": "gold-v2-0027",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，分部、地域和收入是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-7faf58b7d99ab7975ba4"
+      ]
+    },
+    {
+      "id": "gold-v2-0028",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-60c250cad85ebe7a1278"
+      ]
+    },
+    {
+      "id": "gold-v2-0029",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明毛利率、营业利润率和盈利？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0ed2e1fe917843a7c75d"
+      ]
+    },
+    {
+      "id": "gold-v2-0030",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-ad8ff9ca584c757c5c54"
+      ]
+    },
+    {
+      "id": "gold-v2-0031",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，毛利率、营业利润率和盈利是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-e6988848ca29a5561c9f"
+      ]
+    },
+    {
+      "id": "gold-v2-0032",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1828eea6d82e1cb14b74"
+      ]
+    },
+    {
+      "id": "gold-v2-0033",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple FY2025 年报里，哪些段落说明季度和年内累计期间？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-aa66212b06484b9e1e72"
+      ]
+    },
+    {
+      "id": "gold-v2-0034",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Review Apple's FY2024 filing: where does it discuss quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-130fb6d5d887af8944cb"
+      ]
+    },
+    {
+      "id": "gold-v2-0035",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "在 Apple FY2025 的申报中，季度和年内累计期间是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-f577ed34f26c0b47cd2d"
+      ]
+    },
+    {
+      "id": "gold-v2-0036",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "What does Apple's FY2024 annual filing say about quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0ad534c1b542c23bed8a"
+      ]
+    },
+    {
+      "id": "gold-v2-0037",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple FY2024 年报里，哪些段落说明债务、流动性和义务？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3a19518e4e6cf1c44ebd"
+      ]
+    },
+    {
+      "id": "gold-v2-0038",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Review Apple's FY2025 filing: where does it discuss debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-f82f521ca1a6d4b3dca7"
+      ]
+    },
+    {
+      "id": "gold-v2-0039",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "在 Apple FY2024 的申报中，债务、流动性和义务是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-03381573fbb3429fcc86"
+      ]
+    },
+    {
+      "id": "gold-v2-0040",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "What does Apple's FY2025 annual filing say about debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2472322b68d3df2a8908"
+      ]
+    },
+    {
+      "id": "gold-v2-0041",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon FY2025 年报里，哪些段落说明业务、产品、服务和客户？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-40c33a19e748bc5e8422"
+      ]
+    },
+    {
+      "id": "gold-v2-0042",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Review Amazon's FY2023 filing: where does it discuss business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-581af8459386e69a2889"
+      ]
+    },
+    {
+      "id": "gold-v2-0043",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "在 Amazon FY2024 的申报中，业务、产品、服务和客户是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-4104c357d02244c94d7a"
+      ]
+    },
+    {
+      "id": "gold-v2-0044",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "What does Amazon's FY2025 annual filing say about business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-96cdcb5ca349f6692792"
+      ]
+    },
+    {
+      "id": "gold-v2-0045",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon FY2023 年报里，哪些段落说明收入和营业利润变化原因？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-289b005e80a8240895ba"
+      ]
+    },
+    {
+      "id": "gold-v2-0046",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Review Amazon's FY2024 filing: where does it discuss revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8bc8506ab28b51b7f958"
+      ]
+    },
+    {
+      "id": "gold-v2-0047",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "在 Amazon FY2025 的申报中，收入和营业利润变化原因是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2fdae4522662c2128147"
+      ]
+    },
+    {
+      "id": "gold-v2-0048",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "What does Amazon's FY2023 annual filing say about revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1c11f6bc8af6d5830a8b"
+      ]
+    },
+    {
+      "id": "gold-v2-0049",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon FY2025 年报里，哪些段落说明经营现金流和资本开支？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-802b0c841d9e16e5f182"
+      ]
+    },
+    {
+      "id": "gold-v2-0050",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Review Amazon's FY2023 filing: where does it discuss cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2cfc7074ea064ee3c941"
+      ]
+    },
+    {
+      "id": "gold-v2-0051",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "在 Amazon FY2024 的申报中，经营现金流和资本开支是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-975dd8894c5f0ea189af"
+      ]
+    },
+    {
+      "id": "gold-v2-0052",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "What does Amazon's FY2025 annual filing say about cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-fd707c40fdb563b12a55"
+      ]
+    },
+    {
+      "id": "gold-v2-0053",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon FY2024 年报里，哪些段落说明风险、需求和监管因素？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-da27c76c5575fe1dd76e"
+      ]
+    },
+    {
+      "id": "gold-v2-0054",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Review Amazon's FY2025 filing: where does it discuss risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1e2478736c4de4203299"
+      ]
+    },
+    {
+      "id": "gold-v2-0055",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "在 Amazon FY2023 的申报中，风险、需求和监管因素是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-19c24647b7ff3f96337f"
+      ]
+    },
+    {
+      "id": "gold-v2-0056",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "What does Amazon's FY2024 annual filing say about risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-25b3055df2bef3317690"
+      ]
+    },
+    {
+      "id": "gold-v2-0057",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon FY2025 年报里，哪些段落说明竞争和竞争优势？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-40c33a19e748bc5e8422"
+      ]
+    },
+    {
+      "id": "gold-v2-0058",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Review Amazon's FY2023 filing: where does it discuss competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-6ca0bf866378c9e3a6a3"
+      ]
+    },
+    {
+      "id": "gold-v2-0059",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "在 Amazon FY2024 的申报中，竞争和竞争优势是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8c8d7c1e0e02af184e9c"
+      ]
+    },
+    {
+      "id": "gold-v2-0060",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "What does Amazon's FY2025 annual filing say about competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0801fb50fb9d3993938e"
+      ]
+    },
+    {
+      "id": "gold-v2-0061",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon FY2025 年报里，哪些段落说明展望、预期和需求？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1753af546b28b661ffd0"
+      ]
+    },
+    {
+      "id": "gold-v2-0062",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Review Amazon's FY2023 filing: where does it discuss outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-7cef30a243dbfa6d61c1"
+      ]
+    },
+    {
+      "id": "gold-v2-0063",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "在 Amazon FY2024 的申报中，展望、预期和需求是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-14dcb41341e496fdb8ad"
+      ]
+    },
+    {
+      "id": "gold-v2-0064",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "What does Amazon's FY2025 annual filing say about outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1e10b7126ec8c7186c4f"
+      ]
+    },
+    {
+      "id": "gold-v2-0065",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon FY2025 年报里，哪些段落说明分部、地域和收入？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-34e244763002f22a0d81"
+      ]
+    },
+    {
+      "id": "gold-v2-0066",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Review Amazon's FY2023 filing: where does it discuss segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-225437b35885f5edfde8"
+      ]
+    },
+    {
+      "id": "gold-v2-0067",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "在 Amazon FY2024 的申报中，分部、地域和收入是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-ae8ea83be0a84ac2ee75"
+      ]
+    },
+    {
+      "id": "gold-v2-0068",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "What does Amazon's FY2025 annual filing say about segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-de7fbce3ac6bcd912afa"
+      ]
+    },
+    {
+      "id": "gold-v2-0069",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon FY2023 年报里，哪些段落说明毛利率、营业利润率和盈利？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-002b23cbde63a845dc35"
+      ]
+    },
+    {
+      "id": "gold-v2-0070",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Review Amazon's FY2024 filing: where does it discuss gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1edf80fe47c71dbdace6"
+      ]
+    },
+    {
+      "id": "gold-v2-0071",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "在 Amazon FY2025 的申报中，毛利率、营业利润率和盈利是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-34e244763002f22a0d81"
+      ]
+    },
+    {
+      "id": "gold-v2-0072",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "What does Amazon's FY2023 annual filing say about gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2afcc3a9a3057992db39"
+      ]
+    },
+    {
+      "id": "gold-v2-0073",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon FY2024 年报里，哪些段落说明季度和年内累计期间？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-85528f31836aeda63dab"
+      ]
+    },
+    {
+      "id": "gold-v2-0074",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Review Amazon's FY2025 filing: where does it discuss quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1ca06a59d5bb240c9ea9"
+      ]
+    },
+    {
+      "id": "gold-v2-0075",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "在 Amazon FY2023 的申报中，季度和年内累计期间是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-100c6174a511b7f47e84"
+      ]
+    },
+    {
+      "id": "gold-v2-0076",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "What does Amazon's FY2024 annual filing say about quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5d6852b2c05ca8a636f0"
+      ]
+    },
+    {
+      "id": "gold-v2-0077",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon FY2024 年报里，哪些段落说明债务、流动性和义务？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-128ffd357eb6e2e1577c"
+      ]
+    },
+    {
+      "id": "gold-v2-0078",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Review Amazon's FY2025 filing: where does it discuss debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-86d08b9e83405602a63d"
+      ]
+    },
+    {
+      "id": "gold-v2-0079",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "在 Amazon FY2023 的申报中，债务、流动性和义务是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-51fb3944fb2352b3f740"
+      ]
+    },
+    {
+      "id": "gold-v2-0080",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "What does Amazon's FY2024 annual filing say about debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5e5863b5748fd4429cd4"
+      ]
+    },
+    {
+      "id": "gold-v2-0081",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Microsoft FY2026 年报里，哪些段落说明业务、产品、服务和客户？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-07e4868416011a110606"
+      ]
+    },
+    {
+      "id": "gold-v2-0082",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Review Microsoft's FY2024 filing: where does it discuss business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-26eb84b4aa7656ef4359"
+      ]
+    },
+    {
+      "id": "gold-v2-0083",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "在 Microsoft FY2025 的申报中，业务、产品、服务和客户是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-32e9ea22a19b0912ab5d"
+      ]
+    },
+    {
+      "id": "gold-v2-0084",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "What does Microsoft's FY2026 annual filing say about business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-38aba819ecbeb105f66b"
+      ]
+    },
+    {
+      "id": "gold-v2-0085",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft FY2024 年报里，哪些段落说明收入和营业利润变化原因？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-9d545ff4cd591669ce7e"
+      ]
+    },
+    {
+      "id": "gold-v2-0086",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Review Microsoft's FY2025 filing: where does it discuss revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-051a2455b2054a97ae5e"
+      ]
+    },
+    {
+      "id": "gold-v2-0087",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "在 Microsoft FY2026 的申报中，收入和营业利润变化原因是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-121ad64c984aef08eb1a"
+      ]
+    },
+    {
+      "id": "gold-v2-0088",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "What does Microsoft's FY2024 annual filing say about revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-53022eaa674aadaad051"
+      ]
+    },
+    {
+      "id": "gold-v2-0089",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Microsoft FY2026 年报里，哪些段落说明经营现金流和资本开支？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8120d3200b602bf5b1a0"
+      ]
+    },
+    {
+      "id": "gold-v2-0090",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Review Microsoft's FY2024 filing: where does it discuss cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-069b76e2ce47743e96c2"
+      ]
+    },
+    {
+      "id": "gold-v2-0091",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "在 Microsoft FY2025 的申报中，经营现金流和资本开支是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-d78f4537e3d8a9dc26d9"
+      ]
+    },
+    {
+      "id": "gold-v2-0092",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "What does Microsoft's FY2026 annual filing say about cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-c2fb073e42844f407fa1"
+      ]
+    },
+    {
+      "id": "gold-v2-0093",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft FY2025 年报里，哪些段落说明风险、需求和监管因素？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3dc5f23f4869668d9d40"
+      ]
+    },
+    {
+      "id": "gold-v2-0094",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Review Microsoft's FY2026 filing: where does it discuss risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-89e5e7a1a033addc75b0"
+      ]
+    },
+    {
+      "id": "gold-v2-0095",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "在 Microsoft FY2024 的申报中，风险、需求和监管因素是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-ec1566416b08a394663b"
+      ]
+    },
+    {
+      "id": "gold-v2-0096",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "What does Microsoft's FY2025 annual filing say about risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-b6280f91c87a43103eb4"
+      ]
+    },
+    {
+      "id": "gold-v2-0097",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Microsoft FY2026 年报里，哪些段落说明竞争和竞争优势？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-374193acf65ceab048d9"
+      ]
+    },
+    {
+      "id": "gold-v2-0098",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Review Microsoft's FY2024 filing: where does it discuss competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1b0ccc106a211c71729d"
+      ]
+    },
+    {
+      "id": "gold-v2-0099",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "在 Microsoft FY2025 的申报中，竞争和竞争优势是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-72ca5675d1a522984a56"
+      ]
+    },
+    {
+      "id": "gold-v2-0100",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "What does Microsoft's FY2026 annual filing say about competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-ccf641ff7a304cf3d964"
+      ]
+    },
+    {
+      "id": "gold-v2-0101",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Microsoft FY2026 年报里，哪些段落说明展望、预期和需求？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2990fdf7a6f204054b7a"
+      ]
+    },
+    {
+      "id": "gold-v2-0102",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Review Microsoft's FY2024 filing: where does it discuss outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-13214fdbd7f1756460f5"
+      ]
+    },
+    {
+      "id": "gold-v2-0103",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "在 Microsoft FY2025 的申报中，展望、预期和需求是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-41b2eb8bccc256879739"
+      ]
+    },
+    {
+      "id": "gold-v2-0104",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "What does Microsoft's FY2026 annual filing say about outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3db9042e30d2f3659538"
+      ]
+    },
+    {
+      "id": "gold-v2-0105",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Microsoft FY2026 年报里，哪些段落说明分部、地域和收入？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-802571a060e799884a00"
+      ]
+    },
+    {
+      "id": "gold-v2-0106",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Review Microsoft's FY2024 filing: where does it discuss segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-03a97abfeb27fc5bc015"
+      ]
+    },
+    {
+      "id": "gold-v2-0107",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "在 Microsoft FY2025 的申报中，分部、地域和收入是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-e8c0871ff33d1dfa7f37"
+      ]
+    },
+    {
+      "id": "gold-v2-0108",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "What does Microsoft's FY2026 annual filing say about segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8f56457bbe71109bafaf"
+      ]
+    },
+    {
+      "id": "gold-v2-0109",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft FY2024 年报里，哪些段落说明毛利率、营业利润率和盈利？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1fee3811bd38c4f5426b"
+      ]
+    },
+    {
+      "id": "gold-v2-0110",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Review Microsoft's FY2025 filing: where does it discuss gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-eed1bbd95c02ba8ae41a"
+      ]
+    },
+    {
+      "id": "gold-v2-0111",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "在 Microsoft FY2026 的申报中，毛利率、营业利润率和盈利是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-4667f7340b50a123b548"
+      ]
+    },
+    {
+      "id": "gold-v2-0112",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "What does Microsoft's FY2024 annual filing say about gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-bb2185a73e96936d49ff"
+      ]
+    },
+    {
+      "id": "gold-v2-0113",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft FY2025 年报里，哪些段落说明季度和年内累计期间？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-a0d54296acc4488ee9a7"
+      ]
+    },
+    {
+      "id": "gold-v2-0114",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Review Microsoft's FY2026 filing: where does it discuss quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-4cfb0fb465f7c0515b7e"
+      ]
+    },
+    {
+      "id": "gold-v2-0115",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "在 Microsoft FY2024 的申报中，季度和年内累计期间是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-35e93d6ab5ee78d244c0"
+      ]
+    },
+    {
+      "id": "gold-v2-0116",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "What does Microsoft's FY2025 annual filing say about quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-18facd48778c787a3c3e"
+      ]
+    },
+    {
+      "id": "gold-v2-0117",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft FY2025 年报里，哪些段落说明债务、流动性和义务？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-59fcf6c644115631ee6e"
+      ]
+    },
+    {
+      "id": "gold-v2-0118",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2026,
+      "query": "Review Microsoft's FY2026 filing: where does it discuss debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-9bfba6beffa4cebf912c"
+      ]
+    },
+    {
+      "id": "gold-v2-0119",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "在 Microsoft FY2024 的申报中，债务、流动性和义务是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-85c13364f41bbcc7caf8"
+      ]
+    },
+    {
+      "id": "gold-v2-0120",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "What does Microsoft's FY2025 annual filing say about debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-cf8501b80378f76e9bff"
+      ]
+    },
+    {
+      "id": "gold-v2-0121",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明业务、产品、服务和客户？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-308639e0cab5a8b3d1ca"
+      ]
+    },
+    {
+      "id": "gold-v2-0122",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1402044482afccedb504"
+      ]
+    },
+    {
+      "id": "gold-v2-0123",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，业务、产品、服务和客户是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3e09666c61a5959135f3"
+      ]
+    },
+    {
+      "id": "gold-v2-0124",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-540ec987a24e01f08672"
+      ]
+    },
+    {
+      "id": "gold-v2-0125",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明收入和营业利润变化原因？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-e685128e76a3bb16381a"
+      ]
+    },
+    {
+      "id": "gold-v2-0126",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3fc5921f7f538ef23a4e"
+      ]
+    },
+    {
+      "id": "gold-v2-0127",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，收入和营业利润变化原因是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-18673389f9c976f19951"
+      ]
+    },
+    {
+      "id": "gold-v2-0128",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-900f250b9cbf826b7f70"
+      ]
+    },
+    {
+      "id": "gold-v2-0129",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明经营现金流和资本开支？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5aa2eb08020ea1f45169"
+      ]
+    },
+    {
+      "id": "gold-v2-0130",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1a79669c8b248fe2749d"
+      ]
+    },
+    {
+      "id": "gold-v2-0131",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，经营现金流和资本开支是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-6fc2c648a77e1bd9f5eb"
+      ]
+    },
+    {
+      "id": "gold-v2-0132",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-60cbae90c4494322d8aa"
+      ]
+    },
+    {
+      "id": "gold-v2-0133",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明风险、需求和监管因素？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-149a0ad07dc0abd2a3c4"
+      ]
+    },
+    {
+      "id": "gold-v2-0134",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-195116cac0101d49ea3a"
+      ]
+    },
+    {
+      "id": "gold-v2-0135",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，风险、需求和监管因素是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1689762bb435f2b5a785"
+      ]
+    },
+    {
+      "id": "gold-v2-0136",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-4b4e1307c4ccac84fe42"
+      ]
+    },
+    {
+      "id": "gold-v2-0137",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "NVIDIA FY2026 年报里，哪些段落说明竞争和竞争优势？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0e579226bc6227126e92"
+      ]
+    },
+    {
+      "id": "gold-v2-0138",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "Review NVIDIA's FY2025 filing: where does it discuss competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-6a9fd7f57cf1d9f55cbe"
+      ]
+    },
+    {
+      "id": "gold-v2-0139",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "在 NVIDIA FY2026 的申报中，竞争和竞争优势是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-692e5da3035e51d78e7d"
+      ]
+    },
+    {
+      "id": "gold-v2-0140",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "What does NVIDIA's FY2025 annual filing say about competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-86781e645e7fedec56e0"
+      ]
+    },
+    {
+      "id": "gold-v2-0141",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明展望、预期和需求？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-441d4e6cfe4e115ced34"
+      ]
+    },
+    {
+      "id": "gold-v2-0142",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-c021a1a7767f751cf219"
+      ]
+    },
+    {
+      "id": "gold-v2-0143",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，展望、预期和需求是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1689762bb435f2b5a785"
+      ]
+    },
+    {
+      "id": "gold-v2-0144",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0310c83d4f2296d8bc5d"
+      ]
+    },
+    {
+      "id": "gold-v2-0145",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明分部、地域和收入？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-063eb3eeb3c8008a4ad4"
+      ]
+    },
+    {
+      "id": "gold-v2-0146",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-18d55af96a52619963fc"
+      ]
+    },
+    {
+      "id": "gold-v2-0147",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，分部、地域和收入是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-53456192177ac3e97a6f"
+      ]
+    },
+    {
+      "id": "gold-v2-0148",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2098074d1411ea3c6b89"
+      ]
+    },
+    {
+      "id": "gold-v2-0149",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明毛利率、营业利润率和盈利？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3fb7cbc944fa85effb7a"
+      ]
+    },
+    {
+      "id": "gold-v2-0150",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-edd20da4027ee7867937"
+      ]
+    },
+    {
+      "id": "gold-v2-0151",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，毛利率、营业利润率和盈利是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-9ce6b4b46e6a7c5e63ad"
+      ]
+    },
+    {
+      "id": "gold-v2-0152",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-04f465d64c5061791de4"
+      ]
+    },
+    {
+      "id": "gold-v2-0153",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "NVIDIA FY2026 年报里，哪些段落说明季度和年内累计期间？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-21829f106c80f82cb7d5"
+      ]
+    },
+    {
+      "id": "gold-v2-0154",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "Review NVIDIA's FY2025 filing: where does it discuss quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-ef1f711c5667cf2aad54"
+      ]
+    },
+    {
+      "id": "gold-v2-0155",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "在 NVIDIA FY2026 的申报中，季度和年内累计期间是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0310c83d4f2296d8bc5d"
+      ]
+    },
+    {
+      "id": "gold-v2-0156",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "What does NVIDIA's FY2025 annual filing say about quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-2aa77a48c9da8f3928a9"
+      ]
+    },
+    {
+      "id": "gold-v2-0157",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "NVIDIA FY2025 年报里，哪些段落说明债务、流动性和义务？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-111f7f655ad8341e86a9"
+      ]
+    },
+    {
+      "id": "gold-v2-0158",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "Review NVIDIA's FY2026 filing: where does it discuss debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-35dab6d5eec7375c5d81"
+      ]
+    },
+    {
+      "id": "gold-v2-0159",
+      "language": "zh",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2025,
+      "query": "在 NVIDIA FY2025 的申报中，债务、流动性和义务是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-65c22908607f577e76f6"
+      ]
+    },
+    {
+      "id": "gold-v2-0160",
+      "language": "en",
+      "ticker": "NVDA",
+      "company": "NVIDIA",
+      "fiscal_year": 2026,
+      "query": "What does NVIDIA's FY2026 annual filing say about debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-4276d629f75713f215f5"
+      ]
+    },
+    {
+      "id": "gold-v2-0161",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明业务、产品、服务和客户？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-028018648319cecf8c5d"
+      ]
+    },
+    {
+      "id": "gold-v2-0162",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5fb6460d6b425dc46893"
+      ]
+    },
+    {
+      "id": "gold-v2-0163",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，业务、产品、服务和客户是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-10ef010a4054ca466fdc"
+      ]
+    },
+    {
+      "id": "gold-v2-0164",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about business products services customers?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "business",
+          "products",
+          "services",
+          "customers"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-eface3aa40c2b849a19a"
+      ]
+    },
+    {
+      "id": "gold-v2-0165",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明收入和营业利润变化原因？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-11711dad467e10623ea1"
+      ]
+    },
+    {
+      "id": "gold-v2-0166",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-00ec4b56c88ba10ed096"
+      ]
+    },
+    {
+      "id": "gold-v2-0167",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，收入和营业利润变化原因是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-058f0fcc8d702cffa337"
+      ]
+    },
+    {
+      "id": "gold-v2-0168",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about revenue operating income increase decrease?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "increase",
+          "decrease"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1f97cdceac3f184cf436"
+      ]
+    },
+    {
+      "id": "gold-v2-0169",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明经营现金流和资本开支？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-205a5f316717c7f08bf9"
+      ]
+    },
+    {
+      "id": "gold-v2-0170",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-cd0174ac3abb49edc313"
+      ]
+    },
+    {
+      "id": "gold-v2-0171",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，经营现金流和资本开支是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-374ca7c8e836ac6cac2c"
+      ]
+    },
+    {
+      "id": "gold-v2-0172",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about cash flows capital expenditures operating activities?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "cash",
+          "flows",
+          "capital",
+          "expenditures",
+          "operating",
+          "activities"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-23e0f399cfe05ec7689b"
+      ]
+    },
+    {
+      "id": "gold-v2-0173",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明风险、需求和监管因素？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-028018648319cecf8c5d"
+      ]
+    },
+    {
+      "id": "gold-v2-0174",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5fb6460d6b425dc46893"
+      ]
+    },
+    {
+      "id": "gold-v2-0175",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，风险、需求和监管因素是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-24c638a3e12fbd93af9b"
+      ]
+    },
+    {
+      "id": "gold-v2-0176",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about risk factors demand regulatory supply?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "demand",
+          "regulatory",
+          "supply"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-84420a78924baa14914e"
+      ]
+    },
+    {
+      "id": "gold-v2-0177",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC FY2025 年报里，哪些段落说明竞争和竞争优势？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-69e9d0ecb2cf035f72ba"
+      ]
+    },
+    {
+      "id": "gold-v2-0178",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "Review TSMC's FY2024 filing: where does it discuss competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-a07e77f0974dec3356df"
+      ]
+    },
+    {
+      "id": "gold-v2-0179",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "在 TSMC FY2025 的申报中，竞争和竞争优势是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-0006de80ed528c647cca"
+      ]
+    },
+    {
+      "id": "gold-v2-0180",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "What does TSMC's FY2024 annual filing say about competition competitive advantages?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "competition",
+          "competitive",
+          "advantages"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-03e284b0d2a1561522b8"
+      ]
+    },
+    {
+      "id": "gold-v2-0181",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明展望、预期和需求？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-6404f086315acc3ec29f"
+      ]
+    },
+    {
+      "id": "gold-v2-0182",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-afd942b7f09f87ee0d22"
+      ]
+    },
+    {
+      "id": "gold-v2-0183",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，展望、预期和需求是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-02676b345a24fb3c932a"
+      ]
+    },
+    {
+      "id": "gold-v2-0184",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about outlook expect future demand?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "expect",
+          "future",
+          "demand"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-211ffe6366ee7aeffad1"
+      ]
+    },
+    {
+      "id": "gold-v2-0185",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明分部、地域和收入？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-47317d9d9eee50838550"
+      ]
+    },
+    {
+      "id": "gold-v2-0186",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-27581ac0d5205e231a31"
+      ]
+    },
+    {
+      "id": "gold-v2-0187",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，分部、地域和收入是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5fdb54a3cdbc1441e69c"
+      ]
+    },
+    {
+      "id": "gold-v2-0188",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about segment geographic revenue?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": false,
+        "anchor_terms": [
+          "segment",
+          "geographic",
+          "revenue"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-faf061eef3bc2ce12eb5"
+      ]
+    },
+    {
+      "id": "gold-v2-0189",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明毛利率、营业利润率和盈利？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-f2657d3bce0cc0a4278b"
+      ]
+    },
+    {
+      "id": "gold-v2-0190",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8e81e0f6c4eb2f85faba"
+      ]
+    },
+    {
+      "id": "gold-v2-0191",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，毛利率、营业利润率和盈利是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-1313cf2766b0a82d3f5f"
+      ]
+    },
+    {
+      "id": "gold-v2-0192",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about gross margin operating margin profit?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": false,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profit"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-fbf88809b922d3156d62"
+      ]
+    },
+    {
+      "id": "gold-v2-0193",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC FY2025 年报里，哪些段落说明季度和年内累计期间？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-03313914e878e8bf27e1"
+      ]
+    },
+    {
+      "id": "gold-v2-0194",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "Review TSMC's FY2024 filing: where does it discuss quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-c4cc00e6d88e5051bbc1"
+      ]
+    },
+    {
+      "id": "gold-v2-0195",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "在 TSMC FY2025 的申报中，季度和年内累计期间是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8cfcf20e519c918f9b64"
+      ]
+    },
+    {
+      "id": "gold-v2-0196",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "What does TSMC's FY2024 annual filing say about quarter three months six months?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": false,
+        "anchor_terms": [
+          "quarter",
+          "three",
+          "months",
+          "six",
+          "months"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-5b3c98a8d777055f0dd7"
+      ]
+    },
+    {
+      "id": "gold-v2-0197",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC FY2024 年报里，哪些段落说明债务、流动性和义务？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-52f6d5efdc3f66366f7b"
+      ]
+    },
+    {
+      "id": "gold-v2-0198",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "Review TSMC's FY2025 filing: where does it discuss debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-3f0ba4e79135b511c7b9"
+      ]
+    },
+    {
+      "id": "gold-v2-0199",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "在 TSMC FY2024 的申报中，债务、流动性和义务是怎样披露的？",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-8e44e7b0b557fa4374cb"
+      ]
+    },
+    {
+      "id": "gold-v2-0200",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "What does TSMC's FY2025 annual filing say about debt liquidity obligations?",
+      "expected_behavior": "retrieve_cited_passage_with_header_scope",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ],
+        "editorial_source": "corpus-anchored editorial revision"
+      },
+      "expected_passage_ids": [
+        "passage-89b3797b748297d41a80"
+      ]
+    }
+  ]
+}

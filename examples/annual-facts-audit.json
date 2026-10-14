@@ -1,0 +1,86 @@
+{
+  "status": "consistent",
+  "checks_passed": 10,
+  "checks_failed": 0,
+  "source_validation": "not_requested",
+  "source_evidence_checked": 0,
+  "numeric_claims_recomputed": 2,
+  "narrative_claims_not_rechecked": 0,
+  "raw_sources": {
+    "requested": false,
+    "filings_checked": 0,
+    "facts_checked": 0,
+    "missing": 0
+  },
+  "market_sources": {
+    "requested": false,
+    "checked": 0,
+    "missing": 0
+  },
+  "valuation_sources": {
+    "requested": false,
+    "checked": 0,
+    "missing": 0
+  },
+  "checks": [
+    {
+      "code": "manifest",
+      "status": "pass",
+      "detail": "包内容的 SHA256 一致；此校验和不证明作者或来源真实性。"
+    },
+    {
+      "code": "answer_status",
+      "status": "pass",
+      "detail": "完成、部分回答和拒答状态须与实际结论及缺口一致。"
+    },
+    {
+      "code": "evidence_scope",
+      "status": "pass",
+      "detail": "主体、申报归属和公开日期须与研究知悉日期相容。",
+      "evidence_id": "fact-613c64b9ff6e8488edd0"
+    },
+    {
+      "code": "annual_fact",
+      "status": "pass",
+      "detail": "事实的指标、币种、标签及申报期间须有效；年度、单季度与累计期间分开检查。",
+      "evidence_id": "fact-613c64b9ff6e8488edd0"
+    },
+    {
+      "code": "evidence_scope",
+      "status": "pass",
+      "detail": "主体、申报归属和公开日期须与研究知悉日期相容。",
+      "evidence_id": "fact-f20649fbfea0da964d17"
+    },
+    {
+      "code": "annual_fact",
+      "status": "pass",
+      "detail": "事实的指标、币种、标签及申报期间须有效；年度、单季度与累计期间分开检查。",
+      "evidence_id": "fact-f20649fbfea0da964d17"
+    },
+    {
+      "code": "claim_type",
+      "status": "pass",
+      "detail": "核验类别须与结论类型一致。"
+    },
+    {
+      "code": "numeric_text",
+      "status": "pass",
+      "detail": "数字句须与重算后的代码渲染结果逐字一致。"
+    },
+    {
+      "code": "claim_type",
+      "status": "pass",
+      "detail": "核验类别须与结论类型一致。"
+    },
+    {
+      "code": "numeric_text",
+      "status": "pass",
+      "detail": "数字句须与重算后的代码渲染结果逐字一致。"
+    }
+  ],
+  "limitations": [
+    "consistent 表示已执行的结构、数字和一致性检查通过，不等于所有叙述真实。",
+    "无本地证据库或原始缓存时，包内校验和不能证明来源；整体改写后重算校验和仍可自洽。",
+    "本地证据库和缓存由调用者指定，未在线确认 SEC 内容，也未验证数字以外的完整因果含义。"
+  ]
+}

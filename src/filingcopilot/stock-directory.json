@@ -1,0 +1,218 @@
+{
+  "amazon": {
+    "aliases": ["亚马逊", "亞馬遜", "Amazon", "Amazon.com", "Amazon.com, Inc."],
+    "listings": [
+      {
+        "ticker": "AMZN",
+        "name": "亚马逊 / Amazon.com, Inc.",
+        "exchange": "纳斯达克",
+        "currency": "USD",
+        "product": "美国普通股",
+        "industry": "retail",
+        "filings_supported": true,
+        "update_form": "8-K",
+        "filing_note": "支持 SEC 美国公司财报与官方公告；行情无需下载财报。TTM EPS 使用供应商口径，不是预测 EPS。",
+        "source_url": "https://ir.aboutamazon.com/faqs/default.aspx",
+        "external_sources": [{
+          "source_type": "news", "source_name": "About Amazon",
+          "feed_url": "https://www.aboutamazon.com/rss/feed.rss",
+          "evidence_level": "issuer_news"
+        }]
+      }
+    ]
+  },
+  "microsoft": {
+    "aliases": ["微软", "微軟", "Microsoft", "Microsoft Corporation"],
+    "listings": [{
+      "ticker": "MSFT", "name": "微软 / Microsoft Corporation",
+      "exchange": "纳斯达克", "currency": "USD", "product": "美国普通股", "industry": "software",
+      "filings_supported": true, "update_form": "8-K",
+      "filing_note": "支持 SEC 财报与公告；另从发行人官网获取电话会原文摘录，缺少独立公开时间时仅自首次取得时可用。",
+      "source_url": "https://www.microsoft.com/en-us/investor/default",
+      "external_sources": [{
+        "source_type": "transcript", "source_name": "Microsoft Investor Relations",
+        "feed_url": "https://www.microsoft.com/en-us/investor/default",
+        "evidence_level": "issuer_transcript", "format": "html_index",
+        "link_pattern": "/en-us/investor/events/fy-\\d{4}/earnings-fy-\\d{4}-q[1-4]",
+        "text_selector": ".cmp-text.text-break"
+      }]
+    }]
+  },
+  "tencent": {
+    "aliases": ["腾讯", "騰訊", "Tencent", "Tencent Holdings", "腾讯控股"],
+    "listings": [{
+      "ticker": "0700.HK", "name": "腾讯控股 / Tencent Holdings Limited",
+      "exchange": "香港交易所", "currency": "HKD", "product": "香港普通股",
+      "filings_supported": false,
+      "filing_note": "支持 HKEXnews 披露易官方公告的中英文版本和港股行情；年报财务指标将在后续表格管线接入。",
+      "source_url": "https://www1.hkexnews.hk/search/titlesearch.xhtml?lang=en&market=SEHK",
+      "hkex_stock_code": "00700"
+    }]
+  },
+  "maotai": {
+    "aliases": ["贵州茅台", "貴州茅台", "贵州茅台酒", "Kweichow Moutai", "600519"],
+    "listings": [{
+      "ticker": "600519.SS", "name": "贵州茅台 / Kweichow Moutai Co., Ltd.",
+      "exchange": "上海证券交易所", "currency": "CNY", "product": "A股普通股",
+      "filings_supported": false,
+      "filing_note": "支持巨潮资讯官方中文公告和 A 股行情；CAS 口径年报指标将在后续表格管线接入。",
+      "source_url": "https://www.cninfo.com.cn/new/disclosure",
+      "cninfo_stock_code": "600519", "cninfo_column": "sse"
+    }]
+  },
+  "tsmc": {
+    "aliases": [
+      "台积电",
+      "台積電",
+      "台积公司",
+      "台積公司",
+      "台湾积体电路制造",
+      "台灣積體電路製造",
+      "TSMC",
+      "Taiwan Semiconductor",
+      "Taiwan Semiconductor Manufacturing Company Limited"
+    ],
+    "listings": [
+      {
+        "ticker": "TSM",
+        "name": "台积电 / Taiwan Semiconductor",
+        "exchange": "纽约证券交易所",
+        "currency": "USD",
+        "product": "美国存托股（ADS）",
+        "filings_supported": true,
+        "annual_form": "20-F",
+        "annual_financials": true,
+        "filing_note": "支持 SEC 20-F 年报原文、年度新台币营收、利润率、普通股 EPS、经营现金流、现金 PP&E 购置毛额及自由现金流，以及年报便利换算美元 ADS EPS 口径的年度市盈率；另可查询近 90 天最多五次 SEC 6-K 官方公告原文；季度财务计算、净资本开支调整及 TTM ADS 口径仍待接入。行情无需下载年报。",
+        "source_url": "https://investor.tsmc.com/english/shareholder-services/stock-quotes",
+        "update_form": "6-K"
+      },
+      {
+        "ticker": "2330.TW",
+        "name": "台积电 / Taiwan Semiconductor",
+        "exchange": "台湾证券交易所",
+        "currency": "TWD",
+        "product": "台湾普通股",
+        "filings_supported": false,
+        "filing_note": "台湾市场财报采集尚未接入。行情查询无需下载财报。",
+        "source_url": "https://investor.tsmc.com/chinese/shareholder-services/stock-quotes"
+      },
+      {
+        "ticker": "TSMC34.SA",
+        "name": "台积电 / Taiwan Semiconductor",
+        "exchange": "巴西 B3",
+        "currency": "BRL",
+        "product": "巴西存托凭证（BDR）",
+        "filings_supported": false,
+        "filing_note": "巴西市场财报采集尚未接入。该凭证与 TSM、2330.TW 分别报价，币种不同。",
+        "source_url": "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/main/52531/TSMC/corporate-actions?language=pt-BR"
+      }
+    ]
+  },
+  "bp": {
+    "aliases": ["BP", "bp", "英国石油", "BP p.l.c.", "BP plc"],
+    "listings": [
+      {
+        "ticker": "BP",
+        "name": "BP p.l.c.",
+        "exchange": "纽约证券交易所",
+        "currency": "USD",
+        "product": "美国存托股（ADS）",
+        "filings_supported": true,
+        "annual_form": "20-F",
+        "annual_financials": true,
+        "filing_note": "支持 SEC 20-F 原文与登记的 IFRS 美元年度指标；ADS 与普通股报价仍按上市代码分列。",
+        "source_url": "https://www.bp.com/en/global/corporate/investors.html"
+      }
+    ]
+  },
+  "shell": {
+    "aliases": ["Shell", "壳牌", "荷兰皇家壳牌", "Shell plc"],
+    "listings": [
+      {
+        "ticker": "SHEL",
+        "name": "Shell plc",
+        "exchange": "纽约证券交易所",
+        "currency": "USD",
+        "product": "美国存托股（ADS）",
+        "filings_supported": true,
+        "annual_form": "20-F",
+        "annual_financials": true,
+        "filing_note": "支持 SEC 20-F 原文与登记的 IFRS 美元年度指标；ADS 与普通股报价仍按上市代码分列。",
+        "source_url": "https://www.shell.com/investors.html"
+      }
+    ]
+  },
+  "pdd": {
+    "aliases": [
+      "PDD",
+      "PDD Holdings Inc.",
+      "拼多多",
+      "拼多多集团",
+      "Pinduoduo",
+      "PDD Holdings"
+    ],
+    "listings": [
+      {
+        "ticker": "PDD",
+        "name": "拼多多 / PDD Holdings Inc.",
+        "exchange": "NASDAQ",
+        "currency": "USD",
+        "product": "美国存托股（ADS）",
+        "filings_supported": true,
+        "annual_form": "20-F",
+        "annual_financials": true,
+        "update_form": "6-K",
+        "filing_note": "支持登记的 SEC 20-F 原币人民币 US-GAAP 年度收入、利润、资产及现金流指标和原文。未匹配 ADS 每股口径；不把人民币普通股 EPS 与美元 ADS 股价相除。季度/TTM 未登记。",
+        "source_url": "https://www.sec.gov/edgar/browse/?CIK=0001737806"
+      }
+    ]
+  },
+  "baba": {
+    "aliases": [
+      "BABA",
+      "Alibaba Group Holding Limited",
+      "阿里巴巴",
+      "阿里巴巴集团",
+      "Alibaba"
+    ],
+    "listings": [
+      {
+        "ticker": "BABA",
+        "name": "阿里巴巴 / Alibaba Group Holding Limited",
+        "exchange": "NYSE",
+        "currency": "USD",
+        "product": "美国存托股（ADS）",
+        "filings_supported": true,
+        "annual_form": "20-F",
+        "annual_financials": true,
+        "update_form": "6-K",
+        "filing_note": "支持登记的 SEC 20-F 原币人民币 US-GAAP 年度收入、利润、资产及现金流指标和原文。未匹配 ADS 每股口径；不把人民币普通股 EPS 与美元 ADS 股价相除。季度/TTM 未登记。",
+        "source_url": "https://www.sec.gov/edgar/browse/?CIK=0001577552"
+      }
+    ]
+  },
+  "jd": {
+    "aliases": [
+      "JD",
+      "JD.com, Inc.",
+      "京东",
+      "京东集团",
+      "JD.com"
+    ],
+    "listings": [
+      {
+        "ticker": "JD",
+        "name": "京东 / JD.com, Inc.",
+        "exchange": "NASDAQ",
+        "currency": "USD",
+        "product": "美国存托股（ADS）",
+        "filings_supported": true,
+        "annual_form": "20-F",
+        "annual_financials": true,
+        "update_form": "6-K",
+        "filing_note": "支持登记的 SEC 20-F 原币人民币 US-GAAP 年度收入、利润、资产及现金流指标和原文。未匹配 ADS 每股口径；不把人民币普通股 EPS 与美元 ADS 股价相除。季度/TTM 未登记。",
+        "source_url": "https://www.sec.gov/edgar/browse/?CIK=0001549802"
+      }
+    ]
+  }
+}

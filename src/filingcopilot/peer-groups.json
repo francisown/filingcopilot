@@ -1,0 +1,29 @@
+{
+  "version": "2026-10-10",
+  "groups": [
+    {
+      "id": "large_technology_platforms",
+      "label": "大型科技平台候选组",
+      "members": ["AAPL", "MSFT", "AMZN", "META", "NVDA"],
+      "basis": "产品、平台和研发驱动模式的内部候选映射；不是监管、指数或投行行业分类。"
+    },
+    {
+      "id": "semiconductor_compute",
+      "label": "半导体与计算基础设施候选组",
+      "members": ["NVDA", "TSM", "AAPL", "MSFT"],
+      "basis": "芯片、计算基础设施及其主要平台需求的内部候选映射；不是正式行业分类。"
+    },
+    {
+      "id": "consumer_automotive_platform",
+      "label": "消费与汽车平台候选组",
+      "members": ["TSLA", "AMZN", "AAPL"],
+      "basis": "面向消费者的平台、硬件或汽车生态候选映射；业务差异需要人工复核。"
+    },
+    {
+      "id": "financial_services",
+      "label": "金融服务候选组",
+      "members": ["AMJB"],
+      "basis": "当前本地登记证券不足以形成双边同行比较；不会凭空补充证券。"
+    }
+  ]
+}

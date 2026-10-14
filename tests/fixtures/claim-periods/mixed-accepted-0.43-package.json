@@ -1,0 +1,1464 @@
+{
+  "schema": "filingcopilot.claim-period-display/v1",
+  "research": {
+    "id": "run-cf6a06dc554248a8b6e916d7885d0727",
+    "question": "股票怎么样？结合经营表现、价格和近期公告，中文总结。",
+    "as_of": "2026-10-10",
+    "mode": "agent",
+    "status": "partial",
+    "answer": [
+      {
+        "index": 0,
+        "kind": "analysis",
+        "text": "本年度营收同比增长、营业利润率较上年上行，年度经营表现改善；估值吸引力仍需证据。",
+        "evidence_ids": [
+          "calc-de5e13cf3bf7108ed73e",
+          "calc-ab9890ff59b2d84aea26",
+          "calc-44f86be4236060442696"
+        ],
+        "verification": "inference_review"
+      },
+      {
+        "index": 1,
+        "kind": "analysis",
+        "text": "所列 TTM 期间经营现金流为正、项目自由现金流为负；资本投入回报、租赁与其他资金需求仍需核验。",
+        "evidence_ids": [
+          "calc-725cbe017f0f4c54fc4b",
+          "calc-58f3182fa1fccda5ecfd"
+        ],
+        "verification": "inference_review"
+      },
+      {
+        "index": 2,
+        "kind": "analysis",
+        "text": "现价对应的年度与供应商 TTM 市盈率差异较大；缺同业与历史基准，无法据此判断便宜或昂贵。",
+        "evidence_ids": [
+          "calc-ad9ef3f23a87434f9b2e",
+          "calc-2ed1dececb93e185883e",
+          "market:c6b3b1ebc559e8c5e9153a9a"
+        ],
+        "verification": "inference_review"
+      },
+      {
+        "index": 3,
+        "kind": "narrative",
+        "text": "公司完成多档英镑计价票据的公开销售，按此前提交的注册文件发行。",
+        "evidence_ids": [
+          "passage-77a19c9f5979a70f695e"
+        ],
+        "verification": "semantic_review"
+      },
+      {
+        "index": 4,
+        "kind": "narrative",
+        "text": "董事会选举一名网络安全领域外部人士为董事，并任命其进入审计委员会与安全委员会。",
+        "evidence_ids": [
+          "passage-e8bb3f9b8698086bdc8a"
+        ],
+        "verification": "semantic_review"
+      },
+      {
+        "index": 5,
+        "kind": "market",
+        "text": "AMZN 行情报价：262.43 USD，交易所时间 2026-10-09T16:00:01-04:00。2021-10-11 至 2026-10-09（1255 个交易日），复权收盘价区间变化 +61.68%，最大回撤 -55.73%。区间变化未年化，复权数据采用供应商当前版本。",
+        "evidence_ids": [
+          "market:c6b3b1ebc559e8c5e9153a9a"
+        ],
+        "verification": "deterministic"
+      }
+    ],
+    "gaps": [
+      "已分别计算 SEC 年度及供应商 TTM 口径市盈率；供应商 EPS 未逐季重建 SEC 稀释股数。同业和历史基准、预测 EPS 及现金流估值仍需核验，单一倍数不证明便宜或昂贵。",
+      "已补充日期范围内的 SEC 8-K 公司公告；媒体新闻及公告后的经营变化仍需核验。已取得最新可用 10-Q。",
+      "已按所列公式核验现金 PP&E 购置与自由现金流；非现金租赁、融资租赁本金、收购等其他资金需求仍需单独分析。",
+      "已取得来源绑定的 SEC TTM 营业收入、营业利润、净利润、经营活动现金流、自由现金流（OCF−PP&E购置＋出售及激励收款）、净利率、营业利润率；当期金额不证明同比增长，也不完成供应商 EPS 或 SEC 稀释股数对账。",
+      "2026-06-30 单季毛利润（gross_profit）在结构化事实中不可用，季报口径仅披露累计现金流"
+    ],
+    "evidence": [
+      {
+        "id": "calc-1018b0dbbef75ad44852",
+        "operation": "ratio",
+        "value": "17.44031043729372937293729373",
+        "unit": "%",
+        "label": "净利率",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-b7282d765766175a93ea",
+            "operation": "trailing_sum",
+            "value": "135281000000",
+            "unit": "USD",
+            "label": "净利润",
+            "ticker": "AMZN",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-27da7d80f3fb3b7fa6ee",
+                "ticker": "AMZN",
+                "label": "净利润",
+                "value": "77670000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.NetIncomeLoss.units.USD[415]; accession=0001018724-26-000004",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-61932eced979a6e2f616",
+                "ticker": "AMZN",
+                "label": "净利润",
+                "value": "92902000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.NetIncomeLoss.units.USD[420]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-56c7ff9e2223a5c9e994",
+                "ticker": "AMZN",
+                "label": "净利润",
+                "value": "35291000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.NetIncomeLoss.units.USD[409]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-b75770dbde5a9c80dcbf",
+            "operation": "trailing_sum",
+            "value": "775680000000",
+            "unit": "USD",
+            "label": "营业收入",
+            "ticker": "AMZN",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-890a5936f9a14a33e3d4",
+                "ticker": "AMZN",
+                "label": "营业收入",
+                "value": "716924000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[124]; accession=0001018724-26-000004",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-431e18c86605d75489fc",
+                "ticker": "AMZN",
+                "label": "营业收入",
+                "value": "382125000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[126]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-c5c0e6793a9cf974bff2",
+                "ticker": "AMZN",
+                "label": "营业收入",
+                "value": "323369000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[119]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-26c75f23fe2d8d94502e",
+        "operation": "ratio",
+        "value": "12.08127062706270627062706271",
+        "unit": "%",
+        "label": "营业利润率",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-3f2346bbb7ca69b9cd1a",
+            "operation": "trailing_sum",
+            "value": "93712000000",
+            "unit": "USD",
+            "label": "营业利润",
+            "ticker": "AMZN",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-bffa24c28acf303982e0",
+                "ticker": "AMZN",
+                "label": "营业利润",
+                "value": "79975000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[285]; accession=0001018724-26-000004",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-e852ef56e1f3c2ce23db",
+                "ticker": "AMZN",
+                "label": "营业利润",
+                "value": "51313000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[287]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-cda46b6e2bf83d92738d",
+                "ticker": "AMZN",
+                "label": "营业利润",
+                "value": "37576000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[280]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-b75770dbde5a9c80dcbf",
+            "operation": "trailing_sum",
+            "value": "775680000000",
+            "unit": "USD",
+            "label": "营业收入",
+            "ticker": "AMZN",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-890a5936f9a14a33e3d4",
+                "ticker": "AMZN",
+                "label": "营业收入",
+                "value": "716924000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[124]; accession=0001018724-26-000004",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-431e18c86605d75489fc",
+                "ticker": "AMZN",
+                "label": "营业收入",
+                "value": "382125000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[126]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-c5c0e6793a9cf974bff2",
+                "ticker": "AMZN",
+                "label": "营业收入",
+                "value": "323369000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[119]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-2822e20908370284ac1a",
+        "operation": "net_cash_capex",
+        "value": "55623000000",
+        "unit": "USD",
+        "label": "现金PP&E购置净额（毛额−出售及激励收款）",
+        "ticker": "AMZN",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-ae337d8e2f61391f4201",
+            "ticker": "AMZN",
+            "label": "现金资本开支（PP&E购置）",
+            "value": "57202000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+            "locator": "inline-xbrl:id=f-134",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-4dd45a442e6a4ffef1a3",
+            "ticker": "AMZN",
+            "label": "PP&E出售及激励收款",
+            "value": "1579000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+            "locator": "inline-xbrl:id=f-140",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-2ed1dececb93e185883e",
+        "operation": "provider_ttm_pe",
+        "value": "21.11263073209975864843121480",
+        "unit": "倍",
+        "label": "供应商TTM口径市盈率",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "kind": "market",
+            "id": "market:c6b3b1ebc559e8c5e9153a9a",
+            "ticker": "AMZN",
+            "snapshot": {
+              "exchange_timezone": "America/New_York",
+              "quote_at": 1791576001,
+              "quote_type": "provider_quote"
+            }
+          },
+          {
+            "id": "valuation-1e979a7a74fa5668bd33",
+            "kind": "valuation",
+            "ticker": "AMZN",
+            "snapshot": {
+              "period_end_label": "2026-06-30"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-2f2e1602d77379c38475",
+        "operation": "net_cash_capex",
+        "value": "96310000000",
+        "unit": "USD",
+        "label": "现金PP&E购置净额（毛额−出售及激励收款）",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-11910361f97e1fb58f84",
+            "ticker": "AMZN",
+            "label": "现金资本开支（PP&E购置）",
+            "value": "98411000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+            "locator": "inline-xbrl:id=f-135",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-ad62935af4847c2a03b7",
+            "ticker": "AMZN",
+            "label": "PP&E出售及激励收款",
+            "value": "2101000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+            "locator": "inline-xbrl:id=f-141",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-3f2346bbb7ca69b9cd1a",
+        "operation": "trailing_sum",
+        "value": "93712000000",
+        "unit": "USD",
+        "label": "营业利润",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-bffa24c28acf303982e0",
+            "ticker": "AMZN",
+            "label": "营业利润",
+            "value": "79975000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[285]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-e852ef56e1f3c2ce23db",
+            "ticker": "AMZN",
+            "label": "营业利润",
+            "value": "51313000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[287]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-cda46b6e2bf83d92738d",
+            "ticker": "AMZN",
+            "label": "营业利润",
+            "value": "37576000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[280]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-44f86be4236060442696",
+        "operation": "ratio",
+        "value": "10.75194487420037964822190768",
+        "unit": "%",
+        "label": "营业利润率",
+        "ticker": "AMZN",
+        "fiscal_year": 2024,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-3e9a52cfb17ad0af07d4",
+            "ticker": "AMZN",
+            "label": "营业利润",
+            "value": "68593000000",
+            "unit": "USD",
+            "fiscal_year": 2024,
+            "start": "2024-01-01",
+            "end": "2024-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[276]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-053d1ff915250131b1ec",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "637959000000",
+            "unit": "USD",
+            "fiscal_year": 2024,
+            "start": "2024-01-01",
+            "end": "2024-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[115]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-58f3182fa1fccda5ecfd",
+        "operation": "trailing_sum",
+        "value": "-7604000000",
+        "unit": "USD",
+        "label": "自由现金流（OCF−PP&E购置＋出售及激励收款）",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-81f4f82f2f340aab616e",
+            "operation": "free_cash_flow",
+            "value": "11194000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−PP&E购置＋出售及激励收款）",
+            "ticker": "AMZN",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-7a2044d2d6d610fe9887",
+                "ticker": "AMZN",
+                "label": "经营活动现金流",
+                "value": "139514000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[323]; accession=0001018724-26-000004",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-4a3136b2f45f28a68578",
+                "ticker": "AMZN",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "131819000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+                "locator": "inline-xbrl:id=f-98",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-19bc5014cc13e2d7ebef",
+                "ticker": "AMZN",
+                "label": "PP&E出售及激励收款",
+                "value": "3499000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+                "locator": "inline-xbrl:id=f-101",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000004",
+                  "form": "10-K",
+                  "filed": "2026-02-06",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-cb8fe10ee4835af51246",
+            "operation": "free_cash_flow",
+            "value": "-24891000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−PP&E购置＋出售及激励收款）",
+            "ticker": "AMZN",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-8f62af6e20981e6266a1",
+                "ticker": "AMZN",
+                "label": "经营活动现金流",
+                "value": "71419000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[327]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-11910361f97e1fb58f84",
+                "ticker": "AMZN",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "98411000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-135",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-ad62935af4847c2a03b7",
+                "ticker": "AMZN",
+                "label": "PP&E出售及激励收款",
+                "value": "2101000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-141",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-6976e2e50d81a2310962",
+            "operation": "free_cash_flow",
+            "value": "-6093000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−PP&E购置＋出售及激励收款）",
+            "ticker": "AMZN",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-e0f66232d92f2ee03ae6",
+                "ticker": "AMZN",
+                "label": "经营活动现金流",
+                "value": "49530000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[317]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-ae337d8e2f61391f4201",
+                "ticker": "AMZN",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "57202000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-134",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-4dd45a442e6a4ffef1a3",
+                "ticker": "AMZN",
+                "label": "PP&E出售及激励收款",
+                "value": "1579000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-140",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-725cbe017f0f4c54fc4b",
+        "operation": "trailing_sum",
+        "value": "161403000000",
+        "unit": "USD",
+        "label": "经营活动现金流",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-7a2044d2d6d610fe9887",
+            "ticker": "AMZN",
+            "label": "经营活动现金流",
+            "value": "139514000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[323]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-8f62af6e20981e6266a1",
+            "ticker": "AMZN",
+            "label": "经营活动现金流",
+            "value": "71419000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[327]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-e0f66232d92f2ee03ae6",
+            "ticker": "AMZN",
+            "label": "经营活动现金流",
+            "value": "49530000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[317]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-7cfa47329b4c05c7fd04",
+        "operation": "growth",
+        "value": "73.14779857253294500476421620",
+        "unit": "%",
+        "label": "现金PP&E购置净额（毛额−出售及激励收款）同比增长率",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-2f2e1602d77379c38475",
+            "operation": "net_cash_capex",
+            "value": "96310000000",
+            "unit": "USD",
+            "label": "现金PP&E购置净额（毛额−出售及激励收款）",
+            "ticker": "AMZN",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-11910361f97e1fb58f84",
+                "ticker": "AMZN",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "98411000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-135",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-ad62935af4847c2a03b7",
+                "ticker": "AMZN",
+                "label": "PP&E出售及激励收款",
+                "value": "2101000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-141",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-2822e20908370284ac1a",
+            "operation": "net_cash_capex",
+            "value": "55623000000",
+            "unit": "USD",
+            "label": "现金PP&E购置净额（毛额−出售及激励收款）",
+            "ticker": "AMZN",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-ae337d8e2f61391f4201",
+                "ticker": "AMZN",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "57202000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-134",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-4dd45a442e6a4ffef1a3",
+                "ticker": "AMZN",
+                "label": "PP&E出售及激励收款",
+                "value": "1579000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+                "locator": "inline-xbrl:id=f-140",
+                "kind": "fact",
+                "filing": {
+                  "id": "AMZN:0001018724-26-000026",
+                  "form": "10-Q",
+                  "filed": "2026-07-31",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-ab9890ff59b2d84aea26",
+        "operation": "ratio",
+        "value": "11.15529679575519859845674018",
+        "unit": "%",
+        "label": "营业利润率",
+        "ticker": "AMZN",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-bffa24c28acf303982e0",
+            "ticker": "AMZN",
+            "label": "营业利润",
+            "value": "79975000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[285]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-890a5936f9a14a33e3d4",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "716924000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[124]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-ad9ef3f23a87434f9b2e",
+        "operation": "annual_pe",
+        "value": "36.60111576011157601115760112",
+        "unit": "倍",
+        "label": "年度EPS口径市盈率（非TTM）",
+        "ticker": "AMZN",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "kind": "market",
+            "id": "market:c6b3b1ebc559e8c5e9153a9a",
+            "ticker": "AMZN",
+            "snapshot": {
+              "exchange_timezone": "America/New_York",
+              "quote_at": 1791576001,
+              "quote_type": "provider_quote"
+            }
+          },
+          {
+            "id": "fact-a413ff78ea0d6e8768fe",
+            "ticker": "AMZN",
+            "label": "稀释每股收益",
+            "value": "7.17",
+            "unit": "USD/shares",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.EarningsPerShareDiluted.units.USD/shares[309]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-b7282d765766175a93ea",
+        "operation": "trailing_sum",
+        "value": "135281000000",
+        "unit": "USD",
+        "label": "净利润",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-27da7d80f3fb3b7fa6ee",
+            "ticker": "AMZN",
+            "label": "净利润",
+            "value": "77670000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[415]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-61932eced979a6e2f616",
+            "ticker": "AMZN",
+            "label": "净利润",
+            "value": "92902000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[420]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-56c7ff9e2223a5c9e994",
+            "ticker": "AMZN",
+            "label": "净利润",
+            "value": "35291000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[409]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-b75770dbde5a9c80dcbf",
+        "operation": "trailing_sum",
+        "value": "775680000000",
+        "unit": "USD",
+        "label": "营业收入",
+        "ticker": "AMZN",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-890a5936f9a14a33e3d4",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "716924000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[124]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-431e18c86605d75489fc",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "382125000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[126]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-c5c0e6793a9cf974bff2",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "323369000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[119]; accession=0001018724-26-000026; source_sha256=7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000026",
+              "form": "10-Q",
+              "filed": "2026-07-31",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-de5e13cf3bf7108ed73e",
+        "operation": "growth",
+        "value": "12.37775468329469448663628850",
+        "unit": "%",
+        "label": "营业收入同比增长率",
+        "ticker": "AMZN",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-890a5936f9a14a33e3d4",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "716924000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[124]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-053d1ff915250131b1ec",
+            "ticker": "AMZN",
+            "label": "营业收入",
+            "value": "637959000000",
+            "unit": "USD",
+            "fiscal_year": 2024,
+            "start": "2024-01-01",
+            "end": "2024-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[115]; accession=0001018724-26-000004",
+            "kind": "fact",
+            "filing": {
+              "id": "AMZN:0001018724-26-000004",
+              "form": "10-K",
+              "filed": "2026-02-06",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "fact-11910361f97e1fb58f84",
+        "ticker": "AMZN",
+        "label": "现金资本开支（PP&E购置）",
+        "value": "98411000000",
+        "unit": "USD",
+        "fiscal_year": 2026,
+        "start": "2026-01-01",
+        "end": "2026-06-30",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+        "locator": "inline-xbrl:id=f-135",
+        "kind": "fact",
+        "filing": {
+          "id": "AMZN:0001018724-26-000026",
+          "form": "10-Q",
+          "filed": "2026-07-31",
+          "period_end": "2026-06-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+        }
+      },
+      {
+        "id": "fact-ad62935af4847c2a03b7",
+        "ticker": "AMZN",
+        "label": "PP&E出售及激励收款",
+        "value": "2101000000",
+        "unit": "USD",
+        "fiscal_year": 2026,
+        "start": "2026-01-01",
+        "end": "2026-06-30",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+        "locator": "inline-xbrl:id=f-141",
+        "kind": "fact",
+        "filing": {
+          "id": "AMZN:0001018724-26-000026",
+          "form": "10-Q",
+          "filed": "2026-07-31",
+          "period_end": "2026-06-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+        }
+      },
+      {
+        "kind": "market",
+        "id": "market:c6b3b1ebc559e8c5e9153a9a",
+        "ticker": "AMZN",
+        "snapshot": {
+          "exchange_timezone": "America/New_York",
+          "quote_at": 1791576001,
+          "quote_type": "provider_quote"
+        }
+      },
+      {
+        "id": "passage-4c3a2b936276a07738aa",
+        "ticker": "AMZN",
+        "section": "Exhibit 99.1 · company release",
+        "text": "SEATTLE—(BUSINESS WIRE) July 30, 2026—Amazon.com, Inc. (NASDAQ: AMZN) today announced financial results for its second quarter ended June 30, 2026.",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/amzn-20260630xex991.htm",
+        "locator": "narrative block 0, chunk 0; exact text retained",
+        "kind": "passage",
+        "filing": {
+          "id": "AMZN:0001018724-26-000024:EX-99.1",
+          "form": "8-K EX-99.1",
+          "filed": "2026-07-30",
+          "period_end": "2026-07-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/amzn-20260630xex991.htm"
+        }
+      },
+      {
+        "id": "passage-77a19c9f5979a70f695e",
+        "ticker": "AMZN",
+        "section": "Current report · company notice",
+        "text": "On September 14, 2026, Amazon.com, Inc. (the “Company”) closed the sale of £1,250,000,000 aggregate principal amount of its 5.200% notes due 2029 (the “2029 Notes”), £1,000,000,000 aggregate principal amount of its 5.550% notes due 2032 (the “2032 Notes”), £1,000,000,000 aggregate principal amount of its 6.250% notes due 2038 (the “2038 Notes”), and £1,000,000,000 aggregate principal amount of its 6.650% notes due 2045 (the “2045 Notes” and, together with the 2029 Notes, 2032 Notes, and 2038 Notes, the “Notes”) pursuant to an Underwriting Agreement dated September 9, 2026 (the “Underwriting Agreement”) among the Company and the several underwriters named therein. The sale of the Notes was registered under the Company’s registration statement on Form S-3 filed on February 6, 2026 (File No. 333-293246).",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000110465926107526/tm2624614d5_8k.htm",
+        "locator": "narrative block 2, chunk 0; exact text retained",
+        "kind": "passage",
+        "filing": {
+          "id": "AMZN:0001104659-26-107526",
+          "form": "8-K",
+          "filed": "2026-09-14",
+          "period_end": "2026-09-14",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000110465926107526/tm2624614d5_8k.htm"
+        }
+      },
+      {
+        "id": "passage-e8bb3f9b8698086bdc8a",
+        "ticker": "AMZN",
+        "section": "ITEM 5.02. DEPARTURE OF DIRECTORS OR CERTAIN OFFICERS; ELECTION OF DIRECTORS; APPOINTMENT OF CERTAIN OFFICERS; COMPENSATORY ARRANGEMENTS OF CERTAIN OFFICERS.",
+        "text": "On September 8, 2026, the Board of Directors of Amazon.com, Inc. (the “Company”) elected Kevin R. Mandia as a director of the Company and also appointed him to the Audit Committee and Security Committee of the Board. Mr. Mandia has served as Chief Executive Officer of Armadin, Inc., a cybersecurity company he founded, since September 2025. Mr. Mandia has also served as General Partner of Ballistic Ventures, a venture capital firm he co-founded, since June 2024 and previously served as Strategic Partner from December 2021 to June 2024. He served as Chief Executive Officer of Mandiant, Inc., a cybersecurity firm acquired by Google LLC in September 2022, from June 2016 to July 2024 and as a director from February 2016 to September 2022.",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000036/amzn-20260908.htm",
+        "locator": "narrative block 4, chunk 0; exact text retained",
+        "kind": "passage",
+        "filing": {
+          "id": "AMZN:0001018724-26-000036",
+          "form": "8-K",
+          "filed": "2026-09-09",
+          "period_end": "2026-09-08",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000036/amzn-20260908.htm"
+        }
+      }
+    ],
+    "trace": [],
+    "usage": {
+      "prompt_tokens": 47649,
+      "completion_tokens": 8993,
+      "total_tokens": 56642,
+      "model_calls": 6
+    },
+    "elapsed_ms": 144028,
+    "model": "example-model",
+    "research_type": "stock"
+  }
+}

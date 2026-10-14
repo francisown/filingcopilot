@@ -1,0 +1,1691 @@
+{
+  "schema": "filingcopilot.claim-period-display/v1",
+  "research": {
+    "id": "run-a785ac2abc224ed7907a54c4977efc78",
+    "question": "最新季度股票怎么样？结合经营表现、现金流和估值。",
+    "as_of": "2026-10-10",
+    "mode": "agent",
+    "status": "partial",
+    "answer": [
+      {
+        "index": 0,
+        "kind": "analysis",
+        "text": "2026Q2单季营收同比增长但营业利润、净利润同比下降，营业利润率与净利率同步收窄，研发费用占收入比重上升。",
+        "evidence_ids": [
+          "calc-5fc04edfa5cfd74100a0",
+          "calc-8284906cdd1d9fa6999b",
+          "calc-5de5fae6aefe83ae14fd",
+          "calc-e810fe4916cd224d301d",
+          "calc-8df5675f08a5229123ce",
+          "calc-9b5cfeb96f05f5659908",
+          "calc-51e640dc8cca8af28e53",
+          "passage-704d0c02a3c8d500946e"
+        ],
+        "verification": "inference_review"
+      },
+      {
+        "index": 1,
+        "kind": "analysis",
+        "text": "2026上半年（2026-01-01至2026-06-30）经营现金流同比增长但资本开支增速更快，项目自由现金流同比下滑；全年持续性需后续披露。",
+        "evidence_ids": [
+          "calc-602e671fec9b23ae4132",
+          "calc-d3859af5a3a603e288b8",
+          "calc-c1230e5e34369b22f91e",
+          "calc-7e9504a6e22d21981a3c",
+          "fact-3a11a3dd956e333fd82c",
+          "fact-a046a6e8b94151f00d06"
+        ],
+        "verification": "inference_review"
+      },
+      {
+        "index": 2,
+        "kind": "analysis",
+        "text": "年度与供应商TTM口径市盈率均已披露，缺乏同口径历史或同业基准，单一倍数不足以判定贵贱，仍需结合现金流持续性与盈利路径验证。",
+        "evidence_ids": [
+          "calc-45fc21f2d9f6105139e1",
+          "calc-f9ca3d708fa695cf811e",
+          "market:740e7e6c159b24f82062bb29",
+          "calc-b4d47fb0c8ac542e9fe2",
+          "calc-cc1a947531458a5b8929"
+        ],
+        "verification": "inference_review"
+      },
+      {
+        "index": 3,
+        "kind": "market",
+        "text": "META 行情报价：718.67 USD，交易所时间 2026-10-09T16:00:01-04:00。2021-10-11 至 2026-10-09（1255 个交易日），复权收盘价区间变化 +122.94%，最大回撤 -74.42%。区间变化未年化，复权数据采用供应商当前版本。",
+        "evidence_ids": [
+          "market:740e7e6c159b24f82062bb29"
+        ],
+        "verification": "deterministic"
+      }
+    ],
+    "gaps": [
+      "已分别计算 SEC 年度及供应商 TTM 口径市盈率；供应商 EPS 未逐季重建 SEC 稀释股数。同业和历史基准、预测 EPS 及现金流估值仍需核验，单一倍数不证明便宜或昂贵。",
+      "已补充日期范围内的 SEC 8-K 公司公告；媒体新闻及公告后的经营变化仍需核验。已取得最新可用 10-Q。",
+      "已按所列公式核验现金 PP&E 购置与自由现金流；非现金租赁、融资租赁本金、收购等其他资金需求仍需单独分析。",
+      "已取得来源绑定的 SEC TTM 营业收入、营业利润、净利润、经营活动现金流、自由现金流（OCF−现金PP&E购置）、净利率、营业利润率；当期金额不证明同比增长，也不完成供应商 EPS 或 SEC 稀释股数对账。",
+      "META 2026-06-30 单季毛利润（gross_profit）未在10-Q结构化数据中提供",
+      "供应商Yahoo TTM 稀释EPS（26.55）与SEC TTM加权稀释股数的口径差异未做桥接核对",
+      "研发费用占收入比重上升对利润率的具体归因需原文进一步检索，未做因果验证"
+    ],
+    "evidence": [
+      {
+        "id": "calc-45fc21f2d9f6105139e1",
+        "operation": "annual_pe",
+        "value": "30.59472115793954874414644530",
+        "unit": "倍",
+        "label": "年度EPS口径市盈率（非TTM）",
+        "ticker": "META",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "kind": "market",
+            "id": "market:740e7e6c159b24f82062bb29",
+            "ticker": "META",
+            "snapshot": {
+              "exchange_timezone": "America/New_York",
+              "quote_at": 1791576001,
+              "quote_type": "provider_quote"
+            }
+          },
+          {
+            "id": "fact-d68a0572b472b870e14e",
+            "ticker": "META",
+            "label": "稀释每股收益",
+            "value": "23.49",
+            "unit": "USD/shares",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.EarningsPerShareDiluted.units.USD/shares[185]; accession=0001628280-26-003942",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-003942",
+              "form": "10-K",
+              "filed": "2026-01-29",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-51e640dc8cca8af28e53",
+        "operation": "ratio",
+        "value": "38.59121138142941325027359205",
+        "unit": "%",
+        "label": "净利率",
+        "ticker": "META",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-9476ba06d3c45f11e518",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "18337000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[186]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-b327942f3bac219358a5",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "47516000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[103]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-5de5fae6aefe83ae14fd",
+        "operation": "growth",
+        "value": "-13.57364890658231989965643235",
+        "unit": "%",
+        "label": "净利润同比增长率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-3705657c1ae29fda022f",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "15848000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[193]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-9476ba06d3c45f11e518",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "18337000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[186]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-5fc04edfa5cfd74100a0",
+        "operation": "growth",
+        "value": "27.95900328310463843757892080",
+        "unit": "%",
+        "label": "营业收入同比增长率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-04f2de50ad8ddfbda0fd",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "60801000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[109]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-b327942f3bac219358a5",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "47516000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[103]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-602e671fec9b23ae4132",
+        "operation": "growth",
+        "value": "29.24355173735051525601468130",
+        "unit": "%",
+        "label": "经营活动现金流同比增长率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-3a11a3dd956e333fd82c",
+            "ticker": "META",
+            "label": "经营活动现金流",
+            "value": "64088000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[130]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-505805b3b2ed6ec280b0",
+            "ticker": "META",
+            "label": "经营活动现金流",
+            "value": "49587000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[126]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-69448a961c07d06ba36f",
+        "operation": "trailing_sum",
+        "value": "68098000000",
+        "unit": "USD",
+        "label": "净利润",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-330b6aaf5a5ccecfddf9",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "60458000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[189]; accession=0001628280-26-003942",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-003942",
+              "form": "10-K",
+              "filed": "2026-01-29",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-ab20a3e562d1fb849a8d",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "42621000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[192]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-4e6c56a233c758ce97c0",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "34981000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[184]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-69effff5daa57df05a2c",
+        "operation": "ratio",
+        "value": "38.08418073402936292700451704",
+        "unit": "%",
+        "label": "营业利润率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-c52114df639ebe6fd137",
+            "operation": "trailing_sum",
+            "value": "86926000000",
+            "unit": "USD",
+            "label": "营业利润",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-b7d88fc42cadcd2762fd",
+                "ticker": "META",
+                "label": "营业利润",
+                "value": "83276000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[182]; accession=0001628280-26-003942",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-003942",
+                  "form": "10-K",
+                  "filed": "2026-01-29",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-306b5dd4a87831e36b99",
+                "ticker": "META",
+                "label": "营业利润",
+                "value": "41647000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[184]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-abce5b8d2658b55d1fc3",
+                "ticker": "META",
+                "label": "营业利润",
+                "value": "37997000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[177]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-bc88fc0774f8b51a5620",
+            "operation": "trailing_sum",
+            "value": "228247000000",
+            "unit": "USD",
+            "label": "营业收入",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-b71d1f632a667c179379",
+                "ticker": "META",
+                "label": "营业收入",
+                "value": "200966000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[106]; accession=0001628280-26-003942",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-003942",
+                  "form": "10-K",
+                  "filed": "2026-01-29",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-3645cba6472b890289f9",
+                "ticker": "META",
+                "label": "营业收入",
+                "value": "117111000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[108]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-8a423297eb88aaf57ece",
+                "ticker": "META",
+                "label": "营业收入",
+                "value": "89830000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[101]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-7e9504a6e22d21981a3c",
+        "operation": "growth",
+        "value": "-25.52715337179232146409389298",
+        "unit": "%",
+        "label": "自由现金流（OCF−现金PP&E购置）同比增长率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-eceea84695ab9a5d3a9b",
+            "operation": "free_cash_flow",
+            "value": "14975000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-3a11a3dd956e333fd82c",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "64088000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[130]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-a046a6e8b94151f00d06",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "49113000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[127]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-ed426108b834119a5342",
+            "operation": "free_cash_flow",
+            "value": "20108000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-505805b3b2ed6ec280b0",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "49587000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[126]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-f10ac632b83920ac5882",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "29479000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[123]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-8284906cdd1d9fa6999b",
+        "operation": "growth",
+        "value": "-8.150286189521060613472922070",
+        "unit": "%",
+        "label": "营业利润同比增长率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-fb7709f2c24213fb4d46",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "18775000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[185]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-0a592e73e120b8d9e31c",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "20441000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[179]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-8df5675f08a5229123ce",
+        "operation": "ratio",
+        "value": "43.01919353480932738445997138",
+        "unit": "%",
+        "label": "营业利润率",
+        "ticker": "META",
+        "fiscal_year": 2025,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-0a592e73e120b8d9e31c",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "20441000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[179]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-b327942f3bac219358a5",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "47516000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-04-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[103]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-9b5cfeb96f05f5659908",
+        "operation": "ratio",
+        "value": "26.06536076709264650252462953",
+        "unit": "%",
+        "label": "净利率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-3705657c1ae29fda022f",
+            "ticker": "META",
+            "label": "净利润",
+            "value": "15848000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetIncomeLoss.units.USD[193]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-04f2de50ad8ddfbda0fd",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "60801000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[109]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-b4d47fb0c8ac542e9fe2",
+        "operation": "trailing_sum",
+        "value": "130301000000",
+        "unit": "USD",
+        "label": "经营活动现金流",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-d1cefe2f03b9ad78fa65",
+            "ticker": "META",
+            "label": "经营活动现金流",
+            "value": "115800000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[128]; accession=0001628280-26-003942",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-003942",
+              "form": "10-K",
+              "filed": "2026-01-29",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-3a11a3dd956e333fd82c",
+            "ticker": "META",
+            "label": "经营活动现金流",
+            "value": "64088000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[130]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-505805b3b2ed6ec280b0",
+            "ticker": "META",
+            "label": "经营活动现金流",
+            "value": "49587000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[126]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-b54aeb5009484058cd3c",
+        "operation": "ratio",
+        "value": "29.83522236874964402598938869",
+        "unit": "%",
+        "label": "净利率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-69448a961c07d06ba36f",
+            "operation": "trailing_sum",
+            "value": "68098000000",
+            "unit": "USD",
+            "label": "净利润",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-330b6aaf5a5ccecfddf9",
+                "ticker": "META",
+                "label": "净利润",
+                "value": "60458000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetIncomeLoss.units.USD[189]; accession=0001628280-26-003942",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-003942",
+                  "form": "10-K",
+                  "filed": "2026-01-29",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-ab20a3e562d1fb849a8d",
+                "ticker": "META",
+                "label": "净利润",
+                "value": "42621000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetIncomeLoss.units.USD[192]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-4e6c56a233c758ce97c0",
+                "ticker": "META",
+                "label": "净利润",
+                "value": "34981000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetIncomeLoss.units.USD[184]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-bc88fc0774f8b51a5620",
+            "operation": "trailing_sum",
+            "value": "228247000000",
+            "unit": "USD",
+            "label": "营业收入",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-b71d1f632a667c179379",
+                "ticker": "META",
+                "label": "营业收入",
+                "value": "200966000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[106]; accession=0001628280-26-003942",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-003942",
+                  "form": "10-K",
+                  "filed": "2026-01-29",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-3645cba6472b890289f9",
+                "ticker": "META",
+                "label": "营业收入",
+                "value": "117111000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[108]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-8a423297eb88aaf57ece",
+                "ticker": "META",
+                "label": "营业收入",
+                "value": "89830000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[101]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-bc88fc0774f8b51a5620",
+        "operation": "trailing_sum",
+        "value": "228247000000",
+        "unit": "USD",
+        "label": "营业收入",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-b71d1f632a667c179379",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "200966000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[106]; accession=0001628280-26-003942",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-003942",
+              "form": "10-K",
+              "filed": "2026-01-29",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-3645cba6472b890289f9",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "117111000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[108]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-8a423297eb88aaf57ece",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "89830000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[101]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-c1230e5e34369b22f91e",
+        "operation": "difference",
+        "value": "-5133000000",
+        "unit": "USD",
+        "label": "自由现金流（OCF−现金PP&E购置）同比变化额",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-eceea84695ab9a5d3a9b",
+            "operation": "free_cash_flow",
+            "value": "14975000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-3a11a3dd956e333fd82c",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "64088000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[130]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-a046a6e8b94151f00d06",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "49113000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[127]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-ed426108b834119a5342",
+            "operation": "free_cash_flow",
+            "value": "20108000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-505805b3b2ed6ec280b0",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "49587000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[126]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-f10ac632b83920ac5882",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "29479000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[123]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-c52114df639ebe6fd137",
+        "operation": "trailing_sum",
+        "value": "86926000000",
+        "unit": "USD",
+        "label": "营业利润",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-b7d88fc42cadcd2762fd",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "83276000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-12-31",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[182]; accession=0001628280-26-003942",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-003942",
+              "form": "10-K",
+              "filed": "2026-01-29",
+              "period_end": "2025-12-31",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+            }
+          },
+          {
+            "id": "fact-306b5dd4a87831e36b99",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "41647000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[184]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-abce5b8d2658b55d1fc3",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "37997000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[177]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-cc1a947531458a5b8929",
+        "operation": "trailing_sum",
+        "value": "40976000000",
+        "unit": "USD",
+        "label": "自由现金流（OCF−现金PP&E购置）",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "calc-dfab61f78658ad3a1ed7",
+            "operation": "free_cash_flow",
+            "value": "46109000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-d1cefe2f03b9ad78fa65",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "115800000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[128]; accession=0001628280-26-003942",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-003942",
+                  "form": "10-K",
+                  "filed": "2026-01-29",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+                }
+              },
+              {
+                "id": "fact-ec8f26288e61207bba30",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "69691000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-12-31",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[125]; accession=0001628280-26-003942",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-003942",
+                  "form": "10-K",
+                  "filed": "2026-01-29",
+                  "period_end": "2025-12-31",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-eceea84695ab9a5d3a9b",
+            "operation": "free_cash_flow",
+            "value": "14975000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2026,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-3a11a3dd956e333fd82c",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "64088000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[130]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-a046a6e8b94151f00d06",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "49113000000",
+                "unit": "USD",
+                "fiscal_year": 2026,
+                "start": "2026-01-01",
+                "end": "2026-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[127]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          },
+          {
+            "id": "calc-ed426108b834119a5342",
+            "operation": "free_cash_flow",
+            "value": "20108000000",
+            "unit": "USD",
+            "label": "自由现金流（OCF−现金PP&E购置）",
+            "ticker": "META",
+            "fiscal_year": 2025,
+            "kind": "calculation",
+            "inputs": [
+              {
+                "id": "fact-505805b3b2ed6ec280b0",
+                "ticker": "META",
+                "label": "经营活动现金流",
+                "value": "49587000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[126]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              },
+              {
+                "id": "fact-f10ac632b83920ac5882",
+                "ticker": "META",
+                "label": "现金资本开支（PP&E购置）",
+                "value": "29479000000",
+                "unit": "USD",
+                "fiscal_year": 2025,
+                "start": "2025-01-01",
+                "end": "2025-06-30",
+                "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+                "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[123]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+                "kind": "fact",
+                "filing": {
+                  "id": "META:0001628280-26-050705",
+                  "form": "10-Q",
+                  "filed": "2026-07-30",
+                  "period_end": "2026-06-30",
+                  "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "calc-d3859af5a3a603e288b8",
+        "operation": "growth",
+        "value": "66.60334475389260151294141590",
+        "unit": "%",
+        "label": "现金资本开支（PP&E购置）同比增长率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-a046a6e8b94151f00d06",
+            "ticker": "META",
+            "label": "现金资本开支（PP&E购置）",
+            "value": "49113000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-01-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[127]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-f10ac632b83920ac5882",
+            "ticker": "META",
+            "label": "现金资本开支（PP&E购置）",
+            "value": "29479000000",
+            "unit": "USD",
+            "fiscal_year": 2025,
+            "start": "2025-01-01",
+            "end": "2025-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[123]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-e810fe4916cd224d301d",
+        "operation": "ratio",
+        "value": "30.87942632522491406391342248",
+        "unit": "%",
+        "label": "营业利润率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "id": "fact-fb7709f2c24213fb4d46",
+            "ticker": "META",
+            "label": "营业利润",
+            "value": "18775000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.OperatingIncomeLoss.units.USD[185]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          },
+          {
+            "id": "fact-04f2de50ad8ddfbda0fd",
+            "ticker": "META",
+            "label": "营业收入",
+            "value": "60801000000",
+            "unit": "USD",
+            "fiscal_year": 2026,
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+            "locator": "facts.us-gaap.RevenueFromContractWithCustomerExcludingAssessedTax.units.USD[109]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+            "kind": "fact",
+            "filing": {
+              "id": "META:0001628280-26-050705",
+              "form": "10-Q",
+              "filed": "2026-07-30",
+              "period_end": "2026-06-30",
+              "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "calc-f9ca3d708fa695cf811e",
+        "operation": "provider_ttm_pe",
+        "value": "27.06854990583804143126177024",
+        "unit": "倍",
+        "label": "供应商TTM口径市盈率",
+        "ticker": "META",
+        "fiscal_year": 2026,
+        "kind": "calculation",
+        "inputs": [
+          {
+            "kind": "market",
+            "id": "market:740e7e6c159b24f82062bb29",
+            "ticker": "META",
+            "snapshot": {
+              "exchange_timezone": "America/New_York",
+              "quote_at": 1791576001,
+              "quote_type": "provider_quote"
+            }
+          },
+          {
+            "id": "valuation-cbb930a881f44c4a2730",
+            "kind": "valuation",
+            "ticker": "META",
+            "snapshot": {
+              "period_end_label": "2026-06-30"
+            }
+          }
+        ]
+      },
+      {
+        "id": "fact-3a11a3dd956e333fd82c",
+        "ticker": "META",
+        "label": "经营活动现金流",
+        "value": "64088000000",
+        "unit": "USD",
+        "fiscal_year": 2026,
+        "start": "2026-01-01",
+        "end": "2026-06-30",
+        "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+        "locator": "facts.us-gaap.NetCashProvidedByUsedInOperatingActivities.units.USD[130]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+        "kind": "fact",
+        "filing": {
+          "id": "META:0001628280-26-050705",
+          "form": "10-Q",
+          "filed": "2026-07-30",
+          "period_end": "2026-06-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+        }
+      },
+      {
+        "id": "fact-a046a6e8b94151f00d06",
+        "ticker": "META",
+        "label": "现金资本开支（PP&E购置）",
+        "value": "49113000000",
+        "unit": "USD",
+        "fiscal_year": 2026,
+        "start": "2026-01-01",
+        "end": "2026-06-30",
+        "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+        "locator": "facts.us-gaap.PaymentsToAcquirePropertyPlantAndEquipment.units.USD[127]; accession=0001628280-26-050705; source_sha256=7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+        "kind": "fact",
+        "filing": {
+          "id": "META:0001628280-26-050705",
+          "form": "10-Q",
+          "filed": "2026-07-30",
+          "period_end": "2026-06-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+        }
+      },
+      {
+        "kind": "market",
+        "id": "market:740e7e6c159b24f82062bb29",
+        "ticker": "META",
+        "snapshot": {
+          "exchange_timezone": "America/New_York",
+          "quote_at": 1791576001,
+          "quote_type": "provider_quote"
+        }
+      },
+      {
+        "id": "passage-704d0c02a3c8d500946e",
+        "ticker": "META",
+        "section": "Item 2. Management's Discussion and Analysis of Financial Condition and Results of Operations",
+        "text": "Three Months Ended June 30, Six Months Ended June 30, 2026 2025 2026 2025 Revenue 100 % 100 % 100 % 100 % Costs and expenses: Cost of revenue 19 18 18 18 Research and development 36 27 34 28 Marketing and sales 6 6 5 6 General and administrative 9 6 7 6 Total costs and expenses 69 57 64 58 Income from operations 31 43 36 42 Interest and other income (expense), net — — (1) 1 Income before income taxes 31 43 35 43 Provision (benefit) for income taxes 5 5 (2) 4 Net income 26 % 39 % 36 % 39 %",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm",
+        "locator": "narrative block 158, chunk 0; exact text retained",
+        "kind": "passage",
+        "filing": {
+          "id": "META:0001628280-26-050705",
+          "form": "10-Q",
+          "filed": "2026-07-30",
+          "period_end": "2026-06-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+        }
+      }
+    ],
+    "trace": [],
+    "usage": {
+      "prompt_tokens": 25324,
+      "completion_tokens": 7694,
+      "total_tokens": 33018,
+      "model_calls": 3
+    },
+    "elapsed_ms": 89180,
+    "model": "example-model",
+    "research_type": "stock"
+  }
+}

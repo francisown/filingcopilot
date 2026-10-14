@@ -1,0 +1,15 @@
+{
+  "companies": {
+    "TSLA": {"cik": "0001318605", "name": "Tesla, Inc.", "aliases": ["特斯拉", "Tesla"]}
+  },
+  "metrics": {
+    "research_expense": {
+      "label": "研发支出",
+      "concepts": ["ResearchAndDevelopmentExpense"],
+      "aliases": ["研发支出", "research and development expense", "R&D expense"],
+      "unit": "USD"
+    }
+  },
+  "query_expansions": {"研发": "research development expense"},
+  "currencies": {"CAD": "加元"}
+}
