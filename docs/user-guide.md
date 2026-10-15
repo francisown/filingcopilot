@@ -205,7 +205,10 @@ requests. Configure `FC_REVIEW_MODEL` to a different model from `FC_MODEL`.
 
 The semantic evaluation set is run through the configured research and review
 models and its failures are retained. Human blind labeling is a separate
-calibration step and is **not yet completed**; the repository includes
+calibration step; a first 40-claim calibration by one non-domain reviewer (the
+project author, first pass) is recorded at 95% support / 5% unclear / 0%
+unsupported, while further independent review remains pending; the repository
+includes
 `scripts/export_semantic_blind_sample.py` to export a fixed claim-level sample
 without model status or review verdicts, and
 `scripts/score_semantic_blind_labels.py` to calculate rates only after a

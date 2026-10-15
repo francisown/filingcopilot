@@ -6,7 +6,12 @@ The frozen 140-question production-budget experiment retained 40 answered,
 67 partial and 33 abstained records. Three answered records missed a declared
 character minimum; 37/140 (26.43%) met both workflow status and that length rule.
 This is a mechanical delivery measure, not human answer completeness or truth.
-Evidence-ID binding was 75.91%; human semantic citation support remains null.
+Evidence-ID binding was 75.91%. A first human calibration of the 40 delivered
+narrative/analysis claims recorded 95% support / 5% unclear / 0% unsupported —
+one first pass by the project author as a single non-domain reviewer, with
+delivered claims carrying the review gate's selection bias; an independent
+domain review remains future work. The review miss-rate remains null pending
+its calibration key.
 P50/P95 were 135.93/240.03 seconds under the old 240/60-second budgets.
 
 [Budget methodology and original records](user-guide.md#public-release-notes)
@@ -42,7 +47,9 @@ package replay; this single repair does not establish a new 140-question score.
 The original 20/40 worksheets and 872 paired-comparison units are preserved.
 Only a real person's labels and identity may be imported. Mechanical token
 hints never score. Partial reviewed subsets need their selection-bias caveat;
-full support rates and review miss-rate remain null until their required
+a first single-reviewer, non-domain calibration over 40 delivered claims is
+recorded (95% support / 5% unclear / 0% unsupported; one first pass by the
+project author), and the review miss-rate remains null until its required
 inputs exist. Original S4 remains pending; S5-S9 are not unlocked by rule tests.
 
 ## Verification scope
