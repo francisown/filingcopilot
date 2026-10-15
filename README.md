@@ -4,6 +4,12 @@
   <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/francisown/filingcopilot/actions/workflows/ci.yml"><img src="https://github.com/francisown/filingcopilot/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or later"></a>
+</p>
+
 **Research stocks with financial data, price charts, and AI answers linked to original filings.**
 
 FilingCopilot runs on your computer and brings company filings, market data, and research
@@ -201,13 +207,13 @@ Python and FastAPI serve the application. SQLite FTS5 and optional local embeddi
 retrieval; LangGraph orchestrates research tools. Browser, CLI, REST and MCP share the same
 evidence and calculation rules.
 
-- [Chinese guide and historical implementation notes](docs/user-guide.md)
 - [MCP tools](docs/mcp-tools.md)
 - [Architecture](docs/architecture.md)
 - [Research package protocol](docs/research-package-protocol.md)
 - [Independent verifier](docs/independent-verifier.md)
 - [Development and evaluation](docs/evaluation.md)
 - [Roadmap](ROADMAP.md)
+- [Chinese guide and historical implementation notes](docs/user-guide.md)
 
 ## Feedback and contributions
 
