@@ -80,8 +80,10 @@ def test_windows_interpreter_selection_without_installation(shell):
     executable = shutil.which(shell)
     if not executable:
         pytest.skip("Optional PowerShell host is unavailable")
+    # Liveness guard only: Windows PowerShell cold start can exceed 30 seconds
+    # on a descheduled shared CI worker; the output assertions are the real check.
     result = subprocess.run([executable, "-NoProfile", "-File", str(ROOT / "scripts/check_windows_python.ps1"),
-                             "-ProjectRoot", str(ROOT)], capture_output=True, text=True, timeout=30)
+                             "-ProjectRoot", str(ROOT)], capture_output=True, text=True, timeout=120)
     assert result.returncode == 0, result.stdout + result.stderr
     assert "No installation or service startup" in result.stdout
 
