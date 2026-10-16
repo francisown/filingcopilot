@@ -123,7 +123,7 @@
   ],
   "limits": [
     "Local engineering passes do not establish human semantic or investment accuracy.",
-    "Original 20/40 semantic worksheets and 872 comparison units still need human labels; do not bypass S4 for S5-S9.",
+    "Original 20/40 semantic worksheets and 872 comparison units remain retained; human labels were not yet recorded at this date.",
     "No package rebuild, remote push, publication, trade, cleanup retry or extra service."
   ],
   "private_value_scan": {

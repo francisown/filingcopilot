@@ -17,7 +17,6 @@ public hosted demo. It uses the local app and exports a portable research packag
 The first SEC download needs a real contact configured in `.env` and available
 network access. An unregistered Chinese company name may need one model call
 for name conversion; it is accounted separately from financial computation.
-The recording/public link requested in the fifth review has not been produced.
 
 [Current acceptance index](../artifacts/README.md) lists retained evidence and
 limits. A 140-question production-budget re-evaluation is not implied by one

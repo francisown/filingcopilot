@@ -1685,7 +1685,7 @@
       "model_calls": 3
     },
     "elapsed_ms": 89180,
-    "model": "sensenova-6.8-flash-lite",
+    "model": "example-model",
     "research_type": "stock"
   }
 }

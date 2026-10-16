@@ -18,9 +18,8 @@ locally; they have not been published as Release attachments.
 | [200-question retrieval diagnosis](retrieval-frozen-diagnosis-2026-10-11.json) | Exact frozen passage matching; failed candidates remain off. |
 | [PDD cold acquisition](third-round-cold-PDD-2026-10-11.json) | Actual SEC timing and disclosed cache conditions. |
 | [BABA cold acquisition](third-round-cold-BABA-2026-10-11.json) | Actual SEC timing and disclosed cache conditions. |
-| [Fourth review](fourth-round-release-validation-2026-10-11.json) | Historical engineering acceptance; not current activation. |
+| [Release validation](fourth-round-release-validation-2026-10-11.json) | Historical engineering acceptance; not current activation. |
 | [Preservation](fourth-round-preservation-final-2026-10-12.json) | Original package/worksheet hashes and historical runtime. |
-| [1.0.6 acceptance](fifth-review-validation-1.0.6.json) | 1359 local regressions, one repaired numeric question and offline replays. |
 | [Module summary · business](README.md) | Real AMZN business-model module run: three reviewed analysis statements with citations; boundary sentence recorded in the module trace. A real run, not an investment-accuracy claim. |
 | [Module summary · audit](README.md) | Real AMZN audit-report module run (factual restatement): three reviewed narrative statements; the trace records the delivered statement count. |
 | [Module summary · debt retry](README.md) | LITE liabilities module re-run after a provider HTTP 400 aborted the first attempt: completed with one reviewed conclusion and specific gaps; the abort remains a real failure record. |

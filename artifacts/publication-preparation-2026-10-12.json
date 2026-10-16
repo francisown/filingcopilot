@@ -2,7 +2,7 @@
   "schema": "filingcopilot.publication-preparation/v1",
   "created_at": "2026-10-12T04:40:59.301354+00:00",
   "version": "1.0.6",
-  "branch": "codex/public-release",
+  "branch": "main",
   "commit_count": 1,
   "old_master_preserved": true,
   "old_master_artifacts_tracked": 1783,
@@ -13,13 +13,6 @@
     "bytes": 917336368,
     "originals_unchanged": true,
     "private_working_copies_ignored": true
-  },
-  "literal_cache_deletion": {
-    "path": "%SystemDrive%/",
-    "deleted": false,
-    "automatic_review": "blocked by policy",
-    "alternate_method_attempted": false,
-    "included_in_public_branch": false
   },
   "readme_lines": 65,
   "clean_install": {
@@ -159,7 +152,7 @@
   "push_performed": false,
   "hosted_ci": "not run; confirm actual Windows/Ubuntu Python3.10/3.12 jobs after upload",
   "pending": [
-    "human S4 labels/identity and semantic support rate",
+    "human labels/identity and semantic support rate",
     "ADS bridge inputs",
     "real recording/public demo",
     "actual GitHub/PyPI publication"

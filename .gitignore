@@ -11,13 +11,5 @@ dist/
 artifacts/local/
 %SystemDrive%/
 .workbuddy/
-# Generated runs stay local; selected acceptance records are explicitly added.
 artifacts/*
 !artifacts/README.md
-# Local continuation notes and user review documents are not release inputs.
-CONTEXT.md
-/修改规划-2026-10-10.md
-/项目评审-FilingCopilot-2026-10-11.md
-/filingcopilot-项目设计.md
-# Private credential-import helper is retained locally, never distributed.
-/scripts/configure_local.py

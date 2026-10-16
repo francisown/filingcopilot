@@ -7,8 +7,8 @@
   },
   "status": "scored",
   "runner": "scripts/run_semantic_evaluation.py",
-  "review_model": "deepseek-v4-flash",
-  "research_model": "sensenova-6.8-flash-lite",
+  "review_model": "configured-review-model",
+  "research_model": "configured-model",
   "run_configuration": {
     "research_timeout_seconds": 240.0,
     "model_timeout_seconds": 60.0,
@@ -164,8 +164,8 @@
       "semantic-market_outage-020"
     ],
     "configuration": {
-      "model": "sensenova-6.8-flash-lite",
-      "review_model": "deepseek-v4-flash",
+      "model": "configured-model",
+      "review_model": "configured-review-model",
       "research_timeout": 240.0,
       "model_timeout": 60.0,
       "min_model_interval": 21.0,

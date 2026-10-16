@@ -50,7 +50,7 @@ hints never score. Partial reviewed subsets need their selection-bias caveat;
 a first single-reviewer, non-domain calibration over 40 delivered claims is
 recorded (95% support / 5% unclear / 0% unsupported; one first pass by the
 project author), and the review miss-rate remains null until its required
-inputs exist. Original S4 remains pending; S5-S9 are not unlocked by rule tests.
+inputs exist. Original acceptance-stage checks remain pending; later stages are not unlocked by rule tests.
 
 ## Verification scope
 

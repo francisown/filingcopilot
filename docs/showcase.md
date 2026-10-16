@@ -1,6 +1,6 @@
 # FilingCopilot: project showcase
 
-This page is the fastest way to review the project as an engineering portfolio piece.
+This page is the fastest way to review the project as an engineering study.
 It is deliberately narrower than the full user guide: start with one traceable answer,
 then inspect the boundaries that make the answer reproducible.
 

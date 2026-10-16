@@ -20,7 +20,7 @@ FILES = ("README.md", "README.zh-CN.md", "CONTRIBUTING.md", "ROADMAP.md", "LICEN
 RECORDS = ("README.md", "third-round-cold-PDD-2026-10-11.json",
            "third-round-cold-BABA-2026-10-11.json", "semantic-production-evaluation-2026-10-11.json",
            "retrieval-frozen-diagnosis-2026-10-11.json", "fourth-round-release-validation-2026-10-11.json",
-           "fourth-round-preservation-final-2026-10-12.json", "fifth-review-validation-1.0.6.json",
+           "fourth-round-preservation-final-2026-10-12.json",
            "publication-preparation-2026-10-12.json", "bilingual-validation-2026-10-12.json",
            "english-default-validation-2026-10-12.json", "native-english-publication-2026-10-12.json",
            "overnight-release-validation-2026-10-12.json",
@@ -221,7 +221,7 @@ def main():
                 "private_helpers_excluded": sorted(PRIVATE_INPUTS),
                 "security_scope": "Selected files and decoded PNG metadata checked for configured credentials/contact and machine paths; visually review images and run gitleaks separately."}
     (output / "release-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-    subprocess.run(["git", "init", "-b", "codex/public-preview", str(output)], check=True, capture_output=True)
+    subprocess.run(["git", "init", "-b", "main", str(output)], check=True, capture_output=True)
     subprocess.run(["git", "-C", str(output), "add", "-f", "--", *hashes, "release-manifest.json"],
                    check=True, capture_output=True)
     subprocess.run(["git", "-C", str(output), "-c", "user.name=FilingCopilot build bot",
