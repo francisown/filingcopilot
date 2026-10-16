@@ -50,7 +50,9 @@ def prepare_distribution(directory: Path, *, source: Path | None = None) -> dict
         # Package-relative resource lookup must resolve inside this wheel.
         text = original.decode("utf-8").replace('files("filingcopilot")', 'files("filingcopilot_verify")')
         text = text.replace("files('filingcopilot')", "files('filingcopilot_verify')")
-        (target / f"{name}.py").write_text(text, encoding="utf-8")
+        # Byte-exact write: text mode translates newlines on Windows and would
+        # break the source_sha256 manifest recorded above.
+        (target / f"{name}.py").write_bytes(text.encode("utf-8"))
     for name in RESOURCES:
         shutil.copyfile(source / name, target / name)
         hashes[name] = hashlib.sha256((source / name).read_bytes()).hexdigest()
