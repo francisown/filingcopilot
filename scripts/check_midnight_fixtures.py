@@ -20,8 +20,11 @@ class CollectedYesterday:
         # Move fixture constants back one day to trigger the same mismatch now.
         import test_comparison_valuation as comparison
         import test_historical_valuation as historical
+        import test_peers as peers
         import test_scenarios as scenarios
         import test_valuation as valuation
+
+        from filingcopilot import service_comparison, service_execution, service_planning
 
         valuation.NOW -= timedelta(days=1)
         valuation.DAY = valuation.NOW.date()
@@ -31,11 +34,52 @@ class CollectedYesterday:
         comparison.DAY = comparison.NOW.date()
         historical.DAY -= timedelta(days=1)
 
-    def pytest_sessionfinish(self, session):
-        from filingcopilot import api, comparison, historical_valuation, models, scenarios, service
+        # The selected peer test imports ``date`` directly, so pytest's
+        # fixture clock cannot patch it through an application module. Keep
+        # that test and the modular service date guards on the same synthetic
+        # day as the valuation fixtures.
+        class FixtureDate(date):
+            @classmethod
+            def today(cls):
+                return valuation.DAY
 
-        modules = [api, comparison, historical_valuation, models, scenarios, service]
-        clocks_restored = all(module.date is date for module in modules)
+        peers.date = FixtureDate
+        for module in (service_comparison, service_execution, service_planning):
+            module.date = FixtureDate
+
+    def pytest_sessionfinish(self, session):
+        # Restore the direct imports patched in collection_finish before the
+        # post-run guard checks every module's clock identity.
+        import test_peers as peers
+
+        from filingcopilot import (
+            api,
+            comparison,
+            historical_valuation,
+            models,
+            scenarios,
+            service,
+            service_comparison,
+            service_execution,
+            service_planning,
+        )
+
+        peers.date = date
+        for module in (service_comparison, service_execution, service_planning):
+            module.date = date
+
+        modules = [
+            api,
+            comparison,
+            historical_valuation,
+            models,
+            scenarios,
+            service,
+            service_comparison,
+            service_execution,
+            service_planning,
+        ]
+        clocks_restored = all(getattr(module, "date", date) is date for module in modules)
         defaults_restored = models.ResearchRequest(question="clock restoration").as_of == date.today()
         if not clocks_restored or not defaults_restored:
             session.exitstatus = pytest.ExitCode.TESTS_FAILED
