@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "filingcopilot"
-dynamic = ["version"]
+version = "1.0.0"
 description = "Stock research with financial data, price charts, AI agents, RAG, and traceable filing sources"
 authors = [{name = "francisown"}]
 keywords = ["financial-analysis", "stock-research", "sec-edgar", "rag", "mcp"]
@@ -26,9 +26,6 @@ filingcopilot = "filingcopilot.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.dynamic]
-version = {attr = "filingcopilot.__version__"}
 
 [tool.setuptools.package-data]
 filingcopilot = ["static/*", "samples/*.json", "domain-defaults.json", "stock-directory.json", "peer-groups.json", "locale-en.json"]

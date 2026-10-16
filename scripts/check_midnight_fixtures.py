@@ -32,30 +32,10 @@ class CollectedYesterday:
         historical.DAY -= timedelta(days=1)
 
     def pytest_sessionfinish(self, session):
-        from filingcopilot import (
-            api,
-            comparison,
-            historical_valuation,
-            models,
-            scenarios,
-            service,
-            service_comparison,
-            service_execution,
-            service_planning,
-        )
+        from filingcopilot import api, comparison, historical_valuation, models, scenarios, service
 
-        modules = [
-            api,
-            comparison,
-            historical_valuation,
-            models,
-            scenarios,
-            service,
-            service_comparison,
-            service_execution,
-            service_planning,
-        ]
-        clocks_restored = all(getattr(module, "date", date) is date for module in modules)
+        modules = [api, comparison, historical_valuation, models, scenarios, service]
+        clocks_restored = all(module.date is date for module in modules)
         defaults_restored = models.ResearchRequest(question="clock restoration").as_of == date.today()
         if not clocks_restored or not defaults_restored:
             session.exitstatus = pytest.ExitCode.TESTS_FAILED

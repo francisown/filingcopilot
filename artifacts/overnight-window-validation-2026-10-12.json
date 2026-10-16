@@ -1,0 +1,45 @@
+{
+  "schema": "filingcopilot.window-boundary-validation/v1",
+  "date": "2026-10-12",
+  "scope": "Deterministic query planning and controlled browser acceptance; no provider/model calls",
+  "fixed": "Explicit unsupported chart windows such as 35 years no longer fall through to the five-year default; FY2025 annual wording and TTM 12-month wording remain valid non-chart requests.",
+  "checks": {
+    "focused_tests": 130,
+    "focused_seconds": 21.95,
+    "full_tests": 1419,
+    "full_seconds": 169.5,
+    "ruff": "passed",
+    "frontend_commands": 30,
+    "browser_en_zh": "passed",
+    "browser_period_controls": [
+      "1Y",
+      "5Y",
+      "MAX"
+    ],
+    "mcp_tools": 30,
+    "mcp_transports": [
+      "stdio",
+      "streamable-http"
+    ],
+    "bilingual_presets": 59,
+    "gold_anchors": 200,
+    "human_semantic_support_rate": null
+  },
+  "failures": [
+    {
+      "case": "initial full regression after naive INVALID period fallback",
+      "result": "2 failures: FY2025 annual risk query and Chinese 12-month TTM query were blocked",
+      "resolution": "Scope invalid-window rejection to explicit chart context and exclude annual-report and TTM-month wording"
+    },
+    {
+      "case": "automation helper invoked from installation folder",
+      "result": "check_presets.py path did not exist there; no product code affected",
+      "resolution": "Ran the existing helper from its release-QA folder; retained as command-path operator error"
+    }
+  ],
+  "limits": [
+    "35 years is rejected as an unsupported chart range; no new arbitrary range was enabled.",
+    "Browser responses are controlled fixtures; no live supplier/model validation.",
+    "Engineering routing checks are not human semantic or investment accuracy."
+  ]
+}

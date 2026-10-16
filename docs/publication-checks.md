@@ -4,13 +4,14 @@ This is source-release preparation. No GitHub push, PyPI upload or hosted
 deployment has been performed. The application is distributed as a local source
 release; this repository does not include a hosted service.
 
-## Selected source release
+## Selected history and archive
 
-This directory is a standalone source snapshot containing the selected source,
-tests, documentation, examples and dependency lock. It does not include prior
-Git history, private source caches, or the archived development artifacts.
-Upload only the files in this snapshot; do not mirror a private development
-checkout or its branches.
+The `codex/public-release` branch contains selected source, tests, docs,
+examples, dependency locks and key evidence summaries in a fresh root commit.
+The previous master history is retained locally. Publishing this branch alone
+does not publish the old master history; a fresh clone of it is the small
+distribution. The old local `.git` remains larger because it still retains
+the archive branch. Do not describe its size as having been reduced.
 
 The private credential-import helper is ignored locally and explicitly excluded
 by the snapshot builder. Public setup uses `.env.example`; it does not search
@@ -30,8 +31,9 @@ context has a relative home path; its original fingerprint is retained only
 as provenance for the private original, not presented as a hash of the edited
 context. Use the unmodified private manifest for frozen-run replay.
 
-Machine-local cache paths are ignored and excluded from the publication. They
-are not part of the application or its reproducible source inputs.
+Deletion of the literal `%SystemDrive%` cache folder was rejected by automatic
+approval (`blocked by policy`), so it remains ignored and excluded from the
+publication. The refusal was not bypassed with another tool or path.
 
 ## Clean installation
 

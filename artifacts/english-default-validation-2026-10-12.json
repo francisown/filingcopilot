@@ -1,0 +1,107 @@
+{
+  "schema": "filingcopilot.english-default-validation/v1",
+  "date": "2026-10-12",
+  "default_language": "en",
+  "chinese_option": "Explicit persisted browser selection or language=zh in new research requests",
+  "readme": {
+    "default": "README.md",
+    "chinese": "README.zh-CN.md",
+    "duplicate_english_guide_removed": true
+  },
+  "browser_locale_dependency": false,
+  "new_research_defaults": [
+    "browser",
+    "REST",
+    "CLI",
+    "MCP"
+  ],
+  "legacy_package_language_default": "zh; original packages are not rewritten",
+  "python": {
+    "passed": 1380,
+    "seconds": 177.09
+  },
+  "initial_full": {
+    "failed": 73,
+    "passed": 1305,
+    "seconds": 170.17,
+    "reason": "Chinese regression fixtures and assertions assumed Chinese; made their locale explicit and checked new English defaults separately. Original failure log retained."
+  },
+  "initial_failed_cases_retest": {
+    "passed": 73,
+    "seconds": 17.01
+  },
+  "locale_entrypoint_tests": {
+    "passed": 13,
+    "seconds": 1.92,
+    "scope": "Actual no-model source-backed CLI/API output and saved package checks; no semantic accuracy score"
+  },
+  "frontend_commands": 30,
+  "browser": {
+    "scope": "Actual Chromium, bundled SEC numeric answers, controlled synthetic supplier responses; no production restart or live supplier/model validation",
+    "results": [
+      {
+        "language": "en",
+        "initial_default_english": true,
+        "errors": [],
+        "english_residual_labels": [],
+        "chart_keyboard_hover": true,
+        "numeric_answer_language": true,
+        "source_result_unchanged_on_switch": true,
+        "requests_on_switch": 0,
+        "mobile_horizontal_overflow": false,
+        "language_persisted_on_reload": true
+      },
+      {
+        "language": "zh",
+        "initial_default_english": true,
+        "errors": [],
+        "english_residual_labels": [],
+        "chart_keyboard_hover": true,
+        "numeric_answer_language": true,
+        "source_result_unchanged_on_switch": true,
+        "requests_on_switch": 0,
+        "mobile_horizontal_overflow": false,
+        "language_persisted_on_reload": true
+      }
+    ]
+  },
+  "mcp": {
+    "tools": 30,
+    "transports": [
+      "stdio",
+      "streamable-http"
+    ],
+    "english_default_and_explicit_chinese": "passed; source evidence identical"
+  },
+  "frozen_gold": "200 source anchors unchanged; no new retrieval score",
+  "wheel": {
+    "source_resources": 81,
+    "all_source_bytes_match": true,
+    "readme_default_english": true,
+    "sha256": "77330486c7f78f1bdd33d495b0735e6227947a6c72dd14d1fc179d6f0c3ace83"
+  },
+  "old_packages": {
+    "replayed": 43,
+    "invalid": 0,
+    "bytes_unchanged": true,
+    "seconds": 32.518
+  },
+  "protected_hashes_unchanged": 8,
+  "human_semantic_support_rate": null,
+  "runtime": {
+    "port": 8159,
+    "response_after_computer_restart": false,
+    "started_or_restarted": false,
+    "prior_automatic_restart_rejection_not_bypassed": true
+  },
+  "distribution": {
+    "pypi_required": false,
+    "pypi_uploaded": false,
+    "github_pushed": false
+  },
+  "limits": [
+    "Chromium used controlled supplier responses and bundled SEC facts, not live market-provider/model acceptance.",
+    "English-first presentation does not expand filing coverage or translate original source documents.",
+    "Engineering checks are not human semantic or investment accuracy."
+  ]
+}

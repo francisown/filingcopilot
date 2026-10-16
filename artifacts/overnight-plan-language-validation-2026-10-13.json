@@ -1,0 +1,29 @@
+{
+  "schema": "filingcopilot.plan-language-validation/v1",
+  "date": "2026-10-13",
+  "scope": "REST research-plan language boundary; deterministic plan generation, no provider/model calls",
+  "fixed": "English API callers now receive English message, scope, suggestions, and budget basis text; explicit Chinese requests remain Chinese. Browser translation remains a presentation fallback. Direct REST research and follow-up error responses now also stay in the requested language, including mixed validation errors.",
+  "checks": {
+    "full_tests": 1423,
+    "full_seconds": 176.71,
+    "focused_plan_language_cases": 5,
+    "focused_route_cases": 82,
+    "ruff": "passed",
+    "frontend_commands": 30,
+    "english_api_plan_residual_chinese": false,
+    "chinese_api_plan_preserved": true,
+    "model_calls": 0,
+    "human_semantic_support_rate": null,
+    "english_api_research_error_residual_chinese": false,
+    "chinese_api_research_error_preserved": true
+  },
+  "failure_retained": {
+    "initial_case": "English /api/research/plan returned Chinese planning fields while browser DOM masking hid the leak",
+    "resolution": "Localize at API boundary with safe English fallbacks; preserve the internal Chinese plan contract used by legacy domain tests"
+  },
+  "limits": [
+    "No live provider or model request was made.",
+    "This checks planning metadata language, not semantic or investment accuracy.",
+    "Original saved research, evidence, numerical labels and human samples were not changed."
+  ]
+}

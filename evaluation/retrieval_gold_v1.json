@@ -1,0 +1,3968 @@
+{
+  "schema": "filingcopilot.retrieval-gold/v1",
+  "version": "2026-10-11",
+  "count": 200,
+  "notes": "200-item cross-company/year bilingual gold set. Each expected_passage_ids entry is a stable frozen-corpus ID; the evaluator reports unavailable IDs explicitly when the matching fixture corpus is not loaded. The set is not an accuracy claim.",
+  "items": [
+    {
+      "id": "gold-0001",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0001"
+      ]
+    },
+    {
+      "id": "gold-0002",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0002"
+      ]
+    },
+    {
+      "id": "gold-0003",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0003"
+      ]
+    },
+    {
+      "id": "gold-0004",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0004"
+      ]
+    },
+    {
+      "id": "gold-0005",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0005"
+      ]
+    },
+    {
+      "id": "gold-0006",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0006"
+      ]
+    },
+    {
+      "id": "gold-0007",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0007"
+      ]
+    },
+    {
+      "id": "gold-0008",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0008"
+      ]
+    },
+    {
+      "id": "gold-0009",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0009"
+      ]
+    },
+    {
+      "id": "gold-0010",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0010"
+      ]
+    },
+    {
+      "id": "gold-0011",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0011"
+      ]
+    },
+    {
+      "id": "gold-0012",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0012"
+      ]
+    },
+    {
+      "id": "gold-0013",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0013"
+      ]
+    },
+    {
+      "id": "gold-0014",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0014"
+      ]
+    },
+    {
+      "id": "gold-0015",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0015"
+      ]
+    },
+    {
+      "id": "gold-0016",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0016"
+      ]
+    },
+    {
+      "id": "gold-0017",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0017"
+      ]
+    },
+    {
+      "id": "gold-0018",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0018"
+      ]
+    },
+    {
+      "id": "gold-0019",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0019"
+      ]
+    },
+    {
+      "id": "gold-0020",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0020"
+      ]
+    },
+    {
+      "id": "gold-0021",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0021"
+      ]
+    },
+    {
+      "id": "gold-0022",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0022"
+      ]
+    },
+    {
+      "id": "gold-0023",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0023"
+      ]
+    },
+    {
+      "id": "gold-0024",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0024"
+      ]
+    },
+    {
+      "id": "gold-0025",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0025"
+      ]
+    },
+    {
+      "id": "gold-0026",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0026"
+      ]
+    },
+    {
+      "id": "gold-0027",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0027"
+      ]
+    },
+    {
+      "id": "gold-0028",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0028"
+      ]
+    },
+    {
+      "id": "gold-0029",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0029"
+      ]
+    },
+    {
+      "id": "gold-0030",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0030"
+      ]
+    },
+    {
+      "id": "gold-0031",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0031"
+      ]
+    },
+    {
+      "id": "gold-0032",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0032"
+      ]
+    },
+    {
+      "id": "gold-0033",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0033"
+      ]
+    },
+    {
+      "id": "gold-0034",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0034"
+      ]
+    },
+    {
+      "id": "gold-0035",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0035"
+      ]
+    },
+    {
+      "id": "gold-0036",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0036"
+      ]
+    },
+    {
+      "id": "gold-0037",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0037"
+      ]
+    },
+    {
+      "id": "gold-0038",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0038"
+      ]
+    },
+    {
+      "id": "gold-0039",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0039"
+      ]
+    },
+    {
+      "id": "gold-0040",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0040"
+      ]
+    },
+    {
+      "id": "gold-0041",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0041"
+      ]
+    },
+    {
+      "id": "gold-0042",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0042"
+      ]
+    },
+    {
+      "id": "gold-0043",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0043"
+      ]
+    },
+    {
+      "id": "gold-0044",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0044"
+      ]
+    },
+    {
+      "id": "gold-0045",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0045"
+      ]
+    },
+    {
+      "id": "gold-0046",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0046"
+      ]
+    },
+    {
+      "id": "gold-0047",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0047"
+      ]
+    },
+    {
+      "id": "gold-0048",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0048"
+      ]
+    },
+    {
+      "id": "gold-0049",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0049"
+      ]
+    },
+    {
+      "id": "gold-0050",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0050"
+      ]
+    },
+    {
+      "id": "gold-0051",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0051"
+      ]
+    },
+    {
+      "id": "gold-0052",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0052"
+      ]
+    },
+    {
+      "id": "gold-0053",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0053"
+      ]
+    },
+    {
+      "id": "gold-0054",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0054"
+      ]
+    },
+    {
+      "id": "gold-0055",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0055"
+      ]
+    },
+    {
+      "id": "gold-0056",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0056"
+      ]
+    },
+    {
+      "id": "gold-0057",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0057"
+      ]
+    },
+    {
+      "id": "gold-0058",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0058"
+      ]
+    },
+    {
+      "id": "gold-0059",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0059"
+      ]
+    },
+    {
+      "id": "gold-0060",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0060"
+      ]
+    },
+    {
+      "id": "gold-0061",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0061"
+      ]
+    },
+    {
+      "id": "gold-0062",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0062"
+      ]
+    },
+    {
+      "id": "gold-0063",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0063"
+      ]
+    },
+    {
+      "id": "gold-0064",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0064"
+      ]
+    },
+    {
+      "id": "gold-0065",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0065"
+      ]
+    },
+    {
+      "id": "gold-0066",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0066"
+      ]
+    },
+    {
+      "id": "gold-0067",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0067"
+      ]
+    },
+    {
+      "id": "gold-0068",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0068"
+      ]
+    },
+    {
+      "id": "gold-0069",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0069"
+      ]
+    },
+    {
+      "id": "gold-0070",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0070"
+      ]
+    },
+    {
+      "id": "gold-0071",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0071"
+      ]
+    },
+    {
+      "id": "gold-0072",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0072"
+      ]
+    },
+    {
+      "id": "gold-0073",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0073"
+      ]
+    },
+    {
+      "id": "gold-0074",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0074"
+      ]
+    },
+    {
+      "id": "gold-0075",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0075"
+      ]
+    },
+    {
+      "id": "gold-0076",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0076"
+      ]
+    },
+    {
+      "id": "gold-0077",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0077"
+      ]
+    },
+    {
+      "id": "gold-0078",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0078"
+      ]
+    },
+    {
+      "id": "gold-0079",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0079"
+      ]
+    },
+    {
+      "id": "gold-0080",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0080"
+      ]
+    },
+    {
+      "id": "gold-0081",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0081"
+      ]
+    },
+    {
+      "id": "gold-0082",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0082"
+      ]
+    },
+    {
+      "id": "gold-0083",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0083"
+      ]
+    },
+    {
+      "id": "gold-0084",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0084"
+      ]
+    },
+    {
+      "id": "gold-0085",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0085"
+      ]
+    },
+    {
+      "id": "gold-0086",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0086"
+      ]
+    },
+    {
+      "id": "gold-0087",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0087"
+      ]
+    },
+    {
+      "id": "gold-0088",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0088"
+      ]
+    },
+    {
+      "id": "gold-0089",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0089"
+      ]
+    },
+    {
+      "id": "gold-0090",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0090"
+      ]
+    },
+    {
+      "id": "gold-0091",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0091"
+      ]
+    },
+    {
+      "id": "gold-0092",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0092"
+      ]
+    },
+    {
+      "id": "gold-0093",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0093"
+      ]
+    },
+    {
+      "id": "gold-0094",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0094"
+      ]
+    },
+    {
+      "id": "gold-0095",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0095"
+      ]
+    },
+    {
+      "id": "gold-0096",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0096"
+      ]
+    },
+    {
+      "id": "gold-0097",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0097"
+      ]
+    },
+    {
+      "id": "gold-0098",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0098"
+      ]
+    },
+    {
+      "id": "gold-0099",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0099"
+      ]
+    },
+    {
+      "id": "gold-0100",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0100"
+      ]
+    },
+    {
+      "id": "gold-0101",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0101"
+      ]
+    },
+    {
+      "id": "gold-0102",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0102"
+      ]
+    },
+    {
+      "id": "gold-0103",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0103"
+      ]
+    },
+    {
+      "id": "gold-0104",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0104"
+      ]
+    },
+    {
+      "id": "gold-0105",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0105"
+      ]
+    },
+    {
+      "id": "gold-0106",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0106"
+      ]
+    },
+    {
+      "id": "gold-0107",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0107"
+      ]
+    },
+    {
+      "id": "gold-0108",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0108"
+      ]
+    },
+    {
+      "id": "gold-0109",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0109"
+      ]
+    },
+    {
+      "id": "gold-0110",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0110"
+      ]
+    },
+    {
+      "id": "gold-0111",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0111"
+      ]
+    },
+    {
+      "id": "gold-0112",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0112"
+      ]
+    },
+    {
+      "id": "gold-0113",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0113"
+      ]
+    },
+    {
+      "id": "gold-0114",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0114"
+      ]
+    },
+    {
+      "id": "gold-0115",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0115"
+      ]
+    },
+    {
+      "id": "gold-0116",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0116"
+      ]
+    },
+    {
+      "id": "gold-0117",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0117"
+      ]
+    },
+    {
+      "id": "gold-0118",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0118"
+      ]
+    },
+    {
+      "id": "gold-0119",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0119"
+      ]
+    },
+    {
+      "id": "gold-0120",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0120"
+      ]
+    },
+    {
+      "id": "gold-0121",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0121"
+      ]
+    },
+    {
+      "id": "gold-0122",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0122"
+      ]
+    },
+    {
+      "id": "gold-0123",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0123"
+      ]
+    },
+    {
+      "id": "gold-0124",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0124"
+      ]
+    },
+    {
+      "id": "gold-0125",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0125"
+      ]
+    },
+    {
+      "id": "gold-0126",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0126"
+      ]
+    },
+    {
+      "id": "gold-0127",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0127"
+      ]
+    },
+    {
+      "id": "gold-0128",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0128"
+      ]
+    },
+    {
+      "id": "gold-0129",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0129"
+      ]
+    },
+    {
+      "id": "gold-0130",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0130"
+      ]
+    },
+    {
+      "id": "gold-0131",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0131"
+      ]
+    },
+    {
+      "id": "gold-0132",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0132"
+      ]
+    },
+    {
+      "id": "gold-0133",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0133"
+      ]
+    },
+    {
+      "id": "gold-0134",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0134"
+      ]
+    },
+    {
+      "id": "gold-0135",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0135"
+      ]
+    },
+    {
+      "id": "gold-0136",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0136"
+      ]
+    },
+    {
+      "id": "gold-0137",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0137"
+      ]
+    },
+    {
+      "id": "gold-0138",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0138"
+      ]
+    },
+    {
+      "id": "gold-0139",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0139"
+      ]
+    },
+    {
+      "id": "gold-0140",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0140"
+      ]
+    },
+    {
+      "id": "gold-0141",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0141"
+      ]
+    },
+    {
+      "id": "gold-0142",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0142"
+      ]
+    },
+    {
+      "id": "gold-0143",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0143"
+      ]
+    },
+    {
+      "id": "gold-0144",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0144"
+      ]
+    },
+    {
+      "id": "gold-0145",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0145"
+      ]
+    },
+    {
+      "id": "gold-0146",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0146"
+      ]
+    },
+    {
+      "id": "gold-0147",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0147"
+      ]
+    },
+    {
+      "id": "gold-0148",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0148"
+      ]
+    },
+    {
+      "id": "gold-0149",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0149"
+      ]
+    },
+    {
+      "id": "gold-0150",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0150"
+      ]
+    },
+    {
+      "id": "gold-0151",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0151"
+      ]
+    },
+    {
+      "id": "gold-0152",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0152"
+      ]
+    },
+    {
+      "id": "gold-0153",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0153"
+      ]
+    },
+    {
+      "id": "gold-0154",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0154"
+      ]
+    },
+    {
+      "id": "gold-0155",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0155"
+      ]
+    },
+    {
+      "id": "gold-0156",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0156"
+      ]
+    },
+    {
+      "id": "gold-0157",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0157"
+      ]
+    },
+    {
+      "id": "gold-0158",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0158"
+      ]
+    },
+    {
+      "id": "gold-0159",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0159"
+      ]
+    },
+    {
+      "id": "gold-0160",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0160"
+      ]
+    },
+    {
+      "id": "gold-0161",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0161"
+      ]
+    },
+    {
+      "id": "gold-0162",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0162"
+      ]
+    },
+    {
+      "id": "gold-0163",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0163"
+      ]
+    },
+    {
+      "id": "gold-0164",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0164"
+      ]
+    },
+    {
+      "id": "gold-0165",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0165"
+      ]
+    },
+    {
+      "id": "gold-0166",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0166"
+      ]
+    },
+    {
+      "id": "gold-0167",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0167"
+      ]
+    },
+    {
+      "id": "gold-0168",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0168"
+      ]
+    },
+    {
+      "id": "gold-0169",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0169"
+      ]
+    },
+    {
+      "id": "gold-0170",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0170"
+      ]
+    },
+    {
+      "id": "gold-0171",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0171"
+      ]
+    },
+    {
+      "id": "gold-0172",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0172"
+      ]
+    },
+    {
+      "id": "gold-0173",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0173"
+      ]
+    },
+    {
+      "id": "gold-0174",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0174"
+      ]
+    },
+    {
+      "id": "gold-0175",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0175"
+      ]
+    },
+    {
+      "id": "gold-0176",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0176"
+      ]
+    },
+    {
+      "id": "gold-0177",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0177"
+      ]
+    },
+    {
+      "id": "gold-0178",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0178"
+      ]
+    },
+    {
+      "id": "gold-0179",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0179"
+      ]
+    },
+    {
+      "id": "gold-0180",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0180"
+      ]
+    },
+    {
+      "id": "gold-0181",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2022,
+      "query": "Apple 业务、产品或客户 FY2022",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0181"
+      ]
+    },
+    {
+      "id": "gold-0182",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2023,
+      "query": "Amazon revenue operating income growth drivers FY2023",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0182"
+      ]
+    },
+    {
+      "id": "gold-0183",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2024,
+      "query": "Microsoft 经营现金流和资本开支 FY2024",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0183"
+      ]
+    },
+    {
+      "id": "gold-0184",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2025,
+      "query": "TSMC risk factors regulatory demand concentration FY2025",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0184"
+      ]
+    },
+    {
+      "id": "gold-0185",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2022,
+      "query": "Tencent 竞争与优势条件 FY2022",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0185"
+      ]
+    },
+    {
+      "id": "gold-0186",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2023,
+      "query": "Apple outlook guidance expected demand FY2023",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0186"
+      ]
+    },
+    {
+      "id": "gold-0187",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2024,
+      "query": "Amazon 分部与地域营收 FY2024",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0187"
+      ]
+    },
+    {
+      "id": "gold-0188",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2025,
+      "query": "Microsoft gross margin operating margin profitability FY2025",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0188"
+      ]
+    },
+    {
+      "id": "gold-0189",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2022,
+      "query": "TSMC 最新财季与年内累计 FY2022",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0189"
+      ]
+    },
+    {
+      "id": "gold-0190",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2023,
+      "query": "Tencent debt liquidity obligations FY2023",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0190"
+      ]
+    },
+    {
+      "id": "gold-0191",
+      "language": "zh",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2024,
+      "query": "Apple 业务、产品或客户 FY2024",
+      "gold_context": {
+        "section": "business",
+        "required_header_context": false,
+        "anchor_terms": [
+          "业务",
+          "产品或客户"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0191"
+      ]
+    },
+    {
+      "id": "gold-0192",
+      "language": "en",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2025,
+      "query": "Amazon revenue operating income growth drivers FY2025",
+      "gold_context": {
+        "section": "growth",
+        "required_header_context": false,
+        "anchor_terms": [
+          "revenue",
+          "operating",
+          "income",
+          "growth",
+          "drivers"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0192"
+      ]
+    },
+    {
+      "id": "gold-0193",
+      "language": "zh",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2022,
+      "query": "Microsoft 经营现金流和资本开支 FY2022",
+      "gold_context": {
+        "section": "cashflow",
+        "required_header_context": false,
+        "anchor_terms": [
+          "经营现金流和资本开支"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0193"
+      ]
+    },
+    {
+      "id": "gold-0194",
+      "language": "en",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2023,
+      "query": "TSMC risk factors regulatory demand concentration FY2023",
+      "gold_context": {
+        "section": "risk",
+        "required_header_context": false,
+        "anchor_terms": [
+          "risk",
+          "factors",
+          "regulatory",
+          "demand",
+          "concentration"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0194"
+      ]
+    },
+    {
+      "id": "gold-0195",
+      "language": "zh",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2024,
+      "query": "Tencent 竞争与优势条件 FY2024",
+      "gold_context": {
+        "section": "competition",
+        "required_header_context": false,
+        "anchor_terms": [
+          "竞争与优势条件"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0195"
+      ]
+    },
+    {
+      "id": "gold-0196",
+      "language": "en",
+      "ticker": "AAPL",
+      "company": "Apple",
+      "fiscal_year": 2025,
+      "query": "Apple outlook guidance expected demand FY2025",
+      "gold_context": {
+        "section": "guidance",
+        "required_header_context": false,
+        "anchor_terms": [
+          "outlook",
+          "guidance",
+          "expected",
+          "demand"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0196"
+      ]
+    },
+    {
+      "id": "gold-0197",
+      "language": "zh",
+      "ticker": "AMZN",
+      "company": "Amazon",
+      "fiscal_year": 2022,
+      "query": "Amazon 分部与地域营收 FY2022",
+      "gold_context": {
+        "section": "segments",
+        "required_header_context": true,
+        "anchor_terms": [
+          "分部与地域营收"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0197"
+      ]
+    },
+    {
+      "id": "gold-0198",
+      "language": "en",
+      "ticker": "MSFT",
+      "company": "Microsoft",
+      "fiscal_year": 2023,
+      "query": "Microsoft gross margin operating margin profitability FY2023",
+      "gold_context": {
+        "section": "margin",
+        "required_header_context": true,
+        "anchor_terms": [
+          "gross",
+          "margin",
+          "operating",
+          "margin",
+          "profitability"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0198"
+      ]
+    },
+    {
+      "id": "gold-0199",
+      "language": "zh",
+      "ticker": "TSM",
+      "company": "TSMC",
+      "fiscal_year": 2024,
+      "query": "TSMC 最新财季与年内累计 FY2024",
+      "gold_context": {
+        "section": "quarter",
+        "required_header_context": true,
+        "anchor_terms": [
+          "最新财季与年内累计"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0199"
+      ]
+    },
+    {
+      "id": "gold-0200",
+      "language": "en",
+      "ticker": "0700.HK",
+      "company": "Tencent",
+      "fiscal_year": 2025,
+      "query": "Tencent debt liquidity obligations FY2025",
+      "gold_context": {
+        "section": "debt",
+        "required_header_context": false,
+        "anchor_terms": [
+          "debt",
+          "liquidity",
+          "obligations"
+        ]
+      },
+      "expected_passage_ids": [
+        "gold-0200"
+      ]
+    }
+  ]
+}

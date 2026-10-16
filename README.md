@@ -27,6 +27,9 @@ US SEC; price-chart coverage is separate and depends on the market-data provider
 
 [Quick start](#quick-start) · [Using the workspace](#using-the-workspace) · [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md)
 
+**Want the shortest technical tour?** Start with the [project showcase](docs/showcase.md): it walks through a
+no-key verification, one browser trace, and the five code boundaries that make the result replayable.
+
 ## What you can use it for
 
 - Understand a company's business, operating performance, cash generation and disclosed risks.
@@ -67,13 +70,21 @@ Live prices and new filings require internet access.
 ### Windows PowerShell
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e "."
+.\setup.ps1
 if (-not (Test-Path -LiteralPath .env)) {
     Copy-Item .env.example .env
 }
 $env:FC_EMBEDDING_MODE = "off"
 ```
+
+If your pip is configured to a private or mirror index and this command reports that no
+`setuptools>=68` version is available, retry with the official index:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e "." --index-url https://pypi.org/simple
+```
+
+The `setup.ps1` installer already uses the official PyPI index for this step.
 
 Start the workspace with keyword search:
 
@@ -102,6 +113,9 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 ```
+
+If a configured mirror cannot provide the build dependencies, retry with
+`--index-url https://pypi.org/simple`.
 
 Start with keyword search:
 
@@ -211,6 +225,7 @@ evidence and calculation rules.
 - [Architecture](docs/architecture.md)
 - [Research package protocol](docs/research-package-protocol.md)
 - [Independent verifier](docs/independent-verifier.md)
+- [Project showcase](docs/showcase.md)
 - [Development and evaluation](docs/evaluation.md)
 - [Roadmap](ROADMAP.md)
 - [Chinese guide and historical implementation notes](docs/user-guide.md)

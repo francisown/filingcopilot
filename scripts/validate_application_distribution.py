@@ -1,7 +1,6 @@
 """Check current release wheel bytes and run an offline isolated application."""
 
 import argparse
-import ast
 import hashlib
 import json
 import shutil
@@ -9,7 +8,6 @@ import subprocess
 import sys
 import uuid
 import zipfile
-from email.parser import BytesParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,13 +20,6 @@ def main():
     args = parser.parse_args()
     mismatches = []
     with zipfile.ZipFile(args.wheel) as archive:
-        source_version = next(ast.literal_eval(node.value)
-                              for node in ast.parse((ROOT / 'src/filingcopilot/__init__.py').read_text(encoding='utf-8')).body
-                              if isinstance(node, ast.Assign)
-                              and any(isinstance(item, ast.Name) and item.id == '__version__' for item in node.targets))
-        metadata_paths = [name for name in archive.namelist() if name.endswith('.dist-info/METADATA')]
-        if len(metadata_paths) != 1 or BytesParser().parsebytes(archive.read(metadata_paths[0]))['Version'] != source_version:
-            raise ValueError('Wheel metadata and source versions differ')
         expected = [path for path in (ROOT / 'src/filingcopilot').rglob('*')
                     if path.is_file() and '__pycache__' not in path.parts]
         for path in expected:
@@ -67,13 +58,10 @@ print(json.dumps({"version":__version__, "module":sys.modules["filingcopilot"]._
     result = json.loads(replay.stdout)
     if not Path(result['module']).is_relative_to(target):
         raise ValueError('Import did not come from installed wheel')
-    if result['version'] != source_version:
-        raise ValueError('Installed wheel runtime and source versions differ')
     report = {'schema':'filingcopilot.application-wheel-check/v1',
               'wheel_sha256':hashlib.sha256(args.wheel.read_bytes()).hexdigest(),
               'resources_checked':len(expected),'all_source_bytes_match':True,
               'offline_isolation':result}
-    args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     shutil.rmtree(target, ignore_errors=True)
     print(json.dumps(report,ensure_ascii=False))

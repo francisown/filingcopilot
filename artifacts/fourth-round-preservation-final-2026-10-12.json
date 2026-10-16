@@ -1,0 +1,44 @@
+{
+  "files": {
+    "artifacts/semantic-blind-claims-2026-10-11.json": {
+      "sha256": "902554fe2d4697a0d460ffad0c5d59785c444b1687260fe4e66869b048a12b48",
+      "unchanged_during_fourth_review": true
+    },
+    "artifacts/semantic-production-blind-claims-2026-10-11.json": {
+      "sha256": "16df9e6ea50dab90b9f0c7c63f446c278dee1a8b5a13bcf83bf5d0fe1eccd1ba",
+      "unchanged_during_fourth_review": true
+    },
+    "artifacts/third-round-paired-citation-blind-2026-10-11.json": {
+      "sha256": "840ead2df3c973b02bb6a6e0a65c7ced5c4759230603c8490f4b7f687de90941",
+      "unchanged_during_fourth_review": true
+    },
+    "artifacts/third-round-paired-final-2026-10-11.json": {
+      "sha256": "160d8f8470894ee2b988642556e0e4aec651664f1222d2abe52b33e3e9bc1441",
+      "unchanged_during_fourth_review": true
+    },
+    "artifacts/third-round-paired-final-2026-10-11.manifest.json": {
+      "sha256": "9df568cb41f5569816f3c3926f91be4b68da7a6121317d625c60db648dd2ea2a",
+      "unchanged_during_fourth_review": true
+    },
+    "artifacts/third-round-paired-final-2026-10-11.manifest.source.zip": {
+      "sha256": "cfa3cc7d93bf485b40cf31149c5f105c3cce28a3e123ad4ef59ba8807bb9d218",
+      "unchanged_during_fourth_review": true
+    }
+  },
+  "env_unchanged": true,
+  "gold_200_unchanged": true,
+  "runtime": {
+    "loaded_version": "1.0.5",
+    "resource_version": "1.0.5",
+    "source_fingerprint": "25e2c0e1657c59e69cfc8ff1f84219f1f2292b60130652872b363aeb0df11b0f",
+    "needs_restart": false
+  },
+  "version": "1.0.5",
+  "as_of_default": "2026-10-12",
+  "automation": {
+    "id": "filingcopilot",
+    "active": true,
+    "hourly": true,
+    "same_thread": true
+  }
+}

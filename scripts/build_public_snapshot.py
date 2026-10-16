@@ -1,7 +1,6 @@
 """Create a selected local release copy; original history/evidence stay intact."""
 
 import argparse
-import ast
 import hashlib
 import json
 import os
@@ -28,19 +27,6 @@ RECORDS = ("README.md", "third-round-cold-PDD-2026-10-11.json",
            "overnight-installation-validation-2026-10-12.json", "overnight-window-validation-2026-10-12.json",
            "overnight-plan-language-validation-2026-10-13.json", "overnight-api-error-language-validation-2026-10-13.json")
 PRIVATE_INPUTS = frozenset({"scripts/configure_local.py"})
-
-
-def source_version() -> str:
-    tree = ast.parse((ROOT / "src/filingcopilot/__init__.py").read_text(encoding="utf-8"))
-    return next(
-        ast.literal_eval(node.value)
-        for node in tree.body
-        if isinstance(node, ast.Assign)
-        and any(isinstance(target, ast.Name) and target.id == "__version__" for target in node.targets)
-    )
-
-
-RELEASE_VERSION = source_version()
 
 
 def local_exclusions() -> frozenset[str]:
@@ -235,12 +221,11 @@ def main():
                 "private_helpers_excluded": sorted(PRIVATE_INPUTS),
                 "security_scope": "Selected files and decoded PNG metadata checked for configured credentials/contact and machine paths; visually review images and run gitleaks separately."}
     (output / "release-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-    subprocess.run(["git", "init", "-b", "main", str(output)], check=True, capture_output=True)
+    subprocess.run(["git", "init", "-b", "codex/public-preview", str(output)], check=True, capture_output=True)
     subprocess.run(["git", "-C", str(output), "add", "-f", "--", *hashes, "release-manifest.json"],
                    check=True, capture_output=True)
     subprocess.run(["git", "-C", str(output), "-c", "user.name=FilingCopilot build bot",
-                    "-c", "user.email=filingcopilot-bot@localhost", "commit", "-m",
-                    f"FilingCopilot v{RELEASE_VERSION}"],
+                    "-c", "user.email=filingcopilot-bot@localhost", "commit", "-m", "FilingCopilot v1.0.0"],
                    check=True, capture_output=True)
     archive.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED) as zipped:

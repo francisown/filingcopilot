@@ -23,6 +23,10 @@ For a new environment, select an interpreter explicitly if needed:
 development and embedding dependencies. That snapshot is for Python 3.10;
 newer Python versions should use the default core profile.
 
+The setup script passes the official PyPI index when installing the project. This avoids
+an incomplete global pip mirror causing the PEP 517 build environment to report that
+`setuptools>=68` cannot be found.
+
 Create `.env` from the example only if you do not already have it, then start:
 
 ```powershell

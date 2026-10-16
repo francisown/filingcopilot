@@ -1,0 +1,101 @@
+{
+  "schema": "filingcopilot.bilingual-validation/v1",
+  "date": "2026-10-12",
+  "feature": {
+    "languages": [
+      "zh",
+      "en"
+    ],
+    "browser_default": "First supported navigator language; English fallback",
+    "explicit_preference": "Local storage; survives reload",
+    "new_answers": "Selected output language",
+    "original_sources_and_saved_answers": "Verbatim; not overwritten by presentation switching",
+    "english_number_scale": "K/M/B/T",
+    "chinese_number_scale": "万/亿",
+    "cli_rest_mcp": "Explicit language; existing callers default zh; supported Accept-Language can select REST output"
+  },
+  "engineering": {
+    "full_python": {
+      "passed": 1378,
+      "seconds": 181.54,
+      "environment": "Core-only Python3.10 venv, current source installed; not a neural-model evaluation"
+    },
+    "initial_full": {
+      "passed": 1376,
+      "failed": 2,
+      "seconds": 178.04,
+      "cause": "CLI subprocesses imported the previously installed publication clone, which lacked the new language field",
+      "fix": "Installed current source in the isolated core venv; original failure log retained"
+    },
+    "frontend_commands": 34,
+    "frontend_passed": true,
+    "browser": {
+      "scope": "Actual Chromium, bundled SEC numeric answers, controlled synthetic supplier responses; no production restart or live supplier/model validation",
+      "results": [
+        {
+          "language": "en",
+          "errors": [],
+          "english_residual_labels": [],
+          "chart_keyboard_hover": true,
+          "numeric_answer_language": true,
+          "source_result_unchanged_on_switch": true,
+          "requests_on_switch": 0,
+          "mobile_horizontal_overflow": false,
+          "language_persisted_on_reload": true
+        },
+        {
+          "language": "zh",
+          "errors": [],
+          "english_residual_labels": [],
+          "chart_keyboard_hover": true,
+          "numeric_answer_language": true,
+          "source_result_unchanged_on_switch": true,
+          "requests_on_switch": 0,
+          "mobile_horizontal_overflow": false,
+          "language_persisted_on_reload": true
+        }
+      ]
+    },
+    "mcp_transports": [
+      "stdio",
+      "streamable-http"
+    ],
+    "mcp_tools": 30,
+    "frozen_gold": "200 source anchors checked; no new retrieval score",
+    "wheel_resources": 81,
+    "wheel_source_bytes_match": true,
+    "old_packages_replayed": 43,
+    "old_packages_invalid": 0,
+    "old_package_bytes_unchanged": true,
+    "independent_english_package_audit": "consistent",
+    "protected_hashes_unchanged": 8,
+    "ruff": "passed"
+  },
+  "live_english_question": {
+    "status": "partial",
+    "language": "en",
+    "claims": 4,
+    "model_calls": 9,
+    "seconds": 177.53,
+    "audit_status": "consistent",
+    "scope": "One configured live English Agent question over bundled SEC source text, not semantic accuracy evaluation",
+    "human_semantic_support_rate": null
+  },
+  "known_limits": [
+    "Live English example returned partial, not comprehensive, research. Its gap wording about document-wide product completeness was not independently established; source sample and output retained for review.",
+    "Language and engineering checks do not establish human semantic or investment accuracy.",
+    "Original-language source material is not silently machine-translated.",
+    "Old verifiers may reject new English metadata; use the current verifier.",
+    "The existing production service is older and requires a manual restart to load updated code."
+  ],
+  "human_semantic_support_rate": null,
+  "runtime": {
+    "port": 8159,
+    "restarted": false,
+    "automatic_review_prior_restart_rejection_not_bypassed": true
+  },
+  "publication": {
+    "github_push": false,
+    "hosted_ci": false
+  }
+}

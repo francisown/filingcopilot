@@ -113,6 +113,7 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             "agent_ready": service.gateway is not None,
             "model": service.settings.model or None,
             "review_model": service.settings.review_model or None,
+            "review_batch_size": service.settings.review_batch_size,
             "review_configuration_warnings": list(service.settings.review_configuration_warnings),
             "embedding_mode": service.settings.embedding_mode,
             "embedding_model": service.settings.embedding_model,

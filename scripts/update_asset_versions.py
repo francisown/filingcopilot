@@ -19,7 +19,7 @@ def replace(match):
 
 
 source = index.read_text(encoding="utf-8")
-updated = re.sub(r'/static/([a-z0-9-]+\.(?:js|css))\?v=[^"\s]+', replace, source)
+updated = re.sub(r'/static/([a-z-]+\.(?:js|css))\?v=[^"\s]+', replace, source)
 if updated != source:
     index.write_text(updated, encoding="utf-8")
 print("UI cache keys match the shipped asset bytes.")

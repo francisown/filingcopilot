@@ -3,15 +3,15 @@
   "scope": "Curated renderer inputs from archived outputs, not financial/audit packages; trace and large provider histories omitted. Original outputs remain byte-identical in the private archive.",
   "old_packages": {
     "mixed-accepted-0.43-package.json": {
-      "sha256": "74b57f5f2c4ca16cd2fa4acb64a44b9408b066aa635cd33576a6992a056a1f0e",
+      "sha256": "ef6f1de85399b2219d16190eb5c43e76ef484140b36d480c375db3000a01ba01",
       "source_package_sha256": "31cf63173e8a83c8ebb05712d12c42a06bc86259cd879bf3638db55685eb9898"
     },
     "brief-meta-0.42-package.json": {
-      "sha256": "c4aecaa582cf6049d46b3bbba9dc9f685d801dd17226ee6ab35ef7c58edb773a",
+      "sha256": "84461b95bfef9ae4023690393d7a46c0e8afa1c4e3badcc5b94fe31e999c9c5b",
       "source_package_sha256": "473b36fa205c77df07b4b6e17ae6653bd8c611f2dd67712afdd6608ad622522f"
     },
     "mixed-real-0.43-package.json": {
-      "sha256": "e6901d59e819c59d8f12302c0aaef25865ec7909959501cbdd6aa013852fee3a",
+      "sha256": "d8b20d54ec9ec3791d06b0009c281dd969f8f2f074d81f434605424edad0341f",
       "source_package_sha256": "ef7ec09513a396a0a8f9eb3b6f1482760447d768fee0b8306fd037b9417d6404"
     }
   }

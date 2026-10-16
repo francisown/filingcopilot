@@ -24,17 +24,7 @@ def fixed_fixture_date(monkeypatch, request):
     their schema is built, so patch both module clocks and bound factories,
     then rebuild and restore the schemas before the next test.
     """
-    from filingcopilot import (
-        api,
-        comparison,
-        historical_valuation,
-        models,
-        scenarios,
-        service,
-        service_comparison,
-        service_execution,
-        service_planning,
-    )
+    from filingcopilot import api, comparison, historical_valuation, models, scenarios, service
 
     rebuilt = set()
     frozen = None
@@ -58,17 +48,7 @@ def fixed_fixture_date(monkeypatch, request):
                     # patch; preserve the real date wire format and validation.
                     return handler(date)
 
-            modules = [
-                api,
-                comparison,
-                historical_valuation,
-                models,
-                scenarios,
-                service,
-                service_comparison,
-                service_execution,
-                service_planning,
-            ]
+            modules = [api, comparison, historical_valuation, models, scenarios, service]
             modules.append(request.module)
             for module in modules:
                 if getattr(module, "date", None) is date:

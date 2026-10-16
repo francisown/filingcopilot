@@ -20,6 +20,8 @@ Financial research with traceable sources, deterministic calculations and offlin
 
 [快速开始](#快速开始) · [如何使用](#如何使用) · [使用指南](docs/user-guide.md) · [MCP 接入](docs/mcp-tools.md)
 
+**想快速了解技术核心？** 先看[项目导览](docs/showcase.zh-CN.md)：它用一次无需 API Key 的验证、一次浏览器研究和五个代码边界说明项目如何保留证据并重放结果。
+
 ## 这个项目有什么用
 
 研究一家上市公司，往往需要在股价网站、年报、季报、公告和计算表之间来回切换。
@@ -70,12 +72,19 @@ FilingCopilot 把这些步骤连接起来，让你在查看资料的同时提出
 ### Windows PowerShell
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e "."
+.\setup.ps1 -Language zh
 if (-not (Test-Path -LiteralPath .env)) {
     Copy-Item .env.example .env
 }
 ```
+
+如果 pip 使用了无法提供构建依赖的私有源或镜像，并提示找不到 `setuptools>=68`，请改用官方源重试：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e "." --index-url https://pypi.org/simple
+```
+
+`setup.ps1` 安装脚本在这一步已经固定使用官方 PyPI 源。
 
 按下面的配置说明填写 `.env`，然后启动：
 
@@ -100,6 +109,8 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 ```
+
+如果配置的镜像无法提供构建依赖，请给安装命令加上 `--index-url https://pypi.org/simple` 重试。
 
 填写 `.env` 后启动：
 
@@ -201,6 +212,7 @@ Web、CLI、REST 与 MCP 使用相同的研究能力和证据规则。
 | [系统架构](docs/architecture.md) | 服务层、Agent、RAG、证据与复核流程。 |
 | [研究包协议](docs/research-package-protocol.md) | 冻结输入、来源信息及离线复核边界。 |
 | [独立验证器](docs/independent-verifier.md) | 独立安装和复算已导出的研究包。 |
+| [项目导览](docs/showcase.zh-CN.md) | 用一次演示和五个代码边界快速理解项目。 |
 | [开发与评测](docs/evaluation.md) | 评测方法、历史记录与当前限制。 |
 | [发布检查](docs/publication-checks.md) | 依赖、源码包和发布范围。 |
 

@@ -141,7 +141,8 @@ class ReviewMixin:
                     )
                 else:
                     pending.append(claim)
-            for offset in range(0, len(pending), 2):
+            batch_size = max(1, min(8, self.settings.review_batch_size))
+            for offset in range(0, len(pending), batch_size):
                 claims, evidence = [], {}
                 for claim in pending[offset : offset + 2]:
                     claims.append(

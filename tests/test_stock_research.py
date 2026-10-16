@@ -680,7 +680,9 @@ def test_review_batches_and_deduplicates_shared_evidence(tools):
             return result
 
     gateway = BatchGateway()
-    answer = ResearchAgent(Settings(home=tools.corpus.home, min_model_interval=0), gateway).run(
+    answer = ResearchAgent(
+        Settings(home=tools.corpus.home, min_model_interval=0, review_batch_size=2), gateway
+    ).run(
         ResearchRequest(question="苹果股票怎么样？", ticker="AAPL"), tools
     )
     assert len(answer.answer) == 3

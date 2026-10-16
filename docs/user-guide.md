@@ -652,8 +652,8 @@ cp .env.example .env
 | `FC_RERANK_MODE` | `anchor`（默认）使用确定性查询词覆盖校准；`rrf` 保留基线融合 |
 | `FC_HOME` | 数据库、缓存、向量和本地模型目录 |
 | `FC_MAX_ROUNDS` / `FC_MAX_TOOL_CALLS` | Agent 轮数和工具调用上限 |
-| `FC_MODEL_MAX_TOKENS` / `FC_MIN_MODEL_INTERVAL` | 默认 8192 / 21，单次输出预算和同一模型调用间隔；降低预算可能增加推理输出截断与修复 |
-| `FC_REVIEW_MAX_TOKENS` | 独立审查输出预算，默认 8192；审查每批最多两项结论，共享证据去重 |
+| `FC_MODEL_MAX_TOKENS` / `FC_MIN_MODEL_INTERVAL` | 默认 8192 / 21，单次输出预算和同一模型调用间隔；确认供应商限流允许后，本地可降到 5；降低输出预算可能增加推理截断与修复 |
+| `FC_REVIEW_MAX_TOKENS` / `FC_REVIEW_BATCH_SIZE` | 独立审查输出预算默认 8192；默认每批审查 2 项结论，可调为 1–8；共享证据去重 |
 | `FC_RESEARCH_TIMEOUT` | 整轮合作式时间预算秒数，默认 420；环境变量范围 1–1800，排队不计入 |
 | `FC_REFRESH_TIMEOUT` | 每类披露刷新的合作式阶段预算，默认 20 秒，环境变量范围 1–60；整轮预算仍优先 |
 | `FC_MODEL_TIMEOUT` / `FC_MODEL_ATTEMPTS` | 单次网络超时秒数、总尝试次数，默认 60 / 3 |
