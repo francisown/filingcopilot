@@ -654,7 +654,8 @@ def test_stock_agent_prefetches_fundamentals_and_exports_auditable_assessment(to
     assert audit_package(package)["status"] == "invalid"
 
 
-def test_review_batches_and_deduplicates_shared_evidence(tools):
+@pytest.mark.parametrize("batch_size,expected_batches,expected_calls", [(2, [2, 1], 3), (8, [3], 2)])
+def test_review_batches_and_deduplicates_shared_evidence(tools, batch_size, expected_batches, expected_calls):
     class BatchGateway(StockGateway):
         def __init__(self):
             super().__init__()
@@ -681,14 +682,14 @@ def test_review_batches_and_deduplicates_shared_evidence(tools):
 
     gateway = BatchGateway()
     answer = ResearchAgent(
-        Settings(home=tools.corpus.home, min_model_interval=0, review_batch_size=2), gateway
+        Settings(home=tools.corpus.home, min_model_interval=0, review_batch_size=batch_size), gateway
     ).run(
         ResearchRequest(question="苹果股票怎么样？", ticker="AAPL"), tools
     )
     assert len(answer.answer) == 3
-    assert [len(r["claims"]) for r in gateway.reviews] == [2, 1]
+    assert [len(r["claims"]) for r in gateway.reviews] == expected_batches
     assert all(len(r["evidence"]) == 1 for r in gateway.reviews)
-    assert answer.usage["model_calls"] == 3
+    assert answer.usage["model_calls"] == expected_calls
     assert all(t["verdicts"] for t in answer.trace if t["stage"] == "semantic_review")
 
 

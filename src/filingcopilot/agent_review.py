@@ -144,7 +144,7 @@ class ReviewMixin:
             batch_size = max(1, min(8, self.settings.review_batch_size))
             for offset in range(0, len(pending), batch_size):
                 claims, evidence = [], {}
-                for claim in pending[offset : offset + 2]:
+                for claim in pending[offset : offset + batch_size]:
                     claims.append(
                         {k: claim[k] for k in ("index", "kind", "statement", "evidence_ids")}
                     )
