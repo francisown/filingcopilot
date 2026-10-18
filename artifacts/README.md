@@ -6,6 +6,7 @@ locally; they have not been published as Release attachments.
 
 | Record | Scope |
 |---|---|
+| [2026-10-19 live evaluation](../docs/validation/live-evaluation-2026-10-19.json) | Current 140-question model/API run, per-question outcomes and separate post-run repairs; workflow status is not human accuracy. |
 | [Installer and startup checks](overnight-installation-validation-2026-10-12.json) | Core install defaults, Python selection, optional legacy lock and port 8159; controlled installation probes, no service restart. |
 | [Window boundary checks](overnight-window-validation-2026-10-12.json) | Rejects unsupported chart windows without confusing annual FY or TTM periods; controlled routing/browser regression scope. |
 | [Plan language checks](overnight-plan-language-validation-2026-10-13.json) | REST planning metadata follows English default or explicit Chinese selection, including scope, suggestions and budget text. |

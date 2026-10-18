@@ -4,6 +4,76 @@ Evaluation separates workflow delivery, financial calculations, retrieval and
 human citation judgments. The results below belong to their recorded source and
 configuration snapshots.
 
+## Live evaluation — 2026-10-19
+
+The latest full run used all 140 unchanged bilingual questions, a frozen copy of
+`17a1d04`, four workers and the configured model API. The knowledge date was
+2026-10-08. Data came from a separate copy of the existing corpus and warm source
+caches: 62 filings, 1,166 financial facts, 39,912 statement facts and 31,123 passages.
+This tests the fixed filing corpus, not current market prices or a fresh installation.
+Complete and partial below are application status labels.
+
+| Question group | Complete | Partial | No research answer |
+|---|---:|---:|---:|
+| Numeric (20) | 20 | 0 | 0 |
+| Causes (20) | 14 | 6 | 0 |
+| Negation checks (20) | 16 | 4 | 0 |
+| Risks (20) | 11 | 8 | 1 |
+| Annual comparisons (20) | 20 | 0 | 0 |
+| **Research questions (100)** | **81** | **18** | **1** |
+
+The other 40 questions ask about unsupported future-price guarantees or hypothetical
+market-source failures. All received specific boundary explanations. The runner
+records these service exceptions as `abstained`; they are separate from the one
+research question that produced no answer. A separate check of the REST endpoint
+confirmed all 40 responses, including English explanations for the 20 English
+questions, with model calls disabled. No market outage was injected.
+
+Of the 99 nonempty research answers, 57 contain narrative or analysis and 42 contain
+only typed numbers. Two of those numeric-only answers were explanation/risk questions
+whose model work did not finish. All 20 annual comparisons include a calculation
+and reproducible period/source wording, with no model requests. These are delivery
+and coverage observations, not an independent human accuracy score.
+
+| Usage and checks | Result |
+|---|---:|
+| Questions using the model API | 60 |
+| Model HTTP requests started | 476 |
+| Recorded HTTP responses | 442, all HTTP 200 |
+| Reported tokens | 4,312,447 |
+| Median / P95 latency for model-using questions | 92.79 / 417.11 seconds |
+| Research budget timeouts | 3 |
+| Runs explicitly marked as lacking independent review | 3 |
+| Exact SEC CompanyFacts / arithmetic matches | 116 |
+| Numeric claims outside that checker's scope | 34 |
+| Saved packages audited against available raw sources | 100 consistent, none missing sources |
+
+The 80 questions without model requests make the overall median 0.075 seconds;
+that figure does not describe model research latency. Requests without a recorded
+HTTP response and unreported usage remain unaccounted for in the token total.
+Dollar cost is unknown because model prices and a complete invoice were unavailable.
+
+This run exposed three engineering issues. String-encoded integer tool arguments
+could cause retrieval errors; that fix was included in the full run. Incomplete
+English fallback messages and repeated copies of the same financial observation
+were fixed afterward and checked separately without additional model generation.
+The latter change preserves different underlying values, periods, currencies and
+explicit source/revision requests. The original full-run answers remain unchanged.
+The final source passed 1,656 Python tests and 36 frontend checks. All 100 saved
+packages also replayed consistently under that source, without changing their
+answer or package hashes; the duplicate-fact repair was separately replayed from
+the captured failing case with no model calls.
+An earlier attempt stopped after 29 questions is excluded; it recorded 69 model
+HTTP requests in completed questions, with in-flight usage unknown.
+
+The [machine-readable record](validation/live-evaluation-2026-10-19.json) includes
+configuration, source fingerprints, per-question answers and gaps, audit results,
+and the separate follow-up checks. Older measurements below remain historical.
+This was a single current-source run, not a simultaneous rerun of the old GitHub
+baseline. Model review can still accept overly broad wording, particularly claims
+about what an entire filing does not say based on selected excerpts; independent
+semantic review remains necessary.
+
 ## Historical model experiments
 
 The 2026-10-11 production-budget run used 140 questions, a 240-second research budget
