@@ -41,3 +41,25 @@ def test_new_annual_period_gap_is_fully_localized_without_altering_year():
     translated = text(message, "en")
     assert "FY2025" in translated and "aligned consecutive annual" in translated
     assert not re.search(r"[\u4e00-\u9fff]", translated)
+
+
+@pytest.mark.parametrize("message,expected", [
+    ("模型未在研究预算内提交完整回答；已保留通过核验的内容，可缩小问题范围后重试。",
+     "The model did not submit a complete answer within the research budget. Verified content is retained; narrow the question and retry."),
+    ("本轮未在预算内形成通过核验的完整结论；已保留可用证据。下一步：",
+     "No complete, verified conclusion was produced within the budget. Available evidence is retained. Next step:"),
+    ("12 份近期公告未完成可交付的中文摘要，已保留通过来源匹配的原文摘录；可单独查询“近期公司公告中文摘要”继续。",
+     '12 recent announcements lack completed summaries. Source-matched excerpts are retained; ask "Summarize recent company updates" to continue.'),
+])
+def test_incomplete_research_gap_translates_without_rewriting_evidence(message, expected):
+    from copy import deepcopy
+
+    evidence = [{"id": "original", "text": "原始披露不得改写。"}]
+    answer = ResearchAnswer(id="incomplete", question="question", as_of="2026-10-08",
+                            mode="agent", status="partial", answer=[], gaps=[message],
+                            evidence=deepcopy(evidence), trace=[], usage={}, elapsed_ms=0)
+    prepared = prepare_answer(answer, "en")
+    assert prepared.gaps == [expected]
+    assert prepared.evidence == evidence
+    assert prepared.status == "partial"
+    assert text(message, "zh") == message

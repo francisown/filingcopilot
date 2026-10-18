@@ -1935,5 +1935,8 @@
   " 秒。保留了 ": " seconds. Retained ",
   " 项通过核验的结果；未完成审查的判断不作结论。": " verified results; judgments whose review is incomplete are withheld.",
   "保留了 ": "Retained ",
-  " 同比不可计算：来源未绑定可对齐的相邻年度起止日，不能混用期间。": " Year-over-year growth cannot be calculated: the sources do not bind aligned consecutive annual start and end dates. Periods cannot be mixed."
+  " 同比不可计算：来源未绑定可对齐的相邻年度起止日，不能混用期间。": " Year-over-year growth cannot be calculated: the sources do not bind aligned consecutive annual start and end dates. Periods cannot be mixed.",
+  "模型未在研究预算内提交完整回答；已保留通过核验的内容，可缩小问题范围后重试。": "The model did not submit a complete answer within the research budget. Verified content is retained; narrow the question and retry.",
+  "本轮未在预算内形成通过核验的完整结论；已保留可用证据。下一步：": "No complete, verified conclusion was produced within the budget. Available evidence is retained. Next step:",
+  " 份近期公告未完成可交付的中文摘要，已保留通过来源匹配的原文摘录；可单独查询“近期公司公告中文摘要”继续。": " recent announcements lack completed summaries. Source-matched excerpts are retained; ask \"Summarize recent company updates\" to continue."
 }
