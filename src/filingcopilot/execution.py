@@ -39,6 +39,7 @@ class ResearchControl:
         self.events = []
         self.event_count = 0
         self._publish = publish or (lambda event: None)
+        self._research_models: set[str] = set()
         self.usage = {
             "model_calls": 0,
             "tool_calls": 0,
@@ -51,6 +52,15 @@ class ResearchControl:
         self.usage["model_calls"] += 1
         for key in ("total_tokens", "prompt_tokens", "completion_tokens"):
             self.usage[key] += int(usage.get(key) or 0)
+
+    def record_author(self, model: str):
+        with self._lock:
+            self._research_models.add(model)
+
+    @property
+    def research_models(self) -> frozenset[str]:
+        with self._lock:
+            return frozenset(self._research_models)
 
     def record_tool(self, name=None):
         """Record a tool invocation without exposing arguments or source data."""

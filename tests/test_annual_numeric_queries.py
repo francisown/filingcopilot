@@ -178,3 +178,19 @@ def test_reference_explicit_acquisition_can_fetch_missing_annual_year(tmp_path):
     answer = service.research(historical_request(mode="reference", auto_acquire=True))
     assert answer.status == "answered" and answer.usage["model_calls"] == 0
     assert len(answer.answer) == 2
+
+
+@pytest.mark.parametrize("question", [
+    "比较苹果 FY2025 与上一财年的收入增长，期间是否一致？",
+    "Compare Apple's FY2025 revenue with the prior fiscal year using the same period basis.",
+    "苹果 FY2025 收入是多少，来源是什么？",
+])
+def test_comparison_and_source_metadata_are_complete_without_model(tmp_path, question):
+    service = service_at(tmp_path)
+    service.discovery.fetcher.fetch = lambda *args, **kwargs: pytest.fail("Bound cached annual data is sufficient")
+    answer = service.research(ResearchRequest(question=question, ticker="AAPL", language="en", as_of="2026-10-08"))
+    assert answer.status == "answered", answer.gaps
+    assert answer.usage["model_calls"] == 0
+    assert all(c.get("rendering") == "annual_detail_v1" for c in answer.answer)
+    assert not any("来源" in c["text"] for c in answer.answer)
+    assert audit_package(service.export_package(answer.id), corpus=service.corpus)["status"] == "consistent"

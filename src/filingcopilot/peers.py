@@ -29,7 +29,7 @@ def is_peer_question(question: str) -> bool:
             re.I,
         )
         and re.search(
-            r"估值|市盈率|P\s*/?\s*E|倍数|valuation|multiple|相比较|compare", question, re.I
+            r"估值|市盈率|(?<![A-Za-z])P\s*/?\s*E(?![A-Za-z])|倍数|valuation|multiple|相比较|compare", question, re.I
         )
     )
 

@@ -70,20 +70,39 @@ def english_catalog() -> dict[str, str]:
     return json.loads(files("filingcopilot").joinpath("locale-en.json").read_text(encoding="utf-8"))
 
 
-@lru_cache(maxsize=1)
-def _fragments():
+@lru_cache(maxsize=2)
+def _fragments(numeric_boundaries: bool = True):
     keys = sorted((key for key in english_catalog() if len(key) >= 2), key=len, reverse=True)
-    return re.compile("|".join(re.escape(key) for key in keys)) if keys else None
+    def fragment(key):
+        # Whole labels such as "0 秒" must not consume the end of "420 秒"
+        # or a decimal. Keep the browser and backend presentation rules aligned.
+        return ((r"(?<![\d.])" if numeric_boundaries and key[0].isdigit() else "")
+                + re.escape(key)
+                + (r"(?![\d.])" if numeric_boundaries and key[-1].isdigit() else ""))
+    return re.compile("|".join(fragment(key) for key in keys)) if keys else None
 
 
 def text(value: str, language: str | None = None) -> str:
     """Translate known UI messages only; callers must not pass original source text."""
+    return _text(value, language, numeric_boundaries=True)
+
+
+def legacy_numeric_text(value: str) -> str:
+    """Retain the existing saved-claim rendering contract during package replay.
+
+    Numeric claims (including annual_detail_v1) use exact text equality for
+    auditing. UI fixes must not silently change their historical rendering.
+    """
+    return _text(value, None, numeric_boundaries=False)
+
+
+def _text(value: str, language: str | None, *, numeric_boundaries: bool) -> str:
     if (language or current_language()) != "en":
         return value
     catalog = english_catalog()
     if value in catalog:
         return catalog[value]
-    pattern = _fragments()
+    pattern = _fragments(numeric_boundaries)
     def fragment(match):
         result = catalog[match[0]]
         if match.start() and re.match(r"[A-Za-z0-9]", result) and re.match(r"[A-Za-z0-9\u4e00-\u9fff]", value[match.start()-1]):

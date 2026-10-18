@@ -27,13 +27,7 @@ locally; they have not been published as Release attachments.
 [Evaluation limits](../docs/evaluation.md) · [Publication checks](../docs/publication-checks.md)
 · [Offline example](../examples/annual-facts.json)
 
-Older docs link to this index when their full outputs are excluded from the
-selected release. This index does not imply that those omitted outputs were
-included or that historical service ports/versions are active.
-
-The complete archive is retained on the development machine and is not
-published with this repository. Selected JSON summaries are explicitly marked
-as path-redacted publication derivatives; original results and failures remain
-unchanged. The redacted semantic context is not a reusable frozen-run manifest.
-Private human-label context may have ignored local copies for continuity;
-it is excluded from the public branch. Human support/miss-rate remain null.
+This index is also the destination for links to detailed outputs that are kept
+locally. Selected JSON records are path-redacted copies; original results and
+failed runs remain in the local archive. Redacted records cannot serve as frozen
+run manifests. Pending human-review worksheets retain null scores until labeled.

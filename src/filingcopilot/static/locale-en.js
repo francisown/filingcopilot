@@ -1,5 +1,8 @@
 // Generated from locale-en.json. Run scripts/build_locale_catalog.py after editing the catalogue.
 globalThis.FilingLocaleEnglish = {
+  "补充计算前记录的说明（已展示的计算现已补齐，其余缺口仍保留）：": "Note recorded before supplemental calculations (the calculations now shown are available; other gaps remain): ",
+  "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。": "Disclosed financial reports cannot guarantee future outperformance or underperformance against peers. The missing evidence concerns future operating results, market expectations and returns over comparable periods; historical performance and valuation multiples do not prove certain future returns. Preserve uncertainty, and examine disclosed risks or compare historical performance first.",
+  "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。": "An annual filing discloses operating facts and risks; it cannot by itself determine a future stock price. The missing inputs are future operating results, market expectations and valuation assumptions. Historical quotes or reported quarterly figures cannot substitute for a forecast. This system does not provide certain price predictions or guaranteed returns; examine historical performance and disclosed risks first.",
   " / 股": " / share",
   " / 股。不是企业价值或股权目标价。": " / share. Not an enterprise value or equity target price.",
   " 6-K 公告提供原文摘录及日期，无需先下载年报；季度财务计算与 TTM 重建仍待接入。": " 6-K filing provides excerpt and date from the original text; no need to download the annual report first. Quarterly financial calculations and TTM reconstruction are still pending integration.",
@@ -1913,5 +1916,25 @@ globalThis.FilingLocaleEnglish = {
   "资料型模块预算": "Factual module budget",
   "查看行情来源与日线价格": "View source and daily prices",
   "查看行情来源": "View market source",
-  "打开结构化数据（技术） ↗": "Open structured data (technical) ↗"
+  "打开结构化数据（技术） ↗": "Open structured data (technical) ↗",
+  "当前模型多次失败，改用备用模型重试。": "The current model failed repeatedly; trying the fallback model.",
+  "模型未在预算内提交完整回答；已保留已在本地核验的财务数字，未核验的解释不作结论。": "The model did not submit a complete answer within the budget. Locally verified financial figures are retained; unverified explanations are withheld.",
+  "本轮审查未能确认与作者模型独立；该复核不构成独立核验，叙述性结论请谨慎对待。": "Reviewer independence from the author could not be established. This review is not an independent check; treat narrative conclusions with caution.",
+  "审查模型已返回。": "The review model has responded.",
+  "正在等待审查模型返回。": "Waiting for the review model to respond.",
+  "如果行情源不可用，应明确报告行情缺口，暂停依赖该报价的市盈率、回报和价格判断；仍可保留通过来源与日期核验的年报数字及披露分析，不得编造价格或把旧报价当作当前报价。此处说明系统处理规则，未实际触发行情故障或执行故障注入测试。": "If the market source is unavailable, disclose the missing market data and withhold P/E, return and price conclusions that depend on that quote. You may retain filing figures and disclosure analysis whose sources and dates were verified; never invent prices or present an old quote as current. This explains system policy, not an observed outage or a fault-injection test.",
+  " 本轮时间预算 ": " Time budget: ",
+  " 秒，到期保存已核验部分，可继续查询具体问题。": " seconds. Verified results are retained at the deadline; continue with a focused question.",
+  "执行预算：": "Execution budget: ",
+  "预计 ": "Estimated ",
+  " 次模型、": " model calls and ",
+  " 次工具调用": " tool calls",
+  "，约 ": ", approximately ",
+  "；延迟约 ": "; estimated latency ",
+  " 秒，模型成本未配置价格。": " seconds; model pricing is not configured.",
+  "本轮预算 ": "Time budget: ",
+  " 秒。保留了 ": " seconds. Retained ",
+  " 项通过核验的结果；未完成审查的判断不作结论。": " verified results; judgments whose review is incomplete are withheld.",
+  "保留了 ": "Retained ",
+  " 同比不可计算：来源未绑定可对齐的相邻年度起止日，不能混用期间。": " Year-over-year growth cannot be calculated: the sources do not bind aligned consecutive annual start and end dates. Periods cannot be mixed."
 };

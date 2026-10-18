@@ -1,8 +1,8 @@
 # Architecture and trace
 
-FilingCopilot is an evidence-first research application. The web UI, CLI, REST
-API and MCP server call the same service layer; no interface gets a private
-shortcut around period, currency, source-date, or claim verification rules.
+The web UI, CLI, REST API and MCP server share a research service. It prepares
+evidence, runs calculations or model-assisted research, verifies the submitted
+claims and saves the result with its sources.
 
 ```mermaid
 flowchart LR
@@ -26,11 +26,6 @@ answer, the frozen domain, and the zero-model standalone verification. The
 verification report matches the local corpus and the original filing hash. A consistent package
 proves only the checks that were requested, not that a narrative or investment
 decision is correct.
-
-Design ideas were compared with OpenBB, FinRobot, TradingAgents, Financial
-Datasets MCP, FinRAG, financial-agent, AI Hedge Fund and FinanceBench. Their
-public repositories are references for architecture and evaluation questions;
-this repository contains an independent implementation.
 
 The company workspace is an evidence browser: its nine sections, annual
 figures, peers, quarter sequence and structured statement rows do not silently

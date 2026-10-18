@@ -62,6 +62,7 @@ class SavedClaim(StrictModel):
     kind: Literal["fact", "calculation", "market", "valuation", "narrative", "excerpt", "analysis"]
     text: str = Field(min_length=1, max_length=4000)
     evidence_ids: list[str] = Field(min_length=1, max_length=8)
+    rendering: Literal["annual_detail_v1"] | None = None
     verification: Literal[
         "deterministic", "semantic_review", "exact_source_excerpt", "inference_review"
     ]
@@ -806,11 +807,12 @@ def audit_package(
                 item = tools.ledger.get(claim.evidence_ids[0])
                 check(
                     "numeric_text",
-                    item is not None and claim.text == render_numeric(item, package.domain, language=research.language),
+                    item is not None and claim.text == render_numeric(item, package.domain, language=research.language, rendering=claim.rendering),
                     "数字句须与重算后的代码渲染结果逐字一致。",
                 )
                 numeric_count += 1
             elif claim.kind in ("narrative", "analysis"):
+                check("claim_rendering", claim.rendering is None, "非数字结论不能使用数字渲染版本。")
                 narrative_count += 1
         if narrative_count:
             checks.append(

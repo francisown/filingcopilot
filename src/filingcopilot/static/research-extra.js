@@ -3,10 +3,7 @@ async function startCompanyReport(){
   if(state.researchRunning)return;
   const ticker=$('#ticker').value;
   if(!ticker){researchError('先选择一家公司，再生成完整公司研究。');return;}
-  // A full report is explicitly a prose-summary action.  If the user was in
-  // Data only mode, do not silently downgrade it to raw excerpts; use Agent
-  // when a model is configured and keep reference mode only as the honest
-  // model-free fallback.
+  // Full reports use the configured model, with source excerpts as the fallback.
   const reportMode=state.health?.agent_ready?'agent':'reference';
   const request={question:'完整公司股票研究：商业模式、增长、现金流、竞争与优势、风险和估值条件',ticker,as_of:$('#as-of').value,mode:reportMode,depth:'full',auto_acquire:true};
   $('#error').classList.add('hidden');$('#result').classList.add('hidden');

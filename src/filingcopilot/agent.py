@@ -16,11 +16,14 @@ from .company_modules import module_contract, module_instruction
 from .execution import (
     CANCELLED_NOTE,
     DEADLINE_NOTE,
+    ResearchControl,
     ResearchStopped,
     cancelled,
     checkpoint,
+    current_control,
     expired,
     progress,
+    research_scope,
     run_step,
     stopped,
 )
@@ -69,6 +72,11 @@ def module_round_limit(module: str | None, max_rounds: int) -> int:
 
 
 SYSTEM = """You are FilingCopilot, a careful financial filing researcher. Answer in Chinese.
+If annual_comparison is supplied, its facts and growth calculations are already observed.
+Use their exact IDs without fetching or calculating them again. Include the available current
+amount and growth alongside the requested explanation. A requested prior fiscal year is in scope.
+Do not report these supplied numbers/calculations as missing. Seek causes in the requested year's
+filing, keeping annual periods distinct. Do not invent gaps about optional segment amounts.
 If cashflow_overview is supplied, use its typed current/change/growth calculation IDs for FCF.
 Preserve its actual annual/quarter/YTD/TTM dates and gross/net formula. Its
 capex_basis exposes gross purchases and net purchases after sale/incentive receipts separately.
@@ -123,8 +131,16 @@ them. Do not derive growth rankings or financial comparisons from a raw numeric 
 use observed code calculations or an explicit source statement. Omit optional segment rankings
 when no supported calculation exists. Do not add gaps for extra segment metrics or details the user did not ask for. Only disclose
 missing evidence needed to answer the actual question.
+For a question testing a proposed statement, distinguish a contrary disclosure from an
+unsuccessful search: directly cited contrary evidence can refute the proposed statement.
+The absence of that exact proposed wording is not itself an additional evidence gap.
+Do not claim a document-wide absence from a few excerpts; describe what the cited evidence
+actually supports. A gap must identify a requested part that remains unresolved, not an
+unrequested segment figure, optional source, or hypothetical event that never occurred.
 Write short, separate narrative claims directly answering the question; avoid unrelated business
-overviews. In US filings "gross margin" followed by a currency amount means 毛利金额/毛利润,
+overviews. Finish every sentence, keeping statements well below the tool's character limit.
+Summarize in your own concise wording; never cut a source paragraph at the length limit.
+In US filings "gross margin" followed by a currency amount means 毛利金额/毛利润,
 whereas "gross margin percentage" means 毛利率. They can move in opposite directions; never
 translate an increase in gross profit dollars as an increase in 毛利率.
 Do not equate a possible risk with something that actually happened. Be concise, disclose missing
@@ -148,16 +164,90 @@ class AgentState(TypedDict):
     tool_count: int
     seen: set
     repairs: int
+    submit_nudges: int
+    review_independence_warning: bool
     submission: Submission | None
     verified: list
     review_cache: dict
     review_conflicts: set
     verified_candidate: Submission | None
     retained_gaps: list
+    numeric_coverage_errors: list[str]
     errors: list
     trace: list
     usage: dict
     action: str
+
+
+def _research_system_prompt(request: ResearchRequest, *, has_refresh: bool) -> str:
+    """Keep request-specific author instructions together, outside execution policy."""
+    stock_question = is_stock_question(request.question)
+    return (
+        localized_prompt(STOCK_INSTRUCTIONS if stock_question else SYSTEM, request.language)
+        + (
+            "\nUse source_refresh to distinguish an attempted refresh from a successful "
+            "check. If a refresh is incomplete, describe figures as the latest AVAILABLE "
+            "local disclosure, retain the freshness gap, and do not claim the sources "
+            "are current or all recent events have been checked."
+            if has_refresh
+            else ""
+        )
+        + (
+            "\nThis combined stock and notice request needs BOTH parts: keep up to "
+            "three analysis claims for the stock assessment, AND up to two short "
+            "kind=narrative summaries of the latest two readable company_updates events. "
+            "Use only each event's supplied evidence_ids, one distinct accession per "
+            "narrative, within 120 Chinese characters. Omit amounts, ratios and dates "
+            "from notice text; the UI displays public and event dates from source metadata. "
+            "Selected excerpts cannot prove the entire notice omits a fact: omit such "
+            "absence claims or explicitly qualify them as 所引摘录未说明. Omit registration "
+            "boilerplate and executive biographies; describe the core action. "
+            "Retain planned action qualifiers; do not infer completion or effects on the "
+            "stock price. Never use notice excerpts instead of typed financial calculations. "
+            "Keep dynamic financial and passage tools available. If a part lacks sources "
+            "or review, explain that specific gap. Do not replace the assessment with news."
+            if is_stock_updates_question(request.question)
+            else ""
+        )
+        + (
+            "\nUse supplied company_updates. events are SEC official notices; sections.transcripts "
+            "and sections.news are independent external source excerpts. Never merge their "
+            "evidence levels, dates or citations. External source material must preserve "
+            "attribution, outlook/plan qualifiers and text_scope; first_observed is retrieval "
+            "availability, not an inferred publication or event date. "
+            "Summarize the dated announcements in Chinese, one short narrative claim per "
+            "event with its exact excerpt IDs; at most five claims, each under 100 Chinese "
+            "characters. Describe only the core event; omit executive biographies, filing "
+            "registration details and general coverage disclaimers. "
+            "Use standard financial Chinese: debt 'Notes' are 债券 or 票据, never 注记. "
+            "Describe the issuance action without adding debt classifications such as "
+            "中期, short-term, senior or secured unless the source explicitly names them. "
+            "Present events in descending public filing date order. "
+            "Dates are displayed "
+            "by the UI from source metadata; do not repeat them in the statement. Source headlines and "
+            "financial figures in releases are not typed validated facts: describe news "
+            "qualitatively: never include prices, amounts, coupons, interest rates, percentages, "
+            "financial ratios or maturity years in narrative statements. "
+            "If an excerpt is insufficient, search its exact document ID with k=2. "
+            "Distinguish filing/public availability date from event date. "
+            "For 6-K, report_date is only the SEC report label, NEVER proof of an event's "
+            "occurrence date or a financial quarter; the excerpt must support such timing. "
+            "Preserve planned/scheduled payment qualifiers even after the planned date; "
+            "never infer actual payment from will be paid/payable on. Share reclamation "
+            "means shares were reclaimed (回收), not repurchased (回购) unless purchases "
+            "are explicit. Do not invent the reason for a dividend adjustment. "
+            "Do not claim these are all news, newly occurred events, media sentiment or verified effects "
+            "on the stock price. Submit once the available events are summarized. Coverage "
+            "is rendered separately by the product, do not repeat general media omissions in gaps."
+            if is_updates_question(request.question) and not stock_question
+            else ""
+        )
+        + (
+            module_instruction(request.module, request.language)
+            if request.module
+            else ""
+        )
+    )
 
 
 class ResearchAgent(ExecutionMixin, ReviewMixin):
@@ -199,7 +289,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
         )
         progress(
             stage,
-            "独立审查模型已返回。"
+            "审查模型已返回。"
             if stage == "semantic_review"
             else "研究模型已返回，正在处理结果。",
             model_calls=state["usage"]["model_calls"],
@@ -306,6 +396,25 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                         }
                     )
                     return {**state, "action": "reason"}
+                # A model that stops calling tools without submitting would
+                # otherwise end the run with zero delivered content. Ask it
+                # explicitly to submit (bounded) instead of failing the run.
+                nudges = int(state.get("submit_nudges", 0))
+                if nudges < 2 and state["rounds"] < round_limit:
+                    state["submit_nudges"] = nudges + 1
+                    state["messages"].append(
+                        {
+                            "role": "user",
+                            "content": (
+                                "You ended your turn without calling a tool. Call the "
+                                "submit_answer tool now. Include every claim you can support "
+                                "with the evidence already returned, using its observed "
+                                "evidence IDs. Move anything you cannot support into `gaps` "
+                                "with the specific missing evidence. Do not reply with prose."
+                            ),
+                        }
+                    )
+                    return {**state, "action": "reason"}
                 return {
                     **state,
                     "action": "end",
@@ -338,6 +447,14 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
 
     @request_language
     def run(self, request: ResearchRequest, tools: ResearchTools) -> ResearchAnswer:
+        # The public service supplies a scope. Direct agent users need the same
+        # request isolation, including author tracking across graph steps.
+        if current_control() is None:
+            with research_scope(ResearchControl()):
+                return self._run(request, tools)
+        return self._run(request, tools)
+
+    def _run(self, request: ResearchRequest, tools: ResearchTools) -> ResearchAnswer:
         started = time.perf_counter()
         checkpoint()
 
@@ -376,10 +493,21 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
         updates_context = None
         trailing_context = None
         source_context = None
+        annual_comparison = None
+        comparison_trace = []
         focus = request.ticker
         companies = tools.domain.company_scope(request.question)
         if not focus and len(companies) == 1:
             focus = next(iter(companies))
+        if (focus and not stock_question and not module and not is_quarterly_question(request.question)
+                and not is_ttm_question(request.question)
+                and re.search(r"原因|为什么|为何|驱动|\bwhy\b|\bdrivers?\b|\bcauses?\b", request.question, re.I)):
+            annual_comparison, comparison_trace = self._prepare_annual_comparison(
+                tools, request.question, focus, self.settings.max_tool_calls,
+            )
+            initial_trace.extend(comparison_trace)
+            for record in comparison_trace:
+                initial_seen.add(json.dumps([record["tool"], record["arguments"]], sort_keys=True))
         if focus and (
             is_quarterly_question(request.question)
             or stock_question
@@ -567,70 +695,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "messages": [
                     {
                         "role": "system",
-                        "content": localized_prompt(STOCK_INSTRUCTIONS if stock_question else SYSTEM, request.language)
-                        + (
-                            "\nUse source_refresh to distinguish an attempted refresh from a successful "
-                            "check. If a refresh is incomplete, describe figures as the latest AVAILABLE "
-                            "local disclosure, retain the freshness gap, and do not claim the sources "
-                            "are current or all recent events have been checked."
-                            if tools.refresh_status
-                            else ""
-                        )
-                        + (
-                            "\nThis combined stock and notice request needs BOTH parts: keep up to "
-                            "three analysis claims for the stock assessment, AND up to two short "
-                            "kind=narrative summaries of the latest two readable company_updates events. "
-                            "Use only each event's supplied evidence_ids, one distinct accession per "
-                            "narrative, within 120 Chinese characters. Omit amounts, ratios and dates "
-                            "from notice text; the UI displays public and event dates from source metadata. "
-                            "Selected excerpts cannot prove the entire notice omits a fact: omit such "
-                            "absence claims or explicitly qualify them as 所引摘录未说明. Omit registration "
-                            "boilerplate and executive biographies; describe the core action. "
-                            "Retain planned action qualifiers; do not infer completion or effects on the "
-                            "stock price. Never use notice excerpts instead of typed financial calculations. "
-                            "Keep dynamic financial and passage tools available. If a part lacks sources "
-                            "or review, explain that specific gap. Do not replace the assessment with news."
-                            if is_stock_updates_question(request.question)
-                            else ""
-                        )
-                        + (
-                            "\nUse supplied company_updates. events are SEC official notices; sections.transcripts "
-                            "and sections.news are independent external source excerpts. Never merge their "
-                            "evidence levels, dates or citations. External source material must preserve "
-                            "attribution, outlook/plan qualifiers and text_scope; first_observed is retrieval "
-                            "availability, not an inferred publication or event date. "
-                            "Summarize the dated announcements in Chinese, one short narrative claim per "
-                            "event with its exact excerpt IDs; at most five claims, each under 100 Chinese "
-                            "characters. Describe only the core event; omit executive biographies, filing "
-                            "registration details and general coverage disclaimers. "
-                            "Use standard financial Chinese: debt 'Notes' are 债券 or 票据, never 注记. "
-                            "Describe the issuance action without adding debt classifications such as "
-                            "中期, short-term, senior or secured unless the source explicitly names them. "
-                            "Present events in descending public filing date order. "
-                            "Dates are displayed "
-                            "by the UI from source metadata; do not repeat them in the statement. Source headlines and "
-                            "financial figures in releases are not typed validated facts: describe news "
-                            "qualitatively: never include prices, amounts, coupons, interest rates, percentages, "
-                            "financial ratios or maturity years in narrative statements. "
-                            "If an excerpt is insufficient, search its exact document ID with k=2. "
-                            "Distinguish filing/public availability date from event date. "
-                            "For 6-K, report_date is only the SEC report label, NEVER proof of an event's "
-                            "occurrence date or a financial quarter; the excerpt must support such timing. "
-                            "Preserve planned/scheduled payment qualifiers even after the planned date; "
-                            "never infer actual payment from will be paid/payable on. Share reclamation "
-                            "means shares were reclaimed (回收), not repurchased (回购) unless purchases "
-                            "are explicit. Do not invent the reason for a dividend adjustment. "
-                            "Do not claim these are all news, newly occurred events, media sentiment or verified effects "
-                            "on the stock price. Submit once the available events are summarized. Coverage "
-                            "is rendered separately by the product, do not repeat general media omissions in gaps."
-                            if is_updates_question(request.question) and not stock_question
-                            else ""
-                        )
-                        + (
-                            module_instruction(request.module, request.language)
-                            if request.module
-                            else ""
-                        ),
+                        "content": _research_system_prompt(request, has_refresh=bool(tools.refresh_status)),
                     },
                     {
                         "role": "user",
@@ -647,6 +712,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                                 ),
                                 **({"company_updates": updates_context} if updates_context else {}),
                                 **({"annual_overview": overview} if overview is not None else {}),
+                                **({"annual_comparison": annual_comparison} if annual_comparison else {}),
                                 **({"source_overview": source_context} if source_context else {}),
                                 **(
                                     {"trailing_overview": trailing_context}
@@ -693,12 +759,15 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "tool_count": len(initial_trace),
                 "seen": initial_seen,
                 "repairs": 0,
+                "submit_nudges": 0,
+                "review_independence_warning": False,
                 "submission": None,
                 "verified": [],
                 "review_cache": {},
                 "review_conflicts": set(),
                 "verified_candidate": None,
                 "retained_gaps": [],
+                "numeric_coverage_errors": [],
                 "errors": [],
                 "trace": initial_trace,
                 "usage": {
@@ -706,13 +775,15 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     "completion_tokens": 0,
                     "total_tokens": 0,
                     "model_calls": 0,
-                    "tool_calls": 0,
+                    "tool_calls": len(comparison_trace) if annual_comparison else 0,
                 },
                 "action": "reason",
             },
             {"recursion_limit": 60},
         )
         state["verified"] = self._retain_verified_partial(state, state["verified"])
+        if annual_comparison:
+            state["trace"].append({"stage": "annual_comparison_preparation", "result": annual_comparison})
         basic_brief = False
         analysis_count = sum(c["kind"] == "analysis" for c in state["verified"])
         if (
@@ -761,6 +832,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 if basic_brief:
                     # Deliver this entire reviewed draft, never splice rejected model drafts.
                     state["verified"] = reviewed["verified"]
+                    if reviewed.get("review_independence_warning"):
+                        state["review_independence_warning"] = True
         gaps = list(
             dict.fromkeys(
                 [
@@ -888,7 +961,12 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     gaps.append(
                         "本轮经营与估值判断未完成，公告摘要不能替代股票研究；可用“股票怎么样？结合经营表现和价格分析”继续。"
                     )
-        if state["errors"] and not stopped():
+        gaps, fallback_complete = self._complete_filing_answer(state, gaps)
+        if state.get("review_independence_warning"):
+            gaps.append(
+                "本轮审查未能确认与作者模型独立；该复核不构成独立核验，叙述性结论请谨慎对待。"
+            )
+        if state["errors"] and not stopped() and not fallback_complete:
             if basic_brief:
                 gaps.append(
                     "本次为已有资料支持的基础研究简报；业务归因、正常化盈利和估值场景仍需深入核验。"

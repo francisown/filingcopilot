@@ -43,6 +43,25 @@ def _without_judgments(value):
     return deepcopy(value)
 
 
+def _independent_model_review(run: dict) -> bool:
+    """Require recorded, disjoint model identities; a review marker is insufficient.
+
+    A fallback reviewer may also have authored a draft elsewhere in this run.
+    Missing historical trace metadata remains unknown, not an independent pass.
+    This checks model identities, not independence of a future human annotator.
+    """
+    authors = [step for step in run.get("trace", []) if step.get("stage") == "reason"]
+    reviews = [step for step in run.get("trace", []) if step.get("stage") == "semantic_review"]
+    if not authors or not reviews:
+        return False
+    if any(not isinstance(step.get("model"), str) or not step["model"].strip()
+           for step in [*authors, *reviews]):
+        return False
+    author_models = {step["model"].strip().casefold() for step in authors}
+    return all(step.get("review_independence") not in {"not_independent", "unknown"}
+               and step["model"].strip().casefold() not in author_models for step in reviews)
+
+
 def export_claim_sample(
     rows: list[dict],
     load_run: Callable[[str], dict | None],
@@ -80,6 +99,7 @@ def export_claim_sample(
             exclusions["changed_frozen_answer"] += 1
             continue
         ledger = {item["id"]: item for item in run.get("evidence", []) if item.get("id")}
+        independent = _independent_model_review(run)
         for position, claim in enumerate(claims):
             if not str(claim.get("text", "")).strip():
                 exclusions["empty_claim"] += 1
@@ -95,7 +115,8 @@ def export_claim_sample(
                 "label": None,
                 "label_note": "reviewer fills support / unsupported / unclear",
             }
-            reviewed = claim.get("kind") in REVIEW_KINDS and claim.get("verification") in REVIEW_MARKERS
+            reviewed = (independent and claim.get("kind") in REVIEW_KINDS
+                        and claim.get("verification") in REVIEW_MARKERS)
             candidates.append((identifier, position, item, reviewed))
     rng = random.Random(seed)
     reviewed = [candidate for candidate in candidates if candidate[3]]
@@ -129,6 +150,7 @@ def export_claim_sample(
         "limitations": [
             "Keep this decision key separate from the human labeling worksheet.",
             "Only delivered claims are sampled; rejected drafts and abstentions are outside this calibration.",
+            "Independent model review requires recorded reviewer identities disjoint from every author model; unknown history does not qualify.",
             "Strata are enriched; overall sample support is not a population accuracy estimate.",
         ],
     }
@@ -151,7 +173,7 @@ def main() -> None:
             parser.error("claim-level export needs --review-key stored separately")
         if args.output.resolve() == args.review_key.resolve():
             parser.error("worksheet and review key must use different files")
-        corpus = Corpus(args.home)
+        corpus = Corpus(args.home, readonly=True)
         sample, key = export_claim_sample(rows, corpus.run, size=args.size, reviewed_only=args.reviewed_only)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.review_key.parent.mkdir(parents=True, exist_ok=True)

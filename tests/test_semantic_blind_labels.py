@@ -41,7 +41,9 @@ def frozen_run():
         {"text": "Demand increased", "kind": "narrative", "evidence_ids": ["p1"], "verification": "semantic_review"},
         {"text": "Revenue: 100 USD", "kind": "fact", "evidence_ids": ["f1"], "verification": "deterministic"},
     ]
-    return {"answer": claims, "evidence": [evidence, {"id": "f1", "value": "100", "unit": "USD"}]}
+    return {"answer": claims, "evidence": [evidence, {"id": "f1", "value": "100", "unit": "USD"}],
+            "trace": [{"stage": "reason", "model": "author"},
+                      {"stage": "semantic_review", "model": "reviewer"}]}
 
 
 def test_claim_export_includes_frozen_evidence_without_reviewer_judgments():

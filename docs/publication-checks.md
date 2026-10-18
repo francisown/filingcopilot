@@ -1,53 +1,40 @@
-# Publication checks
+# Release checks
 
-The application is distributed as a local source release from this repository;
-there is no hosted service and no PyPI package. This page documents how the
-public source snapshot was prepared and what its checks cover.
+## Prepare the source
 
-## Selection and hygiene
+`scripts/build_public_snapshot.py` creates a source directory and ZIP from the
+project's release file list. It excludes `.env`, runtime caches and local analysis
+scripts, checks for configured secrets and machine paths, and writes a SHA256
+manifest. The command requires new output paths:
 
-- The public snapshot contains selected source, tests, docs, examples,
-  dependency locks and key evidence summaries in a fresh root commit. Older
-  development history, original worksheets and raw archives are retained
-  locally and are not part of the published source.
-- The public setup path uses `.env.example` only. The snapshot builder rejects
-  absolute machine paths and excludes local-only helper and cache files before
-  creating the selected copy.
-- Tracked files were scanned with Gitleaks and configured-value checks. These
-  statements cover the published snapshot; they are not a claim about any
-  other checkout.
-- Selected JSON summaries with local paths are publication derivatives, marked
-  with `publication_redactions` and the original file SHA256. Results, timings,
-  failure counts and human-label state are unchanged.
+```powershell
+python scripts/build_public_snapshot.py --output .filingcopilot/release-source --zip dist/FilingCopilot-source.zip
+```
 
-## Clean installation
+The directory contains a separate Git root commit for packaging. Changes to the
+existing repository should use its normal commit history.
 
-A new Python 3.10 virtual environment without system site packages installed
-`.[dev]` and wheel from the selected source; no private `.env` was present and
-`pip check` reported no broken requirements. The final full regression in that
-core-only environment recorded **1359 passing tests**; optional model inference
-is not covered by that number. `requirements-lock.txt` is the retained Python
-3.10 dependency snapshot, kept for provenance.
+## Validate
 
-## Distribution checks
+- Install the selected source in a fresh environment and run `pip check`.
+- Run the checks in [CONTRIBUTING.md](../CONTRIBUTING.md) and the
+  [CI workflow](../.github/workflows/ci.yml).
+- Build the application and independent-verifier wheels; check their resources and
+  the valid/tampered package examples.
+- Check documentation links and compare a fresh clone with the release manifest.
+- Scan the selected files for credentials, including image metadata.
 
-- README/docs links, wheel resources, the independent verifier, MCP and UI
-  checks run locally; the hosted CI matrix (Windows/Ubuntu, Python 3.10/3.12,
-  read-only repository permissions) runs the same suites on every push.
-- The bundled [offline example](../examples/README.md) supports a key-free
-  first run; its consistency audit does not authenticate remote source bytes.
-- Docker Compose publishes the host port on `127.0.0.1` only; remote
-  deployment and optional token authentication are outside the completed scope.
-- The claim-period check runs on three curated display fixtures; the original
-  archived packages can be replayed explicitly and remained unchanged.
+The [2026-10-18 checks](validation/reliability-followup-2026-10-18.json) record the
+latest application validation. The earlier
+[clean-install record](validation/release-2026-10-18.json) applies to the source
+revision described there. Local runs and hosted CI results are recorded separately.
 
-## Scope statements
+## Files and licenses
 
-- MIT covers this project's code. Runtime dependencies and optional model
-  weights retain their upstream licenses; model weights and private provider
-  caches are excluded from publication. The bundled demo identifies SEC EDGAR
-  HTML and official CompanyFacts as its sources and includes filing provenance.
-- Human semantic support has a first recorded calibration from one non-domain
-  reviewer; see [evaluation limits](evaluation.md) for its exact scope. ADS
-  conversion inputs and full research coverage remain incomplete, and a
-  recorded walkthrough or hosted demo has not been produced.
+The code uses the [MIT license](../LICENSE). Dependencies and optional model weights
+retain their upstream licenses. Model weights and private provider caches are not
+distributed. Bundled filing data identifies its SEC sources and filing metadata.
+
+Selected historical JSON records may redact local paths; those records include
+`publication_redactions` and the original SHA256. Evaluation values and label state
+are preserved. See the [record index](../artifacts/README.md).

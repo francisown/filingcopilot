@@ -1,18 +1,11 @@
-# Public release checks
+# Release checklist
 
-Checks performed before publishing this source:
+- Keep `.env`, credentials, local caches and model weights outside the source package.
+- Supply online SEC contact details through `FC_SEC_USER_AGENT`.
+- Run tests, lint, browser checks, MCP checks and distribution validation.
+- Check the source manifest and scan the selected files for credentials.
+- Confirm the hosted CI result for the commit being released.
 
-- Git history was searched for tracked `.env`, PEM and key files. Only the
-  empty `.env.example` template is tracked; placeholder configuration strings
-  are not credentials.
-- Tracked text artifacts were scanned for workstation paths; known absolute
-  paths were replaced with `<workspace>` or `<user-home>`.
-- The default SEC user-agent is empty. Each operator supplies their own contact
-  string through `FC_SEC_USER_AGENT` before online requests.
-- `docker compose config` was validated with an empty environment file so no
-  local credentials were rendered into the release check.
-- CI runs tests, lint, UI checks, MCP smoke checks, the evaluation gate, wheel
-  builds and wheel-level validation on Windows and Ubuntu.
-
-These checks describe repository hygiene only; they do not certify the accuracy
-of research output. See [evaluation limits](evaluation.md).
+Commands and recorded results are in [release checks](publication-checks.md).
+The application defaults to local access; hosted deployment needs separate
+authentication and operational validation.

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "filingcopilot"
 version = "1.0.0"
-description = "Stock research with financial data, price charts, AI agents, RAG, and traceable filing sources"
+description = "Company filings, financial calculations and stock research with traceable sources"
 authors = [{name = "francisown"}]
 keywords = ["financial-analysis", "stock-research", "sec-edgar", "rag", "mcp"]
 readme = "README.md"

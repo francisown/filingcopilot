@@ -1,61 +1,68 @@
-# Evaluation and limitations
+# Evaluation
 
-## What the existing numbers measure
+Evaluation separates workflow delivery, financial calculations, retrieval and
+human citation judgments. The results below belong to their recorded source and
+configuration snapshots.
 
-The frozen 140-question production-budget experiment retained 40 answered,
-67 partial and 33 abstained records. Three answered records missed a declared
-character minimum; 37/140 (26.43%) met both workflow status and that length rule.
-This is a mechanical delivery measure, not human answer completeness or truth.
-Evidence-ID binding was 75.91%. A first human calibration of the 40 delivered
-narrative/analysis claims recorded 95% support / 5% unclear / 0% unsupported —
-one first pass by the project author as a single non-domain reviewer, with
-delivered claims carrying the review gate's selection bias; an independent
-domain review remains future work. The review miss-rate remains null pending
-its calibration key.
-P50/P95 were 135.93/240.03 seconds under the old 240/60-second budgets.
+## Historical model experiments
 
-[Budget methodology and original records](user-guide.md#public-release-notes)
-remain available. Do not overwrite old results or combine runs with different
-source snapshots, configurations or time budgets.
+The 2026-10-11 production-budget run used 140 questions, a 240-second research budget
+and a 60-second model-request budget. It recorded 40 answered, 67 partial and 33
+abstained results. Of those, 37 met the frozen character minimum: 37/140, or 26.43%.
+This measures workflow delivery and length, not human-rated completeness.
+
+Evidence-ID binding was 75.91%; P50/P95 latency was 135.93/240.03 seconds. The source
+snapshot was `a1881d4`, before later passage and indexing fixes. One cold-index case
+took 369.55 seconds despite the nominal budget. Its failure is retained in the
+[experiment records](../artifacts/README.md).
+
+A later 140-question paired experiment against `43d9a98` used identical required
+provider headers on both sides. Nonempty delivery rose from 97 to 129, while HTTP
+requests rose from 609 to 707 and median latency from 59.32 to 83.03 seconds.
+Further fixes followed that run; its figures are not current-release measurements.
+See [recent changes](release-2026-10-18.md).
 
 ## Retrieval
 
-On the frozen 200-question editorial exact-passage set, the active focused-query
-75-candidate path recorded recall@5 0.260 and MRR@5 0.150333 under the calibrated
-anchor coverage weight 0.05 (earlier weight-0.01 calibration: 0.240/0.132083).
-The full-query 25-candidate control was 0.155/0.084333. The doubling target was not met.
-In the active-path diagnosis, 65 questions missed the target in the candidate
-pool and 83 had a candidate target outside the returned top five. Fix these
-separately. This calibration is not independently human-adjudicated semantic accuracy.
+The frozen set contains 200 bilingual questions across five companies, with exact
+passage IDs. These are corpus-anchored retrieval measurements.
 
-The cross-encoder and multilingual embedding candidates failed their joint
-recall/MRR/latency gate and remain disabled. No candidate or gold change is
-part of the current release. [Negative result](rerank-negative-result-2026-10-11.md).
+| Configuration | Recall@5 | MRR@5 |
+|---|---:|---:|
+| Full query, 25 candidates | 0.155 | 0.084333 |
+| Focused query, 75 candidates, anchor weight 0.05 | 0.260 | 0.150333 |
 
-## Targeted remediation
+In the focused-query diagnosis, 65 targets were absent from the candidate pool and
+83 were present but ranked below the returned top five. The recall-doubling target
+was not met. Cross-encoder and multilingual candidates failed the combined
+recall/MRR/latency gate and remain disabled. The
+[negative-result report](rerank-negative-result-2026-10-11.md) includes their setup
+and reproduction commands.
 
-A retained failure asked for NVIDIA FY2022 revenue and net income, spent
-178.137 seconds and abstained. The original corpus had no FY2022 facts; the
-model repeated tools and inspected other years. The new typed-number path can
-retrieve the requested annual end-years without vector indexing or financial
-model narration. Reasons, outlook and forecasts stay on the analysis path.
-Validate actual source acquisition, dates, missing metrics, cache reuse and
-package replay; this single repair does not establish a new 140-question score.
+## Human review
 
-## Human acceptance
+A first pass over 40 delivered narrative/analysis claims recorded 95% supported,
+5% unclear and 0% unsupported. The project author was the sole reviewer and was not
+a domain specialist. The sample was selected from delivered claims, so it excludes
+rejected drafts and refusals. Independent domain review remains pending.
 
 The original 20/40 worksheets and 872 paired-comparison units are preserved.
-Only a real person's labels and identity may be imported. Mechanical token
-hints never score. Partial reviewed subsets need their selection-bias caveat;
-a first single-reviewer, non-domain calibration over 40 delivered claims is
-recorded (95% support / 5% unclear / 0% unsupported; one first pass by the
-project author), and the review miss-rate remains null until its required
-inputs exist. Original acceptance-stage checks remain pending; later stages are not unlocked by rule tests.
+Scoring requires a human reviewer declaration and unchanged claim/evidence
+fingerprints. Incomplete labels produce a separate subset report. Review miss-rate
+calibration requires its matching decision key.
 
-## Verification scope
+Independent-model calibration also checks the run trace: reviewer models must be
+distinct from every author model. The
+[2026-10-18 correction](reliability-followup-2026-10-18.md#review-calibration)
+documents the affected historical records.
 
-Passing tests or offline consistency checks does not certify narrative truth,
-price-provider correctness, issuer authenticity or investment performance.
-Source caches, unrounded calculation inputs, source dates, currencies and share
-bases remain part of evidence. Missing ADS ratio, dated FX or unrounded inputs
-are never filled by guessing.
+## Reproduction and interpretation
+
+Use [test profiles](test-profiles.md) for regression commands and
+[release checks](publication-checks.md) for distribution validation. Checkpoints bind
+questions, source hashes, model configuration and budgets; a mismatched resume is
+rejected. Compare runs with their cache conditions and denominators intact.
+
+Package audits check the requested structure, arithmetic and source comparisons.
+They do not reassess narrative meaning or investment performance. Missing source
+files, ADS ratios, dated FX rates and original numeric inputs remain explicit.

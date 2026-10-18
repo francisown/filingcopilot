@@ -5,21 +5,160 @@ import re
 import time
 from typing import TYPE_CHECKING
 
+from .annual_details import comparable_annual_periods
+from .annual_scope import annual_fact_years, compares_prior_year, explicit_years
 from .company_modules import module_contract, statement_char_limit
 from .execution import ResearchStopped, current_control, progress, stopped
 from .fundamentals import is_stock_question
 from .localization import current_language, state_language
+from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, Submission
+from .submission_protocol import parse_submission
 from .tools import ResearchTools
 from .updates import is_stock_updates_question, wants_update_summary
-from .verification import verify_submission
+from .verification import numeric_completeness_errors, verify_submission
 
 if TYPE_CHECKING:
     from .agent import AgentState
 
 
 class ExecutionMixin:
+    def _complete_filing_answer(self, state: AgentState, gaps: list[str]) -> tuple[list[str], bool]:
+        """Retain only verified observed math; retire only resolved numeric gaps.
+
+        This runs after model submission/review, under the existing tool budget.
+        It can add typed claims but cannot manufacture a missing explanation.
+        """
+        tools, question, focus = state["tools"], state["question"], state["focus_ticker"]
+        stock_question = is_stock_question(question)
+        fallback_complete = False
+        if not stopped() and not stock_question and focus:
+            calculation_ids = self._complete_observed_calculations(state, self.settings.max_tool_calls)
+            if state["verified"]:
+                # A valid partial submission must not suppress requested math.
+                # Preserve its reviewed prose and gaps; add only bound, requested
+                # calculations, passing the same verifier as model submissions.
+                existing_ids = {i for c in state["verified"] if c["kind"] in ("fact", "calculation")
+                                for i in c["evidence_ids"]}
+                supplemented = False
+                for evidence_id in calculation_ids:
+                    if evidence_id in existing_ids:
+                        continue
+                    checked, _ = verify_submission(
+                        Submission(claims=[Claim(kind="calculation", evidence_ids=[evidence_id])]),
+                        tools, question, focus_ticker=focus,
+                    )
+                    for detail in checked:
+                        detail["index"] = max((c["index"] for c in state["verified"]), default=-1) + 1
+                        state["verified"].append(detail)
+                        existing_ids.add(evidence_id)
+                    if checked:
+                        supplemented = True
+                        state["trace"].append({
+                            "stage": "observed_calculation_completion",
+                            "evidence_id": evidence_id,
+                            "accepted_claims": len(checked),
+                        })
+                if supplemented and state.get("numeric_coverage_errors"):
+                    # Resolve only machine-checked omissions that the delivered
+                    # calculation actually filled. Never infer that prose gaps
+                    # or independent-review warnings have disappeared.
+                    remaining = numeric_completeness_errors(
+                        state["verified"], tools, question, focus,
+                    )
+                    resolved = set(state["numeric_coverage_errors"]) - set(remaining)
+                    if resolved:
+                        gaps = [gap for gap in gaps if gap not in resolved]
+                        state["errors"] = [error for error in state["errors"] if error not in resolved]
+                        state["trace"].append({"stage": "numeric_coverage_completed",
+                                               "resolved": sorted(resolved), "remaining": remaining})
+                if supplemented and gaps:
+                    # Free-form gaps can combine missing math with missing
+                    # interpretation. Preserve their content and partial status,
+                    # but date the explanation so it cannot deny a delivered sum.
+                    state["trace"].append({"stage": "pre_calculation_gaps", "gaps": list(gaps)})
+                    prefix = translate_text("补充计算前记录的说明（已展示的计算现已补齐，其余缺口仍保留）：")
+                    gaps = [prefix + gap for gap in gaps]
+        if not state["verified"] and not stopped() and not stock_question and focus:
+            # The model may end without submitting (some providers return an
+            # empty tool-call with finish_reason="tool_calls"). Do not throw
+            # away figures the run already observed and can verify.
+            fallback = self._observed_typed_fallback(tools, question, focus)
+            for detail in fallback:
+                if not any(
+                    detail["evidence_ids"] == existing["evidence_ids"]
+                    for existing in state["verified"]
+                ):
+                    detail["index"] = max(
+                        (c["index"] for c in state["verified"]), default=-1
+                    ) + 1
+                    state["verified"].append(detail)
+            if fallback:
+                # A numeric question fully answered from bound facts is complete;
+                # only an actually uncovered question keeps the model gap.
+                fallback_complete = self._fallback_covers_question(
+                    tools, question, fallback, focus=focus
+                )
+                if not fallback_complete:
+                    gaps.append(
+                        "模型未在预算内提交完整回答；已保留已在本地核验的财务数字，未核验的解释不作结论。"
+                    )
+                state["trace"].append(
+                    {
+                        "stage": "observed_typed_fallback",
+                        "accepted_claims": len(fallback),
+                        "complete": fallback_complete,
+                        "reason": "deterministic typed evidence retained after the model failed to submit",
+                    }
+                )
+        return gaps, fallback_complete
+
+    @staticmethod
+    def _prepare_annual_comparison(tools, question, focus, max_calls):
+        """Read local typed premises before causal drafting, within the tool budget."""
+        years = explicit_years(question)
+        metrics, _ = tools.domain.requests(question)
+        if len(years) != 1 or not metrics or not compares_prior_year(question):
+            return None, []
+        # Leave room for source retrieval and a submission. Never start a
+        # comparison whose necessary inputs do not fit in the available budget.
+        if 3 * len(metrics) + 2 > max_calls:
+            return None, []
+        evidence, trace, missing = [], [], []
+
+        def call(name, arguments):
+            control = current_control()
+            if control:
+                control.record_tool(name)
+            try:
+                result = tools.call(name, arguments)
+            except ValueError as exc:
+                trace.append({"stage": "tool", "tool": name, "arguments": arguments, "error": str(exc)})
+                raise
+            trace.append({"stage": "tool", "tool": name, "arguments": arguments, "result": result})
+            return result
+
+        year = next(iter(years))
+        for metric in sorted(metrics):
+            pair = []
+            for source_year in (year, year - 1):
+                if stopped():
+                    return {"evidence": evidence, "missing": missing}, trace
+                result = call("get_financial_fact", {"ticker": focus, "metric": metric, "fiscal_year": source_year})
+                if result["found"]:
+                    pair.append(result["evidence"])
+                    evidence.append(result["evidence"])
+                else:
+                    missing.append({"metric": metric, "fiscal_year": source_year})
+            if len(pair) == 2 and comparable_annual_periods(*pair) and not stopped():
+                try:
+                    result = call("calculate", {"operation": "growth", "left_id": pair[0]["id"], "right_id": pair[1]["id"]})
+                    evidence.append(result["evidence"])
+                except ValueError as exc:
+                    missing.append({"metric": metric, "operation": "growth", "reason": str(exc)})
+        return {"evidence": evidence, "missing": missing}, trace
+
     @state_language
     def execute(self, state: AgentState) -> dict:
         submission = None
@@ -66,7 +205,7 @@ class ExecutionMixin:
                         "Notice summary may only submit claims from supplied notice excerpts"
                     )
                 if name == "submit_answer":
-                    submission = Submission.model_validate(arguments)
+                    submission = parse_submission(arguments)
                     if wants_update_summary(state["question"]):
                         try:
                             self._validate_update_summary(submission, state)
@@ -291,3 +430,164 @@ class ExecutionMixin:
             )
             accepted.extend(verified)
         return accepted
+
+    @staticmethod
+    def _complete_observed_calculations(state: dict, max_tool_calls: int) -> list[str]:
+        """Use remaining tool budget for requested math on unambiguous observed facts.
+
+        No acquisition, guessing, model prose or bypass of the calculation tool's
+        period/unit rules is allowed here. Missing or competing versions stay gaps.
+        """
+        tools, question, focus = state["tools"], state["question"], state["focus_ticker"]
+        years = {int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", question)}
+        if not focus or not years:
+            return []
+        metrics, ratios = tools.domain.requests(question)
+        facts = {}
+        for item in tools.ledger.values():
+            if item.get("kind") == "fact" and item.get("ticker") == focus:
+                facts.setdefault((item.get("metric"), item.get("fiscal_year")), []).append(item)
+        pairs = []
+        for year in sorted(years):
+            if compares_prior_year(question):
+                pairs.extend(("growth", (metric, year), (metric, year - 1))
+                             for metric in sorted(metrics))
+            pairs.extend(("ratio", (tools.domain.ratios[key].numerator, year),
+                          (tools.domain.ratios[key].denominator, year)) for key in sorted(ratios))
+        requested_ids = []
+        for operation, left, right in pairs:
+            if stopped():
+                break
+            if len(facts.get(left, [])) != 1 or len(facts.get(right, [])) != 1:
+                continue
+            ids = [facts[left][0]["id"], facts[right][0]["id"]]
+            existing = next((item for item in tools.ledger.values()
+                             if item.get("operation") == operation and item.get("input_ids") == ids), None)
+            if existing:
+                requested_ids.append(existing["id"])
+                continue
+            if state["tool_count"] >= max_tool_calls:
+                continue
+            arguments = {"operation": operation, "left_id": ids[0], "right_id": ids[1]}
+            state["tool_count"] += 1
+            state["usage"]["tool_calls"] = state["usage"].get("tool_calls", 0) + 1
+            control = current_control()
+            if control:
+                control.record_tool("calculate")
+            started = time.perf_counter()
+            trace = {"stage": "fallback_calculation", "tool": "calculate", "arguments": arguments}
+            try:
+                trace["result"] = tools.calculate(**arguments)
+                requested_ids.append(trace["result"]["evidence"]["id"])
+            except ValueError as exc:
+                trace["error"] = str(exc)
+            trace["duration_ms"] = round((time.perf_counter() - started) * 1000)
+            state["trace"].append(trace)
+        return requested_ids
+
+    @staticmethod
+    def _observed_typed_fallback(
+        tools: ResearchTools, question: str, focus: str | None
+    ) -> list[dict]:
+        """Keep already-observed typed evidence when the model fails to submit.
+
+        Only facts/calculations bound to the focused ticker are eligible, and
+        only those for fiscal years the question actually names (when it names
+        any). Every claim still passes the ordinary verifier, so an unverified
+        number is never delivered. This mirrors ``_deadline_numeric_fallback``:
+        the model's missing interpretation must not silently erase figures the
+        run already observed and checked.
+        """
+        if not focus:
+            return []
+        years = explicit_years(question)
+        fact_years = annual_fact_years(question)
+        seen: set[str] = set()
+        typed = []
+        for item in tools.ledger.values():
+            item_id = item.get("id")
+            if (
+                item.get("ticker") != focus
+                or item.get("kind") not in ("fact", "calculation")
+                or not item_id
+                or item_id in seen
+            ):
+                continue
+            year = item.get("fiscal_year")
+            allowed_years = fact_years if item.get("kind") == "fact" else years
+            if allowed_years and year is not None and int(year) not in allowed_years:
+                continue
+            seen.add(item_id)
+            typed.append(item)
+        typed.sort(
+            key=lambda item: (
+                item.get("kind") != "calculation",
+                -(int(item.get("fiscal_year") or 0)),
+                item.get("id", ""),
+            )
+        )
+        accepted = []
+        for item in typed[:8]:
+            claims = Submission(
+                claims=[Claim(kind=item["kind"], evidence_ids=[item["id"]])], gaps=[]
+            )
+            verified, _ = verify_submission(claims, tools, question, focus_ticker=focus)
+            accepted.extend(verified)
+        return accepted
+
+    @staticmethod
+    def _fallback_covers_question(
+        tools: ResearchTools, question: str, claims: list[dict], focus: str | None = None
+    ) -> bool:
+        """Only explicit annual numeric requests can be completed by this fallback.
+
+        Unknown wording stays partial. Valid individual claims alone do not prove
+        coverage: recheck the whole set for every company, year, metric and ratio.
+        Without an explicit year, observed facts cannot establish "latest".
+        """
+        from .annual_numbers import numeric_annual_question
+
+        if not claims or not re.search(r"(?<!\d)20\d{2}(?!\d)", question):
+            return False
+        if not numeric_annual_question(question, tools.domain):
+            return False
+        terms = []
+        for ticker, company in tools.domain.companies.items():
+            terms.extend([ticker, company.name, *company.aliases])
+        for key, spec in {**tools.domain.metrics, **tools.domain.ratios}.items():
+            terms.extend([key, key.replace("_", " "), spec.label, *spec.aliases])
+        residual = question
+        for term in sorted(set(terms), key=len, reverse=True):
+            if not term:
+                continue
+            pattern = re.escape(term)
+            if term.isascii():
+                pattern = r"(?<![a-z0-9_])" + pattern + r"(?![a-z0-9_])"
+            residual = re.sub(pattern, " ", residual, flags=re.I)
+        residual = re.sub(r"(?:FY\s*)?20\d{2}", " ", residual, flags=re.I)
+        residual = re.sub(
+            r"\b(?:what|is|are|was|were|the|and|of|for|in|please|show|give|list|"
+            r"compare|versus|vs|how|much|fiscal|year|annual|amounts?|values?|"
+            r"growth|rate|year-over-year|previous|prior)\b|'s", " ", residual, flags=re.I,
+        )
+        residual = re.sub(
+            r"分别|是多少|多少|数值|金额|列出|上一财年|上一年|财年|年度|同比|增长率|增长|比较|"
+            r"请|的|和|与|及|为|是|年", " ", residual,
+        )
+        if re.search(r"\w", residual):
+            return False
+        ids = list(dict.fromkeys(eid for claim in claims for eid in claim["evidence_ids"]))
+        items = [tools.ledger.get(eid) for eid in ids]
+        if any(not item or item.get("kind") not in {"fact", "calculation"} for item in items):
+            return False
+        submission = Submission(claims=[
+            Claim(kind=item["kind"], evidence_ids=[item["id"]]) for item in items
+        ])
+        # The ordinary verifier uses this canonical spelling for growth coverage.
+        coverage_question = question
+        if re.search(r"growth|同比|增长|year-over-year", question, re.I):
+            coverage_question += " 同比"
+        accepted, errors = verify_submission(
+            submission, tools, coverage_question, focus_ticker=focus
+        )
+        return not errors and len(accepted) == len(submission.claims)

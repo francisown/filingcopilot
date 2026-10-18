@@ -220,8 +220,7 @@ function renderInlineCompanySummary(host,result,section,claimIndexes=null){
     }
     if(module.boundary){const boundary=el('div','company-inline-boundary');boundary.append(el('strong','', '边界'),el('p','',module.boundary));host.append(boundary);}
   }else{
-    // A missing-source message is only honest when the section really has no
-    // material; a failed model run keeps its own reason from the gaps.
+    // Report missing sources separately from model failures.
     const sourceMissing=!(section.evidence_ids||[]).length||section.status==='gap';
     const fallback=sourceMissing?(module.empty_gap||'本节暂未形成可交付文字结论；下方保留具体缺口。'):(gaps.length?'本节暂未形成可交付文字结论；具体原因见下方缺口。':'本节暂未形成可交付文字结论。');
     host.append(el('p','company-source-gap',fallback));

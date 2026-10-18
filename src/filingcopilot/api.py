@@ -48,7 +48,15 @@ def _api_error_message(detail: object, language: str) -> str:
     message = str(detail)
     if language != "en":
         return message
-    translated = translate_text(message, "en")
+    # Translate each complete plan message before joining it to suggestions.
+    # Otherwise a fragment such as " 年" can consume the start of " 年报…",
+    # causing the useful English reason to be replaced by the generic fallback.
+    reason, separator, suggestions = message.partition(" 可选问题：")
+    translated = translate_text(reason, "en")
+    if separator:
+        translated += " Suggested questions: " + " / ".join(
+            translate_text(value, "en") for value in suggestions.split(" / ")
+        )
     if not _CJK.search(translated):
         return translated
     if "知悉日期不能晚于当前可用日期" in message or "Awareness date cannot be later" in message:

@@ -4,6 +4,8 @@ import re
 import time
 import uuid
 
+from .annual_details import comparable_annual_periods
+from .annual_scope import annual_fact_years, compares_prior_year, wants_growth
 from .domain import Domain
 from .models import Claim, ResearchAnswer, ResearchRequest, Submission
 from .tools import ResearchTools
@@ -11,10 +13,7 @@ from .verification import verify_submission
 
 
 def annual_years(question: str) -> tuple[int, ...]:
-    years = {int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", question)}
-    if any(t in question.lower() for t in ("同比", "growth", "year-over-year")):
-        years.update(y - 1 for y in list(years))
-    return tuple(sorted(years))
+    return tuple(sorted(annual_fact_years(question)))
 
 
 def numeric_annual_question(question: str, domain: Domain) -> bool:
@@ -23,12 +22,17 @@ def numeric_annual_question(question: str, domain: Domain) -> bool:
     This routes requests, not source verification. Existing claim gates remain
     authoritative. Acquisition can bind at most three annual end-years.
     """
+    # Only the exact metadata/arithmetic clauses are removed. Business sources,
+    # causes, policy comparisons and forecasts still require interpretation.
+    routed = re.sub(r"(?:期间|报告期间|年度期间)是否一致|(?:同比)?是否(?:可|可以|能够)计算", "", question)
+    if re.search(r"是多少|多少|\bhow much\b|\bwhat (?:was|were|is)\b", routed, re.I):
+        routed = re.sub(r"(?:数据|证据)?来源是什么|\b(?:what is |and )?(?:its |the )?source\b", "", routed, flags=re.I)
     return bool(domain.allowed_metrics(question)) and len(annual_years(question)) <= 3 and not re.search(
         r"为什么|为何|原因|风险|解释|驱动|分析|评价|来源|商业模式|业务|构成|结构|因素|质量|对应|用于|用途|投向|"
-        r"预计|预测|预期|前景|竞争|优势|可持续|是否|差额|差值|最高|最低|排名|哪年|"
+        r"预计|预测|预期|前景|竞争|优势|可持续|是否|差额|差值|最高|最低|排名|哪年|会计|政策|重述|"
         r"why|risk|explain|driver|analys|business|sources?|composition|quality|structure|used for|uses of|purpose|"
-        r"how (?:does|did|is|are|can)|forecast|project(?:ed|ion)|expect|outlook|sustain|difference|higher|lower|ranking",
-        question, re.I,
+        r"how (?:does|did|is|are|can)|forecast|project(?:ed|ion)|expect|outlook|sustain|difference|higher|lower|ranking|accounting|polic|restat",
+        routed, re.I,
     )
 
 
@@ -41,7 +45,12 @@ def reference_answer(request: ResearchRequest, tools: ResearchTools, domain: Dom
     years = sorted({int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", question)})
     metrics, ratios = domain.requests(question)
     needed = domain.allowed_metrics(question)
-    growth = any(t in question.lower() for t in ("同比", "growth", "year-over-year"))
+    comparison = compares_prior_year(question)
+    growth = wants_growth(question) or comparison
+    show_comparison = comparison and bool(re.search(
+        r"期间|period|上一(?:个)?(?:财)?年|上年|去年|prior|previous|preceding|可计算|可以计算|能够计算",
+        question, re.I,
+    ))
     gaps, claims, trace = [], [], []
 
     def call(name, arguments):
@@ -71,7 +80,7 @@ def reference_answer(request: ResearchRequest, tools: ResearchTools, domain: Dom
                 if result["found"]:
                     evidence = result["evidence"]
                     observed[(metric, year)] = evidence
-                    if year in scoped_years:
+                    if year in scoped_years or show_comparison:
                         claims.append(Claim(kind="fact", evidence_ids=[evidence["id"]]))
                 else:
                     label = domain.metrics[metric].label
@@ -92,6 +101,9 @@ def reference_answer(request: ResearchRequest, tools: ResearchTools, domain: Dom
             ]
             for operation, left, right in pairs:
                 if left not in observed or right not in observed:
+                    continue
+                if operation == "growth" and not comparable_annual_periods(observed[left], observed[right]):
+                    gaps.append(f"{ticker} FY{year} 同比不可计算：来源未绑定可对齐的相邻年度起止日，不能混用期间。")
                     continue
                 try:
                     result = call(
@@ -148,6 +160,7 @@ def reference_answer(request: ResearchRequest, tools: ResearchTools, domain: Dom
         question,
         focus_ticker=request.ticker,
         allow_excerpts=True,
+        annual_details=show_comparison or bool(re.search(r"来源|\bsource\b", question, re.I)),
     )
     trace.append({"stage": "verify", "accepted_claims": len(verified), "findings": errors})
     gaps += errors

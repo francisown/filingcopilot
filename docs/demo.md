@@ -1,23 +1,26 @@
 # Local demonstration
 
-This is a reproducible workflow, not a claimed three-minute recording or a
-public hosted demo. It uses the local app and exports a portable research package.
+This walkthrough uses the bundled Apple filings. Follow the
+[installation guide](installation.md), then start the workspace:
 
-1. Run `start.ps1 -Port 8159` and select NVIDIA / NVDA.
-2. Ask `What were NVIDIA's FY2022 revenue and net income?` in Agent mode.
-3. Inspect FY2022 source dates, currency and each fact's original filing link.
-   The typed financial path does not call a model or wait for a vector index.
-   Missing sources/metrics stay explicit; other years are not substituted.
-4. Export the package and run `filingcopilot verify-package package.json`.
-   For original-byte checks add the trusted corpus and source-cache arguments
-   shown in [independent verifier instructions](independent-verifier.md).
-5. Compare a causal question such as `Why did revenue change?`: this needs
-   original passages and model review, and retains an independent status.
+```powershell
+$env:FC_EMBEDDING_MODE = "off"
+.\start.ps1 -Port 8159
+```
 
-The first SEC download needs a real contact configured in `.env` and available
-network access. An unregistered Chinese company name may need one model call
-for name conversion; it is accounted separately from financial computation.
+1. Select Apple / AAPL, a knowledge date of `2026-10-08`, and **Data only**.
+2. Ask `What were Apple's FY2025 revenue and net income?`.
+3. Open a citation and check the filing, reporting period, currency and amount.
+4. Export the research package and verify it:
 
-[Current acceptance index](../artifacts/README.md) lists retained evidence and
-limits. A 140-question production-budget re-evaluation is not implied by one
-working example or by deterministic fixture tests.
+```powershell
+.\.venv\Scripts\python.exe -m filingcopilot verify-package package.json
+```
+
+For raw-source checks, supply a trusted cache as described in the
+[verifier instructions](independent-verifier.md). The verifier does not download
+missing files.
+
+To try a causal question such as `Why did revenue change?`, configure research and
+review models first. New filing downloads also require network access and a contact
+string in `FC_SEC_USER_AGENT`. See [configuration](../README.md#enable-live-filings-and-ai-research).

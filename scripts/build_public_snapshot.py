@@ -26,7 +26,10 @@ RECORDS = ("README.md", "third-round-cold-PDD-2026-10-11.json",
            "overnight-release-validation-2026-10-12.json",
            "overnight-installation-validation-2026-10-12.json", "overnight-window-validation-2026-10-12.json",
            "overnight-plan-language-validation-2026-10-13.json", "overnight-api-error-language-validation-2026-10-13.json")
-PRIVATE_INPUTS = frozenset({"scripts/configure_local.py"})
+PRIVATE_INPUTS = frozenset({
+    "scripts/configure_local.py", "scripts/fc_gold_facts.py", "scripts/fc_report.py",
+})
+PRIVATE_TREES = ("scripts/analysis/",)
 
 
 def local_exclusions() -> frozenset[str]:
@@ -108,7 +111,8 @@ def selected_paths(root: Path) -> list[Path]:
     paths += [root / "artifacts" / name for name in RECORDS
               if (root / "artifacts" / name).is_file()]
     excluded = PRIVATE_INPUTS | local_exclusions()
-    return sorted({p for p in paths if p.relative_to(root).as_posix() not in excluded})
+    return sorted({p for p in paths if p.relative_to(root).as_posix() not in excluded
+                   and not p.relative_to(root).as_posix().startswith(PRIVATE_TREES)})
 
 
 def eol_targets(root: Path, paths: list[Path]) -> dict[str, str]:
@@ -122,7 +126,8 @@ def eol_targets(root: Path, paths: list[Path]) -> dict[str, str]:
     targets = {}
     rels = [p.relative_to(root).as_posix() for p in paths]
     try:
-        proc = subprocess.run(["git", "-C", str(root), "ls-files", "--eol", "-z", "--", *rels],
+        proc = subprocess.run(["git", "-C", str(root), "ls-files", "--cached", "--others",
+                               "--exclude-standard", "--eol", "-z", "--", *rels],
                               capture_output=True, check=True)
     except (OSError, subprocess.CalledProcessError):
         return targets
@@ -135,7 +140,7 @@ def eol_targets(root: Path, paths: list[Path]) -> dict[str, str]:
         text = header.decode("utf-8", "replace")
         index_eol = text.split()[0] if text.split() else ""
         attr = text.split("attr/", 1)[1] if "attr/" in text else ""
-        if index_eol == "i/-text" or attr.strip() == "-text":
+        if index_eol == "i/-text" or "w/-text" in text.split() or attr.strip() == "-text":
             targets[name.decode("utf-8")] = "raw"
         elif "eol=crlf" in attr:
             targets[name.decode("utf-8")] = "crlf"
@@ -161,10 +166,24 @@ def private_values():
     values = set()
     for key, value in dotenv_values(ROOT / ".env").items():
         if value and len(value) >= 6 and any(
-            part in key.upper() for part in ("KEY", "TOKEN", "PASSWORD", "CONTACT", "EMAIL", "USER_AGENT")
+            part in key.upper() for part in ("KEY", "TOKEN", "PASSWORD", "CONTACT", "EMAIL", "USER_AGENT", "SESSION", "SECRET")
         ):
             values.add(value.encode())
             values.update(email.encode() for email in re.findall(r"[\w.+-]+@[\w.-]+", value))
+        if key == "FC_EXTRA_HEADERS" and value:
+            values.add(value.encode())
+            try:
+                headers = json.loads(value)
+            except ValueError:
+                continue
+            if isinstance(headers, dict):
+                for name, header in headers.items():
+                    if isinstance(header, str) and len(header) >= 6 and re.search(
+                        r"authorization|cookie|token|key|secret|session", name, re.I,
+                    ):
+                        values.add(header.encode())
+                        if header.lower().startswith(("bearer ", "basic ")):
+                            values.add(header.split(" ", 1)[1].encode())
     return values
 
 
@@ -219,6 +238,7 @@ def main():
                 "original_repository_preserved": True, "remote_publication": False,
                 "absolute_machine_paths_checked": True,
                 "private_helpers_excluded": sorted(PRIVATE_INPUTS),
+                "private_trees_excluded": list(PRIVATE_TREES),
                 "security_scope": "Selected files and decoded PNG metadata checked for configured credentials/contact and machine paths; visually review images and run gitleaks separately."}
     (output / "release-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     subprocess.run(["git", "init", "-b", "main", str(output)], check=True, capture_output=True)

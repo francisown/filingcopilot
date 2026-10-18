@@ -5,7 +5,9 @@
   const key='filingcopilot.language', original=new WeakMap();
   const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   const fragments=Object.keys(catalog).filter(s=>s.length>=2).sort((a,b)=>b.length-a.length);
-  const matcher=fragments.length?new RegExp(fragments.map(escape).join('|'),'g'):null;
+  // A literal such as "0 秒" is a whole label, not the tail of "420 秒".
+  // Never let fragment translation change a dynamic numeric value.
+  const matcher=fragments.length?new RegExp(fragments.map(s=>(/^\d/.test(s)?'(?<![\\d.])':'')+escape(s)+(/\d$/.test(s)?'(?![\\d.])':'')).join('|'),'g'):null;
   let saved;try{saved=global.localStorage?.getItem(key);}catch(_){}
   let language=['zh','en'].includes(saved)?saved:'en';
   function translate(value){

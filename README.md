@@ -10,7 +10,7 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or later"></a>
 </p>
 
-**Research stocks with financial data, price charts, and AI answers linked to original filings.**
+**A local workspace for company filings, financial calculations and stock research.**
 
 FilingCopilot runs on your computer and brings company filings, market data, and research
 tools into one workspace. Look up a company, explore its financial performance, compare it
@@ -27,17 +27,8 @@ US SEC; price-chart coverage is separate and depends on the market-data provider
 
 [Quick start](#quick-start) · [Using the workspace](#using-the-workspace) · [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md)
 
-**Want the shortest technical tour?** Start with the [project showcase](docs/showcase.md): it walks through a
-no-key verification, one browser trace, and the five code boundaries that make the result replayable.
-
-## What you can use it for
-
-- Understand a company's business, operating performance, cash generation and disclosed risks.
-- View long-term price charts alongside trends in revenue, earnings, and cash flow.
-- Compare companies and optionally add SPY or QQQ as a price benchmark.
-- Explore how growth, valuation multiples, and discount rates affect a calculation.
-- Keep a record of the facts, sources and formulas behind a research result.
-- Connect filing search and financial tools to an MCP-compatible assistant.
+[Project overview](docs/showcase.md): try an offline example, follow a request through the
+code, and inspect the saved evidence.
 
 ## Features
 
@@ -51,14 +42,14 @@ no-key verification, one browser trace, and the five code boundaries that make t
 | Official updates | Read supported companies' recent official disclosures, dates and source excerpts. Configured models can produce cited summaries. |
 | Company comparison | Compare financial figures and price returns over shared dates, with an optional ETF benchmark and current provider TTM valuation. |
 | Valuation scenarios | Compare annual and provider TTM P/E, inspect supported historical annual P/E data, and explore editable earnings and cash-flow assumptions. |
-| AI research | Ask focused questions or run a six-part company review. Track progress, ask follow-up questions, cancel a task, or reconnect after refreshing the page. |
+| Research agent | Ask focused questions or run a six-part company review. Track progress, ask follow-up questions, cancel a task, or reconnect after refreshing the page. |
 | Saved research | Maintain a watchlist, reopen results, export research packages and inspect changes between research versions. |
 | Offline verification | Recompute saved calculations and check a research package. Provide the matching source files to check their contents against the saved evidence. |
 | Integrations | Use the browser, CLI, REST API or 30 MCP tools. |
 
 **Stock charts do not require downloading annual reports first.** Explicit annual numbers,
 growth rates, margins and financial trends can run without an LLM. Explanations, generated
-announcement summaries and AI company reviews require model configuration. Incomplete
+announcement summaries and company reviews require model configuration. Incomplete
 evidence can lead to a partial answer; the interface shows what is still missing.
 
 ## Quick start
@@ -77,27 +68,15 @@ if (-not (Test-Path -LiteralPath .env)) {
 $env:FC_EMBEDDING_MODE = "off"
 ```
 
-If your pip is configured to a private or mirror index and this command reports that no
-`setuptools>=68` version is available, retry with the official index:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e "." --index-url https://pypi.org/simple
-```
-
-The `setup.ps1` installer already uses the official PyPI index for this step.
-
 Start the workspace with keyword search:
 
 ```powershell
 .\start.ps1 -Port 8159
 ```
 
-You can also run `.\setup.ps1` to select an available Python 3.10 or later and
-install the core dependencies. It reuses a compatible existing `.venv`.
-For a new environment, `-PythonExecutable` accepts the full interpreter path.
-`-Profile locked` is an optional reproduction of the historical Python 3.10
-dependency snapshot, which includes development and embedding packages.
-See the [installation guide](docs/installation.md) for these options.
+The installer selects a supported Python version, reuses a compatible `.venv`
+and installs core dependencies from PyPI. Interpreter selection, optional profiles
+and installation troubleshooting are covered in the [installation guide](docs/installation.md).
 
 Open [the local workspace](http://127.0.0.1:8159/). Keep the service terminal running;
 press `Ctrl+C` in that terminal to stop it. Existing installations can use the start
@@ -141,13 +120,14 @@ Python path with `.venv/bin/python`. Live stock charts load separately from this
 
 ### Enable live filings and AI research
 
-Edit `.env` when you are ready to add online filing downloads or AI-generated analysis.
+Configure `.env` to download new filings or use a research model.
 
 | Variable | Purpose |
 |---|---|
 | `FC_SEC_USER_AGENT` | Your real contact name and email, required for online SEC requests. |
 | `FC_API_BASE` | An OpenAI-compatible model endpoint supporting tool calls. |
 | `FC_API_KEY` | The model provider's access key. |
+| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-required request headers; keep real values private. |
 | `FC_MODEL` | The research model. |
 | `FC_REVIEW_MODEL` | The analysis-review model; use a different model where possible. |
 | `FC_EMBEDDING_MODE` | `off` for keyword search; `local` for optional local embeddings. |
@@ -228,7 +208,7 @@ evidence and calculation rules.
 - [Project showcase](docs/showcase.md)
 - [Development and evaluation](docs/evaluation.md)
 - [Roadmap](ROADMAP.md)
-- [Chinese guide and historical implementation notes](docs/user-guide.md)
+- [Chinese user guide](docs/user-guide.md)
 
 ## Feedback and contributions
 

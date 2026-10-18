@@ -13,7 +13,7 @@
         "filed": "2025-10-31",
         "period_end": "2025-09-27",
         "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
-        "content_sha256": "ad62dcaf0ed3f4a7bdafb6ca2969c1c0b4f9e63e000dbac4c325bb5a293499b7"
+        "content_sha256": "3a69f79bffa38444798279ec82fa1e76ce0460b8a20463580026248282d0f37e"
       },
       "facts": [
         {
@@ -3187,7 +3187,7 @@
         "filed": "2024-11-01",
         "period_end": "2024-09-28",
         "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
-        "content_sha256": "d418d74400a563ff3fc0c2195e16fb913f3acb58aba4b242be5a0f3aa01ba4a8"
+        "content_sha256": "f46716d136a9b5b0fad87c506fa5804ab3668a5d0f193e3ef6d9f0cf49e690b7"
       },
       "facts": [
         {
@@ -6361,7 +6361,7 @@
         "filed": "2026-07-29",
         "period_end": "2026-06-30",
         "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
-        "content_sha256": "ace2aa8408b1e40c239fc5b222ce8e1b93acbfead28d0c86c4bb69f79b08eda7"
+        "content_sha256": "d9801758dc8b37b4d7358ec4b0ed803c849a90dbd7830a403dfafac1d4702671"
       },
       "facts": [
         {
@@ -11083,7 +11083,7 @@
         "filed": "2025-07-30",
         "period_end": "2025-06-30",
         "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
-        "content_sha256": "56d41ecc0adc114c7fcda813d41f5911b244a7e448b545f6dca52dfba9801008"
+        "content_sha256": "efc15e3614f8cbd0880a6b048954ae55856eca5226b1d2281f5f877256f7790a"
       },
       "facts": [
         {
@@ -15733,7 +15733,7 @@
         "filed": "2026-02-25",
         "period_end": "2026-01-25",
         "source_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
-        "content_sha256": "da09753693ae094014dd7a13dcd2141978d1e2f187cf42c791670b9b99ad652c"
+        "content_sha256": "466830059725ffdbf75402c8b4906543c720ce7f0635dcf57177c1d6fed5fd63"
       },
       "facts": [
         {
@@ -21112,7 +21112,7 @@
         "filed": "2025-02-26",
         "period_end": "2025-01-26",
         "source_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
-        "content_sha256": "df34c12c9c7143cc7948710138b099e703981ce603128df371167db7b1979736"
+        "content_sha256": "9a2a18a706185b63e0a81887a9d464b498e5b9b9c7e60ae8d4f631cad0073fb0"
       },
       "facts": [
         {

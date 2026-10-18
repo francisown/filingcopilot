@@ -58,8 +58,8 @@ commands, see [test-profiles.md](docs/test-profiles.md).
 - Edit the shared English catalogue in `src/filingcopilot/locale-en.json`, then regenerate
   the browser catalogue with `python scripts/build_locale_catalog.py`.
 - Keep English as the default and Chinese as an explicit, remembered option.
-- Do not change frozen retrieval answers to make a candidate look better. Record failed
-  experiments alongside passing ones; engineering tests do not establish semantic accuracy.
+- Treat frozen questions and expected answers as versioned fixtures. Record failed
+  experiments alongside passing ones, with their code version and evaluation scope.
 
 For MCP changes, update the server registry, documented tool list, and smoke checks together.
 

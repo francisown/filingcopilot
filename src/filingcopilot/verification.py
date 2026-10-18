@@ -1,19 +1,23 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .annual_details import annual_detail_v1
+from .annual_scope import annual_fact_years, wants_growth
 from .cashflow import is_cashflow_question
 from .claim_periods import comparison_context
 from .fundamentals import is_stock_question
 from .localization import current_language, language_scope
-from .localization import text as translate_text
+from .localization import legacy_numeric_text as translate_text
 from .market import MarketEvidence, render_market, symbol
-from .models import ExternalUpdate, Submission
+from .models import Claim, ExternalUpdate, Submission
 from .narrative_gates import gate_narrative_claim
 from .passage_context import context_members, context_part
 from .periods import evidence_period, fact_inputs, period_label
@@ -38,6 +42,13 @@ class ReviewBatch(BaseModel):
     verdicts: list[ReviewVerdict]
 
 
+class GapVerdict(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    index: int = Field(strict=True, ge=0)
+    required_missing: bool = Field(strict=True)
+    reason: str = Field(min_length=1, max_length=500)
+
+
 REVIEW_TOOL = {
     "type": "function",
     "function": {
@@ -60,10 +71,40 @@ REVIEW_TOOL = {
 }
 
 
-def render_numeric(evidence: dict, domain=None, language: str | None = None) -> str:
+def _cached_source_conflicts(evidence: list[dict], home, checked: dict) -> list[str]:
+    """A known raw-byte conflict cannot be hidden by a matching XBRL amount.
+
+    Offline package snapshots have no corpus home; their explicit raw-source
+    audit runs separately. Missing cache is not silently treated as raw proof.
+    """
+    if home is None:
+        return []
+    conflicts = []
+    for item in evidence:
+        for part in [item, *fact_inputs(item)]:
+            filing = part.get("filing")
+            if not filing:
+                continue
+            key = (filing["source_url"], filing["content_sha256"])
+            if key not in checked:
+                path = Path(home) / "sec-cache" / (hashlib.sha256(key[0].encode()).hexdigest() + ".cache")
+                try:
+                    checked[key] = not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() == key[1]
+                except OSError:
+                    checked[key] = False
+            if not checked[key]:
+                conflicts.append("Cached filing bytes differ from the bound source or cannot be read: " + filing["id"])
+    return list(dict.fromkeys(conflicts))
+
+
+def render_numeric(evidence: dict, domain=None, language: str | None = None, *, rendering: str | None = None) -> str:
     if language is not None:
         with language_scope(language):
-            return render_numeric(evidence, domain)
+            return render_numeric(evidence, domain, rendering=rendering)
+    if rendering is not None:
+        if rendering != "annual_detail_v1":
+            raise ValueError("Unknown numeric rendering version")
+        return render_numeric(evidence, domain) + annual_detail_v1(evidence)
     if evidence["kind"] == "market":
         return translate_text(render_market(MarketEvidence.model_validate(evidence).snapshot))
     if evidence["kind"] == "valuation" or evidence.get("operation") == "provider_ttm_pe":
@@ -533,456 +574,548 @@ def verify_submission(
     semantic_review=None,
     focus_ticker: str | None = None,
     allow_excerpts: bool = False,
+    annual_details: bool = False,
 ) -> tuple[list[dict], list[str]]:
-    accepted, errors, narratives = [], [], []
-    requested_years = {int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", question)}
-    companies = tools.domain.company_scope(question)
-    requested_metrics = tools.domain.allowed_metrics(question)
-    if is_cashflow_question(question):
-        requested_metrics.update(
-            {"operating_cash_flow", "cash_capex", "ppe_sale_incentive_proceeds"}
-        )
-    direct_metrics, requested_ratios = tools.domain.requests(question)
-    if not companies and focus_ticker:
-        companies = {focus_ticker.upper()}
-    for index, claim in enumerate(submission.claims):
-        evidence = [tools.ledger.get(i) for i in claim.evidence_ids]
+    """Verify a submission through shared observation, scope and review gates."""
+    return _SubmissionVerifier(
+        tools, question, semantic_review, focus_ticker, allow_excerpts, annual_details,
+    ).verify(submission)
+
+
+class _SubmissionVerifier:
+    """Per-submission state; claim kinds share scope and a source-check cache.
+
+    Deterministic checks run before the single semantic batch. Keeping that
+    ordering here prevents a new claim kind from bypassing observation checks.
+    The public interface remains verify_submission, also used by offline audit.
+    """
+
+    def __init__(self, tools, question, semantic_review, focus_ticker, allow_excerpts, annual_details):
+        self.tools = tools
+        self.question = question
+        self.semantic_review = semantic_review
+        self.focus_ticker = focus_ticker
+        self.allow_excerpts = allow_excerpts
+        self.annual_details = annual_details
+        self.accepted, self.errors, self.narratives = [], [], []
+        self.checked_sources = {}
+        self.requested_years = {int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", self.question)}
+        self.allowed_fact_years = annual_fact_years(self.question)
+        self.companies = self.tools.domain.company_scope(self.question)
+        self.requested_metrics = self.tools.domain.allowed_metrics(self.question)
+        if is_cashflow_question(self.question):
+            self.requested_metrics.update(
+                {"operating_cash_flow", "cash_capex", "ppe_sale_incentive_proceeds"}
+            )
+        direct_metrics, self.requested_ratios = self.tools.domain.requests(self.question)
+        if not self.companies and self.focus_ticker:
+            self.companies = {self.focus_ticker.upper()}
+
+    def verify(self, submission: Submission) -> tuple[list[dict], list[str]]:
+        for index, claim in enumerate(submission.claims):
+            self._verify_claim(index, claim)
+        self._review_narratives()
+        if self.accepted and not submission.gaps:
+            self.errors.extend(numeric_completeness_errors(
+                self.accepted, self.tools, self.question, self.focus_ticker,
+            ))
+        return sorted(self.accepted, key=lambda claim: claim["index"]), self.errors
+
+    def _verify_claim(self, index: int, claim: Claim) -> None:
+        evidence = [self.tools.ledger.get(i) for i in claim.evidence_ids]
         if any(e is None for e in evidence):
-            errors.append(f"claim {index}: citation was not observed in this investigation")
-            continue
-        if any(e["kind"] == "external_update" for e in evidence):
-            if len(evidence) != 1 or evidence[0]["kind"] != "external_update" or claim.kind not in ("excerpt", "narrative"):
-                errors.append(f"claim {index}: external sources require one separate excerpt/narrative citation; they cannot become financial facts or be mixed with official filings")
-                continue
-            item = evidence[0]
-            update = ExternalUpdate.model_validate({k: v for k, v in item.items() if k != "kind"})
-            if update.available_day > tools.as_of or companies and update.ticker not in companies:
-                errors.append(f"claim {index}: external source is outside company or knowledge scope")
-                continue
-            if claim.kind == "excerpt":
-                original = tools.corpus.evidence(update.id, tools.as_of)
-                if not allow_excerpts or original is None or claim.statement != original["text"] or claim.statement != update.text:
-                    errors.append(f"claim {index}: external excerpt must match an available source exactly")
-                    continue
-                accepted.append({"index": index, "kind": "excerpt", "text": claim.statement,
-                                 "evidence_ids": claim.evidence_ids, "verification": "exact_source_excerpt"})
-                continue
-            if not claim.statement or _financial_number_tokens(claim.statement) or re.search(r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I):
-                errors.append(f"claim {index}: external narratives must be qualitative; financial numbers require typed facts")
-                continue
-            if update.evidence_level in ("public_news", "licensed_news") and not re.search(r"据.{1,80}(?:报道|报告)|媒体.{0,20}报道", claim.statement):
-                errors.append(f"claim {index}: third-party news must preserve source attribution")
-                continue
-            if re.search(r"SEC.{0,5}(?:公告|申报)", claim.statement, re.I) or (
-                update.evidence_level not in ("hkex_official", "cninfo_official")
-                and re.search(r"官方公告", claim.statement)
-            ):
-                errors.append(f"claim {index}: external sources cannot be described as SEC official notices")
-                continue
-            narratives.append({"index": index, "kind": "narrative", "statement": claim.statement,
-                              "evidence": [{"kind": "external_update", "text": update.text,
-                                            "ticker": update.ticker, "source_name": update.source_name,
-                                            "evidence_level": update.evidence_level,
-                                            "available_at": update.available_at.isoformat(),
-                                            "publication_basis": update.publication_basis,
-                                            "text_scope": update.text_scope}],
-                              "evidence_ids": claim.evidence_ids, "source_quarter_labels": []})
-            continue
-        if claim.kind in ("fact", "calculation", "market", "valuation"):
-            if len(evidence) != 1 or evidence[0]["kind"] != claim.kind or claim.statement:
-                errors.append(f"claim {index}: numeric claim must bind exactly one typed result")
-                continue
-            item = evidence[0]
-            if (
-                companies
-                and item["ticker"] not in companies
-                and not (
-                    (
-                        claim.kind in ("market", "valuation")
-                        or item.get("operation") == "provider_ttm_pe"
-                    )
-                    and item["ticker"] in {symbol(t) for t in companies}
+            self.errors.append(f"claim {index}: citation was not observed in this investigation")
+            return
+        conflicts = _cached_source_conflicts(evidence, getattr(self.tools.corpus, "home", None), self.checked_sources)
+        if conflicts:
+            self.errors.extend(f"claim {index}: {conflict}" for conflict in conflicts)
+            return
+        if (claim.kind in ("analysis", "narrative") and len(claim.statement.rstrip()) >= 980
+                and not re.search(r"[.!?。！？][\"'”’）)]*$", claim.statement.rstrip())):
+            self.errors.append(f"claim {index}: incomplete sentence near the statement length limit; rewrite as shorter complete sentences, preserving all necessary qualifications")
+            return
+        if any(item["kind"] == "external_update" for item in evidence):
+            self._verify_external(index, claim, evidence)
+        elif claim.kind in ("fact", "calculation", "market", "valuation"):
+            self._verify_numeric(index, claim, evidence)
+        else:
+            self._verify_prose(index, claim, evidence)
+
+    def _verify_external(self, index: int, claim: Claim, evidence: list[dict]) -> None:
+        if len(evidence) != 1 or evidence[0]["kind"] != "external_update" or claim.kind not in ("excerpt", "narrative"):
+            self.errors.append(f"claim {index}: external sources require one separate excerpt/narrative citation; they cannot become financial facts or be mixed with official filings")
+            return
+        item = evidence[0]
+        update = ExternalUpdate.model_validate({k: v for k, v in item.items() if k != "kind"})
+        if update.available_day > self.tools.as_of or self.companies and update.ticker not in self.companies:
+            self.errors.append(f"claim {index}: external source is outside company or knowledge scope")
+            return
+        if claim.kind == "excerpt":
+            original = self.tools.corpus.evidence(update.id, self.tools.as_of)
+            if not self.allow_excerpts or original is None or claim.statement != original["text"] or claim.statement != update.text:
+                self.errors.append(f"claim {index}: external excerpt must match an available source exactly")
+                return
+            self.accepted.append({"index": index, "kind": "excerpt", "text": claim.statement,
+                             "evidence_ids": claim.evidence_ids, "verification": "exact_source_excerpt"})
+            return
+        if not claim.statement or _financial_number_tokens(claim.statement) or re.search(r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I):
+            self.errors.append(f"claim {index}: external narratives must be qualitative; financial numbers require typed facts")
+            return
+        if update.evidence_level in ("public_news", "licensed_news") and not re.search(r"据.{1,80}(?:报道|报告)|媒体.{0,20}报道", claim.statement):
+            self.errors.append(f"claim {index}: third-party news must preserve source attribution")
+            return
+        if re.search(r"SEC.{0,5}(?:公告|申报)", claim.statement, re.I) or (
+            update.evidence_level not in ("hkex_official", "cninfo_official")
+            and re.search(r"官方公告", claim.statement)
+        ):
+            self.errors.append(f"claim {index}: external sources cannot be described as SEC official notices")
+            return
+        self.narratives.append({"index": index, "kind": "narrative", "statement": claim.statement,
+                          "evidence": [{"kind": "external_update", "text": update.text,
+                                        "ticker": update.ticker, "source_name": update.source_name,
+                                        "evidence_level": update.evidence_level,
+                                        "available_at": update.available_at.isoformat(),
+                                        "publication_basis": update.publication_basis,
+                                        "text_scope": update.text_scope}],
+                          "evidence_ids": claim.evidence_ids, "source_quarter_labels": []})
+        return
+
+    def _verify_numeric(self, index: int, claim: Claim, evidence: list[dict]) -> None:
+        if len(evidence) != 1 or evidence[0]["kind"] != claim.kind or claim.statement:
+            self.errors.append(f"claim {index}: numeric claim must bind exactly one typed result")
+            return
+        item = evidence[0]
+        if (
+            self.companies
+            and item["ticker"] not in self.companies
+            and not (
+                (
+                    claim.kind in ("market", "valuation")
+                    or item.get("operation") == "provider_ttm_pe"
                 )
-            ):
-                errors.append(f"claim {index}: company does not match the research scope")
-                continue
-            if claim.kind == "market":
-                try:
-                    market = MarketEvidence.model_validate(item)
-                    if market.snapshot.as_of > tools.as_of:
-                        raise ValueError("Market data is beyond the knowledge date")
-                    text = render_numeric(item, tools.domain)
-                except ValueError as exc:
-                    errors.append(f"claim {index}: {exc}")
-                    continue
-                accepted.append(
-                    {
-                        "index": index,
-                        "kind": "market",
-                        "text": text,
-                        "evidence_ids": claim.evidence_ids,
-                        "verification": "deterministic",
-                    }
-                )
-                continue
-            if claim.kind == "valuation" or item.get("operation") == "provider_ttm_pe":
-                try:
-                    eps = ValuationEvidence.model_validate(
-                        item if claim.kind == "valuation" else item["inputs"][1]
-                    ).snapshot
-                    if eps.retrieved_at.date() > tools.as_of:
-                        raise ValueError("Supplier EPS was fetched after the knowledge date")
-                    if not is_stock_question(question) and not (
-                        is_ttm_question(question)
-                        and re.search(r"每股|EPS|市盈率|\bp/?e\b", question, re.I)
-                    ):
-                        raise ValueError(
-                            "Supplier TTM EPS cannot answer annual or unrelated financial questions"
-                        )
-                    if requested_years:
-                        raise ValueError("Supplier TTM period labels are not fiscal years")
-                    if item.get("operation") == "provider_ttm_pe":
-                        expected = tools.calculate("provider_ttm_pe", *item["input_ids"])[
-                            "evidence"
-                        ]
-                        if expected != item:
-                            raise ValueError("Supplier P/E does not match bound inputs")
-                    text = render_numeric(item, tools.domain)
-                except (ValueError, KeyError, IndexError) as exc:
-                    errors.append(f"claim {index}: {exc}")
-                    continue
-                accepted.append(
-                    {
-                        "index": index,
-                        "kind": claim.kind,
-                        "text": text,
-                        "evidence_ids": claim.evidence_ids,
-                        "verification": "deterministic",
-                    }
-                )
-                continue
-            if requested_years and item["fiscal_year"] not in requested_years:
-                errors.append(f"claim {index}: fiscal year does not match requested years")
-                continue
-            if is_ttm_question(question) and not trailing_window(item):
-                errors.append(
-                    f"claim {index}: TTM request needs a source-bound trailing calculation"
-                )
-                continue
-            if (
-                is_quarterly_question(question)
-                and not is_stock_question(question)
-                and not is_ttm_question(question)
-            ):
-                facts = fact_inputs(item)
-                if any(e["filing"]["form"] not in ("10-Q", "10-Q/A") for e in facts):
-                    errors.append(
-                        f"claim {index}: an annual fact cannot answer a quarterly request"
-                    )
-                    continue
-            metrics = {e["metric"] for e in fact_inputs(item)}
-            if requested_metrics and not metrics <= requested_metrics:
-                errors.append(f"claim {index}: metric does not match the requested subject")
-                continue
-            if claim.kind == "calculation" and item["operation"] == "ratio" and requested_ratios:
-                left, right = item["inputs"]
-                if not any(
-                    fact_inputs(left)[0]["metric"] == tools.domain.ratios[r].numerator
-                    and fact_inputs(right)[0]["metric"] == tools.domain.ratios[r].denominator
-                    for r in requested_ratios
-                ):
-                    errors.append(
-                        f"claim {index}: ratio metric does not match the requested margin"
-                    )
-                    continue
-            accepted.append(
+                and item["ticker"] in {symbol(t) for t in self.companies}
+            )
+        ):
+            self.errors.append(f"claim {index}: company does not match the research scope")
+            return
+        if claim.kind == "market":
+            try:
+                market = MarketEvidence.model_validate(item)
+                if market.snapshot.as_of > self.tools.as_of:
+                    raise ValueError("Market data is beyond the knowledge date")
+                text = render_numeric(item, self.tools.domain)
+            except ValueError as exc:
+                self.errors.append(f"claim {index}: {exc}")
+                return
+            self.accepted.append(
                 {
                     "index": index,
-                    "kind": claim.kind,
-                    "text": render_numeric(item, tools.domain),
+                    "kind": "market",
+                    "text": text,
                     "evidence_ids": claim.evidence_ids,
                     "verification": "deterministic",
                 }
             )
-        else:
-            if claim.kind in ("narrative", "analysis"):
-                incomplete = []
-                passages = [e for e in tools.ledger.values() if e["kind"] == "passage"]
-                for item in evidence:
-                    part = context_part(item) if item["kind"] == "passage" else None
-                    if part and part[3] > 1:
-                        members = context_members(item, passages)
-                        ids = [m["id"] for m in members]
-                        if (
-                            len(members) != part[3]
-                            or len({context_part(m)[2] for m in members}) != part[3]
-                            or not set(ids) <= set(claim.evidence_ids)
-                        ):
-                            incomplete.extend(ids)
-                if incomplete:
-                    errors.append(
-                        f"claim {index}: complete source context required; read and cite all paragraph parts: {', '.join(dict.fromkeys(incomplete))}"
-                    )
-                    continue
-            if companies and any(
-                e["ticker"] not in companies
-                and not (e["kind"] == "market" and e["ticker"] in {symbol(t) for t in companies})
-                for e in evidence
-            ):
-                errors.append(f"claim {index}: company does not match the research scope")
-                continue
-            if (
-                claim.kind == "narrative"
-                and is_stock_updates_question(question)
-                and any(
-                    e["kind"] == "passage" and re.match(r"[68]-K", e["filing"]["form"])
-                    for e in evidence
-                )
-                and re.search(r"公告(?:正文|中)?(?:未|没有)(?:说明|披露|提及)", claim.statement)
-            ):
-                errors.append(
-                    f"claim {index}: selected notice excerpts cannot establish document-wide absence; "
-                    "omit the absence claim or qualify it as 所引摘录未说明"
-                )
-                continue
-            current_notice = (
-                is_stock_updates_question(question)
-                and claim.kind in ("narrative", "excerpt")
-                and all(
-                    e["kind"] == "passage"
-                    and re.fullmatch(r"[68]-K(?:/A)?(?: EX-99\.1)?", e["filing"]["form"])
-                    and 0 <= (tools.as_of - date.fromisoformat(e["filing"]["filed"])).days < 90
-                    for e in evidence
-                )
-            )
-            if (
-                requested_years
-                and not current_notice
-                and any(
-                    int(e["filing"]["period_end"][:4]) not in requested_years
-                    for e in evidence
-                    if e["kind"] == "passage"
-                )
-            ):
-                errors.append(f"claim {index}: filing fiscal year does not match requested years")
-                continue
-            if (
-                is_quarterly_question(question)
-                and not is_stock_question(question)
-                and any(
-                    e["kind"] == "passage" and e["filing"]["form"] not in ("10-Q", "10-Q/A")
-                    for e in evidence
-                )
-            ):
-                errors.append(f"claim {index}: quarterly explanations require 10-Q passages")
-                continue
-            ranking = (
-                r"最大|最小|最高|最低|最快|最慢|largest|smallest|highest|lowest|fastest|slowest"
-            )
-            if (
-                claim.kind in ("narrative", "analysis")
-                and re.search(
-                    r"(?:增长幅度|增速|营收|收入|利润|现金流|市盈率|growth|revenue|profit|income|cash flow).{0,14}(?:"
-                    + ranking
-                    + ")",
-                    claim.statement,
-                    re.I,
-                )
-                and not any(
-                    e["kind"] == "calculation"
-                    or e["kind"] == "passage"
-                    and re.search(ranking, e["text"], re.I)
-                    for e in evidence
-                )
-            ):
-                errors.append(
-                    f"claim {index}: financial ranking needs observed calculations or an explicit source ranking; a numeric table alone is insufficient"
-                )
-                continue
-            if claim.kind == "excerpt":
-                original = tools.corpus.evidence(claim.evidence_ids[0], tools.as_of)
-                if (
-                    not allow_excerpts
-                    or len(evidence) != 1
-                    or evidence[0]["kind"] != "passage"
-                    or original is None
-                    or original["kind"] != "passage"
-                    or claim.statement != original["text"]
-                    or claim.statement != evidence[0]["text"]
+            return
+        if claim.kind == "valuation" or item.get("operation") == "provider_ttm_pe":
+            try:
+                eps = ValuationEvidence.model_validate(
+                    item if claim.kind == "valuation" else item["inputs"][1]
+                ).snapshot
+                if eps.retrieved_at.date() > self.tools.as_of:
+                    raise ValueError("Supplier EPS was fetched after the knowledge date")
+                if not is_stock_question(self.question) and not (
+                    is_ttm_question(self.question)
+                    and re.search(r"每股|EPS|市盈率|\bp/?e\b", self.question, re.I)
                 ):
-                    errors.append(
-                        f"claim {index}: excerpt must match an available original passage exactly"
+                    raise ValueError(
+                        "Supplier TTM EPS cannot answer annual or unrelated financial questions"
                     )
-                    continue
-                accepted.append(
-                    {
-                        "index": index,
-                        "kind": "excerpt",
-                        "text": claim.statement,
-                        "evidence_ids": claim.evidence_ids,
-                        "verification": "exact_source_excerpt",
-                    }
-                )
-                continue
-            if claim.kind == "analysis":
-                if not claim.statement or any(
-                    e["kind"] not in ("fact", "calculation", "passage", "market", "valuation")
-                    for e in evidence
-                ):
-                    errors.append(
-                        f"claim {index}: analysis needs text and observed financial evidence"
-                    )
-                    continue
-                without_periods = re.sub(
-                    r"(?<![A-Za-z0-9])Q[1-4]\s+(?:FY\s*)?20\d{2}"
-                    r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))"
-                    r"|(?<![A-Za-z0-9])(?:(?:FY\s*)?20\d{2}\s*)?Q[1-4]"
-                    r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))"
-                    r"|20\d{2}年第?[1-4]季度(?!\s*(?:倍|%|％|美元|元|USD))",
-                    "",
-                    _without_source_dates(claim.statement, evidence),
-                    flags=re.I,
-                )
-                without_periods = re.sub(
-                    r"(?<![A-Za-z0-9])FY\s*20\d{2}(?!\d|倍|%|％|美元|元|USD)|20\d{2}(?=年|财年|年度)",
-                    "",
-                    without_periods,
-                    flags=re.I,
-                )
-                without_periods = re.sub(
-                    r"(?<![A-Za-z0-9])10-[KQ](?:/A)?"
-                    r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))",
-                    "",
-                    without_periods,
-                    flags=re.I,
-                )
-                has_valuation_multiple = bool(
-                    re.search(
-                        r"市盈率|P\s*/?\s*E|valuation\s+multiples?|annual[- ]basis|trailing[- ]basis",
-                        question,
-                        re.I,
-                    )
-                    and any(
-                        item.get("kind") == "calculation"
-                        and item.get("operation") in ("annual_pe", "provider_ttm_pe")
-                        for item in evidence
-                    )
-                )
-                if re.search(r"\d", without_periods) or _financial_number_tokens(without_periods):
-                    if has_valuation_multiple:
-                        valuation_error = _valuation_analysis_numeric_error(
-                            without_periods, evidence
-                        )
-                        if valuation_error:
-                            errors.append(f"claim {index}: {valuation_error}")
-                            continue
-                    else:
-                        errors.append(
-                            f"claim {index}: {_numeric_analysis_error(without_periods, evidence)}"
-                        )
-                        continue
-                conflict = analysis_conflict(claim.statement, evidence, tools.domain)
-                if conflict:
-                    errors.append(f"claim {index}: {conflict}")
-                    continue
-            elif not claim.statement or any(e["kind"] != "passage" for e in evidence):
-                errors.append(f"claim {index}: narrative needs text and passage-only evidence")
-                continue
-            if _financial_number_tokens(claim.statement) or re.search(
-                r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I
-            ):
-                errors.append(
-                    f"claim {index}: financial amounts and percentages need typed "
-                    "fact/calculation claims; rewrite this narrative qualitatively"
-                )
-                continue
-            source_texts = [e["text"] for e in evidence if e["kind"] == "passage"]
-            conflict = investment_cash_conflict(claim.statement, source_texts)
-            if conflict:
-                errors.append(f"claim {index}: {conflict}")
-                continue
-            conflict = notice_payment_conflict(claim.statement, evidence)
-            if conflict:
-                errors.append(f"claim {index}: {conflict}")
-                continue
-            conflict = quarter_label_conflict(claim.statement, evidence)
-            if conflict:
-                errors.append(f"claim {index}: {conflict}")
-                continue
-            conflict = causal_period_conflict(claim.statement, source_texts, tools.domain)
-            if conflict:
-                errors.append(f"claim {index}: {conflict}")
-                continue
-            conflict = contradiction(
-                claim.statement,
-                source_texts,
-                tools.domain,
-                requested_years,
-            )
-            if conflict:
-                errors.append(f"claim {index}: {conflict}")
-                continue
-            narratives.append(
+                if self.requested_years:
+                    raise ValueError("Supplier TTM period labels are not fiscal years")
+                if item.get("operation") == "provider_ttm_pe":
+                    expected = self.tools.calculate("provider_ttm_pe", *item["input_ids"])[
+                        "evidence"
+                    ]
+                    if expected != item:
+                        raise ValueError("Supplier P/E does not match bound inputs")
+                text = render_numeric(item, self.tools.domain)
+            except (ValueError, KeyError, IndexError) as exc:
+                self.errors.append(f"claim {index}: {exc}")
+                return
+            self.accepted.append(
                 {
                     "index": index,
                     "kind": claim.kind,
-                    "statement": claim.statement,
-                    "evidence": [
-                        {
-                            "kind": e["kind"],
-                            "text": e["text"]
-                            if e["kind"] == "passage"
-                            else render_numeric(e, tools.domain),
-                            "ticker": e["ticker"],
-                            "comparison_periods": comparison_context(e),
-                            "filings": []
-                            if e["kind"] in ("market", "valuation")
-                            else [e["filing"]]
-                            if e["kind"] != "calculation"
-                            else [i["filing"] for i in fact_inputs(e)],
-                        }
-                        for e in evidence
-                    ],
+                    "text": text,
                     "evidence_ids": claim.evidence_ids,
-                    "source_quarter_labels": source_quarter_labels(evidence),
+                    "verification": "deterministic",
                 }
             )
-    if narratives:
-        if semantic_review is None:
-            errors.append("Narrative verification unavailable; descriptive claims were withheld")
-        else:
+            return
+        allowed_years = (self.allowed_fact_years if claim.kind == "fact" and evidence_period(item) == "annual"
+                         and not is_quarterly_question(self.question) else self.requested_years)
+        if allowed_years and item["fiscal_year"] not in allowed_years:
+            self.errors.append(f"claim {index}: fiscal year does not match requested years")
+            return
+        if is_ttm_question(self.question) and not trailing_window(item):
+            self.errors.append(
+                f"claim {index}: TTM request needs a source-bound trailing calculation"
+            )
+            return
+        if (
+            is_quarterly_question(self.question)
+            and not is_stock_question(self.question)
+            and not is_ttm_question(self.question)
+        ):
+            facts = fact_inputs(item)
+            if any(e["filing"]["form"] not in ("10-Q", "10-Q/A") for e in facts):
+                self.errors.append(
+                    f"claim {index}: an annual fact cannot answer a quarterly request"
+                )
+                return
+        metrics = {e["metric"] for e in fact_inputs(item)}
+        if self.requested_metrics and not metrics <= self.requested_metrics:
+            self.errors.append(f"claim {index}: metric does not match the requested subject")
+            return
+        if claim.kind == "calculation" and item["operation"] == "ratio" and self.requested_ratios:
+            left, right = item["inputs"]
+            if not any(
+                fact_inputs(left)[0]["metric"] == self.tools.domain.ratios[r].numerator
+                and fact_inputs(right)[0]["metric"] == self.tools.domain.ratios[r].denominator
+                for r in self.requested_ratios
+            ):
+                self.errors.append(
+                    f"claim {index}: ratio metric does not match the requested margin"
+                )
+                return
+        rendering = None
+        if self.annual_details and (claim.kind == "fact" or item.get("operation") == "growth"):
             try:
-                batch = ReviewBatch.model_validate(semantic_review(question, narratives))
-                indexes = [v.index for v in batch.verdicts]
-                if sorted(indexes) != sorted(n["index"] for n in narratives):
-                    raise ValueError("Reviewer must return every claim exactly once")
-                verdicts = {v.index: v for v in batch.verdicts}
-                for narrative in narratives:
-                    verdict = verdicts[narrative["index"]]
-                    if verdict.supported:
-                        accepted.append(
-                            {
-                                "index": narrative["index"],
-                                "kind": narrative["kind"],
-                                "text": narrative["statement"],
-                                "evidence_ids": narrative["evidence_ids"],
-                                "verification": "inference_review"
-                                if narrative["kind"] == "analysis"
-                                else "semantic_review",
-                            }
-                        )
-                    else:
-                        errors.append(f"claim {verdict.index}: {verdict.reason}")
-            except Exception:
-                errors.append("Narrative verifier failed; descriptive claims were withheld")
-    if accepted and not submission.gaps:
+                annual_detail_v1(item)
+                rendering = "annual_detail_v1"
+            except ValueError as exc:
+                self.errors.append(f"claim {index}: {exc}")
+                return
+        self.accepted.append(
+            {
+                "index": index,
+                "kind": claim.kind,
+                "text": render_numeric(item, self.tools.domain, rendering=rendering),
+                "evidence_ids": claim.evidence_ids,
+                "verification": "deterministic",
+                **({"rendering": rendering} if rendering else {}),
+            }
+        )
+
+    def _check_prose_scope(self, index: int, claim: Claim, evidence: list[dict]) -> bool:
+        if claim.kind in ("narrative", "analysis"):
+            incomplete = []
+            passages = [e for e in self.tools.ledger.values() if e["kind"] == "passage"]
+            for item in evidence:
+                part = context_part(item) if item["kind"] == "passage" else None
+                if part and part[3] > 1:
+                    members = context_members(item, passages)
+                    ids = [m["id"] for m in members]
+                    if (
+                        len(members) != part[3]
+                        or len({context_part(m)[2] for m in members}) != part[3]
+                        or not set(ids) <= set(claim.evidence_ids)
+                    ):
+                        incomplete.extend(ids)
+            if incomplete:
+                self.errors.append(
+                    f"claim {index}: complete source context required; read and cite all paragraph parts: {', '.join(dict.fromkeys(incomplete))}"
+                )
+                return False
+        if self.companies and any(
+            e["ticker"] not in self.companies
+            and not (e["kind"] == "market" and e["ticker"] in {symbol(t) for t in self.companies})
+            for e in evidence
+        ):
+            self.errors.append(f"claim {index}: company does not match the research scope")
+            return False
+        if (
+            claim.kind == "narrative"
+            and is_stock_updates_question(self.question)
+            and any(
+                e["kind"] == "passage" and re.match(r"[68]-K", e["filing"]["form"])
+                for e in evidence
+            )
+            and re.search(r"公告(?:正文|中)?(?:未|没有)(?:说明|披露|提及)", claim.statement)
+        ):
+            self.errors.append(
+                f"claim {index}: selected notice excerpts cannot establish document-wide absence; "
+                "omit the absence claim or qualify it as 所引摘录未说明"
+            )
+            return False
+        current_notice = (
+            is_stock_updates_question(self.question)
+            and claim.kind in ("narrative", "excerpt")
+            and all(
+                e["kind"] == "passage"
+                and re.fullmatch(r"[68]-K(?:/A)?(?: EX-99\.1)?", e["filing"]["form"])
+                and 0 <= (self.tools.as_of - date.fromisoformat(e["filing"]["filed"])).days < 90
+                for e in evidence
+            )
+        )
+        if (
+            self.requested_years
+            and not current_notice
+            and any(
+                int(e["filing"]["period_end"][:4]) not in self.requested_years
+                for e in evidence
+                if e["kind"] == "passage"
+            )
+        ):
+            self.errors.append(f"claim {index}: filing fiscal year does not match requested years")
+            return False
+        if (
+            is_quarterly_question(self.question)
+            and not is_stock_question(self.question)
+            and any(
+                e["kind"] == "passage" and e["filing"]["form"] not in ("10-Q", "10-Q/A")
+                for e in evidence
+            )
+        ):
+            self.errors.append(f"claim {index}: quarterly explanations require 10-Q passages")
+            return False
+        ranking = (
+            r"最大|最小|最高|最低|最快|最慢|largest|smallest|highest|lowest|fastest|slowest"
+        )
+        if (
+            claim.kind in ("narrative", "analysis")
+            and re.search(
+                r"(?:增长幅度|增速|营收|收入|利润|现金流|市盈率|growth|revenue|profit|income|cash flow).{0,14}(?:"
+                + ranking
+                + ")",
+                claim.statement,
+                re.I,
+            )
+            and not any(
+                e["kind"] == "calculation"
+                or e["kind"] == "passage"
+                and re.search(ranking, e["text"], re.I)
+                for e in evidence
+            )
+        ):
+            self.errors.append(
+                f"claim {index}: financial ranking needs observed calculations or an explicit source ranking; a numeric table alone is insufficient"
+            )
+            return False
+        return True
+
+    def _check_analysis(self, index: int, claim: Claim, evidence: list[dict]) -> bool:
+        if not claim.statement or any(
+            e["kind"] not in ("fact", "calculation", "passage", "market", "valuation")
+            for e in evidence
+        ):
+            self.errors.append(
+                f"claim {index}: analysis needs text and observed financial evidence"
+            )
+            return False
+        without_periods = re.sub(
+            r"(?<![A-Za-z0-9])Q[1-4]\s+(?:FY\s*)?20\d{2}"
+            r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))"
+            r"|(?<![A-Za-z0-9])(?:(?:FY\s*)?20\d{2}\s*)?Q[1-4]"
+            r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))"
+            r"|20\d{2}年第?[1-4]季度(?!\s*(?:倍|%|％|美元|元|USD))",
+            "",
+            _without_source_dates(claim.statement, evidence),
+            flags=re.I,
+        )
+        without_periods = re.sub(
+            r"(?<![A-Za-z0-9])FY\s*20\d{2}(?!\d|倍|%|％|美元|元|USD)|20\d{2}(?=年|财年|年度)",
+            "",
+            without_periods,
+            flags=re.I,
+        )
+        without_periods = re.sub(
+            r"(?<![A-Za-z0-9])10-[KQ](?:/A)?"
+            r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))",
+            "",
+            without_periods,
+            flags=re.I,
+        )
+        has_valuation_multiple = bool(
+            re.search(
+                r"市盈率|P\s*/?\s*E|valuation\s+multiples?|annual[- ]basis|trailing[- ]basis",
+                self.question,
+                re.I,
+            )
+            and any(
+                item.get("kind") == "calculation"
+                and item.get("operation") in ("annual_pe", "provider_ttm_pe")
+                for item in evidence
+            )
+        )
+        if re.search(r"\d", without_periods) or _financial_number_tokens(without_periods):
+            if has_valuation_multiple:
+                valuation_error = _valuation_analysis_numeric_error(
+                    without_periods, evidence
+                )
+                if valuation_error:
+                    self.errors.append(f"claim {index}: {valuation_error}")
+                    return False
+            else:
+                self.errors.append(
+                    f"claim {index}: {_numeric_analysis_error(without_periods, evidence)}"
+                )
+                return False
+        conflict = analysis_conflict(claim.statement, evidence, self.tools.domain)
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return False
+        return True
+
+    def _verify_prose(self, index: int, claim: Claim, evidence: list[dict]) -> None:
+        if not self._check_prose_scope(index, claim, evidence):
+            return
+        if claim.kind == "excerpt":
+            original = self.tools.corpus.evidence(claim.evidence_ids[0], self.tools.as_of)
+            if (
+                not self.allow_excerpts
+                or len(evidence) != 1
+                or evidence[0]["kind"] != "passage"
+                or original is None
+                or original["kind"] != "passage"
+                or claim.statement != original["text"]
+                or claim.statement != evidence[0]["text"]
+            ):
+                self.errors.append(
+                    f"claim {index}: excerpt must match an available original passage exactly"
+                )
+                return
+            self.accepted.append(
+                {
+                    "index": index,
+                    "kind": "excerpt",
+                    "text": claim.statement,
+                    "evidence_ids": claim.evidence_ids,
+                    "verification": "exact_source_excerpt",
+                }
+            )
+            return
+        if claim.kind == "analysis":
+            if not self._check_analysis(index, claim, evidence):
+                return
+        elif not claim.statement or any(e["kind"] != "passage" for e in evidence):
+            self.errors.append(f"claim {index}: narrative needs text and passage-only evidence")
+            return
+        if _financial_number_tokens(claim.statement) or re.search(
+            r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I
+        ):
+            self.errors.append(
+                f"claim {index}: financial amounts and percentages need typed "
+                "fact/calculation claims; rewrite this narrative qualitatively"
+            )
+            return
+        source_texts = [e["text"] for e in evidence if e["kind"] == "passage"]
+        conflict = investment_cash_conflict(claim.statement, source_texts)
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return
+        conflict = notice_payment_conflict(claim.statement, evidence)
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return
+        conflict = quarter_label_conflict(claim.statement, evidence)
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return
+        conflict = causal_period_conflict(claim.statement, source_texts, self.tools.domain)
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return
+        conflict = contradiction(
+            claim.statement,
+            source_texts,
+            self.tools.domain,
+            self.requested_years,
+        )
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return
+        self.narratives.append(
+            {
+                "index": index,
+                "kind": claim.kind,
+                "statement": claim.statement,
+                "evidence": [
+                    {
+                        "kind": e["kind"],
+                        "text": e["text"]
+                        if e["kind"] == "passage"
+                        else render_numeric(e, self.tools.domain),
+                        "ticker": e["ticker"],
+                        "comparison_periods": comparison_context(e),
+                        "filings": []
+                        if e["kind"] in ("market", "valuation")
+                        else [e["filing"]]
+                        if e["kind"] != "calculation"
+                        else [i["filing"] for i in fact_inputs(e)],
+                    }
+                    for e in evidence
+                ],
+                "evidence_ids": claim.evidence_ids,
+                "source_quarter_labels": source_quarter_labels(evidence),
+            }
+        )
+
+    def _review_narratives(self) -> None:
+        if self.narratives:
+            if self.semantic_review is None:
+                self.errors.append("Narrative verification unavailable; descriptive claims were withheld")
+            else:
+                try:
+                    batch = ReviewBatch.model_validate(self.semantic_review(self.question, self.narratives))
+                    indexes = [v.index for v in batch.verdicts]
+                    if sorted(indexes) != sorted(n["index"] for n in self.narratives):
+                        raise ValueError("Reviewer must return every claim exactly once")
+                    verdicts = {v.index: v for v in batch.verdicts}
+                    for narrative in self.narratives:
+                        verdict = verdicts[narrative["index"]]
+                        if verdict.supported:
+                            self.accepted.append(
+                                {
+                                    "index": narrative["index"],
+                                    "kind": narrative["kind"],
+                                    "text": narrative["statement"],
+                                    "evidence_ids": narrative["evidence_ids"],
+                                    "verification": "inference_review"
+                                    if narrative["kind"] == "analysis"
+                                    else "semantic_review",
+                                }
+                            )
+                        else:
+                            self.errors.append(f"claim {verdict.index}: {verdict.reason}")
+                except Exception:
+                    self.errors.append("Narrative verifier failed; descriptive claims were withheld")
+
+
+
+def numeric_completeness_errors(
+    accepted: list[dict], tools: ResearchTools, question: str, focus_ticker: str | None = None,
+) -> list[str]:
+    """Check coverage of already verified claims without IO or semantic review.
+
+    Validity and completeness are separate: removing the last disclosed gap
+    must run the same coverage rules as a draft that never had a gap.
+    """
+    errors = []
+    requested_years = {int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", question)}
+    companies = tools.domain.company_scope(question)
+    if not companies and focus_ticker:
+        companies = {focus_ticker.upper()}
+    direct_metrics, requested_ratios = tools.domain.requests(question)
+    if accepted:
         numeric = [
             tools.ledger[c["evidence_ids"][0]]
             for c in accepted
             if c["kind"] in ("fact", "calculation", "valuation")
         ]
-        wants_growth = "同比" in question or "year-over-year" in question.lower()
-        if wants_growth and not any(
+        growth_requested = wants_growth(question)
+        if growth_requested and not any(
             e["kind"] == "calculation" and e["operation"] == "growth" for e in numeric
         ):
             errors.append("Requested year-over-year growth requires a calculate tool result")
@@ -1011,7 +1144,7 @@ def verify_submission(
                     ]
                     if numeric and not matching:
                         errors.append(f"Requested metric missing for {scope}: {metric}")
-                    if wants_growth and not any(
+                    if growth_requested and not any(
                         e["kind"] == "calculation" and e["operation"] == "growth" for e in matching
                     ):
                         errors.append(
@@ -1029,7 +1162,7 @@ def verify_submission(
                         errors.append(
                             f"Requested margin {ratio} for {scope} requires a calculate tool result"
                         )
-    return sorted(accepted, key=lambda x: x["index"]), errors
+    return errors
 
 
 REVIEW_SYSTEM = """You independently check financial research claims against their cited passages.

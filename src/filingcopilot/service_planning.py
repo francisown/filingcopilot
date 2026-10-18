@@ -28,6 +28,43 @@ from .updates import is_stock_updates_question, is_updates_question, wants_updat
 from .valuation import is_provider_valuation_question
 
 
+def _forecast_boundary(question: str) -> str | None:
+    """Keep prospective price/certainty requests out of historical data routes.
+
+    Check both word orders, without treating ordinary peer risks or historical
+    outperformance as a price forecast. This runs before peer/quarter routing.
+    """
+    if re.search(
+        r"(?:一定|必定|保证|肯定).{0,20}(?:跑赢|跑输)|"
+        r"\b(?:will|guaranteed? to|certain to)\b[^.!?;]{0,80}\b(?:outperform|underperform)\b|"
+        r"\b(?:outperformance|underperformance)\b[^.!?;]{0,30}\b(?:proven|guaranteed|certain)\b",
+        question, re.I,
+    ):
+        return "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。"
+    if re.search(
+        r"(?:明天|下周|下个月|下季(?:度)?|未来).{0,24}(?:股价|涨到|涨多少|跌多少)|"
+        r"(?:股价|股票).{0,24}(?:预测|保证|会不会涨|会不会跌|目标价)|"
+        r"(?:预测|预估|目标价).{0,24}股价|"
+        r"\b(?:predict|forecast|project|estimate)\b[^.!?;]{0,80}\b(?:stock |share )?price\b|"
+        r"\b(?:stock |share )?price\b[^.!?;]{0,40}\b(?:predict|prediction|forecast|target)\b|"
+        r"\bwill\b[^.!?;]{0,40}\b(?:stock |share )price\b[^.!?;]{0,20}\b(?:rise|fall|reach|be)\b|"
+        r"\b(?:what|where|how much)\b[^.!?;]{0,25}\bwill\b[^.!?;]{0,40}\b(?:stock |share )?price\b",
+        question, re.I,
+    ):
+        return "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。"
+    return None
+
+
+def _market_failure_policy(question: str) -> bool:
+    """Recognize a request for handling rules, not an actual quote retry."""
+    return bool(
+        re.search(r"行情|报价|实时价格|market source|quote", question, re.I)
+        and re.search(r"不可用|失败|unavailable|fails?|failure", question, re.I)
+        and re.search(r"如果|时|\bif\b|\bwhen\b", question, re.I)
+        and re.search(r"应如何|如何返回|哪些结论|how should|which conclusions", question, re.I)
+    )
+
+
 class PlanningMixin:
     def _ttm_comparison_plan(self, request: ResearchRequest, labels: list[str]) -> dict:
         self.refresh_domain()
@@ -138,6 +175,24 @@ class PlanningMixin:
                 else "请先选择支持 SEC 披露的明确公司，并使用今天或更早的知悉日期。",
                 "suggestions": ["选择公司后使用完整公司研究"],
             }
+        failure_policy = _market_failure_policy(request.question)
+        boundary = (
+            "如果行情源不可用，应明确报告行情缺口，暂停依赖该报价的市盈率、回报和价格判断；仍可保留通过来源与日期核验的年报数字及披露分析，不得编造价格或把旧报价当作当前报价。此处说明系统处理规则，未实际触发行情故障或执行故障注入测试。"
+            if failure_policy else _forecast_boundary(request.question)
+        )
+        if boundary:
+            if request.as_of > date.today():
+                boundary = f"知悉日期不能晚于当前可用日期 {date.today().isoformat()}，请调整日期后继续。"
+            return {
+                "ready": False,
+                "kind": "filing",
+                "uses_model": False,
+                "annual_numeric_direct": False,
+                "time_budget_seconds": self.settings.research_timeout,
+                "message": boundary,
+                "suggestions": ["过去五年股价涨跌和最大回撤是多少？", "年报披露了哪些主要风险？"],
+                **({"guidance_only": True} if failure_policy else {}),
+            }
         comparison_labels = question_ttm_companies(request.question)
         if comparison_labels is not None:
             return self._ttm_comparison_plan(request, comparison_labels)
@@ -195,12 +250,6 @@ class PlanningMixin:
             )
         elif unsupported_question_period(question):
             blocked = "当前走势图支持一个月、六个月、一年、三年、五年、十年和全部历史；请改用已支持的时间范围。"
-        elif re.search(
-            r"(?:明天|下周|下个月|未来).{0,12}(?:股价|涨到|涨多少|跌多少)|(?:股价|股票|price).{0,15}(?:预测|保证|会不会涨|会不会跌|目标价|predict|forecast)",
-            question,
-            re.I,
-        ):
-            blocked = "当前可以分析历史走势和已披露经营风险；具体未来股价或保证涨跌超出已接入的数据能力。请改用下方研究问题。"
         elif (
             re.search(
                 r"(?:FY\s*)?20\d{2}\s*Q[1-4]|\bQ[1-4]\b|(?:第)?[一二三四1-4](?:季度|财季)",

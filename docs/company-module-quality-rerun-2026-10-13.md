@@ -13,12 +13,7 @@ The review checked: (1) whether the result answered the module question, (2) whe
 | MU | Cash flow and capital investment | 10-K, 10-Q, 8-K/EX-99.1 | partial | 2 analysis | 4 | 90.3 s | OCF, net income, gross PP&E purchases and project FCF were bound to typed evidence; the net-capex gap was correctly retained. |
 | JD | Listed shares and currencies | 20-F | partial | 2 narrative | 9 | 242.4 s | The rerun obeyed the factual/restatement contract and passed semantic review; the ADS ratio and listing currencies were stated from cited 20-F text. |
 
-The raw runs are preserved in:
-
-- `../.filingcopilot/new-company-module-runs-2026-10-13/AAPL-business.json`
-- `../.filingcopilot/new-company-module-runs-2026-10-13/NVDA-operating_change.json`
-- `../.filingcopilot/new-company-module-runs-2026-10-13/MU-cashflow.json`
-- `../.filingcopilot/new-company-module-runs-2026-10-13/JD-ownership-v2.json`
+The raw outputs, including the initial JD attempt and its rerun, are retained in the local evaluation archive. They are not included in the public source package.
 
 ## Generated text and review
 

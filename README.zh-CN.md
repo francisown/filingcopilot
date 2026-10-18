@@ -10,32 +10,15 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or later"></a>
 </p>
 
-**股票与财报研究工作台：从行情和财务数字，走到有原文依据的公司分析。**
+**在本地查询财报、计算财务指标、研究上市公司。**
 
-FilingCopilot 将股票历史走势、公开财报、财务计算、公司公告和 AI 研究放在同一个工作空间。
+FilingCopilot 提供股票历史走势、公开财报、财务计算、公司公告和研究问答。
 你可以输入公司名称或股票代码，查看长期股价，了解公司的收入、盈利和现金流，比较不同公司，
 再围绕具体问题开展研究。回答中的数字、原文引用和计算输入可以展开查看，也可以随研究包保存下来。
 
-Financial research with traceable sources, deterministic calculations and offline replay.
-
 [快速开始](#快速开始) · [如何使用](#如何使用) · [使用指南](docs/user-guide.md) · [MCP 接入](docs/mcp-tools.md)
 
-**想快速了解技术核心？** 先看[项目导览](docs/showcase.zh-CN.md)：它用一次无需 API Key 的验证、一次浏览器研究和五个代码边界说明项目如何保留证据并重放结果。
-
-## 这个项目有什么用
-
-研究一家上市公司，往往需要在股价网站、年报、季报、公告和计算表之间来回切换。
-同一个指标还可能涉及不同年度、币种或股份口径，读到的解释也需要回到原文核对。
-FilingCopilot 把这些步骤连接起来，让你在查看资料的同时提出问题、检查出处并保留研究过程。
-
-它适合需要阅读公开披露的个人研究者、财务分析学习者，以及希望把财报工具接入自己 AI 助手的开发者。
-常见用途包括：
-
-- **了解一家公司。** 从商业模式、经营表现、现金生成和风险披露入手，找到支持分析的原文。
-- **观察长期变化。** 将多年股价走势与营收、利润、现金流趋势放在一起查看。
-- **比较研究对象。** 选择几家公司，比较可取得的财务数据、价格表现和估值口径，也可以加入 ETF 基准。
-- **检验自己的假设。** 修改增长、估值倍数或折现假设，查看计算结果如何变化，并保存输入与公式。
-- **复查已有研究。** 重新打开研究记录，检查数字和引用，比较两次研究使用的资料与结论变化。
+[项目导览](docs/showcase.zh-CN.md)包含离线示例、代码阅读顺序和研究包的复核方法。
 
 ## 主要功能
 
@@ -68,6 +51,7 @@ FilingCopilot 把这些步骤连接起来，让你在查看资料的同时提出
 ## 快速开始
 
 需要 Python 3.10 或以上。在下载后的项目根目录执行以下命令。
+内置财报和财务计算不需要模型密钥；实时行情和新文件下载需要网络。
 
 ### Windows PowerShell
 
@@ -76,26 +60,17 @@ FilingCopilot 把这些步骤连接起来，让你在查看资料的同时提出
 if (-not (Test-Path -LiteralPath .env)) {
     Copy-Item .env.example .env
 }
+$env:FC_EMBEDDING_MODE = "off"
 ```
 
-如果 pip 使用了无法提供构建依赖的私有源或镜像，并提示找不到 `setuptools>=68`，请改用官方源重试：
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e "." --index-url https://pypi.org/simple
-```
-
-`setup.ps1` 安装脚本在这一步已经固定使用官方 PyPI 源。
-
-按下面的配置说明填写 `.env`，然后启动：
+启动工作台：
 
 ```powershell
 .\start.ps1 -Port 8159
 ```
 
-也可以运行 `.\setup.ps1 -Language zh`，自动选择可用的 Python 3.10 或以上版本，
-安装核心依赖；兼容的已有 `.venv` 会直接复用。新环境可用 `-PythonExecutable`
-指定解释器完整路径。可选的 `-Profile locked` 只用于复现历史 Python 3.10
-依赖快照，其中包含开发和向量检索依赖。
+安装脚本会选择支持的 Python 版本，复用兼容的 `.venv`，并从 PyPI 安装核心依赖。
+解释器选择、可选配置及安装故障处理见[安装说明](docs/installation.md)。
 
 打开 [本地工作台](http://127.0.0.1:8159/)，并保持服务终端运行。停止服务时，在该终端按 `Ctrl+C`。
 已经安装过的环境可直接使用启动命令；复制配置文件的步骤会保留现有 `.env`。
@@ -112,10 +87,10 @@ fi
 
 如果配置的镜像无法提供构建依赖，请给安装命令加上 `--index-url https://pypi.org/simple` 重试。
 
-填写 `.env` 后启动：
+使用关键词检索启动：
 
 ```bash
-.venv/bin/python -m filingcopilot serve --port 8159
+FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 ```
 
 浏览器同样访问 `http://127.0.0.1:8159/`。
@@ -127,6 +102,7 @@ fi
 | `FC_SEC_USER_AGENT` | 在线获取 SEC 资料所需的真实联系信息，包含联系人和邮箱。 |
 | `FC_API_BASE` | 支持工具调用的 OpenAI 兼容模型接口地址。 |
 | `FC_API_KEY` | 该模型服务的访问密钥。 |
+| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 可选的供应商请求头配置；真实值仅保存在本地。 |
 | `FC_MODEL` | 用于研究与解释的模型名称。 |
 | `FC_REVIEW_MODEL` | 用于审查分析的模型；建议使用与研究模型不同的模型。 |
 | `FC_EMBEDDING_MODE` | `off` 使用关键词检索；`local` 使用可选本地向量检索。 |
@@ -207,12 +183,12 @@ Web、CLI、REST 与 MCP 使用相同的研究能力和证据规则。
 
 | 文档 | 内容 |
 |---|---|
-| [使用指南](docs/user-guide.md) | 详细配置、页面操作和数据口径；包含历史实现记录。 |
+| [使用指南](docs/user-guide.md) | 配置、页面操作、数据口径和常见问题。 |
 | [MCP 接入](docs/mcp-tools.md) | 将财报查询、计算和研究能力接入其他助手。 |
 | [系统架构](docs/architecture.md) | 服务层、Agent、RAG、证据与复核流程。 |
 | [研究包协议](docs/research-package-protocol.md) | 冻结输入、来源信息及离线复核边界。 |
 | [独立验证器](docs/independent-verifier.md) | 独立安装和复算已导出的研究包。 |
-| [项目导览](docs/showcase.zh-CN.md) | 用一次演示和五个代码边界快速理解项目。 |
+| [项目导览](docs/showcase.zh-CN.md) | 离线示例、模块职责和代码阅读顺序。 |
 | [开发与评测](docs/evaluation.md) | 评测方法、历史记录与当前限制。 |
 | [发布检查](docs/publication-checks.md) | 依赖、源码包和发布范围。 |
 

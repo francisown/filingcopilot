@@ -1,0 +1,273 @@
+{
+  "schema": "filingcopilot.demo-source-rebuild/v1",
+  "rebuilt_at": "2026-10-18T13:35:58.474038+00:00",
+  "as_of": "2026-10-08",
+  "network": false,
+  "method": "Full re-extraction from explicitly supplied cached official SEC responses",
+  "input_snapshot_sha256": "7fbe8b3f4159045aba71dd39bf5719a008a2936de0a634f525a2cb91f2307214",
+  "output_snapshot_sha256": "2be88b74f730993bfa5033d18f3379e3f0c17806d178489ce3a7ad6230a759af",
+  "filings": [
+    {
+      "filing_id": "AAPL:0000320193-25-000079",
+      "old_content_sha256": "ad62dcaf0ed3f4a7bdafb6ca2969c1c0b4f9e63e000dbac4c325bb5a293499b7",
+      "new_content_sha256": "3a69f79bffa38444798279ec82fa1e76ce0460b8a20463580026248282d0f37e",
+      "existing_observations_preserved": true,
+      "selection": "Original demo IDs, order and field shape retained after full re-extraction",
+      "extracted_counts": {
+        "facts": 28,
+        "passages": 585,
+        "statement_facts": 820
+      },
+      "counts": {
+        "facts": {
+          "before": 22,
+          "after": 22
+        },
+        "passages": {
+          "before": 314,
+          "after": 314
+        },
+        "statement_facts": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "inputs": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "sha256": "3a69f79bffa38444798279ec82fa1e76ce0460b8a20463580026248282d0f37e",
+          "bytes": 1520315
+        },
+        {
+          "url": "https://data.sec.gov/submissions/CIK0000320193.json",
+          "sha256": "aad00f6aa75ba1405e0a34c788bdba9042281b2724fe1db3ff26f434b9a92e44",
+          "bytes": 163690
+        },
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json",
+          "sha256": "73a86c6aedc31f77cac2ea4df5f80f0b3bd7e6eb58bb4e01444fbedf3afb9c43",
+          "bytes": 3789099
+        }
+      ]
+    },
+    {
+      "filing_id": "AAPL:0000320193-24-000123",
+      "old_content_sha256": "d418d74400a563ff3fc0c2195e16fb913f3acb58aba4b242be5a0f3aa01ba4a8",
+      "new_content_sha256": "f46716d136a9b5b0fad87c506fa5804ab3668a5d0f193e3ef6d9f0cf49e690b7",
+      "existing_observations_preserved": true,
+      "selection": "Original demo IDs, order and field shape retained after full re-extraction",
+      "extracted_counts": {
+        "facts": 28,
+        "passages": 618,
+        "statement_facts": 819
+      },
+      "counts": {
+        "facts": {
+          "before": 22,
+          "after": 22
+        },
+        "passages": {
+          "before": 314,
+          "after": 314
+        },
+        "statement_facts": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "inputs": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+          "sha256": "f46716d136a9b5b0fad87c506fa5804ab3668a5d0f193e3ef6d9f0cf49e690b7",
+          "bytes": 1503887
+        },
+        {
+          "url": "https://data.sec.gov/submissions/CIK0000320193.json",
+          "sha256": "aad00f6aa75ba1405e0a34c788bdba9042281b2724fe1db3ff26f434b9a92e44",
+          "bytes": 163690
+        },
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json",
+          "sha256": "73a86c6aedc31f77cac2ea4df5f80f0b3bd7e6eb58bb4e01444fbedf3afb9c43",
+          "bytes": 3789099
+        }
+      ]
+    },
+    {
+      "filing_id": "MSFT:0001193125-26-323660",
+      "old_content_sha256": "ace2aa8408b1e40c239fc5b222ce8e1b93acbfead28d0c86c4bb69f79b08eda7",
+      "new_content_sha256": "d9801758dc8b37b4d7358ec4b0ed803c849a90dbd7830a403dfafac1d4702671",
+      "existing_observations_preserved": true,
+      "selection": "Original demo IDs, order and field shape retained after full re-extraction",
+      "extracted_counts": {
+        "facts": 28,
+        "passages": 773,
+        "statement_facts": 1365
+      },
+      "counts": {
+        "facts": {
+          "before": 22,
+          "after": 22
+        },
+        "passages": {
+          "before": 486,
+          "after": 486
+        },
+        "statement_facts": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "inputs": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+          "sha256": "d9801758dc8b37b4d7358ec4b0ed803c849a90dbd7830a403dfafac1d4702671",
+          "bytes": 8585608
+        },
+        {
+          "url": "https://data.sec.gov/submissions/CIK0000789019.json",
+          "sha256": "a5848ba348a3d3ae08c3c40bf4599379014be077911e6550ed3a8182a34a6a7b",
+          "bytes": 185024
+        },
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000789019.json",
+          "sha256": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+          "bytes": 4881196
+        }
+      ]
+    },
+    {
+      "filing_id": "MSFT:0000950170-25-100235",
+      "old_content_sha256": "56d41ecc0adc114c7fcda813d41f5911b244a7e448b545f6dca52dfba9801008",
+      "new_content_sha256": "efc15e3614f8cbd0880a6b048954ae55856eca5226b1d2281f5f877256f7790a",
+      "existing_observations_preserved": true,
+      "selection": "Original demo IDs, order and field shape retained after full re-extraction",
+      "extracted_counts": {
+        "facts": 28,
+        "passages": 754,
+        "statement_facts": 1327
+      },
+      "counts": {
+        "facts": {
+          "before": 22,
+          "after": 22
+        },
+        "passages": {
+          "before": 478,
+          "after": 478
+        },
+        "statement_facts": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "inputs": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "sha256": "efc15e3614f8cbd0880a6b048954ae55856eca5226b1d2281f5f877256f7790a",
+          "bytes": 8158174
+        },
+        {
+          "url": "https://data.sec.gov/submissions/CIK0000789019.json",
+          "sha256": "a5848ba348a3d3ae08c3c40bf4599379014be077911e6550ed3a8182a34a6a7b",
+          "bytes": 185024
+        },
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000789019.json",
+          "sha256": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+          "bytes": 4881196
+        }
+      ]
+    },
+    {
+      "filing_id": "NVDA:0001045810-26-000021",
+      "old_content_sha256": "da09753693ae094014dd7a13dcd2141978d1e2f187cf42c791670b9b99ad652c",
+      "new_content_sha256": "466830059725ffdbf75402c8b4906543c720ce7f0635dcf57177c1d6fed5fd63",
+      "existing_observations_preserved": true,
+      "selection": "Original demo IDs, order and field shape retained after full re-extraction",
+      "extracted_counts": {
+        "facts": 25,
+        "passages": 813,
+        "statement_facts": 979
+      },
+      "counts": {
+        "facts": {
+          "before": 22,
+          "after": 22
+        },
+        "passages": {
+          "before": 559,
+          "after": 559
+        },
+        "statement_facts": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "inputs": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+          "sha256": "466830059725ffdbf75402c8b4906543c720ce7f0635dcf57177c1d6fed5fd63",
+          "bytes": 1967923
+        },
+        {
+          "url": "https://data.sec.gov/submissions/CIK0001045810.json",
+          "sha256": "682c49d59116ae49b317eb4adddf3ef9142dfd97f59c5d8e5a5acad7f9058ab4",
+          "bytes": 159761
+        },
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045810.json",
+          "sha256": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+          "bytes": 4092966
+        }
+      ]
+    },
+    {
+      "filing_id": "NVDA:0001045810-25-000023",
+      "old_content_sha256": "df34c12c9c7143cc7948710138b099e703981ce603128df371167db7b1979736",
+      "new_content_sha256": "9a2a18a706185b63e0a81887a9d464b498e5b9b9c7e60ae8d4f631cad0073fb0",
+      "existing_observations_preserved": true,
+      "selection": "Original demo IDs, order and field shape retained after full re-extraction",
+      "extracted_counts": {
+        "facts": 25,
+        "passages": 850,
+        "statement_facts": 1049
+      },
+      "counts": {
+        "facts": {
+          "before": 22,
+          "after": 22
+        },
+        "passages": {
+          "before": 577,
+          "after": 577
+        },
+        "statement_facts": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "inputs": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "sha256": "9a2a18a706185b63e0a81887a9d464b498e5b9b9c7e60ae8d4f631cad0073fb0",
+          "bytes": 2067627
+        },
+        {
+          "url": "https://data.sec.gov/submissions/CIK0001045810.json",
+          "sha256": "682c49d59116ae49b317eb4adddf3ef9142dfd97f59c5d8e5a5acad7f9058ab4",
+          "bytes": 159761
+        },
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045810.json",
+          "sha256": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+          "bytes": 4092966
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Hashes bind these cached bytes; they do not guarantee future SEC responses are identical.",
+    "This updates the bundled seed only; existing databases and frozen evaluations are unchanged."
+  ]
+}

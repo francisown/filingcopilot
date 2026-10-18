@@ -57,6 +57,7 @@ def test_public_snapshot_omits_private_helper_and_generated_inputs(tmp_path):
     inputs = [
         "README.md", ".env", "scripts/configure_local.py", "scripts/ordinary.py",
         "scripts/__pycache__/ordinary.pyc", "artifacts/README.md", "artifacts/private-run.json",
+        "scripts/analysis/local_notes.py", "scripts/fc_gold_facts.py", "scripts/fc_report.py",
     ]
     for name in inputs:
         path = tmp_path / name
@@ -65,6 +66,36 @@ def test_public_snapshot_omits_private_helper_and_generated_inputs(tmp_path):
     selected = {p.relative_to(tmp_path).as_posix() for p in BUILDER["selected_paths"](tmp_path)}
     assert selected == {"README.md", "scripts/ordinary.py", "artifacts/README.md"}
     assert (tmp_path / "scripts/configure_local.py").is_file()
+
+
+def test_public_snapshot_checks_session_and_sensitive_json_header_values(tmp_path, monkeypatch):
+    (tmp_path / ".env").write_text(
+        'FC_SESSION_ID=fixture-private-session\n'
+        'FC_EXTRA_HEADERS={"Authorization":"Bearer fixture-private-credential","Content-Type":"application/json"}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setitem(BUILDER["private_values"].__globals__, "ROOT", tmp_path)
+    values = BUILDER["private_values"]()
+    assert b"fixture-private-session" in values
+    assert b"Bearer fixture-private-credential" in values
+    assert b"fixture-private-credential" in values
+    assert b"application/json" not in values
+    file = tmp_path / "leaked.py"
+    file.write_text('header = "Bearer fixture-private-credential"', encoding="utf-8")
+    with pytest.raises(ValueError, match="Configured private value"):
+        BUILDER["validate_inputs"]([file], tmp_path, values)
+
+
+def test_public_snapshot_applies_git_eol_policy_to_new_untracked_files(tmp_path):
+    subprocess.run(["git", "init", str(tmp_path)], check=True, capture_output=True)
+    (tmp_path / ".gitattributes").write_text("* text=auto eol=lf\n*.py text eol=lf\n", encoding="utf-8")
+    source = tmp_path / "new.py"
+    source.write_bytes(b"value = 1\r\n")
+    image = tmp_path / "image.png"
+    image.write_bytes(b"\x00binary\r\n")
+    targets = BUILDER["eol_targets"](tmp_path, [source, image])
+    assert targets["new.py"] == "lf"
+    assert targets["image.png"] == "raw"
 
 
 @pytest.mark.parametrize("content", [

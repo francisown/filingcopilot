@@ -1,57 +1,42 @@
-# FilingCopilot：项目导览
+# 项目导览
 
-这页用于让第一次看到项目的工程师、潜在用户或合作者在十分钟内理解它。
-建议先看一个可复核的回答，再按边界阅读代码，不需要通读整个仓库。
+FilingCopilot 用于检索公司披露、计算财务指标，并保存回答所依赖的证据。
+浏览器、CLI、REST API 和 MCP 共用研究服务。
 
-## 一句话定位
+## 试用离线示例
 
-FilingCopilot 是一个以证据为中心的财报研究 Agent：数字结论由有类型的事实和公式生成，
-文字结论带有来源引用，保存的研究包可以在不调用模型的情况下由独立验证器重放。
-
-它是个人研究工具和工程实验，不是持牌行情产品、投资顾问，也不声称离线一致就代表叙述或投资判断正确。
-
-## 十分钟、无需 API Key 的演示
-
-仓库自带语料，可以先验证确定性路径：
+按[安装说明](installation.md)完成安装后，运行：
 
 ```powershell
-.\setup.ps1 -Language zh
-$env:FC_EMBEDDING_MODE = "off"
 .\.venv\Scripts\python.exe -m filingcopilot verify-package examples/annual-facts.json
 ```
 
-验证不需要网络或模型 Key。继续看浏览器工作台时，在同一个终端运行：
+该示例不需要网络或模型密钥。macOS/Linux 使用 `.venv/bin/python`。
+接着可以在浏览器里查看一次研究：
 
-```powershell
-.\start.ps1 -Port 8159
-```
+1. 运行 `start.ps1 -Port 8159`。
+2. 选择 Apple / AAPL 和“无模型研究”。
+3. 查询 FY2025 营收与净利润。
+4. 展开引用，检查报告期间，再导出研究包。
 
-选择 **Apple / AAPL** 和 **Data only**，询问 FY2025 营收与净利润，打开引用，再导出研究包。
-要观察的是回答、来源和计算输入之间的关系。
+## 代码阅读顺序
 
-macOS/Linux 使用 `.venv/bin/python`，并执行：
+| 模块 | 职责 |
+|---|---|
+| [models.py](../src/filingcopilot/models.py) | 定义事实、声明、请求及保存的回答。 |
+| [service_research.py](../src/filingcopilot/service_research.py) | 管理研究生命周期、预算、预览及结果保存。 |
+| [service_execution.py](../src/filingcopilot/service_execution.py) | 按请求类型选择流程，准备证据并执行研究。 |
+| [tools.py](../src/filingcopilot/tools.py) | 查询证据并执行财务计算。 |
+| [verification.py](../src/filingcopilot/verification.py) | 检查引用、范围、数字和完整性；通过回调接入语义复核。 |
+| [audit.py](../src/filingcopilot/audit.py) | 导出研究包、离线复核，并按需与原始缓存对照。 |
 
-```bash
-FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
-```
+[架构说明](architecture.md)介绍检索、行情及证据账本的关系。
+[独立验证器](independent-verifier.md)可以单独安装，不需要研究 Agent。
 
-## 推荐的代码阅读顺序
+## 验证与评测
 
-1. [`models.py`](../src/filingcopilot/models.py)：事实、声明、请求和研究包契约。
-2. [`service_research.py`](../src/filingcopilot/service_research.py)：研究请求、知悉日期和状态。
-3. [`service_execution.py`](../src/filingcopilot/service_execution.py)：工具结果、证据和计算。
-4. [`audit.py`](../src/filingcopilot/audit.py)：证据账本及来源/期间绑定检查。
-5. [`verification.py`](../src/filingcopilot/verification.py)：脱离模型运行时重放研究包。
+回归测试覆盖计算规则、来源和日期检查、取消、供应商故障及研究包兼容性。
+检索实验使用固定的 200 题；模型实验分别记录交付、延迟和用量。
 
-浏览器、CLI、REST 和 MCP 共用这些规则。完整流程见 [`architecture.md`](architecture.md)。
-
-## 如何理解评测数字
-
-仓库保留冻结的检索和预算实验，用于发现回归，不把它们包装成人类语义准确率或投资表现证明。
-当前限制、检索结果和人工审查范围见 [`evaluation.md`](evaluation.md)。后续更有价值的评测是小规模、
-盲测、由独立评审完成，并分别报告数字准确率、引用支持率、主动弃答率、延迟和成本。
-
-## 哪些团队可能感兴趣
-
-最适合关注金融数据、研究 Agent、RAG 评测、MCP 集成和本地优先开发者工具的团队。项目的亮点是边界、
-证据和可解释的工程取舍，不是多租户部署或生产运维能力。
+具体数据和分母见[评测说明](evaluation.md)，近期改动见[更新记录](release-2026-10-18.md)。
+完整回答的独立人工评审尚未完成。离线复核检查保存的证据与计算，不会重新判断叙述含义。

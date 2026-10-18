@@ -6,4 +6,4 @@ artifacts
 tests
 __pycache__
 %SystemDrive%
-.workbuddy
+.*

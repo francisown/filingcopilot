@@ -10,6 +10,11 @@ build/
 dist/
 artifacts/local/
 %SystemDrive%/
-.workbuddy/
 artifacts/*
 !artifacts/README.md
+# Local optimization receipts and one-off analysis are retained on this machine.
+/LOCAL-OPTIMIZATIONS.md
+/OPTIMIZATION-STATUS.md
+/scripts/analysis/
+/scripts/fc_gold_facts.py
+/scripts/fc_report.py
