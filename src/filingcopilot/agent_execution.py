@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from .annual_details import comparable_annual_periods
@@ -527,11 +528,26 @@ class ExecutionMixin:
             )
         )
         accepted = []
+        observations = set()
+        separate_sources = bool(re.search(
+            r"来源|版本|修订|重述|\b(?:sources?|filings|reports|revisions?|restat\w*|amend\w*)\b",
+            question, re.I,
+        ))
         for item in typed[:8]:
             claims = Submission(
                 claims=[Claim(kind=item["kind"], evidence_ids=[item["id"]])], gaps=[]
             )
             verified, _ = verify_submission(claims, tools, question, focus_ticker=focus)
+            if verified and item["kind"] == "fact" and not separate_sources:
+                # A later filing may repeat the same observation. Collapse only
+                # exact financial matches after verification, never rounded text
+                # or differing restatements. All observed sources stay in ledger.
+                observation = tuple(item.get(key) for key in (
+                    "ticker", "metric", "concept", "label", "unit", "fiscal_year", "start", "end",
+                )) + (Decimal(item["value"]),)
+                if observation in observations:
+                    continue
+                observations.add(observation)
             accepted.extend(verified)
         return accepted
 
