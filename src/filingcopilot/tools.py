@@ -897,7 +897,37 @@ class ResearchTools:
         }
         if name not in allowed:
             raise ValueError("Unknown read-only research tool")
-        return allowed[name](**arguments)
+        return allowed[name](**_decode_scalar_arguments(name, arguments))
+
+
+def _decode_scalar_arguments(name: str, arguments: dict) -> dict:
+    """Decode unambiguous provider strings using the declared scalar types."""
+    if not isinstance(arguments, dict):
+        raise ValueError("Research tool arguments must be a JSON object")
+    parameters = next(
+        schema["function"]["parameters"]
+        for schema in TOOL_SCHEMAS
+        if schema["function"]["name"] == name
+    )
+    decoded = dict(arguments)
+    for key, specification in parameters["properties"].items():
+        if key not in decoded:
+            continue
+        value = decoded[key]
+        if value is None and key not in parameters["required"]:
+            continue
+        if specification.get("type") == "integer":
+            if isinstance(value, str) and re.fullmatch(r"[+-]?[0-9]+", value.strip()):
+                value = int(value.strip())
+            if type(value) is not int:
+                raise ValueError(f"{name}.{key} must be an integer")
+        elif specification.get("type") == "boolean":
+            if isinstance(value, str) and value.strip().lower() in {"true", "false"}:
+                value = value.strip().lower() == "true"
+            if type(value) is not bool:
+                raise ValueError(f"{name}.{key} must be a boolean")
+        decoded[key] = value
+    return decoded
 
 
 def tool_schema(name: str, description: str, properties: dict, required: list[str]) -> dict:
