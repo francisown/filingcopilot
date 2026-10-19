@@ -36,6 +36,8 @@ def _forecast_boundary(question: str) -> str | None:
     """
     if re.search(
         r"(?:一定|必定|保证|肯定).{0,20}(?:跑赢|跑输)|"
+        r"(?:是否|能否|可否|有没有).{0,24}(?:证明|保证|确定).{0,24}(?:跑赢|跑输|超过同行|落后同行)|"
+        r"(?:年报|财报|annual report|filing).{0,40}(?:能否|是否|可否|能不能).{0,24}(?:证明|保证|确定).{0,24}(?:跑赢|跑输|超过同行|outperform|underperform)|"
         r"\b(?:will|guaranteed? to|certain to)\b[^.!?;]{0,80}\b(?:outperform|underperform)\b|"
         r"\b(?:outperformance|underperformance)\b[^.!?;]{0,30}\b(?:proven|guaranteed|certain)\b",
         question, re.I,
