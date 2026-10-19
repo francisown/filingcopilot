@@ -114,6 +114,40 @@ class ExecutionMixin:
                         "reason": "deterministic typed evidence retained after the model failed to submit",
                     }
                 )
+        model_failure_trace = any(
+            item.get("stage") in ("model_error", "semantic_review_error")
+            or (
+                item.get("tool") == "submit_answer"
+                and isinstance(item.get("result"), dict)
+                and item["result"].get("error")
+            )
+            for item in state.get("trace", [])
+        )
+        if (
+            not state["verified"]
+            and not stopped()
+            and not stock_question
+            and state.get("module")
+            and model_failure_trace
+        ):
+            excerpts = self._observed_module_excerpt_fallback(state)
+            for detail in excerpts:
+                detail["index"] = max(
+                    (claim.get("index", -1) for claim in state["verified"]), default=-1
+                ) + 1
+                state["verified"].append(detail)
+            if excerpts:
+                gaps.append(
+                    "模型整理未完成；已保留与本节直接相关的逐字原文材料，待模型恢复后可继续整理。"
+                )
+                state["trace"].append(
+                    {
+                        "stage": "module_excerpt_fallback",
+                        "module": state["module"],
+                        "accepted_excerpts": len(excerpts),
+                        "reason": "exact observed source retained after factual module model failure",
+                    }
+                )
         if narrative_completeness_errors(state["verified"], question):
             gaps.append(translate_text(
                 "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。"
@@ -121,6 +155,107 @@ class ExecutionMixin:
             state["trace"].append({"stage": "answer_coverage", "explanation_present": False,
                                    "reason": "Verified figures do not answer the requested explanation"})
         return gaps, fallback_complete
+
+    @staticmethod
+    def _observed_module_excerpt_fallback(state: AgentState) -> list[dict]:
+        """Retain exact source passages when a factual module cannot be drafted.
+
+        This fallback is deliberately limited to factual sections. It never
+        paraphrases or promotes a passage to a narrative claim; the page labels
+        the result as original source material and keeps the normal evidence
+        citation. Analysis modules continue to use their typed-evidence fallback
+        and remain partial when interpretation is unavailable.
+        """
+        module = state.get("module")
+        contract = module_contract(module) if module else None
+        if contract is None or contract.kind != "factual":
+            return []
+        tools, focus = state["tools"], state.get("focus_ticker")
+        keywords = {
+            "ownership": ("common stock", "ordinary share", "nasdaq", "currency", "dollar", "depositary", "ads"),
+            "audit": ("audited", "opinion", "consolidated financial statements", "report dated", "critical audit", "pcaob"),
+        }.get(module, ())
+        if not keywords:
+            return []
+        latest_filing = None
+        filings = []
+        for item in state.get("trace", []):
+            if item.get("tool") != "list_filings":
+                continue
+            filings.extend((item.get("result") or {}).get("filings", []))
+        if filings:
+            scoped = [
+                filing
+                for filing in filings
+                if not focus or filing.get("ticker") == focus
+            ]
+            annual = [
+                filing
+                for filing in scoped
+                if filing.get("form", "").upper() in {"10-K", "20-F", "40-F"}
+            ]
+            latest_filing = max(
+                annual or scoped,
+                key=lambda filing: (filing.get("period_end", ""), filing.get("filed", "")),
+                default=None,
+            )
+        candidates = []
+        seen = set()
+        for item in state.get("trace", []):
+            if item.get("tool") != "search_passages":
+                continue
+            result = item.get("result") or {}
+            for hit in result.get("hits", []):
+                passage = hit.get("passage") or {}
+                item_id = passage.get("id")
+                text = passage.get("text", "")
+                if (
+                    not item_id
+                    or item_id in seen
+                    or not text
+                    or passage.get("kind", "passage") != "passage"
+                    or (focus and passage.get("ticker") != focus)
+                ):
+                    continue
+                lower = text.lower()
+                keyword_hits = sum(1 for keyword in keywords if keyword in lower)
+                if not keyword_hits:
+                    continue
+                seen.add(item_id)
+                if item_id not in tools.ledger:
+                    tools.ledger[item_id] = passage
+                latest = bool(latest_filing and passage.get("filing_id") == latest_filing.get("id"))
+                candidates.append(
+                    (
+                        latest,
+                        keyword_hits,
+                        float(hit.get("score") or 0),
+                        item_id,
+                    )
+                )
+        candidates.sort(key=lambda item: (item[0], item[1], item[2]), reverse=True)
+        accepted = []
+        for _, _, _, item_id in candidates[:2]:
+            source = tools.ledger[item_id]
+            checked, _ = verify_submission(
+                Submission(
+                    claims=[
+                        Claim(
+                            kind="excerpt",
+                            evidence_ids=[item_id],
+                            statement=source["text"],
+                        )
+                    ]
+                ),
+                tools,
+                state["question"],
+                focus_ticker=focus,
+                allow_excerpts=True,
+            )
+            for detail in checked:
+                detail["index"] = len(accepted)
+                accepted.append(detail)
+        return accepted
 
     @staticmethod
     def _prepare_annual_comparison(tools, question, focus, max_calls):

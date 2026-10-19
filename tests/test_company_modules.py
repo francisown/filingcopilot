@@ -339,6 +339,81 @@ def test_agent_mode_module_request_without_model_fails_honestly(tmp_path):
         service._research(request)
 
 
+def test_factual_module_keeps_observed_source_excerpt_after_model_failure(tmp_path):
+    """A factual section should retain exact observed text when drafting fails."""
+    service = service_at(tmp_path)
+    ingest_annual(service)
+    audit_filing = Filing(
+        id="AMZN:audit",
+        ticker="AMZN",
+        company="AMZN",
+        cik="0001018724",
+        accession="0001018724-26-000004",
+        form="10-K",
+        filed="2026-02-06",
+        period_end="2025-12-31",
+        source_url="https://www.sec.gov/audit.htm",
+        content_sha256="b" * 64,
+    )
+    service.corpus.ingest(
+        audit_filing,
+        [],
+        [
+            Passage(
+                id="AMZN-audit",
+                filing_id=audit_filing.id,
+                ticker="AMZN",
+                section="Item 8. Financial Statements and Supplementary Data",
+                text="We have audited the consolidated financial statements. In our opinion, they present fairly in all material respects.",
+                source_url=audit_filing.source_url,
+                locator="audit paragraph",
+            )
+        ],
+    )
+    tools = service.tools(date(2026, 10, 8))
+    source = service.corpus.evidence("AMZN-audit", date(2026, 10, 8))
+    tools.ledger[source["id"]] = source
+    state = {
+        "module": "audit",
+        "question": MODULES["audit"].question,
+        "focus_ticker": "AMZN",
+        "tools": tools,
+        "trace": [
+            {
+                "stage": "tool",
+                "tool": "search_passages",
+                "result": {"hits": [{"passage": source}]},
+            },
+            {
+                "stage": "tool",
+                "tool": "submit_answer",
+                "result": {"error": "Submission has an unknown field", "recoverable": True},
+            },
+        ],
+        "verified": [],
+        "errors": ["Model request failed; no answer was fabricated"],
+        "submission": None,
+        "retained_gaps": [],
+        "numeric_coverage_errors": [],
+        "tool_count": 0,
+        "usage": {},
+    }
+    agent = ResearchAgent(Settings(home=tmp_path, embedding_mode="off"), None)
+
+    gaps, _ = agent._complete_filing_answer(state, [])
+
+    assert state["verified"] == [
+        {
+            "index": 0,
+            "kind": "excerpt",
+            "text": source["text"],
+            "evidence_ids": [source["id"]],
+            "verification": "exact_source_excerpt",
+        }
+    ]
+    assert any("逐字原文材料" in gap for gap in gaps)
+
+
 def test_module_statements_accept_both_claim_shapes():
     """The module trace must count delivered (text) and draft (statement) claims."""
     from filingcopilot.agent import module_statements
