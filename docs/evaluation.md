@@ -4,51 +4,6 @@ Evaluation separates workflow delivery, financial calculations, retrieval and
 answer-content review. The results below belong to their recorded source and
 configuration snapshots.
 
-## Source review of the full-run answers — 2026-10-19
-
-The saved answers were subsequently compared with SEC filings, issuer annual
-reports and explicit boundary criteria. Numeric references bind the reporting
-period, currency, accounting basis and calculation inputs. Narrative references
-identify required answer points and source locations. This was an official-source
-check with model-assisted content review, not a blind test or independent expert
-certification. The answers were not regenerated or changed for this review.
-
-| Research question group | Core supported | Partially addressed | Wrong or unsupported | Core unanswered |
-|---|---:|---:|---:|---:|
-| Numeric | 20 | 0 | 0 | 0 |
-| Annual comparisons | 20 | 0 | 0 | 0 |
-| Causes | 17 | 2 | 0 | 1 |
-| Risks | 16 | 1 | 1 | 2 |
-| Negation checks | 9 | 4 | 7 | 0 |
-| **Total** | **82** | **7** | **8** | **3** |
-
-Of the 81 answers originally marked complete, 72 met the core reference criteria,
-three were incomplete and six contained material errors or unsupported conclusions.
-"Core supported" permits minor qualifications noted in the review; it does not
-certify every incidental statement. All 40 boundary responses met their content
-criteria, but they exercise only three policy templates, not 40 independent outage
-scenarios. These findings demonstrate why application completion, source binding
-and passing software tests are separate from answer correctness.
-
-One error reversed the currency subject in Apple's FY2022 pricing risk: weaker
-foreign currencies against the US dollar were described as a weaker dollar.
-Another treated NVIDIA's FY2025 demand-decline disclosures as exclusively future
-risks despite disclosures of experienced reductions. Other failures overstated
-materiality, inferred demand from revenue, or replaced requested explanations with
-figures. TSMC's Taiwan and SEC reports use different accounting bases; their net
-income difference was not treated as a calculation error.
-
-The [per-question source review](validation/source-review-2026-10-19.json) contains
-reference points, source URLs and locations, judgments and original answer hashes.
-The full-run status and usage measurements below remain historical observations.
-
-After this review, the repair sequence used 15 real API questions selected from
-known failures and controls on independent data copies. The first 12 exercised the
-initial repair snapshot; a separate 3-question follow-up exercised the final
-boundary changes. They are diagnostic examples rather than a new accuracy rate.
-The current source tree passes 1,705 Python tests; the original full-run
-measurements below were not rerun or replaced.
-
 ## Live evaluation — 2026-10-19
 
 The latest full run used all 140 unchanged bilingual questions, a frozen copy of
