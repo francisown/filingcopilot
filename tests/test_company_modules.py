@@ -128,6 +128,7 @@ def test_module_instruction_carries_scope_prohibitions_and_language_limit():
     assert "no amounts" in analysis
     assert "do not fill in business lines" in analysis
     assert "one to three kind=analysis claims" in analysis
+    assert "how the company earns revenue and who pays" in analysis
     assert "not stated in the cited excerpts" in analysis
     factual = module_instruction("audit", "en")
     assert "factual restatement" in factual

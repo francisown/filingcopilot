@@ -318,6 +318,14 @@ def module_instruction(key: str, language: str = "zh") -> str:
     points = "; ".join(module.points)
     prohibitions = "; ".join(module.prohibitions)
     if module.kind == "analysis":
+        module_guidance = ""
+        if key == "business":
+            module_guidance = (
+                " For this business-model module, paragraph one must directly answer how the company earns revenue "
+                "and who pays for which products or services. Do not open with a mission statement, an industry label "
+                "or generic company introduction; if the revenue mechanism is not disclosed, state that specific gap "
+                "instead. Use later paragraphs for segments, customers and channels."
+            )
         if key == "valuation":
             numeric_guidance = (
                 " For the leading conclusion, state each observed annual-basis or supplier-TTM "
@@ -354,7 +362,7 @@ def module_instruction(key: str, language: str = "zh") -> str:
             "missing and how to obtain it) in the output language. Never assert that a filing or "
             "notice omits a fact based only on the retrieved excerpts; qualify it as \"not stated "
             "in the cited excerpts\" or leave it to the gap list. "
-            f"Prohibitions: {prohibitions}." + numeric_guidance
+            f"Prohibitions: {prohibitions}." + module_guidance + numeric_guidance
         )
     return (
         f"\nCOMPANY-RESEARCH MODULE BRIEF — {module.title_en} (factual restatement): this request "
