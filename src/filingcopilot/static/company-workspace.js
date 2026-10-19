@@ -61,6 +61,21 @@ function companyWorkspaceCite(e,label='查看出处'){const b=el('button','cite'
 function companyInlineEvidenceButton(evidence,label){
   const button=el('button','cite',label);button.type='button';button.addEventListener('click',()=>showEvidence(evidence));return button;
 }
+function companyInlineCitationMarker(evidence,number){
+  const button=el('button','company-inline-marker','['+number+']');
+  button.type='button';button.title='打开证据 '+number;button.setAttribute('aria-label','打开证据 '+number);
+  button.addEventListener('click',()=>showEvidence(evidence));return button;
+}
+function companyInlineEvidenceLabel(item){
+  const kind=item?.kind||'';
+  const label=item?.label||item?.metric||item?.operation||(
+    kind==='passage'?'原文段落':kind==='fact'?'财务事实':kind==='calculation'?'计算结果':'证据'
+  );
+  const filing=item?.filing||{};
+  const form=filing.form||'';
+  const period=item?.fiscal_year?'FY'+item.fiscal_year:(item?.end||item?.snapshot?.period_end_label||filing.period_end||'');
+  return [label,form,period].filter(Boolean).join(' · ');
+}
 function companyClaimNote(claim){return claim.verification==='inference_review'?'分析基于所引证据，经模型审查；判断仍可人工复核':claim.verification==='semantic_review'?'叙述经模型审查，完整含义仍可人工复核':claim.verification==='exact_source_excerpt'?'原文逐字匹配':'查看证据与核验类别';}
 // Numeric evidence cited by the delivered statements is listed as a "key
 // figures" strip: the prose stays qualitative (numbers are rendered by code),
@@ -176,14 +191,37 @@ function renderInlineCompanySummary(host,result,section,claimIndexes=null){
   const claims=(result.answer||[]).filter(item=>['analysis','narrative','excerpt'].includes(item.kind)&&(!claimIndexes||claimIndexes.includes(item.index)));
   const status=claims.some(item=>['analysis','narrative'].includes(item.kind))?'分析经审查':claims.some(item=>item.kind==='excerpt')?'原文材料':'待补齐';
   const gaps=[...(result.gaps||[])];
+  const cited=[],citationNumbers=new Map();
+  const registerEvidence=item=>{
+    if(!item?.id)return null;
+    if(!citationNumbers.has(item.id)){citationNumbers.set(item.id,cited.length+1);cited.push(item);}
+    return citationNumbers.get(item.id);
+  };
+  const appendMarkers=(parent,ids)=>{
+    const markers=[...new Set(ids||[])].map(id=>evidence.get(id)).filter(Boolean).map(item=>{
+      const number=registerEvidence(item);return companyInlineCitationMarker(item,number);
+    });
+    if(markers.length){const wrap=el('span','company-inline-citation-markers');markers.forEach(marker=>wrap.append(marker));parent.append(el('span','',' '),wrap);}
+  };
+  const appendEvidenceAppendix=()=>{
+    if(!cited.length)return;
+    const box=el('section','company-inline-evidence');
+    box.append(el('strong','company-inline-evidence-title','证据'),el('p','company-inline-evidence-note','正文中的编号对应下列证据；点击“打开证据”查看原文、期间与核验信息。'));
+    const list=el('ol','company-inline-evidence-list');
+    cited.forEach((item,index)=>{
+      const row=el('li','company-inline-evidence-item');
+      row.append(el('span','company-inline-evidence-label','['+(index+1)+'] '+companyInlineEvidenceLabel(item)),companyInlineEvidenceButton(item,'打开证据'));
+      list.append(row);
+    });
+    box.append(list);host.append(box);
+  };
   host.replaceChildren();
   const heading=el('div','market-heading');
   heading.append(el('h3','',section.title+' · 研究结果'),el('span','small-tag',status));
-  host.append(heading,el('p','company-inline-label','固定格式：结论 → 证据与期间 → 边界 → 待补信息'));
+  host.append(heading,el('p','company-inline-label','文章格式：正文标注 [n]，边界与待补信息随后，证据在文末集中列出'));
   if(claims.length){
-    // Verified statements read as one article: consecutive paragraphs under a
-    // single label, each paragraph keeping its own evidence links; the review
-    // note appears once per label group instead of once per claim.
+    // Keep reviewed claims as connected article paragraphs. Each paragraph
+    // carries small numbered markers; the evidence list is appended once.
     const article=el('div','company-inline-article'),groups=[];
     claims.slice(0,4).forEach(claim=>{
       const label=claim.kind==='excerpt'?'原文依据':module.kind==='factual'?'整理':'结论';
@@ -195,10 +233,7 @@ function renderInlineCompanySummary(host,result,section,claimIndexes=null){
       block.append(el('strong','claim-label',group.label));
       group.claims.forEach(claim=>{
         const row=el('div','company-inline-claim');
-        row.append(el('p','claim-text',claim.text||''));
-        const citations=el('div','citations');
-        (claim.evidence_ids||[]).forEach((id,index)=>{const source=evidence.get(id);if(source)citations.append(companyInlineEvidenceButton(source,'查看证据 '+(index+1)));});
-        if(citations.children.length)row.append(citations);
+        const paragraph=el('p','claim-text');paragraph.append(el('span','claim-text-body',claim.text||''));appendMarkers(paragraph,claim.evidence_ids);row.append(paragraph);
         block.append(row);
       });
       block.append(el('p','verification-note',[...new Set(group.claims.map(companyClaimNote))].join(' ')));
@@ -213,7 +248,7 @@ function renderInlineCompanySummary(host,result,section,claimIndexes=null){
         const row=el('p','company-inline-number');
         row.append(el('span','number-label',entry.label+'：'),el('strong','number-value',entry.text));
         if(entry.period)row.append(el('span','number-period','（'+entry.period+'）'));
-        row.append(companyInlineEvidenceButton(entry.evidence,'查看证据'));
+        const number=registerEvidence(entry.evidence);if(number)row.append(el('span','',' '),companyInlineCitationMarker(entry.evidence,number));
         box.append(row);
       });
       host.append(box);
@@ -228,9 +263,9 @@ function renderInlineCompanySummary(host,result,section,claimIndexes=null){
     const deterministic=numbers.map(companyDeterministicConclusion).find(Boolean);
     if(deterministic){
       const box=el('div','company-inline-deterministic');
-      box.append(el('strong','', '可确认结论'),el('p','',deterministic));
+      const deterministicParagraph=el('p','',deterministic);box.append(el('strong','', '可确认结论'),deterministicParagraph);
       const evidence=numbers.find(entry=>companyDeterministicConclusion(entry)===deterministic)?.evidence;
-      if(evidence)box.append(companyInlineEvidenceButton(evidence,'查看计算依据'));
+      if(evidence){const number=registerEvidence(evidence);deterministicParagraph.append(el('span','',' '),companyInlineCitationMarker(evidence,number));}
       host.append(box);
     }
     if(numbers.length){
@@ -240,12 +275,13 @@ function renderInlineCompanySummary(host,result,section,claimIndexes=null){
         const row=el('p','company-inline-number');
         row.append(el('span','number-label',entry.label+'：'),el('strong','number-value',entry.text));
         if(entry.period)row.append(el('span','number-period','（'+entry.period+'）'));
-        row.append(companyInlineEvidenceButton(entry.evidence,'查看证据'));box.append(row);
+        const number=registerEvidence(entry.evidence);if(number)row.append(el('span','',' '),companyInlineCitationMarker(entry.evidence,number));box.append(row);
       });
       host.append(box);
     }
   }
   if(gaps.length){const box=el('div','company-inline-gaps');box.append(el('strong','', '待补信息'));gaps.slice(0,4).forEach(gap=>box.append(el('p','',gap)));host.append(box);}
+  appendEvidenceAppendix();
   host.classList.remove('hidden');
 }
 async function runInlineCompanyResearch(request,host,button,section,renderer=renderInlineCompanySummary,internal=false){

@@ -103,7 +103,11 @@ async function check(){
   const summaryCard=h.select('#company-source-sections').children[0],summaryButton=summaryCard.children[0].children[2].children[0];
   await h.context.startFocusedCompanySummary(businessSection,summaryCard,summaryButton);
   const summary=text(summaryCard.children[2]),count=(value,re)=>(value.match(re)||[]).length;
-  assert.match(summary,/固定格式：结论 → 证据与期间 → 边界 → 待补信息/);
+  assert.match(summary,/文章格式：正文标注 \[n\]，边界与待补信息随后，证据在文末集中列出/);
+  assert.match(summary,/正文中的编号对应下列证据/);
+  assert.match(summary,/打开证据/);
+  assert.doesNotMatch(summary,/查看证据 [0-9]/,'article paragraphs must use inline numeric markers instead of separate evidence buttons');
+  assert.match(summary,/\[1\]/,'article paragraphs must carry numbered evidence markers');
   assert.match(summary,/分析经审查/);assert.match(summary,/公司通过已披露的两条业务线获取收入。/);assert.match(summary,/客户结构以企业客户为主。/);
   assert.match(summary,/边界/);assert.match(summary,/本段只归纳已披露的业务内容/);
   assert.match(summary,/待补信息/);assert.match(summary,/分部金额未结构化核验/);
@@ -111,7 +115,7 @@ async function check(){
   assert.match(summary,/100\.00 USD/);assert.match(summary,/24\.57%/);assert.match(summary,/经营活动现金流同比增长率/);
   assert.equal(count(summary,/分析基于所引证据，经模型审查；判断仍可人工复核/g),1,'two analysis statements must share one review note');
   assert.equal(count(summary,/原文逐字匹配/g),1);
-  assert.equal(count(summary,/结论/g),2,'one section label plus the fixed-format caption');
+  assert.equal(count(summary,/结论/g),1,'the article uses one section label instead of repeating a button row per paragraph');
   assert.equal(summaryButton.disabled,false);assert.equal(summaryButton.classList.contains('busy-button'),false,'the busy mark must clear after completion');
   const deterministicHost=node('div','company-inline-summary hidden');
   h.context.renderInlineCompanySummary(deterministicHost,{answer:[],evidence:[{id:'growth-1',kind:'calculation',operation:'growth',label:'营业收入同比增长率',value:'12.5',unit:'%',fiscal_year:2025}],gaps:[]},{key:'cashflow',title:'现金流与资本投入',status:'partial',evidence_ids:[],module:{kind:'analysis',boundary:'现金流边界',empty_gap:'暂无现金流材料'} });

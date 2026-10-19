@@ -64,6 +64,20 @@ main{margin-left:216px;padding:0 28px 26px;max-width:1900px}header{height:64px;d
 .company-inline-boundary{margin-top:12px;padding:10px 12px;border-left:2px solid #9aa8bd;background:#f2f6fb;font-size:12px;color:#44586f}
 .company-inline-boundary p{margin:5px 0;line-height:1.7}
 .company-inline-boundary strong{display:block;font-size:11px;letter-spacing:.06em;color:#5c7391;margin-bottom:4px}
+.company-inline-article{margin-top:10px;padding:2px 3px 0}
+.company-inline-article .company-inline-group{padding:0 0 3px}
+.company-inline-article .company-inline-group+.company-inline-group{margin-top:14px;padding-top:13px}
+.company-inline-claim{padding:0 0 9px}
+.company-inline-claim .claim-text{margin:7px 0;line-height:1.95}
+.company-inline-marker{display:inline-block;border:0;background:transparent;color:#245b98;padding:0 2px;margin:0 1px;font-size:.78em;line-height:1;vertical-align:super;text-decoration:none}
+.company-inline-marker:hover{background:#e8f0fc;color:#173f72;border-radius:3px;text-decoration:underline}
+.company-inline-evidence{margin-top:17px;padding-top:13px;border-top:1px solid #dce5ef}
+.company-inline-evidence-title{display:block;color:#244e78;font-size:12px;letter-spacing:.04em}
+.company-inline-evidence-note{margin:4px 0 8px;color:#64748b;font-size:11px;line-height:1.7}
+.company-inline-evidence-list{margin:0;padding-left:27px;display:grid;gap:6px}
+.company-inline-evidence-item{display:flex;align-items:baseline;justify-content:space-between;gap:10px;color:#314b6c;font-size:11px;line-height:1.7}
+.company-inline-evidence-label{overflow-wrap:anywhere}
+.company-inline-evidence-item .cite{flex-shrink:0;margin:0;font-size:10px;padding:3px 6px}
 .busy-button::before{content:'';display:inline-block;width:11px;height:11px;margin-right:6px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:busy-spin .8s linear infinite;vertical-align:-1px}
 .busy-button:disabled{cursor:default;opacity:1}
 @keyframes busy-spin{to{transform:rotate(360deg)}}
