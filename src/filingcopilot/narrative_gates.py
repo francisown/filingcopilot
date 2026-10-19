@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 from .claim_periods import period_comparison_conflict
 from .polarity import causal_period_conflict, contradiction, investment_cash_conflict
+from .semantic_boundaries import document_scope_conflict
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ def gate_narrative_claim(claim: dict, evidence: list[dict], domain, requested_ye
         reasons.append("analysis 只能定性；金额和百分比必须绑定 typed fact/calculation。")
     passages = [item.get("text", "") for item in evidence if item.get("kind") == "passage"]
     for conflict in (
+        document_scope_conflict(statement),
         investment_cash_conflict(statement, passages),
         causal_period_conflict(statement, passages, domain),
         contradiction(statement, passages, domain, requested_years or set()),

@@ -41,6 +41,7 @@ from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, ResearchAnswer, ResearchRequest, Submission
 from .quarterly import is_quarterly_question, stock_request_scope
+from .semantic_boundaries import document_scope_conflict
 from .settings import Settings
 from .status import classify_status_reason
 from .tools import ResearchTools, tool_schemas
@@ -72,6 +73,18 @@ def module_round_limit(module: str | None, max_rounds: int) -> int:
 
 
 SYSTEM = """You are FilingCopilot, a careful financial filing researcher. Answer in Chinese.
+For an explanation, lead with the disclosed cause; figures alone do not answer why.
+For a risk question, address each requested risk category, including customer concentration
+when concentration is requested. Keep consolidated and segment results distinct. If discussing
+profit margins, identify which margin changed and its own disclosed drivers; do not substitute
+segment commentary for a consolidated explanation. Search the relevant MD&A heading when needed.
+For a proposed negative, answer with explicit support, a matching counterexample, or insufficient
+evidence. A possible future material risk or unquantified adverse effect cannot establish realized
+material harm. Revenue changes do not by themselves prove demand changes, and strong demand in
+one segment cannot rule out declines elsewhere. If only selected excerpts were searched, say
+what those excerpts establish; do not say the entire filing never or only makes a statement.
+Look for counterevidence to a proposed interpretation before submitting. Preserve the exact
+subject of comparisons: foreign currency weakness against USD is USD strength, not USD weakness.
 If annual_comparison is supplied, its facts and growth calculations are already observed.
 Use their exact IDs without fetching or calculating them again. Include the available current
 amount and growth alongside the requested explanation. A requested prior fiscal year is in scope.
@@ -988,6 +1001,15 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             gaps.append(CANCELLED_NOTE)
         elif expired():
             gaps.append(DEADLINE_NOTE)
+        unsafe_gaps = [gap for gap in gaps if document_scope_conflict(gap)]
+        if unsafe_gaps:
+            # Gap notes are author prose too. An exhausted repair budget cannot
+            # turn an unverified document-wide absence into a delivered fact.
+            state["trace"].append({"stage": "gap_scope_limited", "original_gaps": unsafe_gaps})
+            gaps = [gap for gap in gaps if gap not in unsafe_gaps]
+            gaps.append(translate_text(
+                "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。"
+            ))
         status = "partial" if gaps else "answered"
         if not state["verified"]:
             status = "abstained"

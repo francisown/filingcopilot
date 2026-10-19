@@ -11,6 +11,11 @@ from .localization import state_language
 from .model_context import model_context_json
 from .models import Submission
 from .quarterly import covers_requested_quarter, stock_request_scope
+from .semantic_boundaries import (
+    document_scope_conflict,
+    narrative_completeness_errors,
+    sentences,
+)
 from .verification import (
     REVIEW_SYSTEM,
     REVIEW_TOOL,
@@ -151,7 +156,8 @@ class ReviewMixin:
                 claims, evidence = [], {}
                 for claim in pending[offset : offset + batch_size]:
                     claims.append(
-                        {k: claim[k] for k in ("index", "kind", "statement", "evidence_ids")}
+                        {**{k: claim[k] for k in ("index", "kind", "statement", "evidence_ids")},
+                         "sentences_to_check": sentences(claim["statement"])}
                     )
                     for key, item in zip(claim["evidence_ids"], claim["evidence"], strict=True):
                         evidence[key] = {
@@ -201,7 +207,11 @@ class ReviewMixin:
                                 "complete answer already resolves this exact point or the note asks for "
                                 "information the user did not request. A directly supported refutation of "
                                 "a proposed claim does not need the exact proposed wording to appear in a "
-                                "filing. Never dismiss missing requested evidence, failed verification, "
+                                "filing, but must match its period, business scope and materiality. "
+                                "Possible risk or unquantified impact cannot refute no material impact; "
+                                "one growing segment cannot refute declining demand elsewhere. "
+                                "An excerpt cannot settle absence across an entire filing. "
+                                "Never dismiss missing requested evidence, failed verification, "
                                 "source conflicts, unfinished review or uncertainty needed by the question. "
                                 "If unsure, keep required_missing=true. Explain each decision briefly. "
                                 "Do not assume an unreviewed claim is supported; removal applies only if "
@@ -298,6 +308,11 @@ class ReviewMixin:
             semantic_review,
             state["focus_ticker"],
         )
+        errors.extend(
+            f"gap {index}: {conflict} Rewrite the limitation within the retrieved evidence scope."
+            for index, gap in enumerate(state["submission"].gaps)
+            if (conflict := document_scope_conflict(gap))
+        )
         if (gap_assessment and not errors and len(verified) == len(state["submission"].claims)
                 and not state.get("review_independence_warning")):
             original_gaps = list(state["submission"].gaps)
@@ -310,6 +325,9 @@ class ReviewMixin:
                 )
                 errors.extend(coverage_errors)
                 state["numeric_coverage_errors"] = coverage_errors
+                prose_errors = narrative_completeness_errors(verified, state["question"])
+                errors.extend(prose_errors)
+                coverage_errors = coverage_errors + prose_errors
                 # Keep actionable omissions visible if no repair budget remains.
                 # A later draft is rechecked; reviewer advice cannot waive these.
                 state["submission"].gaps = coverage_errors[:8]

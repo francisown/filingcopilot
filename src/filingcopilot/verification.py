@@ -24,6 +24,11 @@ from .periods import evidence_period, fact_inputs, period_label
 from .polarity import causal_period_conflict, contradiction, investment_cash_conflict
 from .quarter_labels import quarter_label_conflict, source_quarter_labels
 from .quarterly import is_quarterly_question
+from .semantic_boundaries import (
+    counterevidence_conflict,
+    document_scope_conflict,
+    narrative_completeness_errors,
+)
 from .tools import ResearchTools, format_amount
 from .ttm import is_ttm_question, trailing_window
 from .updates import is_stock_updates_question
@@ -619,6 +624,7 @@ class _SubmissionVerifier:
             self.errors.extend(numeric_completeness_errors(
                 self.accepted, self.tools, self.question, self.focus_ticker,
             ))
+            self.errors.extend(narrative_completeness_errors(self.accepted, self.question))
         return sorted(self.accepted, key=lambda claim: claim["index"]), self.errors
 
     def _verify_claim(self, index: int, claim: Claim) -> None:
@@ -753,8 +759,17 @@ class _SubmissionVerifier:
                 }
             )
             return
-        allowed_years = (self.allowed_fact_years if claim.kind == "fact" and evidence_period(item) == "annual"
-                         and not is_quarterly_question(self.question) else self.requested_years)
+        # A comparison's prior-year ratio is a premise just like its prior-year
+        # facts. Other calculations (e.g. an extra year's growth) keep the exact
+        # requested-year scope, and the ratio's metrics are still checked below.
+        annual_premise = claim.kind == "fact" or (
+            claim.kind == "calculation" and item.get("operation") == "ratio"
+        )
+        allowed_years = (
+            self.allowed_fact_years
+            if annual_premise and all(evidence_period(part) == "annual" for part in fact_inputs(item))
+            and not is_quarterly_question(self.question) else self.requested_years
+        )
         if allowed_years and item["fiscal_year"] not in allowed_years:
             self.errors.append(f"claim {index}: fiscal year does not match requested years")
             return
@@ -810,6 +825,10 @@ class _SubmissionVerifier:
 
     def _check_prose_scope(self, index: int, claim: Claim, evidence: list[dict]) -> bool:
         if claim.kind in ("narrative", "analysis"):
+            conflict = document_scope_conflict(claim.statement)
+            if conflict:
+                self.errors.append(f"claim {index}: {conflict}")
+                return False
             incomplete = []
             passages = [e for e in self.tools.ledger.values() if e["kind"] == "passage"]
             for item in evidence:
@@ -971,6 +990,14 @@ class _SubmissionVerifier:
     def _verify_prose(self, index: int, claim: Claim, evidence: list[dict]) -> None:
         if not self._check_prose_scope(index, claim, evidence):
             return
+        if claim.kind in ("analysis", "narrative"):
+            conflict = counterevidence_conflict(
+                self.question, claim.statement,
+                [e["text"] for e in evidence if e["kind"] == "passage"],
+            )
+            if conflict:
+                self.errors.append(f"claim {index}: {conflict}")
+                return
         if claim.kind == "excerpt":
             original = self.tools.corpus.evidence(claim.evidence_ids[0], self.tools.as_of)
             if (
@@ -1166,6 +1193,18 @@ def numeric_completeness_errors(
 
 
 REVIEW_SYSTEM = """You independently check financial research claims against their cited passages.
+Check each supplied sentences_to_check against the actual claim wording, not just its topic.
+First look for a mismatched subject, reversed direction, omitted qualification or scope jump.
+Then decide whether EVERY sentence is supported. A correct source paraphrase in your reason
+cannot justify approving a claim that says the opposite. For exchange rates, identify both
+currencies: weaker foreign currencies against USD means stronger USD, not weaker USD.
+For proposed negatives, distinguish explicit support, a matching counterexample, and insufficient
+evidence. Possible future material harm is not realized material harm; an adverse effect is not
+necessarily material. Effects of several combined causes cannot establish materiality of one.
+Revenue decline alone does not prove demand decline; growth in one segment does not rule out
+declines elsewhere. Selected excerpts cannot establish what an entire filing never or only says.
+Qualify such findings to the cited passages and do not convert an unsuccessful search into denial.
+If a compound claim contains one unsupported inference, return false and identify that part.
 External_update evidence is separately labeled issuer transcript, issuer news or third-party news.
 Preserve attribution and planned/outlook qualifiers. It is not a SEC official filing or a typed
 financial fact. An excerpt cannot establish complete call coverage, media consensus or price causation.

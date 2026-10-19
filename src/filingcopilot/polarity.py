@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 from .domain import Domain
+from .semantic_boundaries import currency_direction_conflict
 
 UP = r"\b(?:increas\w*|grew|grow\w*|rose|ris\w*|improv\w*|expand\w*)\b|增加|增长|提升|提高|上升|改善|上行|走高|抬升|高于(?:上年|去年|前一年|上一年|上期|前期)|higher than (?:the )?(?:prior|previous|last)"
 DOWN = r"\b(?:decreas\w*|declin\w*|fell|fall\w*|drop\w*|reduc\w*|contract\w*)\b|减少|下降|降低|下滑|恶化|下行|走低|回落|低于(?:上年|去年|前一年|上一年|上期|前期)|lower than (?:the )?(?:prior|previous|last)"
@@ -127,6 +128,9 @@ def investment_cash_conflict(statement: str, sources: list[str]) -> str | None:
 def contradiction(
     statement: str, sources: list[str], domain: Domain, years: set[int]
 ) -> str | None:
+    currency_conflict = currency_direction_conflict(statement, sources)
+    if currency_conflict:
+        return currency_conflict
     claims = directions(statement, domain, years)
     evidence: dict[str, set[int]] = {}
     for source in sources:

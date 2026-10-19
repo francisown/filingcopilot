@@ -1,0 +1,3219 @@
+{
+  "review_date": "2026-10-19",
+  "as_of": "2026-10-08",
+  "evaluated_source_commit": "17a1d045ae0749d9db022f098184b7ad930f7659",
+  "answer_snapshot_sha256": "39ed8b15418f66839f41604c7e720360066c05819d64b20acfd85fb2a6aa782c",
+  "question_count": 140,
+  "research_count": 100,
+  "boundary_count": 40,
+  "summary": {
+    "research": {
+      "supported": 82,
+      "partial": 7,
+      "no_answer": 3,
+      "unsupported": 8
+    },
+    "boundary": {
+      "supported": 40
+    },
+    "by_category": {
+      "numeric": {
+        "supported": 20
+      },
+      "cross_period": {
+        "supported": 20
+      },
+      "causality": {
+        "supported": 17,
+        "partial": 2,
+        "no_answer": 1
+      },
+      "risk": {
+        "partial": 1,
+        "supported": 16,
+        "no_answer": 2,
+        "unsupported": 1
+      },
+      "negation": {
+        "partial": 4,
+        "supported": 9,
+        "unsupported": 7
+      },
+      "insufficient_evidence": {
+        "supported": 20
+      },
+      "market_outage": {
+        "supported": 20
+      }
+    },
+    "original_status_vs_review": {
+      "answered": {
+        "supported": 72,
+        "partial": 3,
+        "unsupported": 6
+      },
+      "partial": {
+        "supported": 10,
+        "partial": 4,
+        "no_answer": 2,
+        "unsupported": 2
+      },
+      "abstained": {
+        "no_answer": 1
+      }
+    }
+  },
+  "verdict_definitions": {
+    "supported": "核心核对通过",
+    "partial": "部分完成",
+    "unsupported": "实质错误或证据不足",
+    "no_answer": "未回答核心问题",
+    "unassessed": "尚无法判断"
+  },
+  "limitations": [
+    "本次为基于官方原文的数值校验和模型辅助语义复核，不是独立人工专家金标，也不是盲评。",
+    "supported表示在明确检查范围内核心内容有支持；不代表逐字唯一标准答案或所有附加细节获认证。",
+    "unsupported包括与原文相反的事实错误和无法由证据推出的实质结论，两者需读逐题理由区分。",
+    "参考答案本次整理，未在原评测运行前冻结；不能称预先注册的独立准确率。",
+    "数字部分使用原始申报缓存独立提取，并用官方在线报表核对；同一原始申报不等于独立第三方数据源。",
+    "原始100个研究包和140条运行结果不改写；本报告没有重新运行模型或真实行情故障。",
+    "40条边界结果是三个规则模板的重复实例，不能当成40种独立故障测试。",
+    "本次没有修复生产代码；报告中的更正要点不应被算作产品已经生成的答案。"
+  ],
+  "schema": "filingcopilot.source-review/v1",
+  "method": "Official-source numeric checking and model-assisted content review of existing answers; not a blinded or independent expert assessment.",
+  "answer_record": "live-evaluation-2026-10-19.json",
+  "items": [
+    {
+      "id": "semantic-causality-001",
+      "question": "台积电 FY2023 收入变化的披露原因是什么？",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答覆盖了量、价、汇率及主要平台变化，方向和原文一致。",
+      "reference_points": [
+        "披露的核心原因：晶圆出货下降，先进制程占比提高所带来的平均售价提升、新台币兑美元贬值部分抵消降幅。",
+        "按应用，手机与物联网收入下降，汽车收入增长形成部分抵消。2023收入2,161,735.8百万新台币，同比约-4.51%。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "20-F Item 5, Year-to-Year Comparisons / Net Revenue, printed p.27 (PDF p.32); Item 4 platform revenue, printed p.17 (PDF p.22)"
+        }
+      ],
+      "original_raw_answer_sha256": "b3329bc670622e2985e8b9113c4d094347425b1176646ea3067b98de17d08c55"
+    },
+    {
+      "id": "semantic-causality-002",
+      "question": "Why did Apple's revenue change in FY2024, based on filed evidence?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "主要服务增长与硬件下降的抵消关系有依据；日本iPhone增长也确有披露。",
+      "reference_points": [
+        "总收入391,035百万美元，同比约+2.02%；Services增长来自广告、App Store和云服务，抵消iPad及Wearables/Home/Accessories的下降。",
+        "iPad下降来自iPad Pro和入门款，部分被iPad Air增长抵消；穿戴及配件下降。日本增长来自iPhone，但不是全球增长的唯一或主要贡献来源。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+          "locator": "10-K Item 7, Segment Operating Performance / Products and Services Performance, printed pp.22–23"
+        }
+      ],
+      "original_raw_answer_sha256": "3ebdd32206ab828155642a98765e84556d281c61788c3580da16b401390aa0a9"
+    },
+    {
+      "id": "semantic-causality-003",
+      "question": "亚马逊 的 FY2025 利润率变化由哪些已披露因素解释？",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答明确选择营业利润率，核心销售、费用结构与一次性费用原因有支持；独立重算11.16%及营业利润增长16.59%一致。",
+      "reference_points": [
+        "营业利润79,975百万美元、收入716,924百万美元，营业利润率约11.16%，上年约10.75%。销量和广告增长、AWS销售增长支撑利润；履约、运输及技术基础设施费用抵消一部分增长。",
+        "FTC和解25亿美元、遣散费27亿美元压低利润；部分费用率下降而技术基础设施及其他经营费用率上升。",
+        "汇率影响需分部说明：北美及AWS不利，国际有利；不能把分部不利直接当成合并营业利润的净不利。服务器折旧年限缩短另增加14亿美元折旧。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "10-K Item 7, Operating Expenses / Operating Income / Effect of Foreign Exchange Rates, printed pp.25–29; Note 1 Use of Estimates"
+        }
+      ],
+      "original_raw_answer_sha256": "fee16c2894da3e2c218f9073b3572bb3f534af64ebeb9c9921b6dc541a28063b"
+    },
+    {
+      "id": "semantic-causality-004",
+      "question": "Which disclosed drivers explain Microsoft's FY2022 growth?",
+      "category": "causality",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "虽然系统标partial，回答已准确给出原文总结的主要驱动。题目问驱动，未强制要求同比百分比；缺少calculate结果不是内容错误。",
+      "reference_points": [
+        "总收入增长由三大分部共同带动；Azure及其他云服务、Office 365 Commercial与LinkedIn、搜索及新闻广告和Windows分别是分部主要驱动。",
+        "原文进一步说明Azure消费型服务、Office订阅席位及每用户收入、LinkedIn招聘/广告、Windows商用需求等增长。收入198,270百万美元。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar22/index.html",
+          "locator": "Annual Report, Financial Review / Summary Results of Operations, Fiscal Year 2022 Compared with Fiscal Year 2021; Segment Results"
+        }
+      ],
+      "original_raw_answer_sha256": "eeb2e20a061494e8130c24324fdca6e5aa84c53c8bd24b9a710c7804b49cd32a"
+    },
+    {
+      "id": "semantic-causality-005",
+      "question": "英伟达 FY2023 收入变化的披露原因是什么？",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "主要正负驱动逐项对应原文；0.22%的细化增长与年报“基本持平”并不冲突。",
+      "reference_points": [
+        "总收入26,974百万美元，较26,914百万美元基本持平；数据中心增长被游戏、专业可视化及OEM/Other下降大部分抵消。",
+        "数据中心受超大规模客户及云需求拉动；游戏和专业可视化减少渠道出货以消化库存，游戏还受宏观及中国疫情影响。",
+        "汽车自驾/电动车计算/AI座舱及开发安排增长；OEM和CMP下降，CMP本年贡献很小。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "10-K Item 7, Fiscal Year 2023 Summary / Market Platform Highlights, printed pp.37–39"
+        }
+      ],
+      "original_raw_answer_sha256": "19bb3ba69c676f64c432fe6ab87052768ce1d356cdcbb5c86a6bb17e320e145b"
+    },
+    {
+      "id": "semantic-causality-006",
+      "question": "Why did TSMC's revenue change in FY2024, based on filed evidence?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "量价汇率及平台、地域驱动都与20-F对应，没有把单纯相关数字当成原因。",
+      "reference_points": [
+        "收入2,894,307.7百万新台币，约+33.89%；先进制程占比提升带动平均售价、出货量增加及新台币贬值共同推升收入。",
+        "HPC为主要平台增量，手机次之；地域主要来自北美及亚太。晶圆出货约1,300万片，前一年约1,200万片（12吋约当）。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2024%2020-F.pdf",
+          "locator": "20-F Item 5, Net Revenue, printed p.29 (PDF p.35); Item 4 Markets and Customers / Platforms, printed pp.16,18 (PDF pp.22,24)"
+        }
+      ],
+      "original_raw_answer_sha256": "93f6a8cbcbfa49e222e67048c5c3d35e9054eca4b3b56ac570aca54129f79127"
+    },
+    {
+      "id": "semantic-causality-007",
+      "question": "苹果 的 FY2025 利润率变化由哪些已披露因素解释？",
+      "category": "causality",
+      "original_status": "partial",
+      "verdict": "partial",
+      "reason": "产品和服务毛利率原因正确，但没有说明合并利润率的变化，也把营业利润率和净利润增幅并列而未完成口径衔接；净利变化的重要税项缺失。",
+      "reference_points": [
+        "产品毛利率37.2%降至36.8%，产品组合与关税成本不利，其他有利成本部分抵消；服务毛利率73.9%升至75.4%，服务组合有利、成本增加部分抵消。",
+        "合并毛利率46.2%升至46.9%；营业利润率约31.51%升至31.97%，需区别毛利、营业及净利口径。",
+        "若解释净利润/净利率变化，关键是有效税率24.1%降至15.6%，其中State Aid Decision相关税项同比减少107亿美元。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "10-K Item 7, Gross Margin / Operating Expenses / Provision for Income Taxes, printed pp.24–25; Consolidated Statements of Operations"
+        }
+      ],
+      "original_raw_answer_sha256": "219a9f2f44e6232711000322d8b9f53631d1bc915cdd39d25a8f90544902e2eb"
+    },
+    {
+      "id": "semantic-causality-008",
+      "question": "Which disclosed drivers explain Amazon's FY2022 growth?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答覆盖主要零售/AWS驱动和汇率逆风，并区分国际分部下降与基础需求增长。",
+      "reference_points": [
+        "收入513,983百万美元，同比约+9.40%；北美销量、第三方卖家、广告和订阅增长，AWS由客户用量增加驱动，价格变化部分抵消。",
+        "汇率减少合并收入约155亿美元，国际收入下降主要由汇率造成，基础业务增长部分抵消。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000004/amzn-20221231.htm",
+          "locator": "10-K Item 7, Net Sales, printed pp.23–24"
+        }
+      ],
+      "original_raw_answer_sha256": "edf70af0594983fbe074ddfd4b6200bb8384fbadce57b4bd6259e9da14a09d20"
+    },
+    {
+      "id": "semantic-causality-009",
+      "question": "微软 FY2023 收入变化的披露原因是什么？",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "核心增长及抵消项与官方合并经营总结一致。",
+      "reference_points": [
+        "收入211,915百万美元，同比约+6.88%；Intelligent Cloud和Productivity and Business Processes增长，被More Personal Computing下降部分抵消。",
+        "主要驱动分别为Azure及其他云服务、Office 365 Commercial和LinkedIn；Windows与Devices下降。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar23/index.html",
+          "locator": "Annual Report, Financial Review / Summary Results of Operations / Segment Results, Fiscal Year 2023 Compared with Fiscal Year 2022"
+        }
+      ],
+      "original_raw_answer_sha256": "15a2356ca6a2ca9fdb9813342c150c8b46e2f8a3eae1b8fe609666d2e234e6c5"
+    },
+    {
+      "id": "semantic-causality-010",
+      "question": "Why did NVIDIA's revenue change in FY2024, based on filed evidence?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答的核心因果链Hopper/AI需求和InfiniBand出货有直接披露支持；产品发布列表本身不是充分因果证据，但后文已给出真正驱动。",
+      "reference_points": [
+        "收入60,922百万美元，同比约+125.85%；主要增量来自数据中心，训练和推理、推荐及生成式AI需求推动Hopper出货，InfiniBand带动网络收入。",
+        "数据中心收入47.5十亿美元、同比+217%；游戏因渠道库存正常化和需求增长上升15%，汽车上升21%，其他业务对总增量较小。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000029/nvda-20240128.htm",
+          "locator": "10-K Item 7, Fiscal Year 2024 Summary / Market Platform Highlights / Revenue, printed pp.36–40"
+        }
+      ],
+      "original_raw_answer_sha256": "01fa22f47008c5f65480a6bb752a7c834fb9db2521f87cf84d882506cdd3fa47"
+    },
+    {
+      "id": "semantic-causality-011",
+      "question": "台积电 的 FY2025 利润率变化由哪些已披露因素解释？",
+      "category": "causality",
+      "original_status": "partial",
+      "verdict": "no_answer",
+      "reason": "保存答案只有收入、现金流、利润及比例，没有一个披露原因，未回答题目核心。数值即便正确，也不能代替原因解释。",
+      "reference_points": [
+        "毛利率56.1%升至59.9%；公司明确归因于产能利用率提升和成本改善，汇率不利部分抵消。",
+        "营业利润率45.7%升至50.8%；营业费用率10.4%降至9.1%。费用率变化与毛利率改善共同解释营业利润率，这是表格分解，不能冒充管理层另作的因果归因。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "20-F Item 5, Gross Margin / Operating Expenses, printed p.31 (PDF p.37)"
+        }
+      ],
+      "original_raw_answer_sha256": "6e601cd141ba43e0dbf6c045df970ca3c22ba217651847abf3bb40a4a78d296c"
+    },
+    {
+      "id": "semantic-causality-012",
+      "question": "Which disclosed drivers explain Apple's FY2022 growth?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "主要收入驱动、汇率及额外穿戴贡献均有原文支持；营业利润率结论可由公开数值独立验证。",
+      "reference_points": [
+        "收入增长主要由iPhone、Services及Mac带动，外币走弱对各产品/服务收入不利；iPhone来自新机型，Mac来自笔记本，服务来自广告、云及App Store。",
+        "收入394,328百万美元，同比约+7.79%；营业利润119,437百万美元，同比约+9.63%。营业利润率小幅提高是表格计算结果，不是独立经营因果。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019322000108/aapl-20220924.htm",
+          "locator": "10-K Item 7, Fiscal 2022 Highlights / Products and Services Performance, printed pp.20–21; Consolidated Statements of Operations"
+        }
+      ],
+      "original_raw_answer_sha256": "973b8ec0cfe6b6300e21b1e912253fe81f29bf014054c49b9621c4bd27ee5fff"
+    },
+    {
+      "id": "semantic-causality-013",
+      "question": "亚马逊 FY2023 收入变化的披露原因是什么？",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答准确区分各业务增长和合并/国际汇率方向，没有把国际正效应套用到合并收入。",
+      "reference_points": [
+        "收入574,785百万美元，同比约+11.83%；北美和国际增长来自销量（主要第三方）、广告及订阅；AWS来自客户用量，长期合同价格调整部分抵消。",
+        "汇率合计使收入减少71百万美元，但国际分部增加88百万美元，必须区分整体和分部。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "10-K Item 7, Net Sales, printed pp.24–25"
+        }
+      ],
+      "original_raw_answer_sha256": "33fcd23de033bdafb5378e909a788709ec6dd2f71723036c458ae414ac022200"
+    },
+    {
+      "id": "semantic-causality-014",
+      "question": "Why did Microsoft's revenue change in FY2024, based on filed evidence?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答完整覆盖官方合并总结的三项主要驱动，数值匹配；没有把全部增长说成自然增长。",
+      "reference_points": [
+        "收入245,122百万美元，同比约+15.67%，三大分部共同增长；主要驱动为Azure、Office 365 Commercial以及Gaming。",
+        "进一步分解：Azure受消费型服务增长带动，Office受席位及每用户收入增长带动；游戏内容/服务增长主要包含Activision Blizzard收购影响。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar24/index.html",
+          "locator": "Annual Report, Financial Review / Summary Results of Operations / Segment Results, Fiscal Year 2024 Compared with Fiscal Year 2023"
+        }
+      ],
+      "original_raw_answer_sha256": "dbfdadeaaa035f96b1636d82f98efed04f4a279dedfba2ca41128a434f8b52b0"
+    },
+    {
+      "id": "semantic-causality-015",
+      "question": "英伟达 的 FY2025 利润率变化由哪些已披露因素解释？",
+      "category": "causality",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "毛利原因有直接披露，营业/净利率方向可由官方占比表验证。回答gaps已说明净利分析依据表格；不因公司没有量化每个驱动就判答案错误。",
+      "reference_points": [
+        "毛利率72.7%升至75.0%，公司明确原因是数据中心收入占比更高。",
+        "表格显示营业费用率18.6%降至12.6%，营业利润率54.1%升至62.4%；其他净收入占比1.4%升至2.0%，所得税占收入比6.6%升至8.6%，净利率48.9%升至55.8%。",
+        "后两项是会计分解而非另行证明的业务原因；有效税率上升，公司解释为税前利润提高及上年审计结算优惠。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "10-K Item 7, Results of Operations common-size table / Gross Profit and Gross Margin / Operating Expenses / Income Taxes, printed pp.40–43"
+        }
+      ],
+      "original_raw_answer_sha256": "e2fd736b3dd94b72b6311b41efa9b172077c29acf27e3a0c4ffe3381750e76bf"
+    },
+    {
+      "id": "semantic-causality-016",
+      "question": "Which disclosed drivers explain TSMC's FY2022 growth?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "价格、数量、汇率、平台和额外毛利解释均对应20-F。",
+      "reference_points": [
+        "收入2,263,891.3百万新台币，同比约+42.61%，公司明确归因于平均售价、晶圆出货增长及新台币贬值。",
+        "主要平台增量来自HPC和手机，物联网也增长；毛利率改善由价值定价、有利汇率及成本改善推动，较低利用率抵消一部分。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2022%2020-F.pdf",
+          "locator": "20-F Item 4 Platforms, printed p.17 (PDF p.22); Item 5 Net Revenue / Gross Margin, printed p.27 (PDF p.32)"
+        }
+      ],
+      "original_raw_answer_sha256": "099ce1e49493674a0578539ea1865e20854da5c8b36241df07032e0f585477ce"
+    },
+    {
+      "id": "semantic-causality-017",
+      "question": "苹果 FY2023 收入变化的披露原因是什么？",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "“汇率影响超过总降幅”并非猜测，年报原文明示；Mac/iPhone及服务的方向也一致。",
+      "reference_points": [
+        "收入383,285百万美元，同比约-2.80%；公司明确说明外币走弱的影响超过合并收入的整个同比降幅。",
+        "产品构成主要为Mac和iPhone下降，Services增长部分抵消；地区中美洲产品下降、大中华及日本汇率逆风有对应披露。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "10-K Item 7, Fiscal Year Highlights / Segment Operating Performance / Products and Services Performance, printed pp.20–22"
+        }
+      ],
+      "original_raw_answer_sha256": "a4d7850f11c5a295cc35bdc4983e7a329fe300fda4e9bfcf3181b08a8be1b4d5"
+    },
+    {
+      "id": "semantic-causality-018",
+      "question": "Why did Amazon's revenue change in FY2024, based on filed evidence?",
+      "category": "causality",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答覆盖全部主要分部和汇率方向，AWS增速最快也与表格一致。",
+      "reference_points": [
+        "收入637,959百万美元，同比约+10.99%；北美和国际销量、第三方、广告和订阅增长，AWS客户用量增长、价格调整部分抵消。",
+        "汇率减少合并销售约23亿美元；北美与国际均为负影响。AWS收入增长19%，快于北美10%及国际9%。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000004/amzn-20241231.htm",
+          "locator": "10-K Item 7, Net Sales, printed pp.24–25"
+        }
+      ],
+      "original_raw_answer_sha256": "f6ccdc07b71ccd389cbea2beb24410b63478d8d0e59cb1eed40e76099c7bc03b"
+    },
+    {
+      "id": "semantic-causality-019",
+      "question": "微软 的 FY2025 利润率变化由哪些已披露因素解释？",
+      "category": "causality",
+      "original_status": "partial",
+      "verdict": "partial",
+      "reason": "分部AI成本、效率及税率解释正确，但未回答合并毛利率与营业利润率变化。原gaps称未检索到合并解释，官方Summary Results实际直接提供。",
+      "reference_points": [
+        "合并毛利率略降，主要来自Intelligent Cloud、部分被More Personal Computing抵消；云毛利率受AI基础设施扩张影响，Azure效率提升部分抵消。",
+        "毛利金额增13%，费用增6%，营业收入增15%；计算营业利润率约44.64%升至45.62%。毛利率下降和营业利润率上升可以同时发生。",
+        "Note 12确实把有效税率的小幅下降归于美国/海外利润和税费组合变化；MD&A四舍五入后两年均18%。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/index.html",
+          "locator": "Annual Report, Financial Review / Summary Results of Operations / Segment Results / Income Taxes; Note 12 Income Taxes"
+        }
+      ],
+      "original_raw_answer_sha256": "f6f778cd9ee0735bda9ec58171368dfeb6a2088f87c1c8dcb64ed54c647060fc"
+    },
+    {
+      "id": "semantic-causality-020",
+      "question": "Which disclosed drivers explain NVIDIA's FY2022 growth?",
+      "category": "causality",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "虽然原状态partial，回答已涵盖主要披露驱动，Mellanox全年贡献和供给约束也能在原文找到；无需编造未披露的精确贡献。",
+      "reference_points": [
+        "游戏增长来自Ampere/RTX 30、新游戏、游戏及创作需求、远程工作和挖矿等多因素；数据中心来自Ampere训练/推理、云及AI工作负载。",
+        "专业可视化受Ampere及混合办公工作站需求推动；CMP带动OEM/Other；网络还包含Mellanox全年并表贡献。",
+        "公司披露多领域需求超过供给、扩大供应基础。不能据此量化各需求因素的独立贡献。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000036/nvda-20220130.htm",
+          "locator": "10-K Item 7, Supply / Fiscal Year 2022 Summary / Revenue, printed pp.30–35; Item 1 Seasonality"
+        }
+      ],
+      "original_raw_answer_sha256": "ba0884dd00154738ed82d974b6c7df5e763af46c1763e1fb56de3fbac2da86b9"
+    },
+    {
+      "id": "semantic-cross_period-001",
+      "question": "比较 微软 FY2022 与上一财年的收入增长，期间是否一致？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 198270000000 USD; 2021-07-01–2022-06-30 (365 days)",
+        "FY2021 revenue: 168088000000 USD; 2020-07-01–2021-06-30 (365 days)",
+        "同比 (198270000000 / 168088000000 - 1) × 100 = 17.96%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_9e4cb859-32cb-499b-861d-cc7439e04b9b; context C_efe853fc-8e8a-4899-b65b-e33c17faff7c",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_c7806788-4349-4f7e-b247-cd5f156970ef; context C_4e8ad330-b4ec-4b1c-975b-18c89babf3f1",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar23/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "b8713a030902ae346b1891c84018866a70f9a6ae8f20155aaf8997dbe874ca41"
+    },
+    {
+      "id": "semantic-cross_period-002",
+      "question": "Compare NVIDIA's FY2023 revenue with the prior fiscal year using the same period basis.",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 revenue: 26974000000 USD; 2022-01-31–2023-01-29 (364 days)",
+        "FY2022 revenue: 26914000000 USD; 2021-02-01–2022-01-30 (364 days)",
+        "同比 (26974000000 / 26914000000 - 1) × 100 = 0.22%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV85Ny9mcmFnOjZmYzdlYTc1OTNhMDQ4OGJiNjA5OWUwYmY4MTU2NmE2L3RhYmxlOjRhOTEyMTRmYTdhYTQ5ZGVhNzExYWM1OWI3YjJiY2NmL3RhYmxlcmFuZ2U6NGE5MTIxNGZhN2FhNDlkZWE3MTFhYzU5YjdiMmJjY2ZfMi0xLTEtMS02NjIwMA_2bf1423a-72e7-4a88-8f04-74e849305a32; context i793edb174e3c4f8499d46ce84a602d1b_D20220131-20230129",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV85Ny9mcmFnOjZmYzdlYTc1OTNhMDQ4OGJiNjA5OWUwYmY4MTU2NmE2L3RhYmxlOjRhOTEyMTRmYTdhYTQ5ZGVhNzExYWM1OWI3YjJiY2NmL3RhYmxlcmFuZ2U6NGE5MTIxNGZhN2FhNDlkZWE3MTFhYzU5YjdiMmJjY2ZfMi0zLTEtMS02NjIwMA_5a2be778-de1f-416a-9b24-2fe6789915f0; context i665a8107071c4fdd93062441abf07776_D20210201-20220130",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        }
+      ],
+      "original_raw_answer_sha256": "3c24bc0e3f24ec7fa7bec7303394f341f68a0692f050a40d699904a174f92899"
+    },
+    {
+      "id": "semantic-cross_period-003",
+      "question": "台积电 FY2024 经营现金流同比是否可计算？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2024 operating_cash_flow: 1826177100000.0 TWD; 2024-01-01–2024-12-31 (366 days)",
+        "FY2023 operating_cash_flow: 1241967300000.0 TWD; 2023-01-01–2023-12-31 (365 days)",
+        "同比 (1826177100000.0 / 1241967300000.0 - 1) × 100 = 47.04%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-846; context c-6",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97758; context P01_01_2023To12_31_2023",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "8169d7ed2a08f096c3f4db984c237b03496226bf8663e41605bc39902b5abaa4"
+    },
+    {
+      "id": "semantic-cross_period-004",
+      "question": "Can Apple's FY2025 operating cash flow growth be calculated without mixing periods?",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 operating_cash_flow: 111482000000 USD; 2024-09-29–2025-09-27 (364 days)",
+        "FY2024 operating_cash_flow: 118254000000 USD; 2023-10-01–2024-09-28 (364 days)",
+        "同比 (111482000000 / 118254000000 - 1) × 100 = -5.73%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-307; context c-1",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-308; context c-18",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        }
+      ],
+      "original_raw_answer_sha256": "7841c086a9631a7ae5f84bfd0e5bd800a09d99d99002bc84366b159f9ee3e6e6"
+    },
+    {
+      "id": "semantic-cross_period-005",
+      "question": "比较 亚马逊 FY2022 与上一财年的收入增长，期间是否一致？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 513983000000 USD; 2022-01-01–2022-12-31 (365 days)",
+        "FY2021 revenue: 469822000000 USD; 2021-01-01–2021-12-31 (365 days)",
+        "同比 (513983000000 / 469822000000 - 1) × 100 = 9.40%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-136; context c-8",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-135; context c-7",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        }
+      ],
+      "original_raw_answer_sha256": "deab9e98a91e920d5b209f1674451ddf9fd5382019ae48b8de9796239b71196b"
+    },
+    {
+      "id": "semantic-cross_period-006",
+      "question": "Compare Microsoft's FY2023 revenue with the prior fiscal year using the same period basis.",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 revenue: 211915000000 USD; 2022-07-01–2023-06-30 (365 days)",
+        "FY2022 revenue: 198270000000 USD; 2021-07-01–2022-06-30 (365 days)",
+        "同比 (211915000000 / 198270000000 - 1) × 100 = 6.88%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_1574d8d7-79cc-48b4-b29c-3394ed5cb819; context C_da7a1266-ce2b-41b7-83ff-bb6e03dc1fa5",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_9e4cb859-32cb-499b-861d-cc7439e04b9b; context C_efe853fc-8e8a-4899-b65b-e33c17faff7c",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar23/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "298fc5bca72244addfa2a4d2156fc720bf5c7a8648ff422e8f86f7aaeca06968"
+    },
+    {
+      "id": "semantic-cross_period-007",
+      "question": "英伟达 FY2024 经营现金流同比是否可计算？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2024 operating_cash_flow: 28090000000 USD; 2023-01-30–2024-01-28 (364 days)",
+        "FY2023 operating_cash_flow: 5641000000 USD; 2022-01-31–2023-01-29 (364 days)",
+        "同比 (28090000000 / 5641000000 - 1) × 100 = 397.96%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-356; context c-11",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV8xMTUvZnJhZzplZWQ0YjMxMTc2Njk0MTUxOGZiM2IxYmE2MTA4YTcwYy90YWJsZToxZDc5NDY4NTJkOWU0NzBjOTRlNTM5ZjFkZDcyNDkwNi90YWJsZXJhbmdlOjFkNzk0Njg1MmQ5ZTQ3MGM5NGU1MzlmMWRkNzI0OTA2XzE5LTEtMS0xLTY2MjAw_3cf4c924-9c2a-4727-b01d-80382f027bfb; context i793edb174e3c4f8499d46ce84a602d1b_D20220131-20230129",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        }
+      ],
+      "original_raw_answer_sha256": "31014f2dd824acb81a9e5370f2e5deb276261d29d01f58b399a2b169e660dd4c"
+    },
+    {
+      "id": "semantic-cross_period-008",
+      "question": "Can TSMC's FY2025 operating cash flow growth be calculated without mixing periods?",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 operating_cash_flow: 2274975600000.0 TWD; 2025-01-01–2025-12-31 (365 days)",
+        "FY2024 operating_cash_flow: 1826177100000.0 TWD; 2024-01-01–2024-12-31 (366 days)",
+        "同比 (2274975600000.0 / 1826177100000.0 - 1) × 100 = 24.58%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-847; context c-1",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-846; context c-6",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "19c5c0aa20d8ee717fbf4648afe177c97160e9e6ab1cefb2f7e31afcd3da08cd"
+    },
+    {
+      "id": "semantic-cross_period-009",
+      "question": "比较 苹果 FY2022 与上一财年的收入增长，期间是否一致？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 394328000000 USD; 2021-09-26–2022-09-24 (364 days)",
+        "FY2021 revenue: 365817000000 USD; 2020-09-27–2021-09-25 (364 days)",
+        "同比 (394328000000 / 365817000000 - 1) × 100 = 7.79%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-70; context c-20",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-71; context c-21",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        }
+      ],
+      "original_raw_answer_sha256": "f08f41c1820479049ebfc4bb93e7e6319fd159495b28efc303e620d4bb5103cb"
+    },
+    {
+      "id": "semantic-cross_period-010",
+      "question": "Compare Amazon's FY2023 revenue with the prior fiscal year using the same period basis.",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 revenue: 574785000000 USD; 2023-01-01–2023-12-31 (365 days)",
+        "FY2022 revenue: 513983000000 USD; 2022-01-01–2022-12-31 (365 days)",
+        "同比 (574785000000 / 513983000000 - 1) × 100 = 11.83%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-137; context c-1",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-136; context c-8",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        }
+      ],
+      "original_raw_answer_sha256": "bff482e8eb02068e9637953f81419dd6701da7459d2931e9c0bb308c31472919"
+    },
+    {
+      "id": "semantic-cross_period-011",
+      "question": "微软 FY2024 经营现金流同比是否可计算？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2024 operating_cash_flow: 118548000000 USD; 2023-07-01–2024-06-30 (366 days)",
+        "FY2023 operating_cash_flow: 87582000000 USD; 2022-07-01–2023-06-30 (365 days)",
+        "同比 (118548000000 / 87582000000 - 1) × 100 = 35.36%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_fdf4d759-618a-4c9d-892e-bf24a3d47f1f; context C_c19fe6c0-0e87-44b0-aa2a-d9c6e40a5862",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_98a44173-0601-4d40-980a-0ac8e42e1f26; context C_da7a1266-ce2b-41b7-83ff-bb6e03dc1fa5",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar23/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "18c3edba2f5bde083f5fafff2a8f9e09d8005d3c5967b38de158a0cfa97e4458"
+    },
+    {
+      "id": "semantic-cross_period-012",
+      "question": "Can NVIDIA's FY2025 operating cash flow growth be calculated without mixing periods?",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 operating_cash_flow: 64089000000 USD; 2024-01-29–2025-01-26 (364 days)",
+        "FY2024 operating_cash_flow: 28090000000 USD; 2023-01-30–2024-01-28 (364 days)",
+        "同比 (64089000000 / 28090000000 - 1) × 100 = 128.16%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-355; context c-1",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-356; context c-11",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        }
+      ],
+      "original_raw_answer_sha256": "857996bc2b2e701a4f4c9b73d3aa72c172d703bd37f7349cdcc57f8c085ea70a"
+    },
+    {
+      "id": "semantic-cross_period-013",
+      "question": "比较 台积电 FY2022 与上一财年的收入增长，期间是否一致？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 2263891300000.0 TWD; 2022-01-01–2022-12-31 (365 days)",
+        "FY2021 revenue: 1587415000000.0 TWD; 2021-01-01–2021-12-31 (365 days)",
+        "同比 (2263891300000.0 / 1587415000000.0 - 1) × 100 = 42.61%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97189; context P01_01_2022To12_31_2022",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97188; context P01_01_2021To12_31_2021",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "fd4f12e51c8b60967f013d38705cfff21f704ccbe4e96a53e069eadff73357bf"
+    },
+    {
+      "id": "semantic-cross_period-014",
+      "question": "Compare Apple's FY2023 revenue with the prior fiscal year using the same period basis.",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 revenue: 383285000000 USD; 2022-09-25–2023-09-30 (371 days)",
+        "FY2022 revenue: 394328000000 USD; 2021-09-26–2022-09-24 (364 days)",
+        "同比 (383285000000 / 394328000000 - 1) × 100 = -2.80%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-69; context c-1",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-70; context c-20",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        }
+      ],
+      "original_raw_answer_sha256": "00eb1b1e44ceff9e90759ca72a60b41f0eef515cc5a6d94adc003e3d2700110d"
+    },
+    {
+      "id": "semantic-cross_period-015",
+      "question": "亚马逊 FY2024 经营现金流同比是否可计算？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2024 operating_cash_flow: 115877000000 USD; 2024-01-01–2024-12-31 (366 days)",
+        "FY2023 operating_cash_flow: 84946000000 USD; 2023-01-01–2023-12-31 (365 days)",
+        "同比 (115877000000 / 84946000000 - 1) × 100 = 36.41%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-94; context c-4",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-77; context c-1",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        }
+      ],
+      "original_raw_answer_sha256": "fcaee5ef43afc221032b896373d2f8198873899f1aa5109fcf79552ac72fbd53"
+    },
+    {
+      "id": "semantic-cross_period-016",
+      "question": "Can Microsoft's FY2025 operating cash flow growth be calculated without mixing periods?",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 operating_cash_flow: 136162000000 USD; 2024-07-01–2025-06-30 (365 days)",
+        "FY2024 operating_cash_flow: 118548000000 USD; 2023-07-01–2024-06-30 (366 days)",
+        "同比 (136162000000 / 118548000000 - 1) × 100 = 14.86%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_18e56dfc-4732-44f8-bda5-cf19e12c869f; context C_7102029d-8d6c-44c5-b166-04cf41443b1e",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_fdf4d759-618a-4c9d-892e-bf24a3d47f1f; context C_c19fe6c0-0e87-44b0-aa2a-d9c6e40a5862",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "b304cd0794a1d6a55b300c6538849cf2ef0cd78f561f0f64acba363749b05770"
+    },
+    {
+      "id": "semantic-cross_period-017",
+      "question": "比较 英伟达 FY2022 与上一财年的收入增长，期间是否一致？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 26914000000 USD; 2021-02-01–2022-01-30 (364 days)",
+        "FY2021 revenue: 16675000000 USD; 2020-01-27–2021-01-31 (371 days)",
+        "同比 (26914000000 / 16675000000 - 1) × 100 = 61.40%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV85Ny9mcmFnOjZmYzdlYTc1OTNhMDQ4OGJiNjA5OWUwYmY4MTU2NmE2L3RhYmxlOjRhOTEyMTRmYTdhYTQ5ZGVhNzExYWM1OWI3YjJiY2NmL3RhYmxlcmFuZ2U6NGE5MTIxNGZhN2FhNDlkZWE3MTFhYzU5YjdiMmJjY2ZfMi0zLTEtMS02NjIwMA_5a2be778-de1f-416a-9b24-2fe6789915f0; context i665a8107071c4fdd93062441abf07776_D20210201-20220130",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV85Ny9mcmFnOjZmYzdlYTc1OTNhMDQ4OGJiNjA5OWUwYmY4MTU2NmE2L3RhYmxlOjRhOTEyMTRmYTdhYTQ5ZGVhNzExYWM1OWI3YjJiY2NmL3RhYmxlcmFuZ2U6NGE5MTIxNGZhN2FhNDlkZWE3MTFhYzU5YjdiMmJjY2ZfMi01LTEtMS02NjIwMA_4164d2bd-6c32-4af6-82a8-737460dcc6bc; context i2df64c17a9084e1095b647146439a4f6_D20200127-20210131",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        }
+      ],
+      "original_raw_answer_sha256": "eedb7ee0782bdbae9ca4ac0eb17eaafd1f971567476f04c4f9a150be07c96387"
+    },
+    {
+      "id": "semantic-cross_period-018",
+      "question": "Compare TSMC's FY2023 revenue with the prior fiscal year using the same period basis.",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 revenue: 2161735800000.0 TWD; 2023-01-01–2023-12-31 (365 days)",
+        "FY2022 revenue: 2263891300000.0 TWD; 2022-01-01–2022-12-31 (365 days)",
+        "同比 (2161735800000.0 / 2263891300000.0 - 1) × 100 = -4.51%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97190; context P01_01_2023To12_31_2023",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97189; context P01_01_2022To12_31_2022",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "13de5911dba2ed7362f2d408d6a8ef6e2381fc74096fbbf4bba1aaf8cc00fea0"
+    },
+    {
+      "id": "semantic-cross_period-019",
+      "question": "苹果 FY2024 经营现金流同比是否可计算？",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2024 operating_cash_flow: 118254000000 USD; 2023-10-01–2024-09-28 (364 days)",
+        "FY2023 operating_cash_flow: 110543000000 USD; 2022-09-25–2023-09-30 (371 days)",
+        "同比 (118254000000 / 110543000000 - 1) × 100 = 6.98%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-308; context c-18",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-298; context c-1",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        }
+      ],
+      "original_raw_answer_sha256": "3a45af00212ae8568c49c3b90b61b8c2e48edda09c82ef8ae691989ab27ed2f9"
+    },
+    {
+      "id": "semantic-cross_period-020",
+      "question": "Can Amazon's FY2025 operating cash flow growth be calculated without mixing periods?",
+      "category": "cross_period",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 operating_cash_flow: 139514000000 USD; 2025-01-01–2025-12-31 (365 days)",
+        "FY2024 operating_cash_flow: 115877000000 USD; 2024-01-01–2024-12-31 (366 days)",
+        "同比 (139514000000 / 115877000000 - 1) × 100 = 20.40%。",
+        "以完整财年报告期间计算；如年长不同，必须披露，不将原始同比称作已按日/周归一化。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-95; context c-1",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-94; context c-4",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        }
+      ],
+      "original_raw_answer_sha256": "d90a0ddbe4971d08d75a7664b99fb6b120d1ad061dee74209dc388275755c90a"
+    },
+    {
+      "id": "semantic-insufficient_evidence-001",
+      "question": "仅凭年报能否判断 亚马逊 下季度股价？请说明缺口。",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-002",
+      "question": "Can the annual filing alone predict Microsoft's next-quarter stock price? State the evidence gap.",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-003",
+      "question": "英伟达 是否一定会跑赢同行？如果证据不足应如何回答？",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-004",
+      "question": "Is it proven that TSMC will outperform peers, or should the answer abstain?",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-005",
+      "question": "仅凭年报能否判断 苹果 下季度股价？请说明缺口。",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-006",
+      "question": "Can the annual filing alone predict Amazon's next-quarter stock price? State the evidence gap.",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-007",
+      "question": "微软 是否一定会跑赢同行？如果证据不足应如何回答？",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-008",
+      "question": "Is it proven that NVIDIA will outperform peers, or should the answer abstain?",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-009",
+      "question": "仅凭年报能否判断 台积电 下季度股价？请说明缺口。",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-010",
+      "question": "Can the annual filing alone predict Apple's next-quarter stock price? State the evidence gap.",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-011",
+      "question": "亚马逊 是否一定会跑赢同行？如果证据不足应如何回答？",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-012",
+      "question": "Is it proven that Microsoft will outperform peers, or should the answer abstain?",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-013",
+      "question": "仅凭年报能否判断 英伟达 下季度股价？请说明缺口。",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-014",
+      "question": "Can the annual filing alone predict TSMC's next-quarter stock price? State the evidence gap.",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-015",
+      "question": "苹果 是否一定会跑赢同行？如果证据不足应如何回答？",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-016",
+      "question": "Is it proven that Amazon will outperform peers, or should the answer abstain?",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-017",
+      "question": "仅凭年报能否判断 微软 下季度股价？请说明缺口。",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-018",
+      "question": "Can the annual filing alone predict NVIDIA's next-quarter stock price? State the evidence gap.",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 future_price 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "10-K disclosure contents"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Performance guarantees, targets and projections"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-019",
+      "question": "台积电 是否一定会跑赢同行？如果证据不足应如何回答？",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-insufficient_evidence-020",
+      "question": "Is it proven that Apple will outperform peers, or should the answer abstain?",
+      "category": "insufficient_evidence",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 peer_guarantee 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-47",
+          "locator": "Past performance; performance guarantees"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-001",
+      "question": "如果行情源不可用，英伟达 的估值问题应如何返回？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-002",
+      "question": "How should the system respond when the market source for TSMC is unavailable?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-003",
+      "question": "苹果 的年报仍可用但实时价格失败时，哪些结论可以保留？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-004",
+      "question": "If Amazon's filing is available but its quote fails, which conclusions remain valid?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-005",
+      "question": "如果行情源不可用，微软 的估值问题应如何返回？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-006",
+      "question": "How should the system respond when the market source for NVIDIA is unavailable?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-007",
+      "question": "台积电 的年报仍可用但实时价格失败时，哪些结论可以保留？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-008",
+      "question": "If Apple's filing is available but its quote fails, which conclusions remain valid?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-009",
+      "question": "如果行情源不可用，亚马逊 的估值问题应如何返回？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-010",
+      "question": "How should the system respond when the market source for Microsoft is unavailable?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-011",
+      "question": "英伟达 的年报仍可用但实时价格失败时，哪些结论可以保留？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-012",
+      "question": "If TSMC's filing is available but its quote fails, which conclusions remain valid?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-013",
+      "question": "如果行情源不可用，苹果 的估值问题应如何返回？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-014",
+      "question": "How should the system respond when the market source for Amazon is unavailable?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-015",
+      "question": "微软 的年报仍可用但实时价格失败时，哪些结论可以保留？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-016",
+      "question": "If NVIDIA's filing is available but its quote fails, which conclusions remain valid?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-017",
+      "question": "如果行情源不可用，台积电 的估值问题应如何返回？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-018",
+      "question": "How should the system respond when the market source for Apple is unavailable?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-019",
+      "question": "亚马逊 的年报仍可用但实时价格失败时，哪些结论可以保留？",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-market_outage-020",
+      "question": "If Microsoft's filing is available but its quote fails, which conclusions remain valid?",
+      "category": "market_outage",
+      "original_status": "abstained",
+      "verdict": "supported",
+      "reason": "限制说明涵盖问题要求的边界、可保留内容及后续研究方向；主答案字段为空不等于未返回说明。",
+      "reference_points": [
+        "按 missing_quote 参考规则核对；完整规则见 boundary-standards.json。"
+      ],
+      "sources": [
+        {
+          "url": "https://syndication.finra.org/content/defining-value-investment",
+          "locator": "P/E = current price / EPS"
+        },
+        {
+          "url": "https://www.investor.gov/introduction-investing/getting-started/researching-investments/how-read-10-k",
+          "locator": "Financial statements and risk disclosures"
+        }
+      ],
+      "original_raw_answer_sha256": null
+    },
+    {
+      "id": "semantic-negation-001",
+      "question": "英伟达 FY2022 是否披露没有重大供应链影响？请核对原文。",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "partial",
+      "reason": "短缺、订货提前期和风险描述均可核对。答案仍把这些内容称为与“没有重大影响”方向相反，并以全文口吻开头，未补齐重大性与检索范围限制。",
+      "reference_points": [
+        "年报披露实际半导体短缺、提前至少十二个月订货，以及疫情下供给和物流可用性可能产生重大净负面影响。",
+        "这些段落没有提供供应链无重大影响的保证；但“可能重大”与“本期已经重大”不同，不能据此确定 FY2022 供应链影响的重大性。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000036/nvda-20220130.htm",
+          "locator": "FY2022 10-K, Item 1A: inventory/supply commitments and COVID-19; Item 7: COVID-19"
+        }
+      ],
+      "original_raw_answer_sha256": "4e0b61b287fde3d316e5da8ce366ed7435453cb5c3a5d09adcfea83616d74484"
+    },
+    {
+      "id": "semantic-negation-002",
+      "question": "Did TSMC state that there was no material supply-chain impact in FY2023?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "partial",
+      "reason": "供应链、硅晶圆和出口管制的核心区分正确；但答案说唯一的无重大影响声明都针对出口管制，范围过大，网络安全部分提供反例。",
+      "reference_points": [
+        "原材料部分说明以往及预计可获得充足硅晶圆；另有设备、材料供应延迟及中断风险。",
+        "出口管制的未受重大影响声明限定于相关法规；这不能变成全供应链保证。文件还另有网络安全未产生重大影响的表述。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "FY2023 Form 20-F: printed pp.3,8–9,20 (Raw Materials),76 (Cybersecurity)"
+        }
+      ],
+      "original_raw_answer_sha256": "ee358f84dbf09631bcf3730a385f7506c177dcadf84b2d9801abe2a38ac4fe74"
+    },
+    {
+      "id": "semantic-negation-003",
+      "question": "苹果 FY2024 是否明确否认需求下降？",
+      "category": "negation",
+      "original_status": "partial",
+      "verdict": "partial",
+      "reason": "答案主要判断与原文相容，且 gaps 明确承认只检索部分段落。但“需求一词仅作为前瞻性风险”并不准确，历史季节性需求即是反例；否定句也应保持与 gaps 一致的范围。",
+      "reference_points": [
+        "风险因素承认单一产品需求下降和低于预期需求的可能性；MD&A 解释大中华区 iPhone/iPad 销售减少及汇率影响。",
+        "这些披露并非明确否认需求下降，也不足以把销售变化直接等同于需求变化；季节性部分还讨论历史节日需求。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+          "locator": "FY2024 10-K, Item 1: Seasonality; Item 1A: Financial Risks; Item 7: Greater China and Products"
+        }
+      ],
+      "original_raw_answer_sha256": "ac9fdd140ca383f0b55d234a0620eac9778d0490246c46aa230fd349014a08a3"
+    },
+    {
+      "id": "semantic-negation-004",
+      "question": "Does the FY2025 filing deny a demand decline for Amazon?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "关键风险、业务增长与数字符合原文，且答案区分了风险提示和明确否认。没有找到可归属于公司的明确否认声明；结论应理解为相关披露不构成否认，不能作为全文不存在任何类似语句的形式化证明。",
+      "reference_points": [
+        "需求走弱被列为可能降低收入或增长的风险；北美增长被归因为销量、第三方卖家、广告和订阅增长。",
+        "FY2025、FY2024 收入分别为716,924及637,959百万美元，重算同比12.3778%；这些属于增长披露，不是对需求下降指控的明确否认。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "FY2025 10-K, Item 1A: fluctuations in results/growth; Item 7: Net Sales; Consolidated Statements of Operations"
+        }
+      ],
+      "original_raw_answer_sha256": "445e06bd4e31b2b3e5354cc66af7de95c33dd96b7d71f40e3d251f5b8a2e390a"
+    },
+    {
+      "id": "semantic-negation-005",
+      "question": "微软 FY2022 是否披露没有重大供应链影响？请核对原文。",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "unsupported",
+      "reason": "所引风险属实，但最终以潜在风险推出“没有重大影响”与原文不符，是核心否定推理越界。风险与当期没有重大影响可以同时成立。",
+      "reference_points": [
+        "供应商集中、组件延迟、亚洲装配及地缘冲突可能造成短缺或影响收入利润；这些主要为条件式风险。",
+        "可回答相关原文不提供无重大影响保证；不能从存在未来风险推出公司 FY2022 已受重大影响，或该命题与原文矛盾。"
+      ],
+      "sources": [
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY22Q4_10K",
+          "locator": "FY2022 10-K, Item 1A: We may experience supply or quality problems; international operations / pandemic risks; official DOCX text paragraphs 879,917–918"
+        }
+      ],
+      "original_raw_answer_sha256": "df5c7d45d02d5542f53b24cda1198452d3d8d9a5cf855ab0ed2e64068c5d4897"
+    },
+    {
+      "id": "semantic-negation-006",
+      "question": "Did NVIDIA state that there was no material supply-chain impact in FY2023?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "partial",
+      "reason": "实际约束和毛利受损有直接依据，基本回答了为何不能归纳为无影响。首句却将供应链单项、FY2023及重大负面影响合并确认，强于原文分项证据。",
+      "reference_points": [
+        "披露 FY2023 中国封控影响终端销售、疫情扰动造成供应链和物流约束。",
+        "晶圆、元件和物流成本曾降低毛利；“have had or could ... material negative impact”针对一组疫情因素，不能单独量化供应链在本财年的重大性。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "FY2023 10-K, Item 1A: Economic uncertainty and COVID-19; Item 7: COVID-19 and Gross Margin"
+        }
+      ],
+      "original_raw_answer_sha256": "be8659f609b20a6da935ec0440212ec5179baeca5b4727f5a78d50e969da157c"
+    },
+    {
+      "id": "semantic-negation-007",
+      "question": "台积电 FY2024 是否明确否认需求下降？",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案正确区分风险、展望和平台经营表现，并未宣称需求已经全面下降。相关段落不构成明确否认，结论在该证据范围内成立。",
+      "reference_points": [
+        "文件同时有行业周期/终端需求减弱的条件风险和未来5G、HPC需求的正面展望。",
+        "FY2024 收入改善主要来自HPC与智能手机，不能将正面展望或平台增长视为对所有需求下降的明确否认。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2024%2020-F.pdf",
+          "locator": "FY2024 Form 20-F: Item 3 risk factors; printed p.15 Capacity Management; pp.16–18 platform revenue"
+        }
+      ],
+      "original_raw_answer_sha256": "43d4e5c7200f12c1e83e417a3871e4422067f7ee37e4158b6bc63ad5049048cd"
+    },
+    {
+      "id": "semantic-negation-008",
+      "question": "Does the FY2025 filing deny a demand decline for Apple?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "unsupported",
+      "reason": "主要引用准确，但答案把区域销售数据叫作需求证据，并以其反驳任何需求疲弱否认。该关键推论越过了销售与需求的区别。",
+      "reference_points": [
+        "风险因素说单一产品需求下降可能影响净销售额与毛利；MD&A 报告大中华区销售下降主要由于iPhone销售较低，其他地区增长。",
+        "这些原文不构成明确否认；但收入受价格、组合、汇率等影响，区域销售下降不直接证明需求下降。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "FY2025 10-K, Item 1A: net sales/gross margin risk; Item 7: Segment Operating Performance (p.22)"
+        }
+      ],
+      "original_raw_answer_sha256": "3e085400ceb07fe1dcde3798ac51db45529f042b22ef38aa636142c228683dfe"
+    },
+    {
+      "id": "semantic-negation-009",
+      "question": "亚马逊 FY2022 是否披露没有重大供应链影响？请核对原文。",
+      "category": "negation",
+      "original_status": "partial",
+      "verdict": "unsupported",
+      "reason": "已发生影响和成本增加的复述正确；“该说法与原文相矛盾”把有影响等同于有重大影响，gaps 中未找到相应保证也不能补足该逻辑。",
+      "reference_points": [
+        "全球供应链约束等宏观因素对业绩有难以分离和量化的影响，并共同推高FY2022运营成本；履约生产率也受约束。",
+        "因此不能从相关段落获得无重大供应链影响的保证；但文件并未在这些段落单独确定供应链影响的金额或重大性。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000004/amzn-20221231.htm",
+          "locator": "FY2022 10-K, Item 1A: fulfillment network; Item 7: Results of Operations—Overview (p.23)"
+        }
+      ],
+      "original_raw_answer_sha256": "9aab7de74e4999abc5ac530336f33f0ec761563f53b50f3c07d2ed57141ff8fd"
+    },
+    {
+      "id": "semantic-negation-010",
+      "question": "Did Microsoft state that there was no material supply-chain impact in FY2023?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案最后明确限定 disclosures reviewed，保留条件式风险，未反推出重大影响已经发生。该核心判断与参考依据一致。",
+      "reference_points": [
+        "相关硬件供应链段落列出有限供应商、组件延迟、亚洲装配和国际冲突可能导致的风险。",
+        "该条件式语言不是已经完成的无重大影响评估；只能说核查段落不支持所问保证。"
+      ],
+      "sources": [
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY23Q4_10K",
+          "locator": "FY2023 10-K, Item 1A: supply or quality problems; trade regulations; international operations; official DOCX paragraphs 877,884,910"
+        }
+      ],
+      "original_raw_answer_sha256": "b3a9fe6ed5a5ca614baed509de138ddf2ee394e93f7e1af2faf43faff2905dbc"
+    },
+    {
+      "id": "semantic-negation-011",
+      "question": "英伟达 FY2024 是否明确否认需求下降？",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案保留数据中心/Hopper对象，明确说正面表述与明确否认不同，也保留需求下降的可能性。主要判断有支持。",
+      "reference_points": [
+        "数据中心需求在 FY2024 激增，Hopper需求持续强；公司同时保留需求下降导致存货减值的风险。",
+        "正面需求披露限定数据中心及相关产品，并非逐项否认所有市场、时期的需求下降。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000029/nvda-20240128.htm",
+          "locator": "FY2024 10-K, Item 1A and Item 7: Demand and Supply, Product Transitions; FY2024 Summary (pp.16,34–36)"
+        }
+      ],
+      "original_raw_answer_sha256": "2e350732f65ac98b8384b6a179e47d69699934c6ad62291aa25dc33d793b7ca9"
+    },
+    {
+      "id": "semantic-negation-012",
+      "question": "Does the FY2025 filing deny a demand decline for TSMC?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案准确区分前瞻展望、条件风险和已实现经营变化。没有把风险作为已实现需求下降的事实，核心回答有依据。",
+      "reference_points": [
+        "5G、AI、HPC属于未来强需求展望；周期下行、终端市场放缓及关税可能压低需求。",
+        "FY2025增长来自先进制程组合带动ASP和晶圆出货增加，毛利改善来自利用率和成本；这些不等于明确否认需求下降。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "FY2025 Form 20-F: printed pp.3–6 risk factors; p.17 capacity outlook; pp.30–31 Net Revenue and Gross Margin"
+        }
+      ],
+      "original_raw_answer_sha256": "7015b808e10d36218cf5d19cfe6bb1d8db66229196e54f2813e7cb5f1564e3b7"
+    },
+    {
+      "id": "semantic-negation-013",
+      "question": "苹果 FY2022 是否披露没有重大供应链影响？请核对原文。",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "unsupported",
+      "reason": "事实摘述主要准确，但最后“与没有重大供应链影响直接相反”将已发生不利影响升级为重大性反证，关键结论支持不足。",
+      "reference_points": [
+        "公司披露疫情期间供应商和物流中断，造成短缺并影响全球销售；以往供应受限也曾不利影响业绩。",
+        "原文区分已经不利影响与未来可能重大不利影响，不能仅凭这些句子确认FY2022供应链单项已达重大程度。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019322000108/aapl-20220924.htm",
+          "locator": "FY2022 10-K, Item 1A: COVID-19 (p.5); components/outsourcing constraints (pp.7–8)"
+        }
+      ],
+      "original_raw_answer_sha256": "35d12526517d1ef8526ce60213e30d803baa6033e3b886e9676e35a8620a4462"
+    },
+    {
+      "id": "semantic-negation-014",
+      "question": "Did Amazon state that there was no material supply-chain impact in FY2023?",
+      "category": "negation",
+      "original_status": "partial",
+      "verdict": "unsupported",
+      "reason": "事实段落及未量化的gap是正确的；但答案明确说命题被直接反证，在重大性未确认时并不能得出这个结论。",
+      "reference_points": [
+        "供应链波动与其他宏观因素对业绩存在难分离、难量化的影响，部分因素可能延续到2024年第一季度。",
+        "这不是无重大影响保证，也不是独立证明供应链单项重大影响的陈述。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "FY2023 10-K, Item 7: Overview and Results of Operations—Overview (pp.20,24)"
+        }
+      ],
+      "original_raw_answer_sha256": "72a60cf12a2b2bf99955357f5e29e0bab6a951bcd939b597811f03d475165bfc"
+    },
+    {
+      "id": "semantic-negation-015",
+      "question": "微软 FY2024 是否明确否认需求下降？",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案限定“检索到的披露”，区分风险与增长归因，主要要点可从官方文件直接核对，没有把销售增长当成明确否认。",
+      "reference_points": [
+        "需求与宏观/地缘环境有关，PC和服务器需求下降是条件式风险。",
+        "服务器和Azure增长的具体驱动为混合解决方案及按量服务；这些不构成全公司需求不会下降的明确声明。"
+      ],
+      "sources": [
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY24Q4_10K",
+          "locator": "FY2024 10-K, Item 1A: economic/market conditions; Item 7: Industry Trends and Intelligent Cloud; official DOCX paragraphs 899,1386,1879"
+        }
+      ],
+      "original_raw_answer_sha256": "a75baa0631863f0d8323a25469f0f26cb8ff88d9c6cb9a4c2ae9dc0edc4f611f"
+    },
+    {
+      "id": "semantic-negation-016",
+      "question": "Does the FY2025 filing deny a demand decline for NVIDIA?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "unsupported",
+      "reason": "答案说需求下降只作为未来可能性，并从强劲数据中心需求推断报告期实际下降被隐含否认。官方风险因素包含已发生需求减少/受损的陈述，直接反驳其only future概括；“仅部分支持明确否认”也混淆了题目。",
+      "reference_points": [
+        "数据中心Hopper需求推动年度增长，但文件同时承认过去产品换代前曾发生现有架构需求减少。",
+        "出口限制可能性的增加已经负面影响产品需求；需求减弱并非全都只是未来假设。不得以数据中心增长证明全公司当期没有任何需求下降。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "FY2025 10-K, Item 1A: product transitions (p.17), export controls (pp.25–26); Item 7: FY2025 Summary and Inventories (pp.38–39)"
+        }
+      ],
+      "original_raw_answer_sha256": "36ce77e46d5c414a7a6155857029616d5c3fdf58d5d69bb36965b086005ea780"
+    },
+    {
+      "id": "semantic-negation-017",
+      "question": "台积电 FY2022 是否披露没有重大供应链影响？请核对原文。",
+      "category": "negation",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "答案准确保留疫情/出口管制两个对象，并说明只检索相关段落、未全文逐一排查。未将风险升级为当期重大影响，范围控制较好。",
+      "reference_points": [
+        "截至报告日无重大影响的表述分别针对疫情及出口管制；疫情段落本身同时讨论供应链中断的可能性。",
+        "材料短缺曾导致行业交期或价格变化，硅晶圆供应总体充足；这些不能拼成不分成因的全供应链无重大影响声明。"
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2022%2020-F.pdf",
+          "locator": "FY2022 Form 20-F: printed pp.3,8,11 (COVID-19),20 (Raw Materials)"
+        }
+      ],
+      "original_raw_answer_sha256": "698f62ff4c1928baa0697288d120c2d5563efd007791d82acad67c2c7bb84a1a"
+    },
+    {
+      "id": "semantic-negation-018",
+      "question": "Did Apple state that there was no material supply-chain impact in FY2023?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "unsupported",
+      "reason": "既往事件和风险引用可核对；但开头把“没有重大供应链影响”称为已被反驳，跨过了时期和重大性两个限定，属于核心推理过强。",
+      "reference_points": [
+        "原文描述过去半导体短缺、组件延迟及公共卫生事件曾造成不利影响，未来可能重大不利影响。",
+        "这些历史与条件表述不提供无重大影响保证；也不自动构成FY2023供应链已经产生重大影响的反证。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "FY2023 10-K, Item 1A: international trade/public health (pp.5–6); component supply constraints (pp.7–8)"
+        }
+      ],
+      "original_raw_answer_sha256": "089d4e7d085a4932d2a3a75d2ea41cd1844b1224fe47a911b9e75b841c8a6700"
+    },
+    {
+      "id": "semantic-negation-019",
+      "question": "亚马逊 FY2024 是否明确否认需求下降？",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案明确限定“本次检索到的段落/所查证据”，没有把销量增长等同于否认需求下降。相关事实及核心判断有支持。",
+      "reference_points": [
+        "北美和国际销售增长主要来自销量、第三方卖家、广告和订阅；需求减弱导致收入或增长下降仍属风险。",
+        "这些是正面经营归因和未来风险，不是针对需求下降的明确否认。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000004/amzn-20241231.htm",
+          "locator": "FY2024 10-K, Item 1A: fluctuations in results/growth; Item 7: Net Sales (p.24)"
+        }
+      ],
+      "original_raw_answer_sha256": "64942d0a0e230153b0d52ea5afe1a81f7a1be427614c62d859006524eef5b1f0"
+    },
+    {
+      "id": "semantic-negation-020",
+      "question": "Does the FY2025 filing deny a demand decline for Microsoft?",
+      "category": "negation",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "答案限定 retrieved passages，保留服务器采购下降这一相反方向事实，区分增长和风险与明确否认；关键判断有依据。",
+      "reference_points": [
+        "Azure增长由服务需求推动；服务器产品收入下降与交易式采购减少及客户转向云有关。",
+        "AI基础设施需求增长与宏观需求下降风险并存，核查段落没有提供明确否认需求下降的陈述。"
+      ],
+      "sources": [
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "locator": "FY2025 10-K, Item 1A: economic/market conditions; Item 7: economic conditions and Intelligent Cloud; official DOCX paragraphs 843,1334,2030"
+        }
+      ],
+      "original_raw_answer_sha256": "e1bb3d72a1cdda4a36576240f443b0a9f02cbac36f07df7e70759bd2101e4334"
+    },
+    {
+      "id": "semantic-numeric-001",
+      "question": "微软 FY2025 营业收入和净利润是多少？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 revenue: 281724000000 USD; 2024-07-01–2025-06-30。",
+        "FY2025 net_income: 101832000000 USD; 2024-07-01–2025-06-30。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_54f7ed46-65f2-456a-a77a-3c4b7593c6fb; context C_7102029d-8d6c-44c5-b166-04cf41443b1e",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_557d4ffe-22c6-4a69-9b52-98ab1fae7f74; context C_7102029d-8d6c-44c5-b166-04cf41443b1e",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "20ff145320c65ae69f1573e4f809e3152279191b5805a1953ff3cf47803ae090"
+    },
+    {
+      "id": "semantic-numeric-002",
+      "question": "What were NVIDIA's FY2022 revenue and net income?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 26914000000 USD; 2021-02-01–2022-01-30。",
+        "FY2022 net_income: 9752000000 USD; 2021-02-01–2022-01-30。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV85Ny9mcmFnOjZmYzdlYTc1OTNhMDQ4OGJiNjA5OWUwYmY4MTU2NmE2L3RhYmxlOjRhOTEyMTRmYTdhYTQ5ZGVhNzExYWM1OWI3YjJiY2NmL3RhYmxlcmFuZ2U6NGE5MTIxNGZhN2FhNDlkZWE3MTFhYzU5YjdiMmJjY2ZfMi0zLTEtMS02NjIwMA_5a2be778-de1f-416a-9b24-2fe6789915f0; context i665a8107071c4fdd93062441abf07776_D20210201-20220130",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV85Ny9mcmFnOjZmYzdlYTc1OTNhMDQ4OGJiNjA5OWUwYmY4MTU2NmE2L3RhYmxlOjRhOTEyMTRmYTdhYTQ5ZGVhNzExYWM1OWI3YjJiY2NmL3RhYmxlcmFuZ2U6NGE5MTIxNGZhN2FhNDlkZWE3MTFhYzU5YjdiMmJjY2ZfMTYtMy0xLTEtNjYyMDA_1aed72e4-e049-4030-803f-c7c7952e6a0a; context i665a8107071c4fdd93062441abf07776_D20210201-20220130",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        }
+      ],
+      "original_raw_answer_sha256": "09e61f812495b70f5a7ee25ddf60afc242076f0adde112f2afa8df30d7c761d1"
+    },
+    {
+      "id": "semantic-numeric-003",
+      "question": "台积电 FY2023 经营活动现金流是多少，来源是什么？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 operating_cash_flow: 1241967300000.0 TWD; 2023-01-01–2023-12-31。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97758; context P01_01_2023To12_31_2023",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "4df1c8a44dc62b6b117e1d53fb9616c3f90a431688cc71c62edb7c14466ebe56"
+    },
+    {
+      "id": "semantic-numeric-004",
+      "question": "What was Apple's FY2024 operating income margin?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "营业利润 123216000000 / 营业收入 391035000000 × 100 = 31.51%；币种 USD；FY2024。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-103; context c-18",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-79; context c-18",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        }
+      ],
+      "original_raw_answer_sha256": "e7b477050f52996c0b2d1a3f8e69f0fee958d9bb28b1d8b42b75d6cf7d67b131"
+    },
+    {
+      "id": "semantic-numeric-005",
+      "question": "亚马逊 FY2025 营业收入和净利润是多少？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 revenue: 716924000000 USD; 2025-01-01–2025-12-31。",
+        "FY2025 net_income: 77670000000 USD; 2025-01-01–2025-12-31。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-152; context c-1",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-62; context c-1",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        }
+      ],
+      "original_raw_answer_sha256": "ad3f9975764b43c5be316558c9690f99f613bd73faa04a63f9dee4dcd9a39266"
+    },
+    {
+      "id": "semantic-numeric-006",
+      "question": "What were Microsoft's FY2022 revenue and net income?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 198270000000 USD; 2021-07-01–2022-06-30。",
+        "FY2022 net_income: 72738000000 USD; 2021-07-01–2022-06-30。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_9e4cb859-32cb-499b-861d-cc7439e04b9b; context C_efe853fc-8e8a-4899-b65b-e33c17faff7c",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_f755efc8-6fca-4b89-9614-e1b8269d99b9; context C_efe853fc-8e8a-4899-b65b-e33c17faff7c",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar23/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "ca602977329f65616f117e391a387189600d25fc41fd1d1d71fcbd5215291773"
+    },
+    {
+      "id": "semantic-numeric-007",
+      "question": "英伟达 FY2023 经营活动现金流是多少，来源是什么？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 operating_cash_flow: 5641000000 USD; 2022-01-31–2023-01-29。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "inline fact id3VybDovL2RvY3MudjEvZG9jOjhjZTVjMjViOTM4NDQ1YjFiZWM4MzU3NzdkNmNlY2U5L3NlYzo4Y2U1YzI1YjkzODQ0NWIxYmVjODM1Nzc3ZDZjZWNlOV8xMTUvZnJhZzplZWQ0YjMxMTc2Njk0MTUxOGZiM2IxYmE2MTA4YTcwYy90YWJsZToxZDc5NDY4NTJkOWU0NzBjOTRlNTM5ZjFkZDcyNDkwNi90YWJsZXJhbmdlOjFkNzk0Njg1MmQ5ZTQ3MGM5NGU1MzlmMWRkNzI0OTA2XzE5LTEtMS0xLTY2MjAw_3cf4c924-9c2a-4727-b01d-80382f027bfb; context i793edb174e3c4f8499d46ce84a602d1b_D20220131-20230129",
+          "source_sha256": "05fe1357021f1b9b2529ad918240bd860ca42be33fe5e0c1ed505e621b934727"
+        }
+      ],
+      "original_raw_answer_sha256": "528027700107a4327a9bd96541a0b88acdbe9cf267d47e6f72665dcae8df752b"
+    },
+    {
+      "id": "semantic-numeric-008",
+      "question": "What was TSMC's FY2024 operating income margin?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "营业利润 1322053000000.0 / 营业收入 2894307700000.0 × 100 = 45.68%；币种 TWD；FY2024。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-263; context c-6",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-231; context c-6",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "7631a643093e5e62ac8b54bf1e4da0a25643aa1f025ed79b3704915a4715acd5"
+    },
+    {
+      "id": "semantic-numeric-009",
+      "question": "苹果 FY2025 营业收入和净利润是多少？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 revenue: 416161000000 USD; 2024-09-29–2025-09-27。",
+        "FY2025 net_income: 112010000000 USD; 2024-09-29–2025-09-27。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-78; context c-1",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "inline fact f-114; context c-1",
+          "source_sha256": "4e0132982298def43a7972e284c77308e79b2d6cef057538884ea598f6b8430f"
+        }
+      ],
+      "original_raw_answer_sha256": "ef0cda87dd496e24fb1a00aaaa4f66920ad5496daca5c46da54c6cbd1ba08772"
+    },
+    {
+      "id": "semantic-numeric-010",
+      "question": "What were Amazon's FY2022 revenue and net income?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 513983000000 USD; 2022-01-01–2022-12-31。",
+        "FY2022 net_income: -2722000000 USD; 2022-01-01–2022-12-31。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-136; context c-8",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-43; context c-8",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        }
+      ],
+      "original_raw_answer_sha256": "30e4a85a239d905d892cc09a20cba9d3bb96fcc828fed48e62e90ced2bb8ee65"
+    },
+    {
+      "id": "semantic-numeric-011",
+      "question": "微软 FY2023 经营活动现金流是多少，来源是什么？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 operating_cash_flow: 87582000000 USD; 2022-07-01–2023-06-30。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "inline fact F_98a44173-0601-4d40-980a-0ac8e42e1f26; context C_da7a1266-ce2b-41b7-83ff-bb6e03dc1fa5",
+          "source_sha256": "c96a6a6978b50f8a5f751390cddcbb8062b285bfa12d85a1cac13e3b60b81643"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar23/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "14526d28471b81e2529a2adb6f12789f17ac73df6fec5f32e0866b6eeeea53ba"
+    },
+    {
+      "id": "semantic-numeric-012",
+      "question": "What was NVIDIA's FY2024 operating income margin?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "营业利润 32972000000 / 营业收入 60922000000 × 100 = 54.12%；币种 USD；FY2024。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-99; context c-11",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-78; context c-11",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        }
+      ],
+      "original_raw_answer_sha256": "40bfb9f3e2bf3309546773be10d5a20a07eb571aebfb46051df98fbd74a193b8"
+    },
+    {
+      "id": "semantic-numeric-013",
+      "question": "台积电 FY2025 营业收入和净利润是多少？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 revenue: 3809054300000.0 TWD; 2025-01-01–2025-12-31。",
+        "FY2025 net_income: 1697604000000.0 TWD; 2025-01-01–2025-12-31。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-232; context c-1",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "inline fact f-360; context c-1",
+          "source_sha256": "8003e635887cbb8104826bd125ff956fc868a8cde521e8e07c7cb6f5c1ff5923"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "da3af57e716ef80d5ee18faf20ccf0d9aa53f7a610887b67adfe42b64f4fe469"
+    },
+    {
+      "id": "semantic-numeric-014",
+      "question": "What were Apple's FY2022 revenue and net income?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 394328000000 USD; 2021-09-26–2022-09-24。",
+        "FY2022 net_income: 99803000000 USD; 2021-09-26–2022-09-24。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-70; context c-20",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-106; context c-20",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        }
+      ],
+      "original_raw_answer_sha256": "d293c53f876e6fef56bcffa0d8b121d6ccbb3f6ea9483bb0c548aba4af67f548"
+    },
+    {
+      "id": "semantic-numeric-015",
+      "question": "亚马逊 FY2023 经营活动现金流是多少，来源是什么？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 operating_cash_flow: 84946000000 USD; 2023-01-01–2023-12-31。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "inline fact f-77; context c-1",
+          "source_sha256": "e9ef46aa77f41184720577a9847decba6b87af14a589fcb24ab7519598cf5937"
+        }
+      ],
+      "original_raw_answer_sha256": "161ee582ff4a59c46b98678fce0dc39766a436f3f9c21fce4ce3960db45db954"
+    },
+    {
+      "id": "semantic-numeric-016",
+      "question": "What was Microsoft's FY2024 operating income margin?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "营业利润 109433000000 / 营业收入 245122000000 × 100 = 44.64%；币种 USD；FY2024。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_b5128550-7940-45d1-92a8-039dc62dd531; context C_c19fe6c0-0e87-44b0-aa2a-d9c6e40a5862",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "inline fact F_f3644c27-3201-4eae-830b-29806654338e; context C_c19fe6c0-0e87-44b0-aa2a-d9c6e40a5862",
+          "source_sha256": "9a4ca4f29f6af250e47a0d1af7b3cced619179439832ba50876397716e3d3306"
+        },
+        {
+          "url": "https://www.microsoft.com/investor/reports/ar25/",
+          "locator": "Financial Statements: Income Statements / Cash Flows Statements"
+        }
+      ],
+      "original_raw_answer_sha256": "35866f8ac1784e5b9dc7c48ff80c89c69e03396e6b5bb008809174c83faeba47"
+    },
+    {
+      "id": "semantic-numeric-017",
+      "question": "英伟达 FY2025 营业收入和净利润是多少？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2025 revenue: 130497000000 USD; 2024-01-29–2025-01-26。",
+        "FY2025 net_income: 72880000000 USD; 2024-01-29–2025-01-26。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-77; context c-1",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "inline fact f-119; context c-1",
+          "source_sha256": "f5d6725d0fe85db2478e0fbeb3d64bd5f01409a6cc040a3818acd5c9fe32ffe2"
+        }
+      ],
+      "original_raw_answer_sha256": "7ab8d11d8f9b5c06ad87692258fdebe7f0c35fb9915d81c7178c0be286168693"
+    },
+    {
+      "id": "semantic-numeric-018",
+      "question": "What were TSMC's FY2022 revenue and net income?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2022 revenue: 2263891300000.0 TWD; 2022-01-01–2022-12-31。",
+        "FY2022 net_income: 992923400000.0 TWD; 2022-01-01–2022-12-31。",
+        "采用 SEC 20-F 的 IASB IFRS 口径，净利润取归属于母公司股东；不与台湾本地报表净利混用。原报表金额精度为十万新台币。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97189; context P01_01_2022To12_31_2022",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "inline fact ixv-97321; context P01_01_2022To12_31_2022",
+          "source_sha256": "605e18e087dabbca8a250c56e9b85a0b661d117349ddf348afc518cc27150fd1"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "Consolidated statements of profit or loss / cash flows; annual NT$ columns"
+        }
+      ],
+      "original_raw_answer_sha256": "97cd04aeb51d3b2b3420a55c70ac393a5c2ac2505b492b0c23907f3caed81d22"
+    },
+    {
+      "id": "semantic-numeric-019",
+      "question": "苹果 FY2023 经营活动现金流是多少，来源是什么？",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "FY2023 operating_cash_flow: 110543000000 USD; 2022-09-25–2023-09-30。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "inline fact f-298; context c-1",
+          "source_sha256": "3edfd02456723c368f49078841f7efc80b79edf3c118cd65854d82ec96a1fc88"
+        }
+      ],
+      "original_raw_answer_sha256": "76457110623ef3039cbf2054a9f0548c3a41186b087386f6bf5caeda8a2e47e1"
+    },
+    {
+      "id": "semantic-numeric-020",
+      "question": "What was Amazon's FY2024 operating income margin?",
+      "category": "numeric",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "所问指标、年度、币种、原始金额与独立报表取数匹配；公式及正文显示通过核对。",
+      "reference_points": [
+        "营业利润 68593000000 / 营业收入 637959000000 × 100 = 10.75%；币种 USD；FY2024。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-175; context c-4",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "inline fact f-151; context c-4",
+          "source_sha256": "b127c496c31b10dda5589b8551b43167a07a0d2bbce9e472eeea2637e4768adc"
+        }
+      ],
+      "original_raw_answer_sha256": "27ac90243756d9474d73cdb075cc400fc61ea5edb5c3f7cae8cbf830e7469faa"
+    },
+    {
+      "id": "semantic-risk-001",
+      "question": "台积电 FY2022 的监管、需求和集中度风险有哪些？",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "partial",
+      "reason": "监管和需求两部分有原文依据，也提到台湾地域集中，但遗漏了年报单列且重要的客户集中与大客户缩单风险，三维回答不够完整。",
+      "reference_points": [
+        "监管：贸易制裁、出口许可与两岸政策可能限制客户供货及大陆工厂设备取得；不能把风险提示写成所有限制均已发生。",
+        "需求：半导体与电子终端周期、产能过剩及终端价格下滑，叠加晶圆厂高固定成本，会放大收入和利润率波动。",
+        "集中度：FY2022 前十大客户占净收入约 68%，最大客户约 23%；客户缩单、整合和针对客户的出口限制均有风险。生产和管理集中台湾另有地域风险。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312523107214/d428519d20f.htm",
+          "locator": "Item 3.D Risk Factors：trade tensions/export controls；cyclical industries；large customers（20-F正文第3–7页，客户段第7页）"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2022%2020-F.pdf",
+          "locator": "Item 3.D Risk Factors：trade tensions/export controls；cyclical industries；large customers（20-F正文第3–7页，客户段第7页）"
+        }
+      ],
+      "original_raw_answer_sha256": "6422965540914ea04bae85134cbb1199fd8b1078048ddd337fd87635daa21e77"
+    },
+    {
+      "id": "semantic-risk-002",
+      "question": "What regulatory, demand, and concentration risks did Apple disclose for FY2023?",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "回答覆盖监管、需求和供应集中度，DMA 时间点与单一来源风险均与 FY2023 原文一致，未把潜在后果说成必然损失。",
+      "reference_points": [
+        "监管：App Store 的诉讼、调查和 DMA 合规可能改变应用分发及佣金；报告当时要求在 2024年3月前遵守 DMA。",
+        "需求：宏观下行、通胀、信用和利率环境可能压低消费者支出；竞争、短产品周期及价格压力影响销售和利润。",
+        "集中度：制造集中少数亚洲外包商及单一地点，关键部件存在单一或少数供应商，最终组装也依赖亚洲伙伴。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+          "locator": "Item 1A：macroeconomic conditions；highly competitive markets；outsourcing partners；components；App Store regulatory scrutiny"
+        }
+      ],
+      "original_raw_answer_sha256": "d78c326e00a963c3785b2d52464e7c03ddef0316e6d29c64dd96dc8d7ab232ff"
+    },
+    {
+      "id": "semantic-risk-003",
+      "question": "亚马逊 FY2024 年报有哪些需要持续跟踪的风险？",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "列出的竞争、法律、网络安全、供应链、宏观税务、AI 和库存风险均可在年报找到。末段排序明确标注为分析判断，并未声称是公司正式排名。",
+      "reference_points": [
+        "竞争、需求预测及库存/履约与数据中心容量错配可能降低利润；AI 等新技术也改变竞争条件。",
+        "反垄断、隐私、用工、税务等监管和诉讼可能带来罚款、限制或经营调整。",
+        "有限或单一来源供应商、GPU 等关键半导体及中国卖家/供应商暴露形成供应和收入风险。",
+        "数据安全、技术中断与 AI 的知识产权/声誉风险需要跟踪；宏观、汇率和税制会影响经营结果。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000004/amzn-20241231.htm",
+          "locator": "Items 1A and 1C；Item 7 Overview；Note 7 Legal Proceedings"
+        }
+      ],
+      "original_raw_answer_sha256": "45f4f6aa8e5e2eeafdea9c7557b9932ae2972d57e1184427a8530b189f96de15"
+    },
+    {
+      "id": "semantic-risk-004",
+      "question": "Which risks should an analyst track in Microsoft's FY2025 filing?",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "核心十类风险有官方 10-K 支持；源代码库入侵、有限 GPU 供应与合作伙伴安排等具体描述也能对应到原文。开放式问题不要求复述每一条风险因素。",
+      "reference_points": [
+        "网络攻击与已披露的国家支持攻击事件可损害客户关系、业务及声誉，网络安全合规还会增加成本。",
+        "AI 技术、数据、版权与负责任使用，以及战略合作/收购的回报和执行存在风险。",
+        "数据中心依赖可许可建设的土地、能源、网络和 GPU 等有限来源部件；容量不足和成本上涨会影响交付。",
+        "竞争、反垄断和数据监管、知识产权诉讼、政府采购条件及地缘政治也须跟踪。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+          "locator": "Item 1A：Strategic and competitive risks；Operational risks；Legal/regulatory risks；Item 1 Operations"
+        },
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "locator": "Item 1A：Strategic and competitive risks；Operational risks；Legal/regulatory risks；Item 1 Operations"
+        }
+      ],
+      "original_raw_answer_sha256": "d7f42b1db8a21d0982df23d110f7c49c9822ed34668c4ee54254145d4230e3a1"
+    },
+    {
+      "id": "semantic-risk-005",
+      "question": "英伟达 FY2022 的监管、需求和集中度风险有哪些？",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "三维风险和其相互作用均有披露依据。虽然财年结束于2022年1月，3月申报包含俄乌冲突和终止 Arm 交易的期后信息，不能误判为穿越。末段明确是分析判断。",
+      "reference_points": [
+        "监管：进出口限制、制裁和收购审查；文件确已披露停止向俄罗斯销售，以及 2022年2月终止 Arm 交易。",
+        "需求：制造周期可达十二个月以上，需求预测与不可轻易削减的库存采购承诺可能造成短缺、积压和减值。",
+        "集中度：依赖有限的渠道/合作伙伴客户，采购订单可取消或推迟；亚太制造与第三方代工亦构成依赖。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000036/nvda-20220130.htm",
+          "locator": "Item 1A：Government laws and regulations；demand/supply forecasting；limited customers；acquisitions（申报日期2022-03-18）"
+        }
+      ],
+      "original_raw_answer_sha256": "8d84f2a68b2e59087991e8b31eddb051eadfbb1c2c15aaca51af9e30c3af28de"
+    },
+    {
+      "id": "semantic-risk-006",
+      "question": "What regulatory, demand, and concentration risks did TSMC disclose for FY2023?",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "三个所问维度均回答，许可证时间、周期性机制与客户集中风险都符合 FY2023 20-F。未给出比例并不妨碍其定性回答成立。",
+      "reference_points": [
+        "监管：贸易制裁及出口控制影响客户与大陆运营；南京厂临时授权当时延至2024-05-31，仍申请 VEU。",
+        "需求：电子和半导体周期、终端订单急变与产能过剩影响收入、利用率和利润。",
+        "集中度：FY2023 前十大客户约占净收入70%，前两大客户分别25%和11%；大客户缩单、季节性及整合会放大波动。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+          "locator": "Item 3.D Risk Factors：trade tensions；cyclical industries；large customers（正文第3–7页）"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2023%2020F.pdf",
+          "locator": "Item 3.D Risk Factors：trade tensions；cyclical industries；large customers（正文第3–7页）"
+        }
+      ],
+      "original_raw_answer_sha256": "2470fa1c6b3cf2e2bfbb25bd4ca32207aeb3a9286b6179e510f2b4efe7a5efe8"
+    },
+    {
+      "id": "semantic-risk-007",
+      "question": "苹果 FY2024 年报有哪些需要持续跟踪的风险？",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "已给出六项相关且有依据的跟踪风险，未把初步调查写成最终违法认定。对没有覆盖的集中度、数据和人才段落作了明确限定；这是一份非穷尽清单，仍回答了开放式问题。",
+      "reference_points": [
+        "竞争、产品迭代及宏观/汇率变化影响消费者需求和利润率。",
+        "DMA、App Store、反垄断和隐私/AI 监管可能迫使产品及收费变化并带来罚款；2024年 DMA 调查当时尚有初步认定。",
+        "亚洲制造、单一部件来源、灾害和公共卫生事件可能中断供应；网络安全和产品缺陷也属于运营风险。",
+        "第三方知识产权许可和侵权争议可引起成本、禁令或产品限制。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+          "locator": "Item 1A；Item 3 Legal Proceedings—Digital Markets Act Investigations"
+        }
+      ],
+      "original_raw_answer_sha256": "d805d1fd99af112f115525325c30f2acf94a3d4b04bc4decee854a2852aca0aa"
+    },
+    {
+      "id": "semantic-risk-008",
+      "question": "Which risks should an analyst track in Amazon's FY2025 filing?",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "AI 投资、容量、宏观贸易、竞争、安全和人才风险都有原文支撑。开头排序有“In my assessment”限定，按分析性归纳理解而非公司既定排名。",
+      "reference_points": [
+        "新业务、自动化和 AI 投资的收益不确定，未实现收益可能产生减值；竞争也可能促使降价或增加支出。",
+        "需求预测、履约与数据中心容量、能源与存储芯片供应、贸易政策变化影响经营成本和交付。",
+        "监管、数据安全、系统中断与高技能人员招聘留任存在风险，安全委员会参与网络风险监督。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+          "locator": "Items 1A and 1C；Item 7 Forward-Looking Statements and Overview"
+        }
+      ],
+      "original_raw_answer_sha256": "04f8b521d85fb1bac9bae29a5fac2cf79c9daf09268d2d69bfbda6d92d97d4e7"
+    },
+    {
+      "id": "semantic-risk-009",
+      "question": "微软 FY2022 的监管、需求和集中度风险有哪些？",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "三维核心回答与官方文件一致，尤其没有捏造单一大客户占比。末段把广泛国际业务称为地域需求集中，术语稍宽，但没有改变所披露事实和核心判断。",
+      "reference_points": [
+        "监管：竞争法、数据保护、本地化、数字平台及通信法规可能带来罚款、成本或产品调整。",
+        "需求：宏观恶化压低 IT、PC 与服务器支出；地缘冲突增加客户预算不确定性并影响回款。",
+        "集中度主要包括有限的设备及数据中心部件供应商和难以替换的合格制造商。",
+        "Note 19 明确没有单一客户或美国以外的单一国家超过收入10%；国际收入暴露不能自动等同于单一外国市场集中。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000156459022026876/msft-10k_20220630.htm",
+          "locator": "Item 1A：competition/data regulation；economic conditions；limited suppliers；Note 19 Segment Information and Geographic Data"
+        },
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY22Q4_10K",
+          "locator": "Item 1A：competition/data regulation；economic conditions；limited suppliers；Note 19 Segment Information and Geographic Data"
+        }
+      ],
+      "original_raw_answer_sha256": "bf6262d1f6d309a8ca846a7830ff8662cb2ff053832978b586773503473ff471"
+    },
+    {
+      "id": "semantic-risk-010",
+      "question": "What regulatory, demand, and concentration risks did NVIDIA disclose for FY2023?",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "no_answer",
+      "reason": "既有回答只有重复的营业收入，未解释监管、需求或集中度任一风险。数值即使正确也未回答问题。",
+      "reference_points": [
+        "监管：出口许可、贸易与制裁限制以及 AI 相关监管可能限制市场准入。",
+        "需求：游戏等终端需求、渠道库存、加密货币影响难预测；长供应周期和采购承诺可能造成积压和减值。",
+        "集中度：有限客户/渠道伙伴、第三方代工和亚太供应链依赖，且客户可改变或取消采购。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+          "locator": "Item 1A：Risk Factors；Item 7 Demand, Supply and Macroeconomic Considerations; Government Regulations"
+        }
+      ],
+      "original_raw_answer_sha256": "9a29187a33eb0c73834a07a15e95341659bed16bad4df5b4db24c76d5f83672a"
+    },
+    {
+      "id": "semantic-risk-011",
+      "question": "台积电 FY2024 年报有哪些需要持续跟踪的风险？",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "各项风险和具体时间条件都可对应原文，包含2025年申报前的期后风险信息，且没有把永久 VEU 描述成永不撤销。",
+      "reference_points": [
+        "出口管制、贸易与台湾地域暴露；南京 VEU 当时有效但可被终止，2025年1月规则涉及16纳米及以下特定出货许可。",
+        "需求周期、先进制程/AI 技术迭代及高固定成本、扩产执行影响利用率和回报。",
+        "FY2024 前十大客户约占净收入76%，主要客户集中及应收集中形成风险；设备和原料也有少数供应商依赖。",
+        "地震、水电和电价、气候/环保、知识产权与反垄断风险；文件披露2026年开始缴纳2025年度碳费。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312525083423/d896993d20f.htm",
+          "locator": "Item 3.D；Item 5 Climate Change Related Issues；financial instruments credit risk note"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2024%2020-F.pdf",
+          "locator": "Item 3.D；Item 5 Climate Change Related Issues；financial instruments credit risk note"
+        }
+      ],
+      "original_raw_answer_sha256": "0a472362947417a5e9699522be6df934580a54307ba5021e71dac35e9e5c0175"
+    },
+    {
+      "id": "semantic-risk-012",
+      "question": "Which risks should an analyst track in Apple's FY2025 filing?",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "监管案件、贸易、网络安全、税务及供应风险均有支撑。原系统 partial 的审查独立性警示不是答案内容为错的证据。",
+      "reference_points": [
+        "贸易关税和地缘政治可扰动高度集中的供应链及销售；宏观变化影响消费者需求。",
+        "App Store 竞争调查及 Epic 禁令后续程序可能改变费用、分发与业务实践；2025-04-30的法院决定和刑事藐视移送为已披露事实。",
+        "网络攻击、敏感信息、产品创新、关键人才和单一来源部件风险应持续跟踪；税率及国际税改影响盈利。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm",
+          "locator": "Item 1A；Item 3 Legal Proceedings—Epic Games；income tax risk paragraphs"
+        }
+      ],
+      "original_raw_answer_sha256": "1be5063af03e4a8dfca8fdce126b63a01b0d4eb727ae6c27212aa78c41bda80b"
+    },
+    {
+      "id": "semantic-risk-013",
+      "question": "亚马逊 FY2022 的监管、需求和集中度风险有哪些？",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "监管、需求和供应商集中度三个维度都已解释。题目未限定必须存在单一大客户集中，未检索到这项数据不应否定已有答案。",
+      "reference_points": [
+        "监管：卖家市场的竞争调查、国家准入限制、受监管支付服务和税务要求可能迫使运营调整并增加负担。",
+        "需求：通胀、利率、供应链和客户优化支出影响零售及 AWS；预测失误可能造成库存和容量问题。",
+        "集中度：某些商品、内容和技术来自有限或单一供应商，通常没有长期保证；承运商数量有限也形成履约风险。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000004/amzn-20221231.htm",
+          "locator": "Item 1A：international activities；regulation；suppliers；fulfillment network；Item 7 Overview"
+        }
+      ],
+      "original_raw_answer_sha256": "d37ba1d943a1ab5252c0f041f16d973f22f248e56a6f8c21fbd5d5a129fd7d3c"
+    },
+    {
+      "id": "semantic-risk-014",
+      "question": "What regulatory, demand, and concentration risks did Microsoft disclose for FY2023?",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "三维核心内容符合年报，政府资金、供应商和国债风险都有对应段落。投资组合风险属于附加内容，没有替代主问题。",
+      "reference_points": [
+        "监管：竞争法、GDPR、DMA/DSA/Data Act、贸易与反腐败要求可能增加成本或限制运营。",
+        "需求：IT 支出、设备需求、政府拨款及安全信任影响采购；经济下行也增加信用损失。",
+        "集中度：有限部件供应商、第三方制造及共同供应商竞争会影响销售和数据中心容量；投资组合有较大的美国国债暴露。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+          "locator": "Item 1A：Legal, regulatory, and litigation risks；economic conditions；limited suppliers；investment portfolio；Item 1 Operations"
+        },
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY23Q4_10K",
+          "locator": "Item 1A：Legal, regulatory, and litigation risks；economic conditions；limited suppliers；investment portfolio；Item 1 Operations"
+        }
+      ],
+      "original_raw_answer_sha256": "b4ff672131284c00df144321669e7078f609df31ae3d488f30a8c754002fba13"
+    },
+    {
+      "id": "semantic-risk-015",
+      "question": "英伟达 FY2024 年报有哪些需要持续跟踪的风险？",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "正文的风险主题及机制有原文支持，已回答开放式问题；但 gap 对数值可用性的解释应更正，原文存在明确的客户占比。",
+      "reference_points": [
+        "出口许可不断变化可能影响中国及其他市场、库存销售和供应链；文件提到芯片跟踪/节流条件。",
+        "亚太供应和第三方制造、长供货周期、需求预测及快速产品迭代可能带来短缺、积压、质量与延期风险。",
+        "有限渠道客户与间接终端客户形成集中度：风险因素本身披露直接客户 A 占FY2024收入13%，一个间接客户估计约19%。",
+        "竞争、AI监管/监管问询、产品缺陷、网络安全与知识产权风险应跟踪。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000029/nvda-20240128.htm",
+          "locator": "Item 1A，尤其 limited customers、export controls、AI scrutiny；Item 7 Concentration of Revenue"
+        }
+      ],
+      "original_raw_answer_sha256": "c4a4bd44c0870e07726643116a8719f8e4c04b74d880df115f72aa35ab0e44b2"
+    },
+    {
+      "id": "semantic-risk-016",
+      "question": "Which risks should an analyst track in TSMC's FY2025 filing?",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "九项正文风险有依据，2026年事件也确实出现在该FY2025文件中，并非模型编造。无法给风险概率排名的限定合理。",
+      "reference_points": [
+        "贸易/关税、出口管制与补贴条件影响运营；南京 VEU 于2025年12月届满，替换为年度出口许可且续期无保证。",
+        "AI 技术和产品周期、终端需求、高固定成本及扩产执行影响收入和利润；扩产还涉及人才招募留任。",
+        "FY2025 前十大客户净收入占比约78%，前两大分别19%、17%；台湾地域集中及地震/水电风险也显著。",
+        "20-F 于2026年4月申报，其贸易风险段确包含2026年2月法院判决等期后信息，应按申报时点而非日历2025年末阅读。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+          "locator": "Item 3.D：trade/export controls；customer concentration；capacity expansion；geographic/operational risks（正文第3–13页）"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "locator": "Item 3.D：trade/export controls；customer concentration；capacity expansion；geographic/operational risks（正文第3–13页）"
+        }
+      ],
+      "original_raw_answer_sha256": "f49dce2ea887bc0aec2cf42b5a2de0774c7a1ff800d0d12c12edec368a960249"
+    },
+    {
+      "id": "semantic-risk-017",
+      "question": "苹果 FY2022 的监管、需求和集中度风险有哪些？",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "unsupported",
+      "reason": "监管和集中度多数内容有支撑，但“美元走弱会促使公司提高国际售价”把关键汇率方向写反。原文说外币相对美元走弱，即美元走强。这是需求机制的实质性错误，不能按 answered 算正确。",
+      "reference_points": [
+        "监管：竞争、隐私、数字平台、贸易及其他多法域要求可能增加合规成本并导致诉讼或罚款。",
+        "需求：宏观疲弱、通胀、关税等影响支出；外币相对美元贬值（即美元走强）通常促使提高国际价格，从而可能压低需求。",
+        "集中度：亚洲少数外包商/单一地点、单一或有限部件供应商、部分渠道应收及供应商预付款暴露。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019322000108/aapl-20220924.htm",
+          "locator": "Item 1A：foreign currency exchange rate fluctuations；outsourcing partners；components；credit risk"
+        }
+      ],
+      "original_raw_answer_sha256": "1273a4f2fc3264e75e98166b0c437693d58035514bee9a1f2f25c1402f429407"
+    },
+    {
+      "id": "semantic-risk-018",
+      "question": "What regulatory, demand, and concentration risks did Amazon disclose for FY2023?",
+      "category": "risk",
+      "original_status": "answered",
+      "verdict": "supported",
+      "reason": "三维要求均有具体披露对应，FY2023 文件已包含 GPU 供应和中国卖家风险；监管风险最系统性的排序明确是作者解释，未假称公司量化排名。",
+      "reference_points": [
+        "监管：科技平台、反垄断、FTC/州诉讼以及中印准入/持牌限制可能带来成本或运营调整。",
+        "需求：季节性、宏观和消费变化影响零售库存与履约；企业优化支出影响 AWS，容量误判可能产生费用和减值。",
+        "集中度：中国卖家/供应商贡献重要收入或商品供应，有限/单一供应商、AI GPU 供应和有限承运商也形成暴露。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+          "locator": "Item 1A：international activities；retail variability；suppliers；regulation；Item 7 Overview"
+        }
+      ],
+      "original_raw_answer_sha256": "ebfd7c3560fc0b6e5a7c5bf1150e72d3d958943230934ed39862db50cdaf4aca"
+    },
+    {
+      "id": "semantic-risk-019",
+      "question": "微软 FY2024 年报有哪些需要持续跟踪的风险？",
+      "category": "risk",
+      "original_status": "partial",
+      "verdict": "supported",
+      "reason": "四组正文风险及其机制与官方 10-K 相符，AI 法案/行政令和资本支出方向有明确依据。系统的时间预算/审查独立性 gap 不等同于内容错误。",
+      "reference_points": [
+        "AI 竞争、投资回报、偏差/有害输出、版权和新监管可能产生法律与商业风险。",
+        "云与 AI 投资推高资本支出，数据中心依赖土地、能源、网络和有限部件供应，容量与成本须跟踪。",
+        "网络入侵、服务中断、产品缺陷及开源组件/AI 安全隐患可能损害运营、客户信任与声誉。",
+        "反垄断、数据隐私、内容、电信及知识产权等监管和诉讼风险影响业务实践与财务。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017024087843/msft-20240630.htm",
+          "locator": "Item 1A；Item 1 Operations；Item 7 Liquidity and Capital Resources—Other Planned Uses of Capital"
+        },
+        {
+          "url": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY24Q4_10K",
+          "locator": "Item 1A；Item 1 Operations；Item 7 Liquidity and Capital Resources—Other Planned Uses of Capital"
+        }
+      ],
+      "original_raw_answer_sha256": "d9df07610a35072ff7462a8a2971301c4ab56af2ccb66b617e08017cc4abd4fa"
+    },
+    {
+      "id": "semantic-risk-020",
+      "question": "Which risks should an analyst track in NVIDIA's FY2025 filing?",
+      "category": "risk",
+      "original_status": "abstained",
+      "verdict": "no_answer",
+      "reason": "保存的回答为空，仅有超时限制说明，未给出任何风险要点。存在官方参考资料，因此不是题目无答案。",
+      "reference_points": [
+        "扩大的出口管制和 AI 监管可能改变可销售产品、市场和许可条件。",
+        "Blackwell 等产品转换、复杂供应链、制造/封装和库存承诺带来执行与供需风险。",
+        "直接和间接大客户集中、客户自研芯片及竞争影响需求；网络安全、产品质量和知识产权也需跟踪。"
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
+          "locator": "Item 1A Risk Factors；Item 7 Demand/Supply and Government Regulations; Concentration of Revenue"
+        }
+      ],
+      "original_raw_answer_sha256": "3009c50e58c076e37148d844fe430bf78324c49834ff84222063ab616f17a833"
+    }
+  ]
+}

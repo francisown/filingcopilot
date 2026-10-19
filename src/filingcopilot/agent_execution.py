@@ -15,6 +15,7 @@ from .localization import current_language, state_language
 from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, Submission
+from .semantic_boundaries import narrative_completeness_errors
 from .submission_protocol import parse_submission
 from .tools import ResearchTools
 from .updates import is_stock_updates_question, wants_update_summary
@@ -113,6 +114,12 @@ class ExecutionMixin:
                         "reason": "deterministic typed evidence retained after the model failed to submit",
                     }
                 )
+        if narrative_completeness_errors(state["verified"], question):
+            gaps.append(translate_text(
+                "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。"
+            ))
+            state["trace"].append({"stage": "answer_coverage", "explanation_present": False,
+                                   "reason": "Verified figures do not answer the requested explanation"})
         return gaps, fallback_complete
 
     @staticmethod

@@ -27,6 +27,19 @@ verification report matches the local corpus and the original filing hash. A con
 proves only the checks that were requested, not that a narrative or investment
 decision is correct.
 
+Before semantic review, narrow narrative checks reject explicit currency-direction
+conflicts and attempts to infer document-wide absence from selected passages.
+Correctly scoped uncertainty and directly disclosed negative facts remain eligible
+for review. The reviewer receives the original claim plus its individual sentences
+and checks subject, direction, period, materiality and evidence scope. This remains
+a model judgment; passing it does not certify correctness.
+
+An explicit cause or risk request cannot be completed by submitting only financial
+figures. Valid figures are retained with an explanation gap, and the existing repair
+budget can be used to supply the missing prose. Presence of prose alone does not
+prove that every requested aspect has been answered; content evaluation checks
+that separately.
+
 The company workspace is an evidence browser: its nine sections, annual
 figures, peers, quarter sequence and structured statement rows do not silently
 generate model opinions. Each section can start its own module summary: the

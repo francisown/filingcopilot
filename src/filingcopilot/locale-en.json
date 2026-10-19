@@ -1938,5 +1938,7 @@
   " 同比不可计算：来源未绑定可对齐的相邻年度起止日，不能混用期间。": " Year-over-year growth cannot be calculated: the sources do not bind aligned consecutive annual start and end dates. Periods cannot be mixed.",
   "模型未在研究预算内提交完整回答；已保留通过核验的内容，可缩小问题范围后重试。": "The model did not submit a complete answer within the research budget. Verified content is retained; narrow the question and retry.",
   "本轮未在预算内形成通过核验的完整结论；已保留可用证据。下一步：": "No complete, verified conclusion was produced within the budget. Available evidence is retained. Next step:",
-  " 份近期公告未完成可交付的中文摘要，已保留通过来源匹配的原文摘录；可单独查询“近期公司公告中文摘要”继续。": " recent announcements lack completed summaries. Source-matched excerpts are retained; ask \"Summarize recent company updates\" to continue."
+  " 份近期公告未完成可交付的中文摘要，已保留通过来源匹配的原文摘录；可单独查询“近期公司公告中文摘要”继续。": " recent announcements lack completed summaries. Source-matched excerpts are retained; ask \"Summarize recent company updates\" to continue.",
+  "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。": "The requested cause or risk explanation is still missing. The verified figures are supporting information, not a substitute for that explanation.",
+  "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。": "Some details remain unresolved in the retrieved evidence; document-wide absence has not been established."
 }
