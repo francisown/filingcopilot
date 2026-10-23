@@ -21,3 +21,6 @@ artifacts/*
 .financebench-eval*/
 
 models/
+
+evaluation/external/data/*.parquet
+evaluation/external/data/*.jsonl

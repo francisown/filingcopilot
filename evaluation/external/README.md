@@ -10,6 +10,7 @@ automatically better: each has a different task, license, and label quality.
 | Dataset | Hugging Face ID | License | Size | Fields | Best for | Main caveat |
 |---|---|---|---|---|---|---|
 | **FinanceBench** | `PatronusAI/financebench` | CC-BY-NC-4.0 | 150 public rows (~0.4 MB parquet) | `question`, `answer`, `evidence_text`, `evidence_page_num`, `doc_name`, `company`, `doc_type`, `doc_period`, `doc_link` | SEC 10-K/10-Q question answering with evidence; closest to FilingCopilot | Non-commercial license; 150-row open subset; evidence page, not a full filing corpus |
+| **FinDER** | `Linq-AI-Research/FinDER` | CC-BY-NC-4.0 | 5,703 triplets; 1,085 reasoning rows | `_id`, `text`, `reasoning`, `category`, `references`, `answer`, `type` | Answer-supported reference retrieval; 10-K evidence | Reference corpus only; no company/page scope out of the box |
 | **DocFinQA** | `kensho/DocFinQA` | MIT | 7,437 questions; 4.7 GB original; test split 922 rows / 56 MB parquet | `Context`, `Question`, `Program`, `Answer` | Long-context 10-K/10-Q QA; stress-testing context selection | No evidence span; full 10-K context is huge; not a retrieval benchmark out of the box |
 | **FiQA** | `BeIR/fiqa` + `BeIR/fiqa-qrels` | CC-BY-SA-4.0 | 57,638 passages; 6,648 queries; 17,110 qrels | `_id`, `title`, `text`; `query-id`, `corpus-id`, `score` | Standard financial passage retrieval; nDCG@10, Recall@100, MRR | General financial Q&A, not SEC filings; semantic task, lexical baselines are weak |
 | **FinMTEB** | GitHub `yixuantt/FinMTEB` | Check repository | Multiple tasks | Embedding benchmark tasks | Comparing embedding models on finance retrieval | More setup; not a single ready-to-use QA file |
@@ -49,7 +50,29 @@ gitignored; the dataset is not committed.
 **Measured result (2026-10-23):** evidence-page benchmark: 150 public rows, 163 evidence pages, company+year scope, section-aware 3,000-character chunks with a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.920 / page@1 0.707 / snippet hit@5 0.920 / answer-supported top1 0.427 / MRR 0.798**. Full-filing benchmark: 61 parsed PDFs and 113 questions: **page hit@5 0.850 / page@1 0.478 / snippet hit@5 0.858 / MRR 0.624**; the 22-question new-document check is 0.773 page hit@5. The earlier global-corpus number (0.507/0.407) is retired because it ignored the product's selected-company scope. Full report:
 [`docs/financebench-scoped-2026-10-23.md`](../../docs/financebench-scoped-2026-10-23.md).
 
-### 2. FiQA — the standard retrieval benchmark
+### 2. FinDER — answer-support benchmark
+
+Use FinDER when the metric is **answer-supported retrieval**, not raw FinanceBench
+answer matching. FinanceBench contains many computed answers that never appear on
+the evidence page; only 69/150 rows are answer-evaluable. FinDER exposes the
+reference excerpts directly, so the retrieved reference can be checked for the
+answer.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\evaluate_finder.py `
+  --rerank flashrank `
+  --output artifacts\finder-eval.json
+```
+
+The script builds a 5,830-reference corpus from the dataset, filters to the
+1,085 `reasoning=True` rows by default, and reports answer-supported top1/at5.
+Measured result: **answer top1 0.770, at5 0.873**; on the 1,039 rows where the
+answer is present in a gold reference, **0.801 / 0.908**. BM25-only is 0.709 /
+0.873. The reference hit@5 is only 0.290 because the corpus is not company/page
+scoped; use answer support, not reference hit rate, for this benchmark. License:
+CC-BY-NC-4.0; data is gitignored.
+
+### 3. FiQA — the standard retrieval benchmark
 
 Use it when you want a number that other retrieval systems also report:
 
@@ -67,7 +90,7 @@ python -m pip install datasets ir_measures
 python -c "from datasets import load_dataset; c=load_dataset('BeIR/fiqa','corpus'); q=load_dataset('BeIR/fiqa','queries'); r=load_dataset('BeIR/fiqa-qrels'); print(c, q, r)"
 ```
 
-### 3. DocFinQA — long-context SEC QA
+### 4. DocFinQA — long-context SEC QA
 
 Use the **test split** (922 rows, ~56 MB parquet) for a first pass. The full
 dataset is 4.7 GB because each row carries a long 10-K/10-Q context.

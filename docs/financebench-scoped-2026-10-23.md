@@ -3,7 +3,7 @@
 This note reports two different retrieval layers. They are not interchangeable.
 
 - **Headline:** full-filing retrieval is **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
-- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.427, MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
+- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.913 on the 69 evaluable rows (raw 0.427), MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
 
 ## Evidence-page benchmark
 
@@ -31,9 +31,13 @@ This note reports two different retrieval layers. They are not interchangeable.
 | Snippet hit@3 | 0.873 |
 | Snippet hit@5 | **0.920** |
 | MRR@5 | **0.798** |
-| Answer-supported top1 | 0.427 |
+| Answer-supported top1, raw | 0.427 |
 | Answer-supported top1, page-level | 0.447 |
-| Answer-supported at 5 | 0.467 |
+| Answer-supported at 5, raw | 0.467 |
+| Answer-evaluable questions | 69 |
+| Answer-supported top1, evaluable | 0.913 |
+| Answer-supported at 5, evaluable | 1.000 |
+| Answer-supported top1, page-level evaluable | 0.957 |
 | Retrieval P95 | 6.5 ms |
 
 The 4,000-character parent window is the balanced setting. Larger windows were not adopted because they did not improve answer-supported top1. Chunk size was not increased further.
@@ -59,7 +63,7 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 
 ### Answer support
 
-`answer_supported_top1` is 0.427 while `answer_supported_at_5` is 0.467; the title rerank closes part of the gap. Remaining strict headroom is 4.0 points, and page-level top1 support is 0.447, so the rest is partly page selection and partly the strict parent-window check. Most of the original headroom cases had the supporting page at rank 2.
+Only **69/150** questions have the answer literally present in the gold evidence page; 49/50 `metrics-generated` answers are computed and not written on the page. On those 69 evaluable rows, answer-supported top1 is **0.913**, at 5 is **1.000**, and page-level top1 is **0.957**. The raw 0.427/0.467 numbers are retained for transparency, but they mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
 
 ## Full-filing benchmark
 

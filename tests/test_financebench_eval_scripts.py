@@ -185,6 +185,12 @@ def test_compact_snippet_match_handles_pdf_spacing() -> None:
     assert not pdf_eval.snippet_match("Revenue 100", "19")
 
 
+def test_answer_supported_text() -> None:
+    assert page_eval.answer_supported_text("Revenue was 123 million.", "123")
+    assert page_eval.answer_supported_text("The quick ratio was 0.69.", "0.69")
+    assert not page_eval.answer_supported_text("Revenue was 123 million.", "456")
+
+
 def test_full_filing_flashrank_rerank_order() -> None:
     class FakeRanker:
         def rerank(self, request):

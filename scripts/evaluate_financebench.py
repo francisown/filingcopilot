@@ -395,12 +395,7 @@ def snippet_hit(hit: dict, snippets: list[str], page_texts: dict[tuple[str, int]
     return False
 
 
-def answer_support_page(hit: dict, answer: str, page_texts: dict[tuple[str, int], str]) -> bool:
-    passage = hit["passage"]
-    locator = passage.get("locator", "")
-    page_match = re.search(r"page\s+(\d+)", locator)
-    page = int(page_match.group(1)) if page_match else None
-    text = page_texts.get((passage.get("filing_id"), page), "") if page is not None else ""
+def answer_supported_text(text: str, answer: str) -> bool:
     if not text or not answer:
         return False
     text = norm(text)
@@ -413,17 +408,17 @@ def answer_support_page(hit: dict, answer: str, page_texts: dict[tuple[str, int]
     return norm(answer)[:120] in text
 
 
+def answer_support_page(hit: dict, answer: str, page_texts: dict[tuple[str, int], str]) -> bool:
+    passage = hit["passage"]
+    locator = passage.get("locator", "")
+    page_match = re.search(r"page\s+(\d+)", locator)
+    page = int(page_match.group(1)) if page_match else None
+    text = page_texts.get((passage.get("filing_id"), page), "") if page is not None else ""
+    return answer_supported_text(text, answer)
+
+
 def answer_support(hit: dict, answer: str, page_texts: dict[tuple[str, int], str], parent_chars: int) -> bool:
-    text = norm(expand_hit(hit, page_texts, parent_chars))
-    if not answer:
-        return False
-    numbers = re.findall(r"[-+]?\d[\d,.]*", answer)
-    if numbers:
-        for number in numbers:
-            cleaned = number.replace(",", "").rstrip(".")
-            if cleaned and cleaned in text.replace(",", ""):
-                return True
-    return norm(answer)[:120] in text
+    return answer_supported_text(expand_hit(hit, page_texts, parent_chars), answer)
 
 
 def numeric_density(text: str) -> int:
@@ -589,6 +584,11 @@ def evaluate(
             for rank, hit in enumerate(hits, 1)
             if answer_support(hit, row.get("answer", ""), page_texts, parent_chars)
         ]
+        answer_text = row.get("answer", "")
+        gold_text = " ".join(page_texts.get(pair, "") for pair in gold_pages)
+        answer_evaluable = answer_supported_text(gold_text, answer_text) or any(
+            answer_supported_text(snippet, answer_text) for snippet in snippets
+        )
         results.append(
             {
                 "id": row["financebench_id"],
@@ -598,6 +598,7 @@ def evaluate(
                 "question_type": row.get("question_type"),
                 "question": row["question"],
                 "answer": row.get("answer"),
+                "answer_evaluable": answer_evaluable,
                 "page_hit": bool(page_ranks),
                 "snippet_hit": bool(snippet_ranks),
                 "page_rank": page_ranks[0] if page_ranks else None,
@@ -630,6 +631,23 @@ def evaluate(
         "answer_supported_at_5": sum(row["answer_supported_at_5"] for row in results) / n,
         "answer_supported_top1_page": sum(row["answer_supported_top1_page"] for row in results) / n,
         "answer_supported_at_5_page": sum(row["answer_supported_at_5_page"] for row in results) / n,
+        "answer_evaluable_questions": sum(
+            1 for row in results if row["answer_evaluable"]
+        ),
+        "answer_supported_top1_evaluable": sum(
+            row["answer_supported_top1"] for row in results if row["answer_evaluable"]
+        )
+        / (sum(1 for row in results if row["answer_evaluable"]) or 1),
+        "answer_supported_at_5_evaluable": sum(
+            row["answer_supported_at_5"] for row in results if row["answer_evaluable"]
+        )
+        / (sum(1 for row in results if row["answer_evaluable"]) or 1),
+        "answer_supported_top1_page_evaluable": sum(
+            row["answer_supported_top1_page"]
+            for row in results
+            if row["answer_evaluable"]
+        )
+        / (sum(1 for row in results if row["answer_evaluable"]) or 1),
         "p50_ms": durations[len(durations) // 2] if durations else 0,
         "p95_ms": durations[min(len(durations) - 1, int(len(durations) * 0.95))] if durations else 0,
     }
