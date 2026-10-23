@@ -2,10 +2,8 @@
 
 This note reports two different retrieval layers. They are not interchangeable.
 
-- **Evidence-page benchmark:** FinanceBench supplies the evidence page; the retriever ranks only those evidence pages.
-- **Full-filing benchmark:** the retriever ranks pages inside the downloaded 10-K/10-Q/8-K/earnings PDF.
-
-Both are retrieval measurements. Neither is an answer-accuracy or human-relevance study.
+- **Headline:** full-filing retrieval is **page hit@5 0.850, snippet hit@5 0.779, MRR 0.523** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
+- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, snippet hit@5 0.907, answer-supported top1 0.413** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
 
 ## Evidence-page benchmark
 
