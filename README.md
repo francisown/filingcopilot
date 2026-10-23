@@ -33,8 +33,8 @@ Three things a chat-only RAG demo usually does not do:
 |---|---|
 | Bilingual evaluation | 140 questions; 100 research questions: **81 complete, 18 partial, 1 no answer**; 40 boundary questions answered with explicit limits |
 | Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
-| FinanceBench full-filing | 61 parsed PDFs, 113 questions: **page hit@5 0.850, page@1 0.407, snippet hit@5 0.779, MRR 0.569**; new-document held-out page hit@5 0.773 |
-| FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.907, answer-supported top1 0.427, MRR 0.798** |
+| FinanceBench full-filing | 61 parsed PDFs, 113 questions: **page hit@5 0.850, page@1 0.407, snippet hit@5 0.858, MRR 0.569**; new-document held-out page hit@5 0.773 |
+| FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.427, MRR 0.798** |
 | Tests | **1,656 passed** at the recorded evaluation source; **1,718 passed** on the current branch |
 | Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
 | Codebase | ~23k lines of Python across 77 source modules |
@@ -83,7 +83,7 @@ A click-by-click walkthrough is in [demo-script-3min.md](docs/outreach/demo-scri
 - [Case study (English)](docs/case-study.md) · [案例研究（中文）](docs/case-study.zh-CN.md) — the problem, architecture, evaluation, failure taxonomy, and limitations.
 - [Evaluation](docs/evaluation.md) — 140-question run, retrieval gold set, negative results, and exact denominators.
 - [External evaluation datasets](evaluation/external/README.md) — FinanceBench, DocFinQA, and FiQA: licenses, sizes, and how to fetch them.
-- [FinanceBench check](docs/financebench-scoped-2026-10-23.md) — 150 evidence-page questions (page hit@5 0.920, snippet hit@5 0.907) and 113 full-filing questions (0.850/0.779), with the 22-question new-document check and failure cases.
+- [FinanceBench check](docs/financebench-scoped-2026-10-23.md) — 150 evidence-page questions (page hit@5 0.920, snippet hit@5 0.920) and 113 full-filing questions (0.850/0.858), with the 22-question new-document check and failure cases.
 - [Research package protocol](docs/research-package-protocol.md) — what a frozen package contains and how it is replayed.
 - [Project overview](docs/showcase.md) — try the offline example and follow one request through the code.
 - [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md) · [Full quick start](#quick-start)

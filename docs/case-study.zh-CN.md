@@ -84,7 +84,7 @@ Web / CLI / REST / MCP
 
 检索分两层测量。内部的 200 题精确段落金集是回归集，衡量的是严格段落命中，不是人工相关性；对外汇报用下面的产品 scope 外部测试。
 
-**外部检索更新（2026-10-23）。** 之前的 FinanceBench 全局语料测试作废：它忽略了产品实际使用的“选定公司” scope。evidence-page 采用 company+year、section-aware 3000 字符切块、4000 字符父窗口和 title-based top1 rerank：**page hit@5 0.920、page@1 0.707、snippet hit@5 0.907、answer-supported top1 0.427、MRR 0.798**。full-filing 解析 61 份 PDF、113 道题：**page hit@5 0.850、page@1 0.407、snippet hit@5 0.779、MRR 0.569**；新增文档 22 题 held-out page hit@5 为 0.773。这些是检索测量，不是答案准确率或人工相关性。详见[FinanceBench 报告](financebench-scoped-2026-10-23.md)。
+**外部检索更新（2026-10-23）。** 之前的 FinanceBench 全局语料测试作废：它忽略了产品实际使用的“选定公司” scope。evidence-page 采用 company+year、section-aware 3000 字符切块、4000 字符父窗口和 title-based top1 rerank：**page hit@5 0.920、page@1 0.707、snippet hit@5 0.920、answer-supported top1 0.427、MRR 0.798**。full-filing 解析 61 份 PDF、113 道题：**page hit@5 0.850、page@1 0.407、snippet hit@5 0.858、MRR 0.569**；新增文档 22 题 held-out page hit@5 为 0.773。这些是检索测量，不是答案准确率或人工相关性。详见[FinanceBench 报告](financebench-scoped-2026-10-23.md)。
 
 叙述声明方面，对 40 条已交付声明的人工初查记录为 95% 支持、5% 不清楚、0% 不支持。审查者是项目作者本人，不是领域专家；样本从已交付声明中选取，因此不包含被拒绝的草稿和拒答。独立领域审查仍未完成。
 
@@ -100,7 +100,7 @@ Web / CLI / REST / MCP
 - 没有证明通用答案准确率。没有独立人工金标准。
 - 没有证明每条叙述声明都有证据支持。模型审查不等于人工审查。
 - 没有证明生产可用。延迟、成本和发行商覆盖都还达不到生产级。
-- 没有证明人工相关性或答案准确率：evidence-page 为 0.920 page hit@5 / 0.907 snippet hit@5，full-filing 为 61 份已解析 PDF 上的 0.850 / 0.779；新增文档 22 题 held-out page hit@5 为 0.773。
+- 没有证明人工相关性或答案准确率：evidence-page 为 0.920 page hit@5 / 0.920 snippet hit@5，full-filing 为 61 份已解析 PDF 上的 0.850 / 0.858；新增文档 22 题 held-out page hit@5 为 0.773。
 
 ## 失败分类
 
@@ -138,7 +138,7 @@ Web / CLI / REST / MCP
 1. **独立人工审查。** 找 2–3 位信贷风险或金融分析审查者，盲审一批声明，公开分歧率。没有这一步，95% 的支持率只是自评。
 2. **延迟与成本。** P95 417 秒和 4.3M tokens 不适合交互式使用。下一步是缓存、用更小的模型做抽取、并行工具调用，以及每个答案的硬性成本预算。
 3. **信贷风控垂直案例。** 新增的 `examples/credit-risk` 已经把语料、段落、证据包和验证器复用到合成的政策与模型验证文档上。下一步是对这个垂直案例做独立审查，并扩大题集。
-4. **检索。** evidence-page 达到 page hit@5 0.920、snippet hit@5 0.907；full-filing 在 61 份已解析 PDF 上达到 0.850/0.779。下一步是 top1 rerank、真正的 held-out split，以及 domain/earnings 的表格感知检索，而不是继续加大固定切块。
+4. **检索。** evidence-page 达到 page hit@5 0.920、snippet hit@5 0.920；full-filing 在 61 份已解析 PDF 上达到 0.850/0.858。下一步是真正的 held-out split，以及 domain/earnings 的表格感知检索，而不是继续加大固定切块。
 5. **覆盖。** 外国发行人、财报电话会和跨币种 ADS 桥接仍不完整。覆盖范围应该明确说明，而不是暗示。
 6. **打包。** 验证器已经可以独立分发。下一步是给审查者一个小型 CLI，不需要安装完整应用就能运行。
 

@@ -369,12 +369,25 @@ def expand_hit(hit: dict, page_texts: dict[tuple[str, int], str], parent_chars: 
     return page_text[start:end]
 
 
+def compact_match(text: str, evidence: str) -> bool:
+    compact_text = re.sub(r"[^a-z0-9]+", "", norm(text))
+    compact_evidence = re.sub(r"[^a-z0-9]+", "", norm(evidence))
+    if not compact_evidence or not compact_text:
+        return False
+    if len(compact_evidence) >= 40 and compact_evidence in compact_text:
+        return True
+    prefix = compact_evidence[:400]
+    return len(prefix) >= 40 and prefix in compact_text
+
+
 def snippet_hit(hit: dict, snippets: list[str], page_texts: dict[tuple[str, int], str], parent_chars: int) -> bool:
     text = norm(expand_hit(hit, page_texts, parent_chars))
     for snippet in snippets:
         if not snippet:
             continue
         if norm(snippet) in text:
+            return True
+        if compact_match(text, snippet):
             return True
         wanted = tokens(snippet)
         if wanted and len(wanted & tokens(text)) / len(wanted) >= 0.90:

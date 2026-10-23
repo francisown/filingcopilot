@@ -175,3 +175,11 @@ def test_full_filing_title_rerank_promotes_heading_match() -> None:
         "Which business segment had the lowest net revenue?",
         "off",
     )[0][0] == 0
+
+
+def test_compact_snippet_match_handles_pdf_spacing() -> None:
+    page = "Cash and cash equivalents 1,980 1,101 Short-term investments 2,032"
+    evidence = "Cashandcashequivalents 1,980 1,101 Short-terminvestments 2,032"
+    assert pdf_eval.snippet_match(page, evidence)
+    assert page_eval.compact_match(page, evidence)
+    assert not pdf_eval.snippet_match("Revenue 100", "19")
