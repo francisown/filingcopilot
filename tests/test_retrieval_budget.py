@@ -94,7 +94,7 @@ def test_cancelled_embedding_is_not_swallowed_as_a_permanent_model_failure(tools
         control.cancel()
         raise ResearchCancelled()
 
-    tools.retriever.settings = Settings(home=tools.corpus.home)
+    tools.retriever.settings = Settings(home=tools.corpus.home, rerank_mode="anchor")
     tools.retriever._embedder = cancelled_model
     with research_scope(control), pytest.raises(ResearchCancelled):
         tools.retriever.search("manufacturing", tools.as_of, "AAPL")
@@ -124,7 +124,7 @@ def test_cancelled_waiter_leaves_index_mutex_while_owner_still_holds_it(tools, t
             self.release()
 
     tools.retriever.lock = ObservedLock()
-    tools.retriever.settings = Settings(home=tools.corpus.home)
+    tools.retriever.settings = Settings(home=tools.corpus.home, rerank_mode="anchor")
     tools.retriever._embedder = lambda: None
 
     def lookup():

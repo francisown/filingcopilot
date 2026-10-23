@@ -228,7 +228,9 @@ def test_retrieval_keeps_company_date_and_fiscal_scope(tools):
 
 
 def test_broken_optional_vector_index_preserves_lexical_results(tools, monkeypatch):
-    tools.retriever.settings = Settings(home=tools.corpus.home, embedding_mode="local")
+    tools.retriever.settings = Settings(
+        home=tools.corpus.home, embedding_mode="local", rerank_mode="anchor"
+    )
 
     def broken(passages):
         raise ValueError("corrupted vector file")

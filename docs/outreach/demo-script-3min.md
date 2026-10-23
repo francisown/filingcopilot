@@ -74,7 +74,7 @@ python examples/credit-risk/demo.py demo
 
 Say:
 
-> The honest limitation: the 140-question evaluation is self-reviewed, there is no independent human gold standard, and model-using questions had a P95 of 417 seconds. Retrieval Recall@5 is 0.26, and I publish that as a weakness. The project is strong on evidence integrity and honest on accuracy. That is the part I would want a reviewer to challenge.
+> The honest limitation: the 140-question evaluation is self-reviewed, there is no independent human gold standard, and model-using questions had a P95 of 417 seconds. Retrieval Recall@5 is 0.430 after the coverage rerank (0.255 lexical baseline), and growth/competition are still weak. The project is strong on evidence integrity and honest on accuracy. That is the part I would want a reviewer to challenge.
 
 ## 30-second version
 

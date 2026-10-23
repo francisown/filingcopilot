@@ -258,7 +258,9 @@ def test_low_tool_budget_reserves_submission_instead_of_starting_optional_search
 
 def test_lexical_preparation_does_not_load_embeddings_and_default_still_tries_hybrid(sources):
     tools, annual, _ = sources
-    tools.retriever.settings = replace(tools.retriever.settings, embedding_mode="local")
+    tools.retriever.settings = replace(
+        tools.retriever.settings, embedding_mode="local", rerank_mode="anchor"
+    )
     attempts = []
 
     def broken_vectors(passages):

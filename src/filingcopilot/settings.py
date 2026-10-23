@@ -30,7 +30,7 @@ class Settings:
     embedding_mode: str = "local"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_threads: int = min(8, max(1, (os.cpu_count() or 2) // 2))
-    rerank_mode: str = "anchor"
+    rerank_mode: str = "coverage"
     retrieval_query_mode: str = "focused"
     retrieval_candidate_limit: int = 75
     max_rounds: int = 8
@@ -95,7 +95,7 @@ class Settings:
             embedding_mode=os.getenv("FC_EMBEDDING_MODE", "local").strip(),
             embedding_model=os.getenv("FC_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"),
             embedding_threads=max(1, min(8, int(os.getenv("FC_EMBEDDING_THREADS", str(cls.embedding_threads))))),
-            rerank_mode=os.getenv("FC_RERANK_MODE", "anchor").strip().lower(),
+            rerank_mode=os.getenv("FC_RERANK_MODE", "coverage").strip().lower(),
             max_rounds=max(1, min(12, int(os.getenv("FC_MAX_ROUNDS", "8")))),
             max_tool_calls=max(1, min(30, int(os.getenv("FC_MAX_TOOL_CALLS", "20")))),
             model_max_tokens=max(512, min(8192, int(os.getenv("FC_MODEL_MAX_TOKENS", "8192")))),

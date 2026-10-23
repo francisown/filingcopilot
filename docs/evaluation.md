@@ -101,6 +101,7 @@ passage IDs. These are corpus-anchored retrieval measurements.
 |---|---:|---:|
 | Full query, 25 candidates | 0.155 | 0.084333 |
 | Focused query, 75 candidates, anchor weight 0.05 | 0.260 | 0.150333 |
+| Coverage rerank, 2026-10-23 (default) | 0.430 | 0.244833 |
 
 In the focused-query diagnosis, 65 targets were absent from the candidate pool and
 83 were present but ranked below the returned top five. The recall-doubling target
@@ -108,6 +109,17 @@ was not met. Cross-encoder and multilingual candidates failed the combined
 recall/MRR/latency gate and remain disabled. The
 [negative-result report](rerank-negative-result-2026-10-11.md) includes their setup
 and reproduction commands.
+
+On 2026-10-23, a deterministic coverage rerank replaced the anchor default. It
+expands bilingual query terms, scores every scoped passage by IDF-weighted term
+coverage, includes the section title in matching, and adds a small section prior.
+On the same frozen 200-question set it reached **Recall@5 0.430 / MRR@5 0.244833**
+(English 0.420/0.213, Chinese 0.440/0.277). The lexical-only baseline was
+0.255/0.1417; the recorded hybrid/anchor baseline above remains 0.260/0.150333.
+The local comparison did not use embeddings because `fastembed` was not installed.
+This is exact-passage retrieval, not human relevance. The 140-question
+answer-level run was not re-executed. Method, per-section results, latency and
+limitations are in [the coverage rerank report](retrieval-coverage-2026-10-23.md).
 
 ## Human review
 

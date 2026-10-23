@@ -7,8 +7,8 @@ The project evidence is:
 - Python/FastAPI service, LangGraph agent, SQLite FTS5 + optional local embeddings.
 - 30 MCP tools; browser, CLI, REST, and MCP on one research service.
 - Evidence ledger, deterministic numeric/narrative gates, semantic review, frozen package, offline verifier.
-- 140-question bilingual evaluation; 116 exact SEC/arithmetic matches with 0 mismatches; 1,715 tests passing now (1,656 at the recorded source).
-- Published weaknesses: self-reviewed, no independent human gold, Recall@5 0.26, P95 417s, 4.3M tokens.
+- 140-question bilingual evaluation; 116 exact SEC/arithmetic matches with 0 mismatches; 1,718 tests passing now (1,656 at the recorded source).
+- Published weaknesses: self-reviewed, no independent human gold, P95 417s, 4.3M tokens; exact-passage Recall@5 is 0.430 after the coverage rerank (0.255 lexical baseline), with growth/competition still weak.
 
 ## OCBC — AI Engineer (Agentic AI)
 
@@ -16,7 +16,7 @@ The project evidence is:
 
 **Resume bullets**
 - Built a LangGraph research agent that plans tool calls, retrieves filing passages, and submits every claim to deterministic and semantic verification; exposed the same service through browser, CLI, REST, and 30 MCP tools.
-- Implemented hybrid retrieval (SQLite FTS5 + optional local embeddings) with a frozen 200-question gold set; published Recall@5 0.26 as a limitation and kept the negative reranker result.
+- Implemented hybrid retrieval (SQLite FTS5 + optional local embeddings), then added a deterministic coverage rerank that raised exact-passage Recall@5 from 0.255 to 0.430 (MRR 0.142 → 0.245) on a frozen 200-question gold set; kept the negative cross-encoder result.
 - Built an offline verifier that recomputes package hashes, document hashes, and quote spans without the model or network.
 
 **Cover letter (2 sentences):** I built an agentic research system where the hard part is not the prompt but the evidence: every claim is tied to a source and can be re-checked offline. I am looking to apply that discipline to OCBC’s agentic AI work, especially in credit and risk workflows.
@@ -47,7 +47,7 @@ The project evidence is:
 **Resume bullets**
 - Built a tool-using agent with explicit budgets (rounds, tool calls, time, review) and a claim-level verification layer for financial answers.
 - Implemented citation-bound retrieval over SEC filings and a synthetic credit-risk corpus; every answer exports a SHA256 package and verifies offline.
-- Published an honest evaluation: 81/100 research questions complete, 116 numeric matches with 0 mismatches, and a 0.26 Recall@5 limitation.
+- Published an honest evaluation: 81/100 research questions complete, 116 numeric matches with 0 mismatches, and a coverage rerank that raised Recall@5 from 0.255 to 0.430, with growth/competition still weak.
 
 **Cover letter:** Agentic payments need the same property as credit research: the action must be traceable to a policy or a source, and it must be reproducible after the fact. I built that evidence layer and want to apply it to payment-risk workflows.
 
@@ -120,4 +120,4 @@ The project evidence is:
 - Pick 2–3 roles, not all 7. Tailor the resume bullets to the JD.
 - Bring one artifact to the interview: the case study, the credit-risk demo, or the verifier. Do not bring the whole README.
 - Lead with the evidence layer and the domain mapping; the agent framework is secondary.
-- State the limitations before the interviewer finds them. The self-review, Recall@5 0.26, and P95 417s are known; present them as engineering judgment, not hidden weaknesses.
+- State the limitations before the interviewer finds them. The self-review, Recall@5 0.430 (up from 0.255), and P95 417s are known; present them as engineering judgment, not hidden weaknesses.

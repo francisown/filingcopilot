@@ -33,15 +33,15 @@ Recorded evaluation:
 - 140 bilingual questions
 - 81/100 research questions complete, 18 partial, 1 no answer
 - 116 exact SEC/arithmetic matches, 0 mismatches
-- 1,656 tests at the recorded source (1,715 now)
+- 1,656 tests at the recorded source (1,718 now)
 - 30 MCP tools
 
 **7/8**
-The honest weaknesses:
-- self-reviewed; no independent human gold standard
-- retrieval Recall@5 = 0.26 (target not met)
-- model-using questions: median 92.8s, P95 417s
-- 4.3M tokens in the recorded run
+Honest weaknesses:
+- self-reviewed; no independent human gold
+- Recall@5 0.430 after coverage rerank (0.255 baseline); growth/competition weak
+- model Qs: median 92.8s, P95 417s
+- 4.3M tokens
 I publish these because a demo without limitations is marketing.
 
 **8/8**

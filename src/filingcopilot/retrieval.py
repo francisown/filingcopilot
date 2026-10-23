@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import sqlite3
 import threading
@@ -106,6 +107,29 @@ def rewrite_query(
 
 def expand_query(query: str, aliases: dict | None = None) -> str:
     return rewrite_query(query, aliases=aliases)["expanded"]
+
+
+_COVERAGE_SECTION_WEIGHT = 0.15
+
+
+def _coverage_text(value: str) -> str:
+    """Normalize text for deterministic term and phrase matching."""
+    value = value.casefold().replace("-", " ").replace("_", " ").replace("/", " ")
+    value = re.sub(r"[^a-z0-9%.\s\u4e00-\u9fff]", " ", value)
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _term_forms(term: str) -> set[str]:
+    """Small, explicit suffix stemmer; no language model, no hidden state."""
+    forms = {term.casefold()}
+    for suffix in ("ations", "ation", "ions", "ion", "ing", "ed", "es", "s"):
+        if term.casefold().endswith(suffix) and len(term) - len(suffix) >= 4:
+            forms.add(term.casefold()[: -len(suffix)])
+    return forms
+
+
+def _matches_coverage_term(term: str, text: str) -> bool:
+    return any(form in text for form in _term_forms(term))
 
 
 class Retriever:
@@ -395,6 +419,60 @@ class Retriever:
         temp.write_text(json.dumps(payload), encoding="utf-8")
         temp.replace(path)
 
+    def _coverage_hits(self, terms, passages, *, section_weight):
+        """IDF-weighted term coverage plus a small section prior.
+
+        This is a deterministic second stage over the already scoped passages.
+        It intentionally does not use the gold set, expected IDs, or a model.
+        """
+        if not terms or not passages:
+            return []
+        texts = [
+            (passage, _coverage_text(passage.text + " " + passage.section))
+            for passage in passages
+        ]
+        total = len(texts)
+        document_frequency = {
+            term: sum(1 for _, text in texts if _matches_coverage_term(term, text))
+            for term in terms
+        }
+        idf = {
+            term: math.log((total + 1) / (document_frequency[term] + 1)) + 1
+            for term in terms
+        }
+        scored = []
+        for passage, text in texts:
+            matched = [term for term in terms if _matches_coverage_term(term, text)]
+            if not matched:
+                continue
+            coverage = sum(idf[term] for term in matched)
+            section = passage.section.casefold()
+            prior = 0.0
+            if "risk factor" in section:
+                prior += 1.0
+            elif "financial statement" in section:
+                prior += 0.25
+            elif "management" in section and "analysis" in section:
+                prior += 0.25
+            score = coverage + section_weight * prior
+            scored.append((score, coverage, prior, matched, passage))
+        scored.sort(key=lambda item: (-item[0], item[4].id))
+        return [
+            {
+                "passage": passage.model_dump(mode="json"),
+                "score": round(score, 6),
+                "legs": {
+                    "coverage": {
+                        "raw_score": round(coverage, 6),
+                        "section_prior": round(prior, 3),
+                        "matched_terms": matched,
+                    }
+                },
+                "anchor_coverage": len(matched),
+            }
+            for score, coverage, prior, matched, passage in scored
+        ]
+
     def search(
         self,
         query: str,
@@ -410,6 +488,7 @@ class Retriever:
         rrf_k: int = 60,
         rerank_mode: str | None = None,
         anchor_weight: float = 0.05,
+        coverage_section_weight: float = _COVERAGE_SECTION_WEIGHT,
         query_mode: str | None = None,
         candidate_limit: int | None = None,
         diagnostics: bool = False,
@@ -424,7 +503,9 @@ class Retriever:
             raise ValueError("retrieval RRF constant must be non-negative")
         if anchor_weight < 0:
             raise ValueError("retrieval anchor weight must be non-negative")
-        if rerank_mode not in {"rrf", "anchor"}:
+        if coverage_section_weight < 0:
+            raise ValueError("retrieval coverage section weight must be non-negative")
+        if rerank_mode not in {"rrf", "anchor", "coverage"}:
             raise ValueError("unknown retrieval rerank mode")
         if query_mode not in {"full", "focused"} or not 1 <= candidate_limit <= 100:
             raise ValueError("invalid retrieval query mode or candidate limit")
@@ -440,6 +521,36 @@ class Retriever:
         passages = self.corpus.passages(as_of, ticker, fiscal_year, filing_id)
         if section_title:
             passages = [p for p in passages if section_title.casefold() in p.section.casefold()]
+        if rerank_mode == "coverage":
+            ranked = self._coverage_hits(
+                terms, passages, section_weight=coverage_section_weight
+            )
+            return {
+                "query": query.strip(),
+                "query_rewrite": {
+                    "normalized": rewrite["normalized"],
+                    "added_terms": rewrite["added_terms"],
+                    "canonical_terms": rewrite["canonical_terms"],
+                    "retrieval_text": query,
+                    "mode": query_mode,
+                },
+                "backend": "fts5+coverage",
+                "embedding_unavailable": self.model_error,
+                "hits": ranked[: max(1, min(8, k))],
+                "eligible_passages": len(passages),
+                **(
+                    {
+                        "retrieval_diagnostics": {
+                            "candidate_ids": [item["passage"]["id"] for item in ranked],
+                            "candidate_limit_per_leg": candidate_limit,
+                            "rerank_mode": "coverage",
+                        }
+                    }
+                    if diagnostics
+                    else {}
+                ),
+                **({"section_title": section_title} if section_title else {}),
+            }
         # unicode61 does not segment continuous CJK prose. A bounded fallback
         # uses the already scoped passages, retaining the same publication,
         # company, year, filing and section boundaries as the vector leg.

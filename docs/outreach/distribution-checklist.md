@@ -86,7 +86,7 @@ The goal is not virality. The goal is **three qualified conversations** and **tw
 
 - Do not buy stars or ask for star swaps.
 - Do not claim “production-ready”, “state-of-the-art”, “beats GPT”, or “regulatory compliant”.
-- Do not hide the self-review, Recall@5 0.26, or P95 417s. State them before someone finds them.
+- Do not hide the self-review, the retrieval development-set numbers (0.430 coverage, 0.255 lexical baseline), or P95 417s. State them before someone finds them.
 - Do not argue with criticism in public. Ask one clarifying question, fix what is real, and move on.
 - Do not post the same link in five communities at once. Space it out and adapt the framing.
 - Do not apply to all seven roles with the same resume. Pick the two where the domain mapping is strongest.

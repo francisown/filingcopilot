@@ -58,7 +58,10 @@ The exported calculation keeps those inputs and user assumptions, but it is
 not a v1 research package. OCF less gross PP&E is a cashflow proxy, not unlevered
 FCF: the surface does not call the result enterprise value or an equity target.
 
-`reranking.py` is an evaluation-only seam. Invalid score counts, nonfinite
+The default coverage rerank lives in `Retriever._coverage_hits`; it is
+deterministic, uses bilingual query expansion, IDF-weighted term coverage and a
+small section prior, and does not call a model. `reranking.py` remains an
+evaluation-only seam. Invalid score counts, nonfinite
 scores or scorer failures preserve the original order and evidence objects.
 The candidate evaluator requires complete frozen-ID coverage, no failed
 questions, strict recall and MRR improvements, and acceptable latency before

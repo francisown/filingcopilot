@@ -80,9 +80,11 @@ The other 40 questions asked about unsupported future-price guarantees or hypoth
 
 The run used models for 60 questions, started 476 HTTP requests, recorded 442 HTTP 200 responses, and reported 4,312,447 tokens. Median latency for model-using questions was 92.79 seconds; P95 was 417.11 seconds. The overall median of 0.075 seconds is dominated by the 80 questions that required no model call and does not describe research latency.
 
-The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 numeric claims outside that checker's scope, and zero mismatches**. The 34 unassessed claims are not counted as correct. Saved packages were audited against available raw sources: 100 consistent, none missing sources. The recorded source passed **1,656 tests**; the current branch passes **1,715**, including the new credit-risk demo tests.
+The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 numeric claims outside that checker's scope, and zero mismatches**. The 34 unassessed claims are not counted as correct. Saved packages were audited against available raw sources: 100 consistent, none missing sources. The recorded source passed **1,656 tests**; the current branch passes **1,718**, including the new credit-risk demo tests.
 
 Retrieval is measured separately on a frozen set of 200 bilingual questions with exact passage IDs. The focused configuration reached **Recall@5 0.26 and MRR@5 0.150**. That is a weak result, and it is published as a weak result. The recall-doubling target was not met; cross-encoder and multilingual candidates failed the combined recall, MRR, and latency gate and remain disabled. Keeping the negative result is more useful than hiding it, because it shows where the next engineering effort should go.
+
+**Retrieval update (2026-10-23).** A deterministic coverage reranker plus bilingual query expansion raised exact-passage Recall@5 from 0.255 to 0.430 and MRR from 0.142 to 0.245 on the same 200-question gold set (English 0.42, Chinese 0.44). The 140-question answer run was not re-executed, so the answer-level results above remain historical. These are development-set measurements, not human relevance; growth (0.15) and competition (0.25) remain weak. See [the coverage rerank report](retrieval-coverage-2026-10-23.md).
 
 For narrative claims, a first pass over 40 delivered claims recorded 95% supported, 5% unclear, and 0% unsupported. The project author was the sole reviewer and was not a domain specialist. The sample was selected from delivered claims, so it excludes rejected drafts and refusals. Independent domain review remains pending.
 
@@ -98,7 +100,7 @@ For narrative claims, a first pass over 40 delivered claims recorded 95% support
 - It does not prove general answer accuracy. There is no independent human gold standard.
 - It does not prove that every narrative claim is supported. Model review is not a human reviewer.
 - It does not prove production readiness. The latency, cost, and issuer coverage are not production-grade.
-- It does not prove that retrieval is good. Recall@5 of 0.26 is a clear limitation.
+- It does not prove that retrieval is good. The coverage rerank raised R@5 to 0.430, but growth and competition remain weak.
 
 ## Failure taxonomy
 
@@ -136,7 +138,7 @@ For a bank, the useful part is not "the model is smart." It is "the model's outp
 1. **Independent human review.** Recruit two or three credit-risk or financial-analysis reviewers, blind a sample of claims, and publish the disagreement rate. Without this, the 95% claim-support figure is only a self-review.
 2. **Latency and cost.** P95 of 417 seconds and 4.3M tokens are not acceptable for interactive use. The next step is caching, smaller models for extraction, parallel tool calls, and a hard cost budget per answer.
 3. **Credit-risk vertical.** The new `examples/credit-risk` demo reuses the corpus, passage, package, and verifier layers on synthetic policy and model-validation documents. The next step is an independent review of that vertical and a larger question set.
-4. **Retrieval.** Recall@5 of 0.26 is the weakest number in the project. The negative reranker result suggests the next attempt should focus on query decomposition and section-aware retrieval, not another cross-encoder.
+4. **Retrieval.** The coverage rerank raised Recall@5 from 0.255 to 0.430, but growth (0.15) and competition (0.25) are still weak. The next step is query decomposition and section-aware retrieval for those topics, not another global reranker.
 5. **Coverage.** Foreign issuers, earnings calls, and cross-currency ADS bridges are still incomplete. Coverage should be described explicitly rather than implied.
 6. **Packaging.** The verifier is already separable. The next step is a small CLI distribution that a reviewer can run without installing the full application.
 
