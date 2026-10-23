@@ -10,15 +10,76 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or later"></a>
 </p>
 
-**在本地查询财报、计算财务指标、研究上市公司。**
+**证据优先的公司披露研究。每个数字可追溯到来源，每个答案可导出并离线复核。**
 
-FilingCopilot 提供股票历史走势、公开财报、财务计算、公司公告和研究问答。
-你可以输入公司名称或股票代码，查看长期股价，了解公司的收入、盈利和现金流，比较不同公司，
-再围绕具体问题开展研究。回答中的数字、原文引用和计算输入可以展开查看，也可以随研究包保存下来。
+FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或英文提问，打开数字背后的原文段落，或把事实、计算和引用导出成冻结证据包，让审查者不需要模型就能复核。
 
-[快速开始](#快速开始) · [如何使用](#如何使用) · [使用指南](docs/user-guide.md) · [MCP 接入](docs/mcp-tools.md)
+![英文工作台，包含股价图与财务研究控件](docs/images/workspace.png)
 
-[项目导览](docs/showcase.zh-CN.md)包含离线示例、代码阅读顺序和研究包的复核方法。
+*界面示例使用内置财报数据与示意价格；图中行情不是实时报价。*
+
+它比普通 RAG demo 多做的三件事：
+
+- **每个数字可追溯**到文件、报告期、币种、单位和行号定位。
+- **证据可冻结**为带 SHA256 清单的包，并离线验证。
+- **纯数字问题不需要 LLM**：年度数字、增长、利润率、趋势都在本地语料上确定性计算。
+
+## 记录在案的评测
+
+| 信号 | 结果 |
+|---|---|
+| 双语评测 | 140 题；100 道研究题：**81 完整、18 部分、1 无答案**；40 道边界题给出明确边界解释 |
+| 数值 oracle | **116 条与 SEC CompanyFacts 或算术检查完全一致，0 条不一致**；34 条超出检查器范围 |
+| 检索金集 | 200 题；**Recall@5 0.26、MRR@5 0.150**——作为限制公开，不作为成功指标 |
+| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,715 个全部通过** |
+| 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
+| 代码 | 约 23k 行 Python，77 个源码模块 |
+
+**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。这些是工程测量，不是生产承诺。完整方法和分母见[评测](docs/evaluation.md)。
+
+## 工作方式
+
+![架构：接口、研究服务、混合检索、证据账本、确定性门、冻结证据包、离线验证器](docs/images/architecture.svg)
+
+1. 问题从浏览器、CLI、REST API 或 MCP 进入。
+2. 研究服务生成能力计划与预算。
+3. LangGraph 工具 Agent 检索段落并调用财务工具。
+4. 证据账本保存事实、计算、来源和行号定位。
+5. 确定性数值门与叙述门接受、修复或拒绝声明；语义审查检查主语、方向、期间、重大性和证据范围。
+6. 答案与明确缺口冻结为证据包；独立验证器不需要 Agent、模型或网络即可复核。
+
+架构见[架构说明](docs/architecture.md)，验证器契约见[独立验证器](docs/independent-verifier.md)。
+
+## 60 秒快速路径（不需要 API Key）
+
+```powershell
+.\setup.ps1
+$env:FC_EMBEDDING_MODE = "off"
+.\start.ps1 -Port 8159
+```
+
+打开 <http://127.0.0.1:8159/>，选择 **Apple / AAPL**，选择 **只看数据**，提问
+**“What were Apple's FY2025 revenue and net income?”**，打开引用，再导出研究包。也可以直接验证内置示例：
+
+```powershell
+.\.venv\Scripts\python.exe -m filingcopilot verify-package examples/annual-facts.json
+```
+
+同一套证据层也可以跑在合成的信贷风控语料上：
+
+```powershell
+python examples/credit-risk/demo.py demo
+```
+
+逐步演示见 [3 分钟演示脚本](docs/outreach/demo-script-3min.md)；信贷风控垂直案例见 [examples/credit-risk/README.md](examples/credit-risk/README.md)。
+
+## 从哪里开始
+
+- [案例研究（中文）](docs/case-study.zh-CN.md) · [Case study (English)](docs/case-study.md) — 问题、架构、评测、失败分类和限制。
+- [评测](docs/evaluation.md) — 140 题运行、检索金集、负面结果和精确分母。
+- [研究包协议](docs/research-package-protocol.md) — 冻结包里有什么，如何重放。
+- [项目导览](docs/showcase.zh-CN.md) — 离线示例和一条请求的代码阅读顺序。
+- [MCP 接入](docs/mcp-tools.md) · [参与贡献](CONTRIBUTING.md) · [完整快速开始](#快速开始)
 
 ## 主要功能
 

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "q01-dti-prime",
+    "question": "What is the maximum DTI for a prime unsecured loan?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "3. Eligibility limits",
+    "expected_terms": ["43%", "prime unsecured"]
+  },
+  {
+    "id": "q02-ltv-used-auto",
+    "question": "What is the maximum LTV for a used auto loan?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "3. Eligibility limits",
+    "expected_terms": ["95%", "used auto"]
+  },
+  {
+    "id": "q03-approve-10pct",
+    "question": "Who must approve an exception above 10% over the policy limit?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "5. Exception policy",
+    "expected_terms": ["Chief Risk Officer", "10%"]
+  },
+  {
+    "id": "q04-compensating",
+    "question": "What compensating factors are required for a DTI exception?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "5. Exception policy",
+    "expected_terms": ["liquid reserves", "clean repayment"]
+  },
+  {
+    "id": "q05-min-income",
+    "question": "What is the minimum verified monthly income for an unsecured loan?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "3. Eligibility limits",
+    "expected_terms": ["S$2,500", "2,500"]
+  },
+  {
+    "id": "q06-income-docs",
+    "question": "Which documents are required to verify income?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "4. Income verification",
+    "expected_terms": ["payslips", "bank statements"]
+  },
+  {
+    "id": "q07-recalibrate-date",
+    "question": "When must RetailScore v4.2 be recalibrated?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "6. Overall opinion and required actions",
+    "expected_terms": ["2026-06-30", "recalibrat"]
+  },
+  {
+    "id": "q08-near-prime-finding",
+    "question": "What did the 2026 validation find about near-prime calibration?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "4. Findings",
+    "expected_terms": ["6.8%", "5.1%"]
+  },
+  {
+    "id": "q09-observed-predicted",
+    "question": "What is the observed versus predicted PD in the near-prime segment?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "4. Findings",
+    "expected_terms": ["6.8%", "5.1%"]
+  },
+  {
+    "id": "q10-auc-ks",
+    "question": "What are the AUC and KS statistics of RetailScore v4.2?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "3. Performance results",
+    "expected_terms": ["0.71", "0.28"]
+  },
+  {
+    "id": "q11-lineage",
+    "question": "What income data lineage issue was identified?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "4. Findings",
+    "expected_terms": ["12%", "lineage"]
+  },
+  {
+    "id": "q12-limitations",
+    "question": "What are the known limitations of the model?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "5. Model limitations",
+    "expected_terms": ["SME", "bureau snapshot"]
+  },
+  {
+    "id": "q13-highest-dpd",
+    "question": "Which segment has the highest 30+ DPD rate?",
+    "expected_document": "portfolio-performance-2026Q2.md",
+    "expected_section": "2. Segment performance",
+    "expected_terms": ["near-prime", "4.8%"]
+  },
+  {
+    "id": "q14-near-prime-dpd",
+    "question": "What is the 30+ DPD rate for near-prime unsecured?",
+    "expected_document": "portfolio-performance-2026Q2.md",
+    "expected_section": "2. Segment performance",
+    "expected_terms": ["4.8%"]
+  },
+  {
+    "id": "q15-revalidation",
+    "question": "How often is the model revalidated?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "7. Model use and revalidation",
+    "expected_terms": ["annually", "independent validation"]
+  },
+  {
+    "id": "q16-high-finding",
+    "question": "What action is required for the high finding on near-prime calibration?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "4. Findings",
+    "expected_terms": ["recalibrate", "overlay"]
+  },
+  {
+    "id": "q17-validation-owner",
+    "question": "Who owns independent validation?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "8. Roles and responsibilities",
+    "expected_terms": ["Model Risk Management"]
+  },
+  {
+    "id": "q18-board-15",
+    "question": "What is the escalation path for an exception above 15%?",
+    "expected_document": "credit-policy-v3.md",
+    "expected_section": "5. Exception policy",
+    "expected_terms": ["Board Risk Committee", "15%"]
+  },
+  {
+    "id": "q19-psi",
+    "question": "What is the population stability index and its threshold?",
+    "expected_document": "model-validation-report-2026.md",
+    "expected_section": "3. Performance results",
+    "expected_terms": ["0.18", "0.25"]
+  },
+  {
+    "id": "q20-coverage",
+    "question": "What is the coverage ratio for near-prime unsecured?",
+    "expected_document": "portfolio-performance-2026Q2.md",
+    "expected_section": "2. Segment performance",
+    "expected_terms": ["98%"]
+  }
+]

@@ -10,25 +10,80 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or later"></a>
 </p>
 
-**A local workspace for company filings, financial calculations and stock research.**
+**Evidence-grounded research for company filings. Every number traceable to a source; every answer exportable and verifiable offline.**
 
-FilingCopilot runs on your computer and brings company filings, market data, and research
-tools into one workspace. Look up a company, explore its financial performance, compare it
-with other companies, and ask focused questions. Open a citation to read the original
-disclosure, or export the facts and calculations behind an answer for later review.
-
-It is useful for individual investors, financial-analysis students, and developers building
-financial research tools. Financial filings primarily cover companies that report to the
-US SEC; price-chart coverage is separate and depends on the market-data provider.
+FilingCopilot is a local-first workspace for SEC filings, financial calculations, and cited
+research. Ask a question in English or Chinese, open the passage behind a number, or export
+the facts, calculations, and citations as a frozen package that a reviewer can re-check
+without the model.
 
 ![English workspace with a stock chart and financial research controls](docs/images/workspace.png)
 
 *Interface example using bundled filing data and illustrative prices. The chart is not a live quote.*
 
-[Quick start](#quick-start) · [Using the workspace](#using-the-workspace) · [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md)
+Three things a chat-only RAG demo usually does not do:
 
-[Project overview](docs/showcase.md): try an offline example, follow a request through the
-code, and inspect the saved evidence.
+- **Trace every number** to a filing, reporting period, currency, unit, and line locator.
+- **Freeze the evidence** into a package with a SHA256 manifest, then verify it offline.
+- **Answer deterministic questions without an LLM** — annual numbers, growth, margins, and trends run on the local corpus.
+
+## Verified on the recorded evaluation
+
+| Signal | Result |
+|---|---|
+| Bilingual evaluation | 140 questions; 100 research questions: **81 complete, 18 partial, 1 no answer**; 40 boundary questions answered with explicit limits |
+| Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
+| Retrieval gold set | 200 questions; **Recall@5 0.26, MRR@5 0.150** — published as a limitation, not a success |
+| Tests | **1,656 passed** at the recorded evaluation source; **1,715 passed** on the current branch |
+| Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
+| Codebase | ~23k lines of Python across 77 source modules |
+
+**Read the caveats before the numbers:** the evaluation is self-reviewed, there is no independent human gold standard, and model-using questions had a median latency of 92.8 seconds and a P95 of 417.1 seconds. These are engineering measurements, not a production claim. The full method and denominators are in [Evaluation](docs/evaluation.md).
+
+## How it works
+
+![Architecture: interfaces, research service, hybrid retrieval, evidence ledger, deterministic gates, frozen package, offline verifier](docs/images/architecture.svg)
+
+1. A question arrives through the browser, CLI, REST API, or MCP.
+2. The research service builds a capability plan and a budget.
+3. A LangGraph tool-using agent retrieves passages and calls financial tools.
+4. The evidence ledger stores facts, calculations, sources, and line locators.
+5. Deterministic numeric and narrative gates accept, repair, or reject claims; a semantic reviewer checks subject, direction, period, materiality, and scope.
+6. The answer and its explicit gaps are frozen into a package. The standalone verifier re-checks the package without the agent, the model, or the network.
+
+See [Architecture](docs/architecture.md) and the [Independent verifier](docs/independent-verifier.md) for the contracts.
+
+## Fast path (60 seconds, no API key)
+
+```powershell
+.\setup.ps1
+$env:FC_EMBEDDING_MODE = "off"
+.\start.ps1 -Port 8159
+```
+
+Open <http://127.0.0.1:8159/>, choose **Apple / AAPL**, select **Data only**, ask
+**“What were Apple's FY2025 revenue and net income?”**, open a citation, then export the
+research package. To verify the bundled example without the app:
+
+```powershell
+.\.venv\Scripts\python.exe -m filingcopilot verify-package examples/annual-facts.json
+```
+
+The same evidence layer runs on a synthetic credit-risk corpus:
+
+```powershell
+python examples/credit-risk/demo.py demo
+```
+
+A click-by-click walkthrough is in [demo-script-3min.md](docs/outreach/demo-script-3min.md); the credit-risk vertical is documented in [examples/credit-risk/README.md](examples/credit-risk/README.md).
+
+## Start with the evidence
+
+- [Case study (English)](docs/case-study.md) · [案例研究（中文）](docs/case-study.zh-CN.md) — the problem, architecture, evaluation, failure taxonomy, and limitations.
+- [Evaluation](docs/evaluation.md) — 140-question run, retrieval gold set, negative results, and exact denominators.
+- [Research package protocol](docs/research-package-protocol.md) — what a frozen package contains and how it is replayed.
+- [Project overview](docs/showcase.md) — try the offline example and follow one request through the code.
+- [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md) · [Full quick start](#quick-start)
 
 ## Features
 
