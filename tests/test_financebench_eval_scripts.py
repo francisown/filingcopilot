@@ -154,3 +154,24 @@ def test_title_rerank_promotes_heading_match() -> None:
         2000,
         "off",
     )[0] is hits[0]
+
+
+def test_full_filing_title_rerank_promotes_heading_match() -> None:
+    pages = [
+        "Forward-looking statements and risk factors.",
+        "Segment results: net revenue by business segment.",
+    ]
+    ranked = [(0, 0, 10.0), (1, 0, 9.0)]
+    reordered = pdf_eval.rerank_title_pages(
+        ranked,
+        pages,
+        "Which business segment had the lowest net revenue?",
+        "title",
+    )
+    assert reordered[0][0] == 1
+    assert pdf_eval.rerank_title_pages(
+        ranked,
+        pages,
+        "Which business segment had the lowest net revenue?",
+        "off",
+    )[0][0] == 0

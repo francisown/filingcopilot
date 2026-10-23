@@ -662,6 +662,41 @@ def rank_pages(
     return ranked[:k]
 
 
+def title_match_score(text: str, question: str) -> int:
+    stop = frozenset(
+        "what is the a an of for to from with about which how does did do was were are be been being "
+        "and or in on by as at this that these those it its company fy".split()
+    )
+    query_terms = {
+        term
+        for term in re.findall(r"[a-z0-9]+", question.casefold())
+        if term not in stop
+    }
+    head = norm(text)[:500]
+    return len(query_terms & set(re.findall(r"[a-z0-9]+", head)))
+
+
+def rerank_title_pages(
+    ranked: list[tuple[int, int, float]],
+    pages: list[str],
+    question: str,
+    mode: str,
+) -> list[tuple[int, int, float]]:
+    if mode != "title" or len(ranked) < 2:
+        return ranked
+    limit = min(3, len(ranked))
+    scores = [
+        title_match_score(pages[ranked[index][0]], question)
+        for index in range(limit)
+    ]
+    candidate = max(range(limit), key=lambda index: (scores[index], -index))
+    if candidate == 0 or scores[candidate] <= scores[0]:
+        return ranked
+    reordered = list(ranked)
+    reordered[0], reordered[candidate] = reordered[candidate], reordered[0]
+    return reordered
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DATA)
@@ -673,6 +708,12 @@ def main() -> None:
     )
     parser.add_argument("--chunk-size", type=int, default=2500)
     parser.add_argument("--parent-chars", type=int, default=2500)
+    parser.add_argument(
+        "--top1-rerank",
+        choices=("off", "title"),
+        default="title",
+        help="Promote a top-3 page whose heading matches more query terms before scoring.",
+    )
     parser.add_argument(
         "--retrieval", choices=("lexical", "dense", "hybrid", "router"), default="lexical"
     )
@@ -776,6 +817,7 @@ def main() -> None:
                         dense = dense_page_scores(chunks, vectors, query_vector)
                     page_scores = fuse_pages(lexical, dense, args.retrieval)
             ranked = rank_pages(page_scores, 5)
+            ranked = rerank_title_pages(ranked, pages, question, args.top1_rerank)
             page_ranks = [position for position, (page, _, _) in enumerate(ranked, 1) if page == gold_page]
             snippet_evaluable = bool((evidence.get("evidence_text") or "").strip())
             snippet_ranks = []

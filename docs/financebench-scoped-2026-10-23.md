@@ -2,7 +2,7 @@
 
 This note reports two different retrieval layers. They are not interchangeable.
 
-- **Headline:** full-filing retrieval is **page hit@5 0.850, snippet hit@5 0.779, MRR 0.523** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
+- **Headline:** full-filing retrieval is **page hit@5 0.850, page@1 0.407, snippet hit@5 0.779, MRR 0.569** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
 - **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, page@1 0.707, snippet hit@5 0.907, answer-supported top1 0.427, MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
 
 ## Evidence-page benchmark
@@ -71,6 +71,7 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 ```powershell
 .\.venv\Scripts\python.exe scripts\evaluate_financebench_pdf.py `
   --docs 80 --questions 20 --retrieval router --strategy section `
+  --top1-rerank title `
   --output artifacts\financebench-pdf-router80docs.json
 ```
 
@@ -78,10 +79,10 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 |---|---:|
 | Questions | 113 |
 | Parsed documents | 61 |
-| Page hit@1 | 0.327 |
+| Page hit@1 | 0.407 |
 | Page hit@5 | **0.850** |
 | Snippet hit@5 | **0.779** |
-| MRR@5 | 0.523 |
+| MRR@5 | 0.569 |
 
 The 22 questions from the 60→80 document extension reached page hit@5 **0.773**. This is the closest thing to a held-out check; it is still small and document-selected.
 
@@ -90,17 +91,17 @@ The 22 questions from the 60→80 document extension reached page hit@5 **0.773*
 - Topic routing now uses title pages plus body topic phrases, so continuation pages without headings can still be retrieved.
 - Added routes for tax, legal, segment, earnings, acquisitions, geographic, cash-conversion and capital-metric questions.
 - DPO and cash-conversion questions can route to more than one statement.
-- A title-based top1 rerank promotes a top-3 page whose heading matches more query terms; it improved page@1 and answer support without changing page@5.
+- A title-based top1 rerank promotes a top-3 page whose heading matches more query terms. In full-filing it raised page@1 0.327→0.407 and MRR 0.523→0.569 while page@5 and snippet@5 stayed unchanged; evidence-page answer support also improved.
 - TOC/index pages are down-weighted.
 - Segment-result pages with a `managed basis` table get a page-level bonus.
 
 ## Limitations
 
 - Evidence-page retrieval is not full 10-K search. The 0.920 number must not be presented as full-filing accuracy.
-- The full-filing result is 0.850 page hit@5 on 61 parsed documents; page@1 0.327 and MRR 0.523 are still weak.
+- The full-filing result is 0.850 page hit@5 on 61 parsed documents; page@1 0.407 and MRR 0.569 are improved but still not strong.
 - 19 of 80 selected documents were skipped due to HTTP 403, corrupt files, or no extractable text. That is selection bias.
 - The router contains domain and bank-report heuristics. It is development-tuned on these rows; the 22-question held-out extension is too small for a final claim.
-- The title rerank is also development-tuned on the same 150 rows; its gain needs a held-out confirmation.
+- The title rerank is development-tuned on the 150 evidence-page rows and 113 full-filing questions; its gain needs a held-out confirmation.
 - Snippet matching uses normalized token overlap; answer support checks numeric or answer-substring presence. Neither is human relevance.
 - No model answer was generated. This is retrieval, not end-to-end answer accuracy.
 - FinanceBench is CC-BY-NC-4.0; the dataset and PDFs are gitignored and not redistributed.
