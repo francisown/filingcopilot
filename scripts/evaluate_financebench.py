@@ -505,6 +505,22 @@ def rerank_top1(
     return reordered
 
 
+def rerank_flashrank(
+    hits: list[dict], question: str, ranker: object
+) -> list[dict]:
+    if not hits:
+        return hits
+    passages = [
+        {"id": index, "text": hit["passage"].get("text", "")[:2000]}
+        for index, hit in enumerate(hits)
+    ]
+    from flashrank import RerankRequest
+
+    ranked = ranker.rerank(RerankRequest(query=question, passages=passages))
+    order = [item["id"] for item in ranked]
+    return [hits[index] for index in order if index < len(hits)]
+
+
 def evaluate(
     rows: list[dict],
     retriever: Retriever,
@@ -513,6 +529,7 @@ def evaluate(
     parent_chars: int = 2000,
     finance_expand: bool = False,
     top1_rerank_mode: str = "title",
+    ranker: object | None = None,
 ) -> dict:
     page_texts: dict[tuple[str, int], str] = {}
     for row in rows:
@@ -556,6 +573,10 @@ def evaluate(
         )
         elapsed = (time.perf_counter() - started) * 1000
         hits = result["hits"][:k]
+        if ranker is not None:
+            rerank_started = time.perf_counter()
+            hits = rerank_flashrank(hits, question, ranker)
+            elapsed += (time.perf_counter() - rerank_started) * 1000
         hits = rerank_top1(hits, question, page_texts, parent_chars, top1_rerank_mode)
         page_ranks = [rank for rank, hit in enumerate(hits, 1) if page_hit(hit, gold_pages)]
         snippet_ranks = [
@@ -660,6 +681,9 @@ def main() -> None:
         default="title",
         help="Top1 rerank mode. 'title' promotes a top-3 page whose heading matches more query terms.",
     )
+    parser.add_argument(
+        "--rerank", choices=("off", "flashrank"), default="off"
+    )
     parser.add_argument("--embedding-mode", choices=("off", "local"), default="off")
     parser.add_argument(
         "--embedding-model", default="BAAI/bge-small-en-v1.5"
@@ -683,6 +707,14 @@ def main() -> None:
         rerank_mode=args.mode,
     )
     retriever = Retriever(Corpus(args.home), settings)
+    ranker = None
+    if args.rerank == "flashrank":
+        from flashrank import Ranker
+
+        ranker = Ranker(
+            model_name="ms-marco-MiniLM-L-12-v2",
+            cache_dir=str(Path("models") / "flashrank"),
+        )
     report = evaluate(
         rows,
         retriever,
@@ -690,6 +722,7 @@ def main() -> None:
         args.scope,
         args.parent_chars,
         top1_rerank_mode=args.top1_rerank,
+        ranker=ranker,
     )
     payload = {
         "schema": "filingcopilot.financebench-eval/v1",
@@ -704,6 +737,7 @@ def main() -> None:
         "chunk_strategy": args.chunk_strategy,
         "parent_chars": args.parent_chars,
         "top1_rerank": args.top1_rerank,
+        "rerank": args.rerank,
         "avg_chunk_chars": corpus_info["avg_chunk_chars"],
         "corpus_pages": corpus_info["pages"],
         "corpus_passages": corpus_info["passages"],

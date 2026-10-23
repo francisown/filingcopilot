@@ -710,6 +710,25 @@ def rerank_title_pages(
     return reordered
 
 
+def rerank_flashrank_pages(
+    ranked: list[tuple[int, int, float]],
+    pages: list[str],
+    question: str,
+    ranker: object,
+) -> list[tuple[int, int, float]]:
+    if not ranked:
+        return ranked
+    from flashrank import RerankRequest
+
+    passages = [
+        {"id": index, "text": pages[page][:2000]}
+        for index, (page, _, _) in enumerate(ranked)
+    ]
+    reranked = ranker.rerank(RerankRequest(query=question, passages=passages))
+    order = [item["id"] for item in reranked]
+    return [ranked[index] for index in order if index < len(ranked)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DATA)
@@ -726,6 +745,9 @@ def main() -> None:
         choices=("off", "title"),
         default="title",
         help="Promote a top-3 page whose heading matches more query terms before scoring.",
+    )
+    parser.add_argument(
+        "--rerank", choices=("off", "flashrank"), default="flashrank"
     )
     parser.add_argument(
         "--retrieval", choices=("lexical", "dense", "hybrid", "router"), default="lexical"
@@ -761,6 +783,14 @@ def main() -> None:
         if args.retrieval in {"dense", "hybrid"}
         else None
     )
+    ranker = None
+    if args.rerank == "flashrank":
+        from flashrank import Ranker
+
+        ranker = Ranker(
+            model_name="ms-marco-MiniLM-L-12-v2",
+            cache_dir=str(Path("models") / "flashrank"),
+        )
     results = []
     for doc in selected_docs:
         doc_rows = by_doc[doc]
@@ -831,6 +861,8 @@ def main() -> None:
                     page_scores = fuse_pages(lexical, dense, args.retrieval)
             ranked = rank_pages(page_scores, 5)
             ranked = rerank_title_pages(ranked, pages, question, args.top1_rerank)
+            if ranker is not None:
+                ranked = rerank_flashrank_pages(ranked, pages, question, ranker)
             page_ranks = [position for position, (page, _, _) in enumerate(ranked, 1) if page == gold_page]
             snippet_evaluable = bool((evidence.get("evidence_text") or "").strip())
             snippet_ranks = []
@@ -890,6 +922,8 @@ def main() -> None:
         "strategy": args.strategy,
         "chunk_size": args.chunk_size,
         "parent_chars": args.parent_chars,
+        "top1_rerank": args.top1_rerank,
+        "rerank": args.rerank,
         "summary": summary,
         "rows": results,
     }

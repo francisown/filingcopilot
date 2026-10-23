@@ -136,7 +136,7 @@ questions over 163 evidence pages, company+year scope, section-aware
 top1 rerank: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920,
 answer-supported top1 0.427, MRR@5 0.798**. The
 full-filing benchmark covers 61 parsed PDFs and 113 questions: **page hit@5
-0.850, page@1 0.407, snippet hit@5 0.858, MRR@5 0.569**; 22 questions from the
+0.850, page@1 0.478, snippet hit@5 0.858, MRR@5 0.624**; 22 questions from the
 60→80 document extension reach page hit@5 0.773. The earlier global-corpus number (0.507/0.407)
 was retired because it ignored the product's selected-company scope. Full
 report: [financebench-scoped-2026-10-23.md](financebench-scoped-2026-10-23.md).

@@ -19,6 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 semantic = ["fastembed>=0.4,<1"]
+evaluation = ["flashrank>=0.2.10"]
 dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
 
 [project.scripts]

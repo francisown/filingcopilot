@@ -183,3 +183,15 @@ def test_compact_snippet_match_handles_pdf_spacing() -> None:
     assert pdf_eval.snippet_match(page, evidence)
     assert page_eval.compact_match(page, evidence)
     assert not pdf_eval.snippet_match("Revenue 100", "19")
+
+
+def test_full_filing_flashrank_rerank_order() -> None:
+    class FakeRanker:
+        def rerank(self, request):
+            return [{"id": 1}, {"id": 0}]
+
+    ranked = [(0, 0, 10.0), (1, 0, 9.0)]
+    reordered = pdf_eval.rerank_flashrank_pages(
+        ranked, ["first page", "second page"], "query", FakeRanker()
+    )
+    assert reordered[0][0] == 1

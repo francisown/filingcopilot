@@ -19,3 +19,5 @@ artifacts/*
 /scripts/fc_gold_facts.py
 /scripts/fc_report.py
 .financebench-eval*/
+
+models/
