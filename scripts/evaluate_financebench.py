@@ -413,6 +413,85 @@ def answer_support(hit: dict, answer: str, page_texts: dict[tuple[str, int], str
     return norm(answer)[:120] in text
 
 
+def numeric_density(text: str) -> int:
+    return len(re.findall(r"\d", text))
+
+
+def is_numeric_question(question: str) -> bool:
+    folded = question.casefold()
+    if re.search(r"\d", question):
+        return True
+    terms = (
+        "how much",
+        "how many",
+        "what was",
+        "what is",
+        "ratio",
+        "percent",
+        "margin",
+        "average",
+        "increase",
+        "decrease",
+        "highest",
+        "lowest",
+        "most",
+        "least",
+    )
+    return any(term in folded for term in terms)
+
+
+def title_match_score(hit: dict, question: str, page_texts: dict[tuple[str, int], str], parent_chars: int) -> int:
+    text = norm(expand_hit(hit, page_texts, parent_chars))[:400]
+    stop = frozenset(
+        "what is the a an of for to from with about which how does did do was were are be been being "
+        "and or in on by as at this that these those it its company fy fy20".split()
+    )
+    query_terms = {
+        term
+        for term in re.findall(r"[a-z0-9]+", question.casefold())
+        if term not in stop
+    }
+    head_terms = set(re.findall(r"[a-z0-9]+", text))
+    return len(query_terms & head_terms)
+
+
+def rerank_top1(
+    hits: list[dict],
+    question: str,
+    page_texts: dict[tuple[str, int], str],
+    parent_chars: int,
+    mode: str,
+) -> list[dict]:
+    if mode == "off" or len(hits) < 2:
+        return hits
+    limit = min(3, len(hits))
+    if mode == "digits":
+        if not is_numeric_question(question):
+            return hits
+        scores = [
+            numeric_density(expand_hit(hit, page_texts, parent_chars))
+            for hit in hits[:limit]
+        ]
+        candidate = max(range(limit), key=lambda index: (scores[index], -index))
+        if candidate == 0:
+            return hits
+        if scores[candidate] < max(2 * scores[0], scores[0] + 30):
+            return hits
+    elif mode == "title":
+        scores = [
+            title_match_score(hit, question, page_texts, parent_chars)
+            for hit in hits[:limit]
+        ]
+        candidate = max(range(limit), key=lambda index: (scores[index], -index))
+        if candidate == 0 or scores[candidate] <= scores[0]:
+            return hits
+    else:
+        return hits
+    reordered = list(hits)
+    reordered[0], reordered[candidate] = reordered[candidate], reordered[0]
+    return reordered
+
+
 def evaluate(
     rows: list[dict],
     retriever: Retriever,
@@ -420,6 +499,7 @@ def evaluate(
     scope: str = "global",
     parent_chars: int = 2000,
     finance_expand: bool = False,
+    top1_rerank_mode: str = "title",
 ) -> dict:
     page_texts: dict[tuple[str, int], str] = {}
     for row in rows:
@@ -463,6 +543,7 @@ def evaluate(
         )
         elapsed = (time.perf_counter() - started) * 1000
         hits = result["hits"][:k]
+        hits = rerank_top1(hits, question, page_texts, parent_chars, top1_rerank_mode)
         page_ranks = [rank for rank, hit in enumerate(hits, 1) if page_hit(hit, gold_pages)]
         snippet_ranks = [
             rank
@@ -560,6 +641,12 @@ def main() -> None:
         default=2000,
         help="Expand a retrieved chunk to this many source characters for snippet/answer checks.",
     )
+    parser.add_argument(
+        "--top1-rerank",
+        choices=("off", "digits", "title"),
+        default="title",
+        help="Top1 rerank mode. 'title' promotes a top-3 page whose heading matches more query terms.",
+    )
     parser.add_argument("--embedding-mode", choices=("off", "local"), default="off")
     parser.add_argument(
         "--embedding-model", default="BAAI/bge-small-en-v1.5"
@@ -583,7 +670,14 @@ def main() -> None:
         rerank_mode=args.mode,
     )
     retriever = Retriever(Corpus(args.home), settings)
-    report = evaluate(rows, retriever, args.k, args.scope, args.parent_chars)
+    report = evaluate(
+        rows,
+        retriever,
+        args.k,
+        args.scope,
+        args.parent_chars,
+        top1_rerank_mode=args.top1_rerank,
+    )
     payload = {
         "schema": "filingcopilot.financebench-eval/v1",
         "dataset": "PatronusAI/financebench",
@@ -596,6 +690,7 @@ def main() -> None:
         "chunk_overlap": args.chunk_overlap,
         "chunk_strategy": args.chunk_strategy,
         "parent_chars": args.parent_chars,
+        "top1_rerank": args.top1_rerank,
         "avg_chunk_chars": corpus_info["avg_chunk_chars"],
         "corpus_pages": corpus_info["pages"],
         "corpus_passages": corpus_info["passages"],

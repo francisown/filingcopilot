@@ -120,3 +120,37 @@ def test_answer_support_rejects_missing_answer() -> None:
     }
     page_texts = {("SYNTHETIC", 4): "Revenue was 123 million."}
     assert not page_eval.answer_support(hit, "456", page_texts, 2000)
+
+
+def test_title_rerank_promotes_heading_match() -> None:
+    hits = [
+        {
+            "passage": {
+                "filing_id": "SYNTHETIC",
+                "locator": "page 1",
+                "text": "Forward-looking statements and risk factors.",
+            }
+        },
+        {
+            "passage": {
+                "filing_id": "SYNTHETIC",
+                "locator": "page 2",
+                "text": "Segment results: net revenue by business segment.",
+            }
+        },
+    ]
+    reordered = page_eval.rerank_top1(
+        hits,
+        "Which business segment had the lowest net revenue?",
+        {},
+        2000,
+        "title",
+    )
+    assert reordered[0] is hits[1]
+    assert page_eval.rerank_top1(
+        hits,
+        "Which business segment had the lowest net revenue?",
+        {},
+        2000,
+        "off",
+    )[0] is hits[0]

@@ -3,7 +3,7 @@
 This note reports two different retrieval layers. They are not interchangeable.
 
 - **Headline:** full-filing retrieval is **page hit@5 0.850, snippet hit@5 0.779, MRR 0.523** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
-- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, snippet hit@5 0.907, answer-supported top1 0.413** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
+- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, page@1 0.707, snippet hit@5 0.907, answer-supported top1 0.427, MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
 
 ## Evidence-page benchmark
 
@@ -25,15 +25,16 @@ This note reports two different retrieval layers. They are not interchangeable.
 | Metric | Result |
 |---|---:|
 | Questions | 150 |
-| Page hit@1 | 0.667 |
+| Page hit@1 | 0.707 |
 | Page hit@5 | **0.920** |
-| Snippet hit@1 | 0.600 |
+| Snippet hit@1 | 0.640 |
 | Snippet hit@3 | 0.860 |
 | Snippet hit@5 | **0.907** |
-| MRR@5 | **0.779** |
-| Answer-supported top1 | 0.413 |
+| MRR@5 | **0.798** |
+| Answer-supported top1 | 0.427 |
+| Answer-supported top1, page-level | 0.447 |
 | Answer-supported at 5 | 0.467 |
-| Retrieval P95 | 6.8 ms |
+| Retrieval P95 | 7.0 ms |
 
 The 4,000-character parent window is the balanced setting. A 6,000-character window reaches snippet hit@5 0.913, but adds context without improving answer-supported top1; it is not the default. Chunk size was not increased further.
 
@@ -58,7 +59,7 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 
 ### Answer support
 
-`answer_supported_top1` is 0.413 while `answer_supported_at_5` is 0.467. The 5.3-point gap is a ranking problem, not a parent-window problem: page-level answer support is also 0.413. Seven of the eight headroom questions have their supporting page at rank 2.
+`answer_supported_top1` is 0.427 while `answer_supported_at_5` is 0.467; the title rerank closes part of the gap. Remaining strict headroom is 4.0 points, and page-level top1 support is 0.447, so the rest is partly page selection and partly the strict parent-window check. Most of the original headroom cases had the supporting page at rank 2.
 
 ## Full-filing benchmark
 
@@ -89,6 +90,7 @@ The 22 questions from the 60→80 document extension reached page hit@5 **0.773*
 - Topic routing now uses title pages plus body topic phrases, so continuation pages without headings can still be retrieved.
 - Added routes for tax, legal, segment, earnings, acquisitions, geographic, cash-conversion and capital-metric questions.
 - DPO and cash-conversion questions can route to more than one statement.
+- A title-based top1 rerank promotes a top-3 page whose heading matches more query terms; it improved page@1 and answer support without changing page@5.
 - TOC/index pages are down-weighted.
 - Segment-result pages with a `managed basis` table get a page-level bonus.
 
@@ -98,6 +100,7 @@ The 22 questions from the 60→80 document extension reached page hit@5 **0.773*
 - The full-filing result is 0.850 page hit@5 on 61 parsed documents; page@1 0.327 and MRR 0.523 are still weak.
 - 19 of 80 selected documents were skipped due to HTTP 403, corrupt files, or no extractable text. That is selection bias.
 - The router contains domain and bank-report heuristics. It is development-tuned on these rows; the 22-question held-out extension is too small for a final claim.
+- The title rerank is also development-tuned on the same 150 rows; its gain needs a held-out confirmation.
 - Snippet matching uses normalized token overlap; answer support checks numeric or answer-substring presence. Neither is human relevance.
 - No model answer was generated. This is retrieval, not end-to-end answer accuracy.
 - FinanceBench is CC-BY-NC-4.0; the dataset and PDFs are gitignored and not redistributed.
@@ -105,6 +108,6 @@ The 22 questions from the 60→80 document extension reached page hit@5 **0.773*
 ## Next
 
 1. Add a real held-out split with more than 22 questions.
-2. Rerank top1 for answer support rather than growing chunks.
+2. Validate the title rerank on that split; do not tune it further on the same 150 rows.
 3. Improve domain-relevant and earnings-release pages with table-aware retrieval, not larger fixed chunks.
 4. Keep full-filing and evidence-page claims separate in every public document.

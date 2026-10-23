@@ -84,7 +84,7 @@ Web / CLI / REST / MCP
 
 检索分两层测量。内部的 200 题精确段落金集是回归集，衡量的是严格段落命中，不是人工相关性；对外汇报用下面的产品 scope 外部测试。
 
-**外部检索更新（2026-10-23）。** 之前的 FinanceBench 全局语料测试作废：它忽略了产品实际使用的“选定公司” scope。evidence-page 采用 company+year、section-aware 3000 字符切块 + 4000 字符父窗口：**page hit@5 0.920、snippet hit@5 0.907、answer-supported top1 0.413、MRR 0.779**。full-filing 解析 61 份 PDF、113 道题：**page hit@5 0.850、snippet hit@5 0.779、MRR 0.523**；新增文档 22 题 held-out page hit@5 为 0.773。这些是检索测量，不是答案准确率或人工相关性。详见[FinanceBench 报告](financebench-scoped-2026-10-23.md)。
+**外部检索更新（2026-10-23）。** 之前的 FinanceBench 全局语料测试作废：它忽略了产品实际使用的“选定公司” scope。evidence-page 采用 company+year、section-aware 3000 字符切块、4000 字符父窗口和 title-based top1 rerank：**page hit@5 0.920、page@1 0.707、snippet hit@5 0.907、answer-supported top1 0.427、MRR 0.798**。full-filing 解析 61 份 PDF、113 道题：**page hit@5 0.850、snippet hit@5 0.779、MRR 0.523**；新增文档 22 题 held-out page hit@5 为 0.773。这些是检索测量，不是答案准确率或人工相关性。详见[FinanceBench 报告](financebench-scoped-2026-10-23.md)。
 
 叙述声明方面，对 40 条已交付声明的人工初查记录为 95% 支持、5% 不清楚、0% 不支持。审查者是项目作者本人，不是领域专家；样本从已交付声明中选取，因此不包含被拒绝的草稿和拒答。独立领域审查仍未完成。
 
