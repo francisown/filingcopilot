@@ -30,12 +30,13 @@ FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或�
 |---|---|
 | 双语评测 | 140 题；100 道研究题：**81 完整、18 部分、1 无答案**；40 道边界题给出明确边界解释 |
 | 数值 oracle | **116 条与 SEC CompanyFacts 或算术检查完全一致，0 条不一致**；34 条超出检查器范围 |
-| 检索金集 | 200 题；**Recall@5 0.430、MRR@5 0.245**（确定性 coverage rerank；词法基线 0.255/0.142，记录在案的 hybrid 基线 0.260/0.150） |
+| FinanceBench evidence-page | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.920、snippet hit@5 0.907、answer-supported top1 0.413、MRR 0.779** |
+| FinanceBench full-filing | 61 份已解析 PDF、113 题：**page hit@5 0.850、snippet hit@5 0.779、MRR 0.523**；新增文档 held-out page hit@5 0.773 |
 | 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,718 个全部通过** |
 | 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
 | 代码 | 约 23k 行 Python，77 个源码模块 |
 
-**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。检索是开发集上的精确段落命中，不是人工相关性；0.430 仍有提升空间。这些是工程测量，不是生产承诺。完整方法和分母见[评测](docs/evaluation.md)。
+**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。FinanceBench evidence-page 是 150 条公开数据、company+year scope，不等于完整 filing 检索；full-filing 是 61 份已解析 PDF、113 题，新增文档 22 题 held-out page hit@5 为 0.773。两者都不是人工相关性或生产准确率。这些是工程测量，不是生产承诺。完整方法和分母见[评测](docs/evaluation.md)。
 
 ## 工作方式
 
@@ -77,9 +78,8 @@ python examples/credit-risk/demo.py demo
 
 - [案例研究（中文）](docs/case-study.zh-CN.md) · [Case study (English)](docs/case-study.md) — 问题、架构、评测、失败分类和限制。
 - [评测](docs/evaluation.md) — 140 题运行、检索金集、负面结果和精确分母。
-- [检索 coverage rerank](docs/retrieval-coverage-2026-10-23.md) — 精确段落 R@5 如何从 0.255 到 0.430，以及仍然弱在哪里。
 - [外部评测数据集](evaluation/external/README.md) — FinanceBench、DocFinQA、FiQA 的许可、规模和拉取方式。
-- [FinanceBench 外部测试](docs/financebench-2026-10-23.md) — 150 道公开题；page hit@5 0.507、切块 snippet hit@5 0.407，以及为什么词法检索到这里见顶。
+- [FinanceBench 测试](docs/financebench-scoped-2026-10-23.md) — 150 道 evidence-page 题（page hit@5 0.920、snippet hit@5 0.907）和 113 道 full-filing 题（0.850/0.779），含新增文档 held-out 与失败案例。
 - [研究包协议](docs/research-package-protocol.md) — 冻结包里有什么，如何重放。
 - [项目导览](docs/showcase.zh-CN.md) — 离线示例和一条请求的代码阅读顺序。
 - [MCP 接入](docs/mcp-tools.md) · [参与贡献](CONTRIBUTING.md) · [完整快速开始](#快速开始)

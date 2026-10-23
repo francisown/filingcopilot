@@ -1,10 +1,11 @@
 # When an English cross-encoder degraded bilingual filing retrieval
 
-> **2026-10-23 update:** a deterministic coverage reranker (bilingual query
-> expansion, IDF-weighted term coverage, section prior) raised exact-passage
-> Recall@5 from 0.255 to 0.430 on the same gold set. This negative result applies
-> to the cross-encoder experiment below; the production default is no longer the
-> anchor path. See [retrieval-coverage-2026-10-23.md](retrieval-coverage-2026-10-23.md).
+> **2026-10-23 update:** the production retrieval default is the deterministic
+> coverage path (bilingual expansion, IDF-weighted coverage, section prior). The
+> internal exact-passage gold is retained as a regression set, not a product
+> headline. This negative result applies to the cross-encoder experiment below.
+> See [evaluation.md](evaluation.md) and the product-scoped
+> [FinanceBench check](financebench-scoped-2026-10-23.md).
 
 FilingCopilot retained its existing retrieval path after a fixed-model,
 fixed-corpus ablation. Reordering eight public results or the full lexical/dense

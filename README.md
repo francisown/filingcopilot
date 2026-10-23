@@ -33,12 +33,13 @@ Three things a chat-only RAG demo usually does not do:
 |---|---|
 | Bilingual evaluation | 140 questions; 100 research questions: **81 complete, 18 partial, 1 no answer**; 40 boundary questions answered with explicit limits |
 | Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
-| Retrieval gold set | 200 questions; **Recall@5 0.430, MRR@5 0.245** after the deterministic coverage rerank (lexical baseline 0.255/0.142; recorded hybrid baseline 0.260/0.150) |
+| FinanceBench evidence-page | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, snippet hit@5 0.907, answer-supported top1 0.413, MRR 0.779** |
+| FinanceBench full-filing | 61 parsed PDFs, 113 questions: **page hit@5 0.850, snippet hit@5 0.779, MRR 0.523**; new-document held-out page hit@5 0.773 |
 | Tests | **1,656 passed** at the recorded evaluation source; **1,718 passed** on the current branch |
 | Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
 | Codebase | ~23k lines of Python across 77 source modules |
 
-**Read the caveats before the numbers:** the evaluation is self-reviewed, there is no independent human gold standard, and model-using questions had a median latency of 92.8 seconds and a P95 of 417.1 seconds. Retrieval is exact-passage on a development gold set, not human relevance; 0.430 still leaves room. These are engineering measurements, not a production claim. The full method and denominators are in [Evaluation](docs/evaluation.md).
+**Read the caveats before the numbers:** the evaluation is self-reviewed, there is no independent human gold standard, and model-using questions had a median latency of 92.8 seconds and a P95 of 417.1 seconds. The FinanceBench evidence-page result is 150 public rows scoped to company+year; it is not full-filing retrieval. The full-filing result is 61 parsed PDFs and 113 questions, with a 22-question new-document check at page hit@5 0.773. Neither number is human relevance or production accuracy. These are engineering measurements, not a production claim. The full method and denominators are in [Evaluation](docs/evaluation.md).
 
 ## How it works
 
@@ -81,9 +82,8 @@ A click-by-click walkthrough is in [demo-script-3min.md](docs/outreach/demo-scri
 
 - [Case study (English)](docs/case-study.md) · [案例研究（中文）](docs/case-study.zh-CN.md) — the problem, architecture, evaluation, failure taxonomy, and limitations.
 - [Evaluation](docs/evaluation.md) — 140-question run, retrieval gold set, negative results, and exact denominators.
-- [Retrieval coverage rerank](docs/retrieval-coverage-2026-10-23.md) — how exact-passage R@5 moved from 0.255 to 0.430, and what is still weak.
 - [External evaluation datasets](evaluation/external/README.md) — FinanceBench, DocFinQA, and FiQA: licenses, sizes, and how to fetch them.
-- [FinanceBench external check](docs/financebench-2026-10-23.md) — 150 public questions; page hit@5 0.507, chunk snippet hit@5 0.407, and why the lexical ceiling is visible.
+- [FinanceBench check](docs/financebench-scoped-2026-10-23.md) — 150 evidence-page questions (page hit@5 0.920, snippet hit@5 0.907) and 113 full-filing questions (0.850/0.779), with the 22-question new-document check and failure cases.
 - [Research package protocol](docs/research-package-protocol.md) — what a frozen package contains and how it is replayed.
 - [Project overview](docs/showcase.md) — try the offline example and follow one request through the code.
 - [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md) · [Full quick start](#quick-start)

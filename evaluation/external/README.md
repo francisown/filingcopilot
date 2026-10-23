@@ -46,12 +46,8 @@ The output is `evaluation/external/data/financebench.jsonl` plus a manifest with
 the source URL, license, row count, and SHA256. The `data/` directory is
 gitignored; the dataset is not committed.
 
-**Measured result (2026-10-23):** 150 public rows, 163 evidence pages. Page-level
-coverage reached **page hit@5 0.507 / MRR 0.303**; 2,000-character chunks reached
-**snippet hit@5 0.407 / MRR 0.381**. The `metrics-generated` questions are the
-weak point (snippet hit@5 0.30), which points to table-aware retrieval and
-embeddings, not another lexical reranker. Full report:
-[`docs/financebench-2026-10-23.md`](../../docs/financebench-2026-10-23.md).
+**Measured result (2026-10-23):** evidence-page benchmark: 150 public rows, 163 evidence pages, company+year scope, section-aware 3,000-character chunks with a 4,000-character parent window: **page hit@5 0.920 / snippet hit@5 0.907 / answer-supported top1 0.413 / MRR 0.779**. Full-filing benchmark: 61 parsed PDFs and 113 questions: **page hit@5 0.850 / snippet hit@5 0.779 / MRR 0.523**; the 22-question new-document check is 0.773 page hit@5. The earlier global-corpus number (0.507/0.407) is retired because it ignored the product's selected-company scope. Full report:
+[`docs/financebench-scoped-2026-10-23.md`](../../docs/financebench-scoped-2026-10-23.md).
 
 ### 2. FiQA — the standard retrieval benchmark
 

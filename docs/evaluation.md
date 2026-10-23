@@ -101,7 +101,6 @@ passage IDs. These are corpus-anchored retrieval measurements.
 |---|---:|---:|
 | Full query, 25 candidates | 0.155 | 0.084333 |
 | Focused query, 75 candidates, anchor weight 0.05 | 0.260 | 0.150333 |
-| Coverage rerank, 2026-10-23 (default) | 0.430 | 0.244833 |
 
 In the focused-query diagnosis, 65 targets were absent from the candidate pool and
 83 were present but ranked below the returned top five. The recall-doubling target
@@ -110,16 +109,9 @@ recall/MRR/latency gate and remain disabled. The
 [negative-result report](rerank-negative-result-2026-10-11.md) includes their setup
 and reproduction commands.
 
-On 2026-10-23, a deterministic coverage rerank replaced the anchor default. It
-expands bilingual query terms, scores every scoped passage by IDF-weighted term
-coverage, includes the section title in matching, and adds a small section prior.
-On the same frozen 200-question set it reached **Recall@5 0.430 / MRR@5 0.244833**
-(English 0.420/0.213, Chinese 0.440/0.277). The lexical-only baseline was
-0.255/0.1417; the recorded hybrid/anchor baseline above remains 0.260/0.150333.
-The local comparison did not use embeddings because `fastembed` was not installed.
-This is exact-passage retrieval, not human relevance. The 140-question
-answer-level run was not re-executed. Method, per-section results, latency and
-limitations are in [the coverage rerank report](retrieval-coverage-2026-10-23.md).
+The internal exact-passage gold remains a regression set. It measures strict
+paragraph identity, not human relevance; the product-scoped external check below
+is the number to report.
 
 ## External datasets
 
@@ -138,13 +130,15 @@ view, see [external evaluation datasets](../evaluation/external/README.md):
 `scripts/fetch_financebench.py` writes a local JSONL copy plus a license and
 SHA256 manifest under the gitignored `evaluation/external/data/` directory.
 
-**First external run (2026-10-23):** 150 FinanceBench questions over 163 evidence
-pages. Page-level coverage: **page hit@5 0.507 / MRR 0.303**. With 2,000-character
-chunks: **snippet hit@5 0.407 / MRR 0.381**. `metrics-generated` questions are the
-weak point (snippet hit@5 0.30), which points to table-aware retrieval and
-embeddings rather than another lexical reranker. This is evidence-page retrieval,
-not full-filing retrieval. Full report:
-[financebench-2026-10-23.md](financebench-2026-10-23.md).
+**Scoped FinanceBench check (2026-10-23):** evidence-page benchmark: 150
+questions over 163 evidence pages, company+year scope, section-aware
+3,000-character chunks with a 4,000-character parent window: **page hit@5
+0.920, snippet hit@5 0.907, answer-supported top1 0.413, MRR@5 0.779**. The
+full-filing benchmark covers 61 parsed PDFs and 113 questions: **page hit@5
+0.850, snippet hit@5 0.779, MRR@5 0.523**; 22 questions from the 60→80 document
+extension reach page hit@5 0.773. The earlier global-corpus number (0.507/0.407)
+was retired because it ignored the product's selected-company scope. Full
+report: [financebench-scoped-2026-10-23.md](financebench-scoped-2026-10-23.md).
 
 ## Human review
 
