@@ -138,6 +138,14 @@ view, see [external evaluation datasets](../evaluation/external/README.md):
 `scripts/fetch_financebench.py` writes a local JSONL copy plus a license and
 SHA256 manifest under the gitignored `evaluation/external/data/` directory.
 
+**First external run (2026-10-23):** 150 FinanceBench questions over 163 evidence
+pages. Page-level coverage: **page hit@5 0.507 / MRR 0.303**. With 2,000-character
+chunks: **snippet hit@5 0.407 / MRR 0.381**. `metrics-generated` questions are the
+weak point (snippet hit@5 0.30), which points to table-aware retrieval and
+embeddings rather than another lexical reranker. This is evidence-page retrieval,
+not full-filing retrieval. Full report:
+[financebench-2026-10-23.md](financebench-2026-10-23.md).
+
 ## Human review
 
 A first pass over 40 delivered narrative/analysis claims recorded 95% supported,

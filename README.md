@@ -83,6 +83,7 @@ A click-by-click walkthrough is in [demo-script-3min.md](docs/outreach/demo-scri
 - [Evaluation](docs/evaluation.md) — 140-question run, retrieval gold set, negative results, and exact denominators.
 - [Retrieval coverage rerank](docs/retrieval-coverage-2026-10-23.md) — how exact-passage R@5 moved from 0.255 to 0.430, and what is still weak.
 - [External evaluation datasets](evaluation/external/README.md) — FinanceBench, DocFinQA, and FiQA: licenses, sizes, and how to fetch them.
+- [FinanceBench external check](docs/financebench-2026-10-23.md) — 150 public questions; page hit@5 0.507, chunk snippet hit@5 0.407, and why the lexical ceiling is visible.
 - [Research package protocol](docs/research-package-protocol.md) — what a frozen package contains and how it is replayed.
 - [Project overview](docs/showcase.md) — try the offline example and follow one request through the code.
 - [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md) · [Full quick start](#quick-start)
