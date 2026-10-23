@@ -121,6 +121,23 @@ This is exact-passage retrieval, not human relevance. The 140-question
 answer-level run was not re-executed. Method, per-section results, latency and
 limitations are in [the coverage rerank report](retrieval-coverage-2026-10-23.md).
 
+## External datasets
+
+The internal gold set is corpus-anchored and author-reviewed. For an independent
+view, see [external evaluation datasets](../evaluation/external/README.md):
+
+- **FinanceBench** (`PatronusAI/financebench`, CC-BY-NC-4.0): 150 public SEC
+  filing questions with answers and evidence pages. Closest to the product;
+  non-commercial; not a full-filing retrieval corpus.
+- **DocFinQA** (`kensho/DocFinQA`, MIT): 7,437 long-context 10-K/10-Q questions;
+  the test split is 922 rows. No evidence span.
+- **FiQA** (`BeIR/fiqa` + `BeIR/fiqa-qrels`, CC-BY-SA-4.0): 57,638 passages,
+  6,648 queries, 17,110 qrels. Standard financial retrieval; report nDCG@10 and
+  Recall@100, not exact-passage R@5.
+
+`scripts/fetch_financebench.py` writes a local JSONL copy plus a license and
+SHA256 manifest under the gitignored `evaluation/external/data/` directory.
+
 ## Human review
 
 A first pass over 40 delivered narrative/analysis claims recorded 95% supported,

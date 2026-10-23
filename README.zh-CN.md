@@ -78,6 +78,7 @@ python examples/credit-risk/demo.py demo
 - [案例研究（中文）](docs/case-study.zh-CN.md) · [Case study (English)](docs/case-study.md) — 问题、架构、评测、失败分类和限制。
 - [评测](docs/evaluation.md) — 140 题运行、检索金集、负面结果和精确分母。
 - [检索 coverage rerank](docs/retrieval-coverage-2026-10-23.md) — 精确段落 R@5 如何从 0.255 到 0.430，以及仍然弱在哪里。
+- [外部评测数据集](evaluation/external/README.md) — FinanceBench、DocFinQA、FiQA 的许可、规模和拉取方式。
 - [研究包协议](docs/research-package-protocol.md) — 冻结包里有什么，如何重放。
 - [项目导览](docs/showcase.zh-CN.md) — 离线示例和一条请求的代码阅读顺序。
 - [MCP 接入](docs/mcp-tools.md) · [参与贡献](CONTRIBUTING.md) · [完整快速开始](#快速开始)
