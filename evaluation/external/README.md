@@ -64,13 +64,14 @@ answer.
   --output artifacts\finder-eval.json
 ```
 
-The script builds a 5,830-reference corpus from the dataset, filters to the
-1,085 `reasoning=True` rows by default, and reports answer-supported top1/at5.
-Measured result: **answer top1 0.770, at5 0.873**; on the 1,039 rows where the
-answer is present in a gold reference, **0.801 / 0.908**. BM25-only is 0.709 /
-0.873. The reference hit@5 is only 0.290 because the corpus is not company/page
-scoped; use answer support, not reference hit rate, for this benchmark. License:
-CC-BY-NC-4.0; data is gitignored.
+The script builds category-scoped reference corpora from the dataset, filters to
+the 1,085 `reasoning=True` rows by default, and reports answer-supported
+top1/at5. Measured result: **answer top1 0.794, at5 0.876**; on the 1,039 rows
+where the answer is present in a gold reference, **0.826 / 0.911**. BM25-only
+category scope is 0.737 / 0.876. Reference hit@5 is 0.371 because the benchmark
+does not provide company/page scope; use answer support, not reference hit rate,
+as the primary metric. P95 is 309 ms. License: CC-BY-NC-4.0; data is gitignored.
+`category` is dataset metadata, not inferred by the retriever.
 
 ### 3. FiQA — the standard retrieval benchmark
 

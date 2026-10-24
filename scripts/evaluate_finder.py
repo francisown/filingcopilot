@@ -15,6 +15,7 @@ import math
 import re
 import shutil
 import time
+from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
@@ -74,6 +75,22 @@ def build_corpus(rows: list[dict]) -> tuple[list[str], dict[str, int]]:
     return corpus, index
 
 
+def build_scoped_corpora(
+    rows: list[dict], scope: str
+) -> dict[str, tuple[list[str], dict[str, int], list[list[str]], float]]:
+    groups: dict[str, list[str]] = defaultdict(list)
+    for row in rows:
+        key = "global" if scope == "global" else str(row["category"])
+        groups[key].extend(list(row["references"]))
+    corpora = {}
+    for key, references in groups.items():
+        corpus, index = build_corpus([{"references": references}])
+        tokenized = [tokens(text) for text in corpus]
+        average = sum(len(doc) for doc in tokenized) / max(1, len(tokenized))
+        corpora[key] = (corpus, index, tokenized, average)
+    return corpora
+
+
 def bm25_top(
     tokenized: list[list[str]], avg_length: float, terms: list[str], k: int = 5
 ) -> list[tuple[int, float]]:
@@ -109,6 +126,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts" / "finder-eval.json")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--include-reasoning", action="store_true")
+    parser.add_argument("--scope", choices=("global", "category"), default="category")
     parser.add_argument("--rerank", choices=("off", "flashrank"), default="flashrank")
     parser.add_argument("--k", type=int, default=5)
     args = parser.parse_args()
@@ -116,11 +134,7 @@ def main() -> None:
     data_path = ensure_data(args.data)
     frame = pd.read_parquet(data_path)
     all_rows = frame.to_dict("records")
-    corpus, corpus_index = build_corpus(all_rows)
-    tokenized_corpus = [tokens(text) for text in corpus]
-    avg_length = sum(len(doc) for doc in tokenized_corpus) / max(
-        1, len(tokenized_corpus)
-    )
+    corpora = build_scoped_corpora(all_rows, args.scope)
     rows = (
         all_rows
         if args.include_reasoning
@@ -142,6 +156,8 @@ def main() -> None:
     latencies = []
     for row in rows:
         started = time.perf_counter()
+        scope_key = "global" if args.scope == "global" else str(row["category"])
+        corpus, corpus_index, tokenized_corpus, avg_length = corpora[scope_key]
         top = bm25_top(tokenized_corpus, avg_length, tokens(row["text"]), args.k)
         if ranker is not None and top:
             from flashrank import RerankRequest
@@ -195,7 +211,8 @@ def main() -> None:
     durations = sorted(latencies)
     summary = {
         "questions": len(results),
-        "corpus_references": len(corpus),
+        "scope": args.scope,
+        "corpus_references": sum(len(item[0]) for item in corpora.values()),
         "reference_hit_at_1": sum(
             1 for row in results if row["reference_rank"] == 1
         )
@@ -223,7 +240,7 @@ def main() -> None:
         "schema": "filingcopilot.finder-eval/v1",
         "dataset": REPO,
         "license": "CC-BY-NC-4.0",
-        "scope": "reference retrieval; reasoning rows excluded unless --include-reasoning",
+        "scope": f"reference retrieval ({args.scope} scope); reasoning rows excluded unless --include-reasoning",
         "rerank": args.rerank,
         "summary": summary,
         "rows": results,

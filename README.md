@@ -35,7 +35,7 @@ Three things a chat-only RAG demo usually does not do:
 | Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
 | FinanceBench full-filing | 61 parsed PDFs, 113 questions: **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624**; new-document held-out page hit@5 0.773 |
 | FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.427 raw / 0.913 evaluable (69/150), MRR 0.798** |
-| FinDER answer-support | 1,085 reasoning questions, 5,830 reference corpus, BM25 + FlashRank: **answer-supported top1 0.770, at5 0.873**; on 1,039 evaluable rows: **0.801 / 0.908** |
+| FinDER answer-support | 1,085 reasoning questions, category-scoped reference corpus, BM25 + FlashRank: **answer-supported top1 0.794, at5 0.876**; 1,039 evaluable rows: **0.826 / 0.911**; ref hit@5 0.371, P95 309ms |
 | Tests | **1,656 passed** at the recorded evaluation source; **1,718 passed** on the current branch |
 | Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
 | Codebase | ~23k lines of Python across 77 source modules |

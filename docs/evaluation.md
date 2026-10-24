@@ -146,11 +146,12 @@ ceiling-limited: only 69/150 answers appear in the gold evidence page (49/50
 `metrics-generated` answers are computed), so its raw 0.427 is not a fair
 retrieval headline. On that evaluable subset, top1 is 0.913 and at5 is 1.000.
 For a cleaner answer-support benchmark we added FinDER (CC-BY-NC-4.0): 1,085
-`reasoning=True` rows over a 5,830-reference corpus. BM25 gives answer top1
-0.709 / at5 0.873; BM25 + FlashRank gives **0.770 / 0.873**, and on the 1,039
-rows whose answer is present in a gold reference **0.801 / 0.908**. FinDER
-reference hit@5 is only 0.290 because the reference corpus is not company/page
-scoped; answer support is the primary metric. Script:
+`reasoning=True` rows with category-scoped reference corpora. BM25 gives answer
+top1 0.737 / at5 0.876; BM25 + FlashRank gives **0.794 / 0.876**, and on the
+1,039 rows whose answer is present in a gold reference **0.826 / 0.911**.
+FinDER reference hit@5 is 0.371 because the benchmark does not provide
+company/page scope; answer support is the primary metric. P95 is 309 ms.
+`category` is dataset metadata, not inferred by the retriever. Script:
 `scripts/evaluate_finder.py`; result: `artifacts/finder-eval.json`.
 
 ## Human review
