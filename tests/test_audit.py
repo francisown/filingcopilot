@@ -178,6 +178,10 @@ def test_api_export_audit_and_versions(service):
     client = TestClient(create_app(service))
     package = package_for(service)
     run_id = package["research"]["id"]
+    health = client.get("/api/health")
+    assert health.headers["x-content-type-options"] == "nosniff"
+    assert health.headers["x-frame-options"] == "DENY"
+    assert health.headers["referrer-policy"] == "no-referrer"
     assert client.get(f"/api/runs/{run_id}/package").json() == package
     assert client.get(f"/api/runs/{run_id}/audit").json()["status"] == "consistent"
     assert client.get("/api/runs/missing/package").status_code == 404

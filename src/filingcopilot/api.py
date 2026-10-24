@@ -100,6 +100,14 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
         if status['needs_restart'] and (request.method not in ('GET', 'HEAD') or request.url.path in ('/', '/index.html') or request.url.path.startswith('/static/')):
             return JSONResponse({'detail': translate_text('服务代码或页面资源已经更新，请重启当前服务后再开始新任务。', header_language(request.headers.get('accept-language'))), 'runtime': status}, status_code=503)
         return await call_next(request)
+
+    @app.middleware('http')
+    async def security_headers(request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+        response.headers.setdefault('X-Frame-Options', 'DENY')
+        response.headers.setdefault('Referrer-Policy', 'no-referrer')
+        return response
     app.state.service = service
     app.state.research_jobs = jobs
     static = str(files("filingcopilot").joinpath("static"))
