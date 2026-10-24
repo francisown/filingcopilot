@@ -65,6 +65,11 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 
 Only **69/150** questions have the answer literally present in the gold evidence page; 49/50 `metrics-generated` answers are computed and not written on the page. On those 69 evaluable rows, answer-supported top1 is **0.913**, at 5 is **1.000**, and page-level top1 is **0.957**. The raw 0.427/0.467 numbers are retained for transparency, but they mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
 
+BGE was also measured on the evidence-page path: page@1 0.707→**0.720**,
+page@3 0.873→**0.913**, MRR 0.798→**0.808**, page@5 stays **0.920**.
+P95 rises from 8.2ms to **1.46s**, so the fast evidence-page path keeps
+title rerank; BGE is enabled only for the full-filing path.
+
 ## Full-filing benchmark
 
 - 80 documents selected; 61 parsed PDFs; 113 questions.
