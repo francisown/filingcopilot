@@ -104,6 +104,21 @@ The 22 questions from the 60→80 document extension reached page hit@5 **0.773*
 - TOC/index pages are down-weighted.
 - Segment-result pages with a `managed basis` table get a page-level bonus.
 
+## Additional full-filing ablations (2026-10-24)
+
+The retained baseline is page@1 0.478, page@5 0.850, snippet@5 0.858,
+MRR@5 0.624. Four candidate changes were measured and rejected:
+
+| Change | Page@1 | Page@5 | Snippet@5 | MRR@5 | Verdict |
+|---|---:|---:|---:|---:|---|
+| Top20 candidates + FlashRank, then top5 | 0.398 | 0.805 | 0.814 | 0.546 | Reject: reranker promotes distractors |
+| Union router filter with lexical fallback pages | 0.310 | 0.540 | 0.549 | 0.397 | Reject: title/topic filter is load-bearing |
+| Query-focused FlashRank window instead of page head | 0.442 | 0.850 | 0.858 | 0.606 | Reject: page head/title context matters |
+| Insert adjacent pages after top hits | 0.478 | 0.690 | 0.690 | 0.537 | Reject: neighbors displace exact gold pages |
+
+These are negative results for this 113-question set, not evidence that the
+methods cannot work with a stronger page index or layout-aware extraction.
+
 ## Limitations
 
 - Evidence-page retrieval is not full 10-K search. The 0.920 number must not be presented as full-filing accuracy.
