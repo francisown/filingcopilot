@@ -43,16 +43,27 @@ retrieval path is 1.84s P95; FinDER retrieval is 287ms P95.
   evidence risks dropping the exact number, period or qualifier that the
   evidence checks depend on; it is not enabled without a paired accuracy test.
 
-## Change applied
+## Live A/B: review batch 2 vs 4
 
-`FC_REVIEW_BATCH_SIZE` / `Settings.review_batch_size` now defaults to **4**
-instead of 2. A 9-claim risk answer goes from five serial review calls to three;
-a 4-claim answer goes from two to one. The reviewer still returns one verdict per
-claim, and the existing batch-validation/withholding tests remain in force.
+Two slow risk questions from the live set were rerun with the same model,
+corpus and `workers=1`; only `FC_REVIEW_BATCH_SIZE` changed. Each arm is one
+sample, so this is directional, not a P95 estimate.
 
-This is a call-count optimization, not a latency claim. The live harness was not
-available in this environment, so P95 has **not** been re-measured after the
-change.
+| Question | Batch | Latency | Status | Coverage |
+|---|---:|---:|---|---:|
+| NVIDIA FY2025 risk (`semantic-risk-020`) | 2 | 214.9s | partial | 0.0 |
+| NVIDIA FY2025 risk | 4 | **157.1s** | **answered** | **1.0** |
+| Apple FY2025 risk (`semantic-risk-012`) | 2 | **304.1s** | partial | 0.0 |
+| Apple FY2025 risk | 4 | 421.5s | **abstained / timeout** | 0.0 |
+
+The larger batch helped one question and made another hit the 420s deadline.
+It is therefore **not a stable latency optimization**. `Settings.review_batch_size`
+remains **2**; the code comment records the failed experiment. The `.env`
+already overrode the code default with 2, which is why the earlier default-only
+change did not affect real runs.
+
+The reviewer still returns one verdict per claim, and the batch-validation /
+withholding tests remain in force.
 
 ## Candidate changes still unvalidated
 
@@ -64,6 +75,8 @@ change.
 
 ## Status
 
-**Partially applied.** Review batching is changed and unit-tested; live P95 is
-unresolved. The README continues to report the 417.1s result rather than hiding
-it.
+**Not solved.** The batch-size change was reverted after a mixed live A/B
+(one faster answer, one timeout). The README continues to report the 417.1s
+result rather than hiding it. The next candidate is parallel review batches at
+the existing batch size 2, followed by model routing; both need the same paired
+latency/quality harness before becoming defaults.
