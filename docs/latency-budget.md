@@ -32,6 +32,20 @@ retrieval-speed problem.
 This is an orchestration problem, not a retrieval problem. The full-filing
 retrieval path is 1.84s P95; FinDER retrieval is 287ms P95.
 
+A direct provider probe used the same `mimo-v2.6-flash` model, endpoint and
+`x-opencode-session` header as the gateway, with no project tools or agent:
+
+| Prompt | Prompt tokens | Completion tokens | Wall time |
+|---|---:|---:|---:|
+| Short risk prompt | 98 | 512 (`length`) | 20.3s / 20.9s |
+| 4,271-token risk context | 4,271 | 665 / 746 (`stop`) | 22.4s / 21.3s |
+
+The provider therefore has a **roughly 20-second floor per call** even when the
+input is tiny; generation dominates and context size is secondary. The project
+makes 8–12 such calls for a slow question, so a 160–260s floor is expected
+before retries, serial review and queueing. That does not excuse 417s: it means
+the fix must reduce/parallelize calls, not only optimize retrieval.
+
 ## External patterns
 
 - Anthropic's agent guidance recommends simple workflows, **routing** and
