@@ -77,6 +77,18 @@ on negation and risk. It was not adopted; the local `.env` is back to
 routing design could send only categories that retain quality to DeepSeek, but
 that requires a held-out per-category quality gate.
 
+Two prompt variants were tested after the no-prompt run:
+
+| Variant | Answered | Risk | Negation | Causality | P95 |
+|---|---:|---:|---:|---:|---:|
+| DeepSeek, no added guidance | 64/140 | 7/20 | 4/20 | 13/20 | 139.0s |
+| + negation/risk gap guidance | **76/140** | **16/20** | 10/20 | 10/20 | 129.4s |
+| + causality gap guidance | 67/140 | — | — | — | 174.3s |
+
+The first prompt was a real improvement but still below mimo's 81/140; the
+causality-specific variant regressed. Prompt text alone is not enough to close
+the gap. The experiment code was reverted; only this result is retained.
+
 ## External patterns
 
 - Anthropic's agent guidance recommends simple workflows, **routing** and
