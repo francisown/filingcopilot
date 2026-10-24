@@ -92,7 +92,7 @@ Only **69/150** questions have the answer literally present in the gold evidence
 | MRR@5 | **0.664** |
 | Rerank P95 | 1.84 s |
 
-The 22 questions from the 60→80 document extension reached page hit@5 **0.773** under the FlashRank baseline. BGE was not separately re-scored on that 22-question slice; it is still small and document-selected.
+The 22 questions from the 60→80 document extension reach page hit@1 **0.545**, page hit@5 **0.773** and MRR **0.621** with BGE. This is the closest thing to a held-out check; it is still small and document-selected.
 
 ## What changed
 
@@ -130,7 +130,7 @@ methods cannot work with a stronger page index or layout-aware extraction.
 - The full-filing result is 0.850 page hit@5 on 61 parsed documents; BGE rerank improves page@1 to 0.540 and MRR to 0.664, but these are still not strong.
 - 19 of 80 selected documents were skipped due to HTTP 403, corrupt files, or no extractable text. That is selection bias.
 - The router contains domain and bank-report heuristics. It is development-tuned on these rows; the 22-question held-out extension is too small for a final claim.
-- Title, FlashRank and BGE rerankers are development-tuned on the 150 evidence-page rows and 113 full-filing questions; their gain needs a held-out confirmation. FlashRank adds roughly 0.3s per query; BGE INT8 ONNX adds roughly 1.8s P95 on CPU. The 22-question extension was not re-scored with BGE.
+- Title, FlashRank and BGE rerankers are development-tuned on the 150 evidence-page rows and 113 full-filing questions; their gain needs a held-out confirmation. FlashRank adds roughly 0.3s per query; BGE INT8 ONNX adds roughly 1.8s P95 on CPU. The 22-question BGE extension reaches page@1 0.545 / page@5 0.773 / MRR 0.621, still too small for a final claim.
 - Snippet matching uses normalized token and compact-character matching; answer support checks numeric or answer-substring presence. Neither is human relevance.
 - No model answer was generated. This is retrieval, not end-to-end answer accuracy.
 - FinanceBench is CC-BY-NC-4.0; the dataset and PDFs are gitignored and not redistributed.

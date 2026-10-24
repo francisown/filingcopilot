@@ -139,10 +139,10 @@ full-filing benchmark covers 61 parsed PDFs and 113 questions with a BGE
 ONNX reranker over the top5 router pages: **page hit@5 0.850, page@1 0.540,
 snippet hit@5 0.858, snippet hit@1 0.531, MRR@5 0.664**. BGE adds about 1.8 s
 P95 on CPU. The earlier FlashRank baseline was page@1 0.478 / page@5 0.850 /
-MRR 0.624; its 22-question 60→80 document extension reached page hit@5 0.773.
-BGE was not separately re-scored on that small extension. The earlier
-global-corpus number (0.507/0.407) was retired because it ignored the product's
-selected-company scope. Full report:
+MRR 0.624. BGE's 22-question 60→80 document extension reaches page hit@1 0.545,
+page hit@5 0.773 and MRR 0.621; it is still small and document-selected. The
+earlier global-corpus number (0.507/0.407) was retired because it ignored the
+product's selected-company scope. Full report:
 [financebench-scoped-2026-10-23.md](financebench-scoped-2026-10-23.md).
 
 **FinDER answer-support (2026-10-24):** FinanceBench raw answer support is

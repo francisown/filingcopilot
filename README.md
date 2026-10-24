@@ -33,7 +33,7 @@ Three things a chat-only RAG demo usually does not do:
 |---|---|
 | Bilingual evaluation | 140 questions; 100 research questions: **81 complete, 18 partial, 1 no answer**; 40 boundary questions answered with explicit limits |
 | Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
-| FinanceBench full-filing | 61 parsed PDFs, 113 questions, BGE ONNX rerank: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR 0.664**; rerank P95 1.84s; new-document held-out page hit@5 0.773 under FlashRank |
+| FinanceBench full-filing | 61 parsed PDFs, 113 questions, BGE ONNX rerank: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR 0.664**; rerank P95 1.84s; new-document held-out page@1 0.545 / page@5 0.773 |
 | FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.427 raw / 0.913 evaluable (69/150), MRR 0.798** |
 | FinDER answer-support | 1,085 reasoning questions, company-scoped reference corpus with category fallback, BM25 + FlashRank: **answer-supported top1 0.823, at5 0.893**; 1,039 evaluable rows: **0.857 / 0.928**; ref hit@5 0.598, P95 287ms |
 | Tests | **1,656 passed** at the recorded evaluation source; **1,718 passed** on the current branch |
