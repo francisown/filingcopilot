@@ -729,6 +729,61 @@ def rerank_flashrank_pages(
     return [ranked[index] for index in order if index < len(ranked)]
 
 
+def bge_inputs(
+    encodings: list[object], input_names: set[str]
+) -> dict[str, np.ndarray]:
+    max_length = max(len(item.ids) for item in encodings)
+    input_ids = np.full((len(encodings), max_length), 1, dtype=np.int64)
+    attention_mask = np.zeros((len(encodings), max_length), dtype=np.int64)
+    for index, item in enumerate(encodings):
+        length = len(item.ids)
+        input_ids[index, :length] = item.ids
+        attention_mask[index, :length] = item.attention_mask
+    inputs = {"input_ids": input_ids, "attention_mask": attention_mask}
+    if "token_type_ids" in input_names:
+        token_type_ids = np.zeros((len(encodings), max_length), dtype=np.int64)
+        for index, item in enumerate(encodings):
+            length = len(item.ids)
+            token_type_ids[index, :length] = item.type_ids
+        inputs["token_type_ids"] = token_type_ids
+    return inputs
+
+
+def load_bge_reranker(model_path: Path, tokenizer_path: Path):
+    if not model_path.exists() or not tokenizer_path.exists():
+        raise FileNotFoundError(
+            f"BGE reranker files not found: {model_path}, {tokenizer_path}"
+        )
+    from onnxruntime import InferenceSession
+    from tokenizers import Tokenizer
+
+    tokenizer = Tokenizer.from_file(str(tokenizer_path))
+    tokenizer.enable_truncation(max_length=512)
+    session = InferenceSession(
+        str(model_path), providers=["CPUExecutionProvider"]
+    )
+    input_names = {item.name for item in session.get_inputs()}
+    return tokenizer, session, input_names
+
+
+def rerank_bge_pages(
+    ranked: list[tuple[int, int, float]],
+    pages: list[str],
+    question: str,
+    reranker: tuple[object, object, set[str]],
+) -> list[tuple[int, int, float]]:
+    if not ranked:
+        return ranked
+    tokenizer, session, input_names = reranker
+    encodings = [
+        tokenizer.encode(question, pages[page][:4000])
+        for page, _, _ in ranked
+    ]
+    logits = session.run(None, bge_inputs(encodings, input_names))[0].reshape(-1)
+    order = sorted(range(len(ranked)), key=lambda index: -float(logits[index]))
+    return [ranked[index] for index in order]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DATA)
@@ -747,7 +802,17 @@ def main() -> None:
         help="Promote a top-3 page whose heading matches more query terms before scoring.",
     )
     parser.add_argument(
-        "--rerank", choices=("off", "flashrank"), default="flashrank"
+        "--rerank", choices=("off", "flashrank", "bge"), default="flashrank"
+    )
+    parser.add_argument(
+        "--bge-model",
+        type=Path,
+        default=ROOT / "models" / "bge-reranker-v2-m3-int8" / "model_int8.onnx",
+    )
+    parser.add_argument(
+        "--bge-tokenizer",
+        type=Path,
+        default=ROOT / "models" / "bge-reranker-v2-m3-int8" / "tokenizer.json",
     )
     parser.add_argument(
         "--retrieval", choices=("lexical", "dense", "hybrid", "router"), default="lexical"
@@ -784,6 +849,7 @@ def main() -> None:
         else None
     )
     ranker = None
+    bge_reranker = None
     if args.rerank == "flashrank":
         from flashrank import Ranker
 
@@ -791,6 +857,8 @@ def main() -> None:
             model_name="ms-marco-MiniLM-L-12-v2",
             cache_dir=str(Path("models") / "flashrank"),
         )
+    elif args.rerank == "bge":
+        bge_reranker = load_bge_reranker(args.bge_model, args.bge_tokenizer)
     results = []
     for doc in selected_docs:
         doc_rows = by_doc[doc]
@@ -863,6 +931,8 @@ def main() -> None:
             ranked = rerank_title_pages(ranked, pages, question, args.top1_rerank)
             if ranker is not None:
                 ranked = rerank_flashrank_pages(ranked, pages, question, ranker)
+            elif bge_reranker is not None:
+                ranked = rerank_bge_pages(ranked, pages, question, bge_reranker)
             page_ranks = [position for position, (page, _, _) in enumerate(ranked, 1) if page == gold_page]
             snippet_evaluable = bool((evidence.get("evidence_text") or "").strip())
             snippet_ranks = []

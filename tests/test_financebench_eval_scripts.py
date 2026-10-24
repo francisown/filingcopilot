@@ -201,3 +201,18 @@ def test_full_filing_flashrank_rerank_order() -> None:
         ranked, ["first page", "second page"], "query", FakeRanker()
     )
     assert reordered[0][0] == 1
+
+
+def test_bge_inputs_pads_to_longest_sequence() -> None:
+    class Encoding:
+        def __init__(self, ids, mask):
+            self.ids = ids
+            self.attention_mask = mask
+            self.type_ids = [0] * len(ids)
+
+    inputs = pdf_eval.bge_inputs(
+        [Encoding([1, 2, 3], [1, 1, 1]), Encoding([4], [1])],
+        {"input_ids", "attention_mask"},
+    )
+    assert inputs["input_ids"].tolist() == [[1, 2, 3], [4, 1, 1]]
+    assert inputs["attention_mask"].tolist() == [[1, 1, 1], [1, 0, 0]]
