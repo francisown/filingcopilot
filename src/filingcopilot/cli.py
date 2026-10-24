@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 from datetime import date
@@ -12,6 +13,16 @@ from .service import FilingCopilot, directory_enriched_companies
 from .settings import Settings
 from .stock_directory import StockDirectory
 from .trends import TrendRequest
+
+
+def is_loopback_host(host: str) -> bool:
+    """The service has no authentication or tenant isolation."""
+    if host.casefold() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
 
 
 def main():
@@ -280,6 +291,11 @@ def main():
             print(content)
         return
     if args.command == "serve":
+        if not is_loopback_host(args.host):
+            parser.error(
+                "refusing a non-loopback bind: FilingCopilot has no authentication "
+                "or tenant isolation; use a loopback reverse proxy with its own auth"
+            )
         import uvicorn
 
         from .api import create_app

@@ -80,7 +80,7 @@ The other 40 questions asked about unsupported future-price guarantees or hypoth
 
 The run used models for 60 questions, started 476 HTTP requests, recorded 442 HTTP 200 responses, and reported 4,312,447 tokens. Median latency for model-using questions was 92.79 seconds; P95 was 417.11 seconds. The overall median of 0.075 seconds is dominated by the 80 questions that required no model call and does not describe research latency.
 
-The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 numeric claims outside that checker's scope, and zero mismatches**. The 34 unassessed claims are not counted as correct. Saved packages were audited against available raw sources: 100 consistent, none missing sources. The recorded source passed **1,656 tests**; the current branch passes **1,718**, including the new credit-risk demo tests.
+The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 numeric claims outside that checker's scope, and zero mismatches**. The 34 unassessed claims are not counted as correct. Saved packages were audited against available raw sources: 100 consistent, none missing sources. The recorded source passed **1,656 tests**; the current branch passes **1,735**, including the new credit-risk demo tests.
 
 Retrieval is measured on two levels. The internal 200-question exact-passage gold is a regression set; it measures strict paragraph identity, not human relevance. The product-scoped external check below is the number to report.
 

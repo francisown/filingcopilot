@@ -165,6 +165,31 @@ scope is 0.757 / 0.892. Answer support remains the primary metric because the
 benchmark still does not provide full-filing page scope. Script:
 `scripts/evaluate_finder.py`; result: `artifacts/finder-eval.json`.
 
+### Sampling uncertainty
+
+These are finite samples. The 95% Wilson intervals below are descriptive, not a
+correction for document selection, tuning on the same questions, or clustering
+by company/document.
+
+| Metric | Estimate | n | 95% Wilson interval |
+|---|---:|---:|---:|
+| FinanceBench full-filing page@1 | 0.540 | 113 | 0.448–0.629 |
+| FinanceBench full-filing page@5 | 0.850 | 113 | 0.772–0.904 |
+| FinanceBench full-filing snippet@1 | 0.531 | 113 | 0.439–0.620 |
+| FinanceBench full-filing snippet@5 | 0.858 | 113 | 0.782–0.911 |
+| Full-filing 22-question extension page@1 | 0.545 | 22 | 0.347–0.731 |
+| Full-filing 22-question extension page@5 | 0.773 | 22 | 0.566–0.899 |
+| FinanceBench evidence-page page@1 | 0.707 | 150 | 0.629–0.774 |
+| FinanceBench evidence-page page@5 | 0.920 | 150 | 0.865–0.954 |
+| FinanceBench evaluable answer top1 | 0.913 | 69 | 0.823–0.960 |
+| FinDER answer top1 | 0.823 | 1,085 | 0.799–0.845 |
+| FinDER answer at5 | 0.893 | 1,085 | 0.873–0.910 |
+| FinDER evaluable answer top1 | 0.857 | 1,039 | 0.834–0.877 |
+| FinDER evaluable answer at5 | 0.928 | 1,039 | 0.911–0.942 |
+
+The 22-question extension is especially noisy: its page@5 interval spans
+0.57–0.90. None of these intervals addresses human relevance or correctness.
+
 ## Human review
 
 A first pass over 40 delivered narrative/analysis claims recorded 95% supported,
