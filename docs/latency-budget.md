@@ -65,25 +65,28 @@ change did not affect real runs.
 The reviewer still returns one verdict per claim, and the batch-validation /
 withholding tests remain in force.
 
-## Live route: risk questions use six rounds
+## Live route rejected: risk questions with six rounds
 
-The next A/B kept batch=2 and changed only the risk-question round budget from
-8 to 6. The same two questions were rerun with the provider and corpus
-unchanged:
+The next experiment kept batch=2 and limited risk questions to six reasoning
+rounds. The first two slow questions improved, so the same configuration was
+run on the five slowest risk questions from the live set. The result did **not**
+hold:
 
-| Question | max rounds | Latency | Status | Coverage |
-|---|---:|---:|---|---:|
-| Apple FY2025 risk | 8 | 304.1s | partial | 0.0 |
-| Apple FY2025 risk | 6 | **208.8s** | **answered** | **1.0** |
-| NVIDIA FY2025 risk | 8 | 214.9s | partial | 0.0 |
-| NVIDIA FY2025 risk | 6 | **120.9s** | partial | 0.0 |
-| Apple FY2025 risk, code route | 8 global / 6 risk | **178.5s** | **answered** | **1.0** |
-| NVIDIA FY2025 risk, code route | 8 global / 6 risk | **162.6s** | **answered** | **1.0** |
+| Question | max8 latency/status | risk6 latency/status |
+|---|---:|---:|
+| `semantic-risk-001` | 420.0s partial | 388.4s partial |
+| `semantic-risk-008` | 378.0s **answered** | 306.9s **partial** |
+| `semantic-risk-010` | 417.1s partial | 116.7s partial |
+| `semantic-risk-019` | 420.0s partial | 420.5s partial / timeout |
+| `semantic-risk-020` | 420.8s abstained | 82.7s **answered** |
 
-Both questions got faster, and both code-route runs answered with full coverage.
-The change is therefore **risk-specific**: `risk_max_rounds=6`; non-risk
-questions keep `max_rounds=8`. It is still a two-question live sample, not a
-replacement for a full 140-question paired run.
+- P50 improved: 420.0s → 306.9s
+- P95 did **not** improve: 420.8s → 420.5s
+- Coverage stayed 0.2 (1/5); one timeout remained
+- One question improved, one regressed from answered to partial
+
+The six-round route is therefore **not a stable optimization** and was
+reverted. It remains a documented failed experiment, not a default.
 
 ## Candidate changes still unvalidated
 
@@ -95,8 +98,9 @@ replacement for a full 140-question paired run.
 
 ## Status
 
-**Partially solved for the risk tail.** Batch 4 was reverted; risk-specific
-six-round routing is now in code and is faster on both live A/B questions.
-The full 140-question P95 has not been rerun, so the README continues to report
-the historical 417.1s result rather than claiming a new P95. Next candidates are
-parallel review batches at batch 2 and parallel independent tool calls.
+**Not solved.** Both tested shortcuts were rejected: batch 4 produced a
+timeout, and risk-specific six-round routing did not improve P95 or coverage on
+the five-question follow-up. The code is back to batch 2 / max_rounds 8. The
+README continues to report the historical 417.1s result rather than claiming a
+new P95. Next candidates are parallel review batches at batch 2, model routing
+with a paired quality test, and parallel independent tool calls.

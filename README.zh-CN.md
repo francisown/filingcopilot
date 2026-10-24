@@ -33,7 +33,7 @@ FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或�
 | FinanceBench full-filing | 61 份已解析 PDF、113 题，BGE ONNX rerank：**page hit@5 0.850、page@1 0.540、snippet hit@5 0.858、snippet hit@1 0.531、MRR 0.664**；rerank P95 1.84s；新增文档 held-out page@1 0.545 / page@5 0.773 |
 | FinanceBench evidence-page（诊断） | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.920、page@1 0.707、snippet hit@5 0.920、answer-supported top1 0.427 raw / 0.913 evaluable（69/150）、MRR 0.798** |
 | FinDER answer-support | 1,085 道 reasoning 题，company-scoped reference corpus + category fallback，BM25 + FlashRank：**answer-supported top1 0.823、at5 0.893**；1,039 道 evaluable 题上 **0.857 / 0.928**；ref hit@5 0.598，P95 287ms |
-| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,736 个全部通过** |
+| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,735 个全部通过** |
 | 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
 | 代码 | 约 23k 行 Python，77 个源码模块 |
 

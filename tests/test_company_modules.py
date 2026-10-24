@@ -263,19 +263,6 @@ def test_factual_modules_use_a_shorter_model_round_budget():
     assert module_round_limit("valuation", 3) == 3
 
 
-def test_risk_questions_use_the_six_round_budget_only():
-    from filingcopilot.agent import is_risk_question, question_round_limit
-
-    assert is_risk_question("Which risks should an analyst track?")
-    assert is_risk_question("英伟达的风险有哪些？")
-    assert not is_risk_question("What was the revenue growth?")
-    assert not is_risk_question("asterisk marker")
-    assert question_round_limit(None, "Which risks matter?", 8, 6) == 6
-    assert question_round_limit(None, "What was revenue?", 8, 6) == 8
-    assert question_round_limit("risk", "What are the main risks?", 8, 6) == 6
-    assert question_round_limit("ownership", "Who owns shares?", 8, 6) == 4
-
-
 def test_status_reason_distinguishes_budget_and_evidence_gaps():
     assert classify_status_reason(
         {

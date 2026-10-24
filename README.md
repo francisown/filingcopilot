@@ -36,7 +36,7 @@ Three things a chat-only RAG demo usually does not do:
 | FinanceBench full-filing | 61 parsed PDFs, 113 questions, BGE ONNX rerank: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR 0.664**; rerank P95 1.84s; new-document held-out page@1 0.545 / page@5 0.773 |
 | FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.427 raw / 0.913 evaluable (69/150), MRR 0.798** |
 | FinDER answer-support | 1,085 reasoning questions, company-scoped reference corpus with category fallback, BM25 + FlashRank: **answer-supported top1 0.823, at5 0.893**; 1,039 evaluable rows: **0.857 / 0.928**; ref hit@5 0.598, P95 287ms |
-| Tests | **1,656 passed** at the recorded evaluation source; **1,736 passed** on the current branch |
+| Tests | **1,656 passed** at the recorded evaluation source; **1,735 passed** on the current branch |
 | Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
 | Codebase | ~23k lines of Python across 77 source modules |
 
