@@ -10,7 +10,7 @@ automatically better: each has a different task, license, and label quality.
 | Dataset | Hugging Face ID | License | Size | Fields | Best for | Main caveat |
 |---|---|---|---|---|---|---|
 | **FinanceBench** | `PatronusAI/financebench` | CC-BY-NC-4.0 | 150 public rows (~0.4 MB parquet) | `question`, `answer`, `evidence_text`, `evidence_page_num`, `doc_name`, `company`, `doc_type`, `doc_period`, `doc_link` | SEC 10-K/10-Q question answering with evidence; closest to FilingCopilot | Non-commercial license; 150-row open subset; evidence page, not a full filing corpus |
-| **FinDER** | `Linq-AI-Research/FinDER` | CC-BY-NC-4.0 | 5,703 triplets; 1,085 reasoning rows | `_id`, `text`, `reasoning`, `category`, `references`, `answer`, `type` | Answer-supported reference retrieval; 10-K evidence | Reference corpus only; no company/page scope out of the box |
+| **FinDER** | `Linq-AI-Research/FinDER` | CC-BY-NC-4.0 | 5,703 triplets; 1,085 reasoning rows | `_id`, `text`, `reasoning`, `category`, `references`, `answer`, `type` | Answer-supported reference retrieval; 10-K evidence | Reference excerpts only; company scope is inferred, page scope is unavailable |
 | **DocFinQA** | `kensho/DocFinQA` | MIT | 7,437 questions; 4.7 GB original; test split 922 rows / 56 MB parquet | `Context`, `Question`, `Program`, `Answer` | Long-context 10-K/10-Q QA; stress-testing context selection | No evidence span; full 10-K context is huge; not a retrieval benchmark out of the box |
 | **FiQA** | `BeIR/fiqa` + `BeIR/fiqa-qrels` | CC-BY-SA-4.0 | 57,638 passages; 6,648 queries; 17,110 qrels | `_id`, `title`, `text`; `query-id`, `corpus-id`, `score` | Standard financial passage retrieval; nDCG@10, Recall@100, MRR | General financial Q&A, not SEC filings; semantic task, lexical baselines are weak |
 | **FinMTEB** | GitHub `yixuantt/FinMTEB` | Check repository | Multiple tasks | Embedding benchmark tasks | Comparing embedding models on finance retrieval | More setup; not a single ready-to-use QA file |
@@ -60,18 +60,22 @@ answer.
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\evaluate_finder.py `
+  --scope company `
   --rerank flashrank `
   --output artifacts\finder-eval.json
 ```
 
-The script builds category-scoped reference corpora from the dataset, filters to
-the 1,085 `reasoning=True` rows by default, and reports answer-supported
-top1/at5. Measured result: **answer top1 0.794, at5 0.876**; on the 1,039 rows
-where the answer is present in a gold reference, **0.826 / 0.911**. BM25-only
-category scope is 0.737 / 0.876. Reference hit@5 is 0.371 because the benchmark
-does not provide company/page scope; use answer support, not reference hit rate,
-as the primary metric. P95 is 309 ms. License: CC-BY-NC-4.0; data is gitignored.
-`category` is dataset metadata, not inferred by the retriever.
+The script builds company-scoped reference corpora from question tickers/company
+aliases and reference headers, with category fallback for questions without a
+company match. It filters to the 1,085 `reasoning=True` rows by default and
+reports answer-supported top1/at5. Measured result: **answer top1 0.823, at5
+0.893**; on the 1,039 rows where the answer is present in a gold reference,
+**0.857 / 0.928**. Reference hit@5 is 0.598 and P95 is 287 ms. The category-only
+baseline is 0.794 / 0.876 with reference hit@5 0.371 and P95 309 ms; BM25-only
+company scope is 0.757 / 0.892. This is metadata filtering over reference
+excerpts, not full-filing page retrieval; answer support remains the primary
+metric. Company metadata is inferred without the answer column. License:
+CC-BY-NC-4.0; data is gitignored.
 
 ### 3. FiQA — the standard retrieval benchmark
 

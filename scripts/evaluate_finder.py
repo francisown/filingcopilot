@@ -15,7 +15,8 @@ import math
 import re
 import shutil
 import time
-from collections import defaultdict
+import unicodedata
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import pandas as pd
@@ -75,6 +76,259 @@ def build_corpus(rows: list[dict]) -> tuple[list[str], dict[str, int]]:
     return corpus, index
 
 
+COMPANY_GENERIC_PREFIXES = (
+    "as of",
+    "we ",
+    "our ",
+    "the company",
+    "the most",
+    "the board",
+    "consolidated",
+    "overview",
+    "employees",
+    "employee ",
+    "table of contents",
+    "one of",
+    "at ",
+    "income ",
+    "net income",
+    "workforce",
+    "diversity",
+    "talent",
+    "board ",
+    "corporate ",
+    "sustainability",
+    "future ",
+    "basic ",
+    "with ",
+    "union ",
+)
+TICKER_STOP = {
+    "FY",
+    "GAAP",
+    "EBIT",
+    "EBITDA",
+    "EPS",
+    "AI",
+    "US",
+    "USA",
+    "LLC",
+    "INC",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    "SG&A",
+    "CEO",
+    "CFO",
+    "ROI",
+    "ROA",
+    "YOY",
+    "USD",
+    "K",
+    "M",
+    "AR",
+    "AP",
+    "PPE",
+    "R&D",
+    "FTE",
+    "HC",
+    "DEI",
+    "HCM",
+    "NI",
+    "SG",
+    "OI",
+    "GP",
+    "GPM",
+    "IBT",
+    "CAGR",
+    "OPEX",
+    "NP",
+    "COGS",
+    "GM",
+    "OM",
+    "ROP",
+    "CF",
+    "NPM",
+    "ESG",
+    "TKR",
+    "DBE",
+    "HR",
+    "TICKER",
+}
+ALIAS_STOP = {
+    "the",
+    "inc",
+    "incorporated",
+    "corp",
+    "corporation",
+    "company",
+    "companies",
+    "ltd",
+    "limited",
+    "plc",
+    "holdings",
+    "group",
+    "and",
+    "of",
+    "a",
+}
+GENERIC_SINGLE_ALIASES = {
+    "global",
+    "capital",
+    "delta",
+    "american",
+    "united",
+    "general",
+    "first",
+    "international",
+    "national",
+    "public",
+    "financial",
+    "energy",
+    "health",
+    "systems",
+    "solutions",
+    "services",
+    "industries",
+    "resources",
+    "community",
+    "enterprise",
+    "technology",
+    "digital",
+    "medical",
+    "industrial",
+    "consumer",
+    "growth",
+    "value",
+    "income",
+    "employee",
+    "workforce",
+    "diversity",
+    "talent",
+    "match",
+    "pool",
+    "meta",
+}
+
+
+def company_from_references(references: list[object]) -> str:
+    """Return a company header from reference text, not from the answer."""
+    for reference in references:
+        lines = [line.strip() for line in str(reference).split("\n") if line.strip()]
+        for line in lines[:4]:
+            folded = line.casefold()
+            if folded.startswith(COMPANY_GENERIC_PREFIXES):
+                continue
+            candidate = re.split(
+                r"\b(?:and subsidiaries|and subsidiary companies|consolidated|overview)\b",
+                line,
+                flags=re.I,
+            )[0].strip(' ,.|"')
+            candidate = re.sub(r"\s+and\s*$", "", candidate, flags=re.I)
+            if len(candidate) > 110 or len(candidate.split()) > 12:
+                continue
+            if ". " in candidate or ";" in candidate or "\n" in candidate:
+                continue
+            if not re.search(
+                r"\b(inc|incorporated|corp|corporation|company|companies|ltd|limited|plc)\b",
+                candidate.casefold(),
+            ):
+                continue
+            return candidate
+    return ""
+
+
+def build_company_scope(
+    rows: list[dict],
+) -> tuple[
+    dict[str, tuple[list[str], dict[str, int], list[list[str]], float]],
+    dict[object, str],
+    int,
+]:
+    """Build company groups from question tickers and reference headers.
+
+    Company metadata is inferred from document headers and question text. The
+    answer column is not used. Rows without a confident company fall back to
+    their FinDER category.
+    """
+    ticker_companies: dict[str, Counter[str]] = defaultdict(Counter)
+    parenthesized_tickers: set[str] = set()
+    for row in rows:
+        company = company_from_references(row["references"])
+        if not company:
+            continue
+        text = str(row["text"])
+        parenthesized_tickers.update(re.findall(r"\(([A-Z]{2,6})\)", text))
+        for ticker in set(re.findall(r"\b[A-Z]{2,6}\b", text)):
+            if ticker not in TICKER_STOP:
+                ticker_companies[ticker][company] += 1
+
+    ticker_map = {
+        ticker: counter.most_common(1)[0][0]
+        for ticker, counter in ticker_companies.items()
+        if counter.most_common(1)[0][1] >= 2 or ticker in parenthesized_tickers
+    }
+
+    companies = Counter(
+        company_from_references(row["references"]) for row in rows
+    )
+    alias_to_company: dict[str, str] = {}
+    for company in companies:
+        if not company:
+            continue
+        ascii_company = (
+            unicodedata.normalize("NFKD", company)
+            .encode("ascii", "ignore")
+            .decode()
+        )
+        cleaned = re.sub(r"[^a-z0-9& ]+", " ", ascii_company.casefold())
+        core = [
+            word for word in cleaned.split() if word not in ALIAS_STOP
+        ]
+        for size in (1, 2, 3):
+            if len(core) < size:
+                continue
+            alias = " ".join(core[:size])
+            if len(alias) < 4:
+                continue
+            if size == 1 and alias in GENERIC_SINGLE_ALIASES:
+                continue
+            alias_to_company.setdefault(alias, company)
+    aliases = sorted(alias_to_company, key=len, reverse=True)
+
+    def company_for(row: dict) -> str:
+        text = str(row["text"])
+        for ticker in re.findall(r"\b[A-Z]{2,6}\b", text):
+            if ticker in ticker_map:
+                return ticker_map[ticker]
+        folded = text.casefold()
+        for alias in aliases:
+            if re.search(rf"\b{re.escape(alias)}\b", folded):
+                return alias_to_company[alias]
+        return ""
+
+    groups: dict[str, list[str]] = defaultdict(list)
+    row_scope: dict[object, str] = {}
+    for row in rows:
+        company = company_for(row)
+        if company:
+            key = f"company:{company}"
+        else:
+            key = f"category:{row['category']}"
+        groups[key].extend(str(reference) for reference in row["references"])
+        row_scope[row["_id"]] = key
+
+    corpora = {}
+    for key, references in groups.items():
+        corpus, index = build_corpus([{"references": references}])
+        tokenized = [tokens(text) for text in corpus]
+        average = sum(len(doc) for doc in tokenized) / max(1, len(tokenized))
+        corpora[key] = (corpus, index, tokenized, average)
+    company_scopes = sum(1 for key in groups if key.startswith("company:"))
+    return corpora, row_scope, company_scopes
+
+
 def build_scoped_corpora(
     rows: list[dict], scope: str
 ) -> dict[str, tuple[list[str], dict[str, int], list[list[str]], float]]:
@@ -126,7 +380,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts" / "finder-eval.json")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--include-reasoning", action="store_true")
-    parser.add_argument("--scope", choices=("global", "category"), default="category")
+    parser.add_argument(
+        "--scope", choices=("global", "category", "company"), default="company"
+    )
     parser.add_argument("--rerank", choices=("off", "flashrank"), default="flashrank")
     parser.add_argument("--k", type=int, default=5)
     args = parser.parse_args()
@@ -134,7 +390,12 @@ def main() -> None:
     data_path = ensure_data(args.data)
     frame = pd.read_parquet(data_path)
     all_rows = frame.to_dict("records")
-    corpora = build_scoped_corpora(all_rows, args.scope)
+    row_scope: dict[object, str] | None = None
+    company_scopes = 0
+    if args.scope == "company":
+        corpora, row_scope, company_scopes = build_company_scope(all_rows)
+    else:
+        corpora = build_scoped_corpora(all_rows, args.scope)
     rows = (
         all_rows
         if args.include_reasoning
@@ -154,9 +415,15 @@ def main() -> None:
 
     results = []
     latencies = []
+    company_scoped_questions = 0
     for row in rows:
         started = time.perf_counter()
-        scope_key = "global" if args.scope == "global" else str(row["category"])
+        if row_scope is not None:
+            scope_key = row_scope[row["_id"]]
+            if scope_key.startswith("company:"):
+                company_scoped_questions += 1
+        else:
+            scope_key = "global" if args.scope == "global" else str(row["category"])
         corpus, corpus_index, tokenized_corpus, avg_length = corpora[scope_key]
         top = bm25_top(tokenized_corpus, avg_length, tokens(row["text"]), args.k)
         if ranker is not None and top:
@@ -212,6 +479,8 @@ def main() -> None:
     summary = {
         "questions": len(results),
         "scope": args.scope,
+        "company_scopes": company_scopes,
+        "company_scoped_questions": company_scoped_questions,
         "corpus_references": sum(len(item[0]) for item in corpora.values()),
         "reference_hit_at_1": sum(
             1 for row in results if row["reference_rank"] == 1
@@ -240,7 +509,11 @@ def main() -> None:
         "schema": "filingcopilot.finder-eval/v1",
         "dataset": REPO,
         "license": "CC-BY-NC-4.0",
-        "scope": f"reference retrieval ({args.scope} scope); reasoning rows excluded unless --include-reasoning",
+        "scope": (
+            "reference retrieval "
+            f"({args.scope} scope, category fallback for unscoped rows); "
+            "reasoning rows excluded unless --include-reasoning"
+        ),
         "rerank": args.rerank,
         "summary": summary,
         "rows": results,

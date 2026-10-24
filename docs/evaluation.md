@@ -146,12 +146,19 @@ ceiling-limited: only 69/150 answers appear in the gold evidence page (49/50
 `metrics-generated` answers are computed), so its raw 0.427 is not a fair
 retrieval headline. On that evaluable subset, top1 is 0.913 and at5 is 1.000.
 For a cleaner answer-support benchmark we added FinDER (CC-BY-NC-4.0): 1,085
-`reasoning=True` rows with category-scoped reference corpora. BM25 gives answer
-top1 0.737 / at5 0.876; BM25 + FlashRank gives **0.794 / 0.876**, and on the
-1,039 rows whose answer is present in a gold reference **0.826 / 0.911**.
-FinDER reference hit@5 is 0.371 because the benchmark does not provide
-company/page scope; answer support is the primary metric. P95 is 309 ms.
-`category` is dataset metadata, not inferred by the retriever. Script:
+`reasoning=True` rows. The default retriever scopes references by company when
+the question contains a ticker or company alias, and falls back to the FinDER
+category otherwise. Company metadata is inferred from reference headers and
+question text, never from the answer column; 600/1,085 questions are
+company-scoped and 382 company groups are built. This is metadata filtering over
+reference excerpts, not full-filing page retrieval.
+
+Company scope + BM25 + FlashRank gives answer top1 **0.823** / at5 **0.893**;
+on the 1,039 rows whose answer is present in a gold reference, **0.857 / 0.928**.
+Reference hit@5 is **0.598** and P95 is **287 ms**. The category-only baseline
+is 0.794 / 0.876 with reference hit@5 0.371 and P95 309 ms; BM25-only company
+scope is 0.757 / 0.892. Answer support remains the primary metric because the
+benchmark still does not provide full-filing page scope. Script:
 `scripts/evaluate_finder.py`; result: `artifacts/finder-eval.json`.
 
 ## Human review
