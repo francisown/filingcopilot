@@ -46,7 +46,7 @@ makes 8–12 such calls for a slow question, so a 160–260s floor is expected
 before retries, serial review and queueing. That does not excuse 417s: it means
 the fix must reduce/parallelize calls, not only optimize retrieval.
 
-## Model swap: deepseek-v4.1-flash
+## Model swap tested and rejected: deepseek-v4.1-flash
 
 A direct probe of `deepseek-v4.1-flash` on the same endpoint was faster than
 `mimo-v2.6-flash`:
@@ -56,27 +56,26 @@ A direct probe of `deepseek-v4.1-flash` on the same endpoint was faster than
 | `mimo-v2.6-flash` | 20.3 / 20.9s | 22.4 / 21.3s |
 | `deepseek-v4.1-flash` | 16.3 / 4.7s | 7.2 / 4.4s |
 
-The local `.env` now uses:
+A first five-question risk subset looked promising: P50 420.0s→88.5s, P95
+420.8s→117.0s, coverage 0.2→0.6. The full 140-question run then exposed a
+quality regression:
 
-- research: `deepseek-v4.1-flash`
-- review: `glm-5.3-flash`
-- review independence warning: empty
-- `review_batch_size=2`, `max_rounds=8`
-
-A live run on the **same five slowest risk questions** (workers=1) produced:
-
-| Metric | mimo max8 (historical) | deepseek |
+| Metric | mimo historical | deepseek full run |
 |---|---:|---:|
-| P50 | 420.0s | **88.5s** |
-| P95 | 420.8s | **117.0s** |
-| Coverage | 0.2 | **0.6** |
-| Timeouts | 1 | **0** |
-| Answered | 1/5 | **3/5** |
+| Answered | **81/140** | 64/140 |
+| Partial | 18/140 | 36/140 |
+| Abstained | 41/140 | 40/140 |
+| Coverage | **0.579** | 0.457 |
+| Model-backed P95 | 417.1s | **139.0s** |
+| Negation answered | **16/20** | 4/20 |
+| Risk answered | **11/20** | 7/20 |
+| Causality answered | 14/20 | 13/20 |
 
-This is a **model/configuration change**, not a retrieval or code change. It is
-still a five-question risk subset; the full 140-question run has not been
-re-executed, and quality on numeric/causality/evidence-boundary categories is
-not established by this swap.
+The speed gain is real, but it is a **quality-for-speed trade-off**, especially
+on negation and risk. It was not adopted; the local `.env` is back to
+`mimo-v2.6-flash` with `glm-5.3-flash` review, batch 2, max_rounds 8. A future
+routing design could send only categories that retain quality to DeepSeek, but
+that requires a held-out per-category quality gate.
 
 ## External patterns
 
@@ -144,11 +143,10 @@ reverted. It remains a documented failed experiment, not a default.
 
 ## Status
 
-**Partially mitigated by changing the model.** Batch 4 and risk-specific
-six-round routing were rejected. The local `.env` now routes research to
-`deepseek-v4.1-flash` and review to `glm-5.3-flash`; the five-question risk
-subset improved from P50 420.0s / P95 420.8s / coverage 0.2 to P50 88.5s /
-P95 117.0s / coverage 0.6, with no timeouts. The full 140-question run has not
-been repeated, so the README still reports the historical 417.1s result and
-does not claim a new global P95. Next candidates are parallel review batches at
-batch 2 and parallel independent tool calls.
+**Not adopted.** Batch 4, risk-specific six-round routing, and the DeepSeek
+model swap were all rejected. DeepSeek cut the full-run P95 from 417.1s to
+139.0s, but answered fell from 81/140 to 64/140 and negation dropped from 16/20
+to 4/20. The local `.env` is back to `mimo-v2.6-flash` + `glm-5.3-flash`, batch
+2, max_rounds 8. The README continues to report the historical 417.1s result.
+Next candidates are parallel review batches at batch 2 and category routing
+with a held-out quality gate.
