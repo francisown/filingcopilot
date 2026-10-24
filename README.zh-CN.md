@@ -37,7 +37,7 @@ FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或�
 | 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
 | 代码 | 约 23k 行 Python，77 个源码模块 |
 
-**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。FinanceBench evidence-page 是 150 条公开数据、company+year scope，不等于完整 filing 检索；full-filing 是 61 份已解析 PDF、113 题，使用 BGE ONNX rerank（page@1 0.540、page@5 0.850、rerank P95 1.84s）；新增文档 22 题 held-out page@1 0.545 / page@5 0.773。两者都不是人工相关性或生产准确率。这些是工程测量，不是生产承诺。完整方法和分母见[评测](docs/evaluation.md)。
+**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。FinanceBench evidence-page 是 150 条公开数据、company+year scope，不等于完整 filing 检索；full-filing 是 61 份已解析 PDF、113 题，使用 BGE ONNX rerank（page@1 0.540、page@5 0.850、rerank P95 1.84s）；新增文档 22 题 held-out page@1 0.545 / page@5 0.773。两者都不是人工相关性或生产准确率。这些是工程测量，不是生产承诺。历史 417.1 秒使用的是 `mimo-v2.6-flash`；当前本地配置将研究模型切换为 `deepseek-v4.1-flash`、审查模型为 `glm-5.3-flash`。在 5 道最慢 risk 题上实测 P50 88.5 秒 / P95 117.0 秒，coverage 0.2→0.6；完整 140 题尚未重跑。完整方法和分母见[评测](docs/evaluation.md)与[延迟记录](docs/latency-budget.md)。
 
 ## 工作方式
 

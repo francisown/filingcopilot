@@ -46,6 +46,38 @@ makes 8–12 such calls for a slow question, so a 160–260s floor is expected
 before retries, serial review and queueing. That does not excuse 417s: it means
 the fix must reduce/parallelize calls, not only optimize retrieval.
 
+## Model swap: deepseek-v4.1-flash
+
+A direct probe of `deepseek-v4.1-flash` on the same endpoint was faster than
+`mimo-v2.6-flash`:
+
+| Model | Short wall | 4k-context wall |
+|---|---:|---:|
+| `mimo-v2.6-flash` | 20.3 / 20.9s | 22.4 / 21.3s |
+| `deepseek-v4.1-flash` | 16.3 / 4.7s | 7.2 / 4.4s |
+
+The local `.env` now uses:
+
+- research: `deepseek-v4.1-flash`
+- review: `glm-5.3-flash`
+- review independence warning: empty
+- `review_batch_size=2`, `max_rounds=8`
+
+A live run on the **same five slowest risk questions** (workers=1) produced:
+
+| Metric | mimo max8 (historical) | deepseek |
+|---|---:|---:|
+| P50 | 420.0s | **88.5s** |
+| P95 | 420.8s | **117.0s** |
+| Coverage | 0.2 | **0.6** |
+| Timeouts | 1 | **0** |
+| Answered | 1/5 | **3/5** |
+
+This is a **model/configuration change**, not a retrieval or code change. It is
+still a five-question risk subset; the full 140-question run has not been
+re-executed, and quality on numeric/causality/evidence-boundary categories is
+not established by this swap.
+
 ## External patterns
 
 - Anthropic's agent guidance recommends simple workflows, **routing** and
@@ -112,9 +144,11 @@ reverted. It remains a documented failed experiment, not a default.
 
 ## Status
 
-**Not solved.** Both tested shortcuts were rejected: batch 4 produced a
-timeout, and risk-specific six-round routing did not improve P95 or coverage on
-the five-question follow-up. The code is back to batch 2 / max_rounds 8. The
-README continues to report the historical 417.1s result rather than claiming a
-new P95. Next candidates are parallel review batches at batch 2, model routing
-with a paired quality test, and parallel independent tool calls.
+**Partially mitigated by changing the model.** Batch 4 and risk-specific
+six-round routing were rejected. The local `.env` now routes research to
+`deepseek-v4.1-flash` and review to `glm-5.3-flash`; the five-question risk
+subset improved from P50 420.0s / P95 420.8s / coverage 0.2 to P50 88.5s /
+P95 117.0s / coverage 0.6, with no timeouts. The full 140-question run has not
+been repeated, so the README still reports the historical 417.1s result and
+does not claim a new global P95. Next candidates are parallel review batches at
+batch 2 and parallel independent tool calls.
