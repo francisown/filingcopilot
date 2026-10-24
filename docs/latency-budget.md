@@ -65,6 +65,26 @@ change did not affect real runs.
 The reviewer still returns one verdict per claim, and the batch-validation /
 withholding tests remain in force.
 
+## Live route: risk questions use six rounds
+
+The next A/B kept batch=2 and changed only the risk-question round budget from
+8 to 6. The same two questions were rerun with the provider and corpus
+unchanged:
+
+| Question | max rounds | Latency | Status | Coverage |
+|---|---:|---:|---|---:|
+| Apple FY2025 risk | 8 | 304.1s | partial | 0.0 |
+| Apple FY2025 risk | 6 | **208.8s** | **answered** | **1.0** |
+| NVIDIA FY2025 risk | 8 | 214.9s | partial | 0.0 |
+| NVIDIA FY2025 risk | 6 | **120.9s** | partial | 0.0 |
+| Apple FY2025 risk, code route | 8 global / 6 risk | **178.5s** | **answered** | **1.0** |
+| NVIDIA FY2025 risk, code route | 8 global / 6 risk | **162.6s** | **answered** | **1.0** |
+
+Both questions got faster, and both code-route runs answered with full coverage.
+The change is therefore **risk-specific**: `risk_max_rounds=6`; non-risk
+questions keep `max_rounds=8`. It is still a two-question live sample, not a
+replacement for a full 140-question paired run.
+
 ## Candidate changes still unvalidated
 
 1. Parallel review batches (subject to provider rate limits).
@@ -75,8 +95,8 @@ withholding tests remain in force.
 
 ## Status
 
-**Not solved.** The batch-size change was reverted after a mixed live A/B
-(one faster answer, one timeout). The README continues to report the 417.1s
-result rather than hiding it. The next candidate is parallel review batches at
-the existing batch size 2, followed by model routing; both need the same paired
-latency/quality harness before becoming defaults.
+**Partially solved for the risk tail.** Batch 4 was reverted; risk-specific
+six-round routing is now in code and is faster on both live A/B questions.
+The full 140-question P95 has not been rerun, so the README continues to report
+the historical 417.1s result rather than claiming a new P95. Next candidates are
+parallel review batches at batch 2 and parallel independent tool calls.

@@ -34,6 +34,7 @@ class Settings:
     retrieval_query_mode: str = "focused"
     retrieval_candidate_limit: int = 75
     max_rounds: int = 8
+    risk_max_rounds: int = 6
     max_tool_calls: int = 20
     model_max_tokens: int = 8192
     review_max_tokens: int = 8192
@@ -97,6 +98,7 @@ class Settings:
             embedding_threads=max(1, min(8, int(os.getenv("FC_EMBEDDING_THREADS", str(cls.embedding_threads))))),
             rerank_mode=os.getenv("FC_RERANK_MODE", "coverage").strip().lower(),
             max_rounds=max(1, min(12, int(os.getenv("FC_MAX_ROUNDS", "8")))),
+            risk_max_rounds=max(1, min(12, int(os.getenv("FC_RISK_MAX_ROUNDS", "6")))),
             max_tool_calls=max(1, min(30, int(os.getenv("FC_MAX_TOOL_CALLS", "20")))),
             model_max_tokens=max(512, min(8192, int(os.getenv("FC_MODEL_MAX_TOKENS", "8192")))),
             review_max_tokens=max(1024, min(8192, int(os.getenv("FC_REVIEW_MAX_TOKENS", "8192")))),

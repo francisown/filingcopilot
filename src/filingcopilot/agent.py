@@ -72,6 +72,29 @@ def module_round_limit(module: str | None, max_rounds: int) -> int:
     return min(max_rounds, 4) if contract and contract.kind == "factual" else max_rounds
 
 
+RISK_PATTERN = re.compile(r"\brisks?\b|\brisk factors?\b|风险")
+
+
+def is_risk_question(question: str) -> bool:
+    return bool(RISK_PATTERN.search(question.casefold()))
+
+
+def question_round_limit(
+    module: str | None,
+    question: str,
+    max_rounds: int,
+    risk_max_rounds: int,
+) -> int:
+    """Risk summaries use the live-tested six-round budget; other runs keep eight."""
+
+    base = module_round_limit(module, max_rounds)
+    if module == "risk":
+        return min(base, max(1, risk_max_rounds))
+    if module or not is_risk_question(question):
+        return base
+    return min(base, max(1, risk_max_rounds))
+
+
 SYSTEM = """You are FilingCopilot, a careful financial filing researcher. Answer in Chinese.
 For an explanation, lead with the disclosed cause; figures alone do not answer why.
 For a risk question, address each requested risk category, including customer concentration
@@ -693,14 +716,23 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     initial_seen.add(
                         json.dumps(["search_passages", record["arguments"]], sort_keys=True)
                     )
-        round_limit = module_round_limit(request.module, self.settings.max_rounds)
-        if request.module and round_limit < self.settings.max_rounds:
+        round_limit = question_round_limit(
+            request.module,
+            request.question,
+            self.settings.max_rounds,
+            self.settings.risk_max_rounds,
+        )
+        if round_limit < self.settings.max_rounds:
             initial_trace.append(
                 {
-                    "stage": "module_budget",
+                    "stage": "module_budget" if request.module else "risk_budget",
                     "module": request.module,
                     "round_limit": round_limit,
-                    "reason": "factual restatement section uses a bounded drafting/repair budget",
+                    "reason": (
+                        "factual restatement section uses a bounded drafting/repair budget"
+                        if request.module
+                        else "risk summary uses the live-tested six-round budget"
+                    ),
                 }
             )
         state = self.graph.invoke(
