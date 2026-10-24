@@ -170,7 +170,9 @@ def test_expired_review_keeps_only_completed_batch_no_repairs(tools, monkeypatch
         ]
     )
     with research_scope(control):
-        result = ResearchAgent(Settings(home=tools.corpus.home), gateway).run(
+        result = ResearchAgent(
+            Settings(home=tools.corpus.home, review_batch_size=2), gateway
+        ).run(
             ResearchRequest(language="zh", question="苹果供应风险", ticker="AAPL"), tools
         )
     assert len(result.answer) == 2 and result.usage["model_calls"] == 3

@@ -725,7 +725,10 @@ def test_failed_review_batch_preserves_other_approved_claims_and_withholds_unrev
             return result
 
     answer = ResearchAgent(
-        Settings(home=tools.corpus.home, max_rounds=1), FailedBatchGateway()
+        Settings(
+            home=tools.corpus.home, max_rounds=1, review_batch_size=2
+        ),
+        FailedBatchGateway(),
     ).run(ResearchRequest(question="苹果股票怎么样？", ticker="AAPL"), tools)
     assert answer.status == "partial"
     assert [c["index"] for c in answer.answer] == [0, 1]

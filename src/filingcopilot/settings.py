@@ -38,9 +38,10 @@ class Settings:
     model_max_tokens: int = 8192
     review_max_tokens: int = 8192
     # A larger batch reduces serial review calls while keeping every claim
-    # independently verdict-bound. The value remains configurable for slower
-    # providers or stricter review experiments.
-    review_batch_size: int = 2
+    # independently verdict-bound. Four is the latency/context compromise;
+    # the value remains configurable for slower providers or stricter review
+    # experiments.
+    review_batch_size: int = 4
     min_model_interval: float = 21.0
     model_timeout: float = 60.0
     # A full company brief performs source preparation plus model drafting and
@@ -100,7 +101,7 @@ class Settings:
             max_tool_calls=max(1, min(30, int(os.getenv("FC_MAX_TOOL_CALLS", "20")))),
             model_max_tokens=max(512, min(8192, int(os.getenv("FC_MODEL_MAX_TOKENS", "8192")))),
             review_max_tokens=max(1024, min(8192, int(os.getenv("FC_REVIEW_MAX_TOKENS", "8192")))),
-            review_batch_size=max(1, min(8, int(os.getenv("FC_REVIEW_BATCH_SIZE", "2")))),
+            review_batch_size=max(1, min(8, int(os.getenv("FC_REVIEW_BATCH_SIZE", "4")))),
             min_model_interval=max(0.0, min(60.0, float(os.getenv("FC_MIN_MODEL_INTERVAL", "21")))),
             model_timeout=max(1.0, min(180.0, float(os.getenv("FC_MODEL_TIMEOUT", "60")))),
             research_timeout=max(1.0, min(1800.0, float(os.getenv("FC_RESEARCH_TIMEOUT", "420")))),

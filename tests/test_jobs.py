@@ -521,7 +521,9 @@ def test_cancel_after_first_review_batch_retains_only_reviewed_claims(tools):
         ]
     )
     with research_scope(control):
-        result = ResearchAgent(Settings(home=tools.corpus.home), gateway).run(
+        result = ResearchAgent(
+            Settings(home=tools.corpus.home, review_batch_size=2), gateway
+        ).run(
             ResearchRequest(language="zh", question="苹果供应风险", ticker="AAPL"), tools
         )
     assert result.usage["model_calls"] == 3
