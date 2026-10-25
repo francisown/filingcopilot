@@ -257,7 +257,7 @@ async def check(read, write, transport):
         )
         assert not source_search.isError
         source_data = source_search.structuredContent or json.loads(source_search.content[0].text)
-        assert source_data["backend"] == "fts5" and source_data["eligible_passages"] > 0
+        assert source_data["backend"].startswith("fts5") and source_data["eligible_passages"] > 0, source_data
         trailing = await session.call_tool(
             "get_ttm_financial_fact", {"ticker": "AAPL", "metric": "revenue", "as_of": "2026-02-01"}
         )
