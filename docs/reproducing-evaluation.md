@@ -53,6 +53,9 @@ The fetcher verifies the ONNX file's size and SHA256:
 .\.venv\Scripts\python.exe scripts\evaluate_finder.py `
   --scope company --rerank flashrank --output artifacts\finder-eval.json
 
+# The evidence-page evaluator refuses to delete a nonempty unmanaged --home.
+# Use a fresh directory or pass --force deliberately after checking the path.
+
 # Full test suite
 .\.venv\Scripts\python.exe -m pytest -q
 ```
@@ -61,7 +64,9 @@ The fetcher verifies the ONNX file's size and SHA256:
 
 These are the latest recorded values, with 95% Wilson intervals where the
 sample is binomial. They are not guaranteed to reproduce byte-for-byte if
-upstream PDFs change or return 403.
+upstream PDFs change or return 403. Answer support is strict: every distinct
+numeric value in the answer must occur in the same evidence text. The earlier
+any-one-number values are retired and are not comparable.
 
 | Check | Estimate | n | 95% interval |
 |---|---:|---:|---:|
@@ -69,10 +74,15 @@ upstream PDFs change or return 403.
 | Full-filing page@5 | 0.850 | 113 | 0.772–0.904 |
 | Full-filing snippet@5 | 0.858 | 113 | 0.782–0.911 |
 | 22-question extension page@5 | 0.773 | 22 | 0.566–0.899 |
-| Evidence-page page@5 | 0.920 | 150 | 0.865–0.954 |
-| Evidence-page evaluable answer top1 | 0.913 | 69 | 0.823–0.960 |
-| FinDER answer top1 | 0.823 | 1,085 | 0.799–0.845 |
-| FinDER answer at5 | 0.893 | 1,085 | 0.873–0.910 |
+| Evidence-page page@5 | 0.927 | 150 | 0.874–0.959 |
+| Evidence-page strict answer top1 | 0.227 | 150 | 0.167–0.300 |
+| Evidence-page evaluable strict answer top1 | 0.750 | 44 | 0.606–0.854 |
+| FinDER strict answer top1 | 0.082 | 1,085 | 0.067–0.100 |
+| FinDER strict answer at5 | 0.136 | 1,085 | 0.117–0.158 |
+| FinDER evaluable strict answer top1 | 0.392 | 227 | 0.331–0.457 |
+
+Strict records: [FinDER](validation/finder-strict-2026-10-25.json) and
+[FinanceBench](validation/financebench-strict-2026-10-25.json).
 
 ## Known reproducibility limits
 

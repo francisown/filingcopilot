@@ -18,6 +18,7 @@ import shutil
 import time
 from collections import defaultdict
 from datetime import date
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from filingcopilot.corpus import Corpus, stable_id
@@ -30,6 +31,8 @@ AS_OF = date(2026, 12, 31)
 FILED = date(2024, 1, 1)
 PERIOD_END = date(2023, 12, 31)
 DEFAULT_DATA = Path("evaluation/external/data/financebench.jsonl")
+ROOT = Path(__file__).resolve().parents[1]
+MANAGED_HOME_MARKER = ".filingcopilot-eval-home"
 
 FINANCE_SYNONYMS = {
     "capital expenditure": "capital expenditures capex purchases of property plant and equipment pp&e",
@@ -273,6 +276,44 @@ def chunk_page(
     return _recursive_chunks(text, size, overlap)
 
 
+def prepare_home(home: Path, *, force: bool = False) -> Path:
+    """Create a disposable evaluation home without deleting unmanaged data.
+
+    The evaluator rebuilds its corpus, so an existing managed home may be
+    replaced. Any other nonempty directory requires an explicit ``--force``;
+    the repository root, the current directory and the user's home are always
+    rejected.
+    """
+    requested = home.expanduser()
+    if requested.is_symlink():
+        raise ValueError(f"Evaluation home must not be a symlink: {requested}")
+    home = requested.resolve()
+    protected = {
+        Path(home.anchor).resolve(),
+        Path.home().resolve(),
+        ROOT.resolve(),
+        Path.cwd().resolve(),
+    }
+    if home in protected:
+        raise ValueError(f"Refusing to use protected directory as evaluation home: {home}")
+    if home.exists() and not home.is_dir():
+        raise ValueError(f"Evaluation home is not a directory: {home}")
+    if home.exists():
+        has_contents = any(home.iterdir())
+        if has_contents and not (home / MANAGED_HOME_MARKER).is_file() and not force:
+            raise ValueError(
+                f"Refusing to delete unmanaged directory {home}; "
+                "use a new/empty directory or pass --force explicitly"
+            )
+        shutil.rmtree(home)
+    home.mkdir(parents=True, exist_ok=True)
+    (home / MANAGED_HOME_MARKER).write_text(
+        "Managed by scripts/evaluate_financebench.py; safe to rebuild.\n",
+        encoding="utf-8",
+    )
+    return home
+
+
 def build_corpus(
     rows: list[dict],
     home: Path,
@@ -280,9 +321,9 @@ def build_corpus(
     chunk_size: int = 0,
     chunk_overlap: int = 120,
     chunk_strategy: str = "recursive",
+    force: bool = False,
 ) -> dict:
-    if home.exists():
-        shutil.rmtree(home, ignore_errors=True)
+    prepare_home(home, force=force)
     corpus = Corpus(home)
     pages: dict[str, dict[int, dict]] = defaultdict(dict)
     for row in rows:
@@ -395,17 +436,32 @@ def snippet_hit(hit: dict, snippets: list[str], page_texts: dict[tuple[str, int]
     return False
 
 
+NUMBER_PATTERN = re.compile(
+    r"(?<![\w.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w)"
+)
+
+
+def numeric_values(value: object) -> set[Decimal]:
+    """Return exact numeric values, never substrings inside larger numbers."""
+    values: set[Decimal] = set()
+    for match in NUMBER_PATTERN.finditer(str(value)):
+        try:
+            values.add(Decimal(match.group(0).replace(",", "")))
+        except InvalidOperation:
+            continue
+    return values
+
+
 def answer_supported_text(text: str, answer: str) -> bool:
+    """Require every answer number to occur in the same evidence text."""
     if not text or not answer:
         return False
     text = norm(text)
-    numbers = re.findall(r"[-+]?\d[\d,.]*", answer)
+    answer_value = norm(answer)
+    numbers = numeric_values(answer_value)
     if numbers:
-        for number in numbers:
-            cleaned = number.replace(",", "").rstrip(".")
-            if cleaned and cleaned in text.replace(",", ""):
-                return True
-    return norm(answer)[:120] in text
+        return numbers <= numeric_values(text)
+    return answer_value[:120] in text
 
 
 def answer_support_page(hit: dict, answer: str, page_texts: dict[tuple[str, int], str]) -> bool:
@@ -670,6 +726,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--home", type=Path, default=Path(".financebench-eval"))
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Allow rebuilding a nonempty unmanaged home directory. Never allowed for protected roots.",
+    )
     parser.add_argument("--limit", type=int)
     parser.add_argument("--k", type=int, default=5)
     parser.add_argument("--mode", choices=("coverage", "anchor", "rrf"), default="coverage")
@@ -717,6 +778,7 @@ def main() -> None:
         chunk_size=args.chunk_size,
         chunk_overlap=args.chunk_overlap,
         chunk_strategy=args.chunk_strategy,
+        force=args.force,
     )
     settings = Settings(
         home=args.home,

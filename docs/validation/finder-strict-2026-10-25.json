@@ -1,0 +1,37 @@
+{
+  "schema": "filingcopilot.validation/eval-strict/v1",
+  "recorded_at": "2026-10-25",
+  "benchmark": "FinDER",
+  "dataset": "Linq-AI-Research/FinDER",
+  "license": "CC-BY-NC-4.0",
+  "scope": "1,085 reasoning rows; company-scoped reference corpus with category fallback; BM25 + FlashRank",
+  "strict_answer_support": "Every distinct numeric value in the answer must occur in the same evidence text using normalized numeric equality; numeric substrings do not count. Nonnumeric answers retain normalized text containment.",
+  "configuration": {
+    "rows": 1085,
+    "scope": "company",
+    "company_scopes": 382,
+    "company_scoped_questions": 600,
+    "corpus_references": 5912,
+    "rerank": "flashrank"
+  },
+  "metrics": {
+    "questions": 1085,
+    "answer_supported_top1": 0.08202764976958525,
+    "answer_supported_at_5": 0.13640552995391705,
+    "answer_evaluable_questions": 227,
+    "answer_supported_top1_evaluable": 0.3920704845814978,
+    "answer_supported_at_5_evaluable": 0.6431718061674009,
+    "reference_hit_at_1": 0.423963133640553,
+    "reference_hit_at_5": 0.5981566820276498,
+    "p50_ms": 216.24479998718016,
+    "p95_ms": 273.55010001338087
+  },
+  "artifact": {
+    "path": "artifacts/finder-eval-strict.json",
+    "sha256": "c86905212cdace3b59ef3a05b639779e34aa4dd64a2f9bb7baf2803a7605484e"
+  },
+  "source_scripts": {
+    "scripts/evaluate_finder.py": "b2688b4a58b05b3e1901b5c43b6fe5c908afb5aef934d37612d9b6d48814cf83"
+  },
+  "note": "The previous any-one-number metric (top1 0.823 / at5 0.893) is retired. It counted a row as supported when only one of several answer numbers appeared in the evidence."
+}

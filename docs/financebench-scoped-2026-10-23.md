@@ -1,9 +1,9 @@
-# FinanceBench check — 2026-10-23
+# FinanceBench check — 2026-10-23, strict update 2026-10-25
 
 This note reports two different retrieval layers. They are not interchangeable.
 
 - **Headline:** full-filing retrieval is **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
-- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.913 on the 69 evaluable rows (raw 0.427), MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search.
+- **Diagnostic:** evidence-page retrieval is **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927, answer-supported top1 0.227 hit / 0.240 page raw; 0.750 / 0.795 on 44 fully-supported rows; MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search. The earlier 0.427/0.913 answer-support values used any-one-number matching and are retired.
 
 ## Evidence-page benchmark
 
@@ -22,23 +22,27 @@ This note reports two different retrieval layers. They are not interchangeable.
   --output artifacts\financebench-eval-section3000-p4000.json
 ```
 
+The evaluator refuses to delete a nonempty unmanaged `--home`. Use a fresh
+directory, or pass `--force` deliberately after confirming the path. The
+repository root, current directory and user home are always rejected.
+
 | Metric | Result |
 |---|---:|
 | Questions | 150 |
 | Page hit@1 | 0.707 |
-| Page hit@5 | **0.920** |
+| Page hit@5 | **0.927** |
 | Snippet hit@1 | 0.653 |
 | Snippet hit@3 | 0.873 |
-| Snippet hit@5 | **0.920** |
+| Snippet hit@5 | **0.927** |
 | MRR@5 | **0.798** |
-| Answer-supported top1, raw | 0.427 |
-| Answer-supported top1, page-level | 0.447 |
-| Answer-supported at 5, raw | 0.467 |
-| Answer-evaluable questions | 69 |
-| Answer-supported top1, evaluable | 0.913 |
-| Answer-supported at 5, evaluable | 1.000 |
-| Answer-supported top1, page-level evaluable | 0.957 |
-| Retrieval P95 | 6.5 ms |
+| Answer-supported top1, raw | 0.227 |
+| Answer-supported top1, page-level | 0.240 |
+| Answer-supported at 5, raw | 0.307 |
+| Answer-evaluable questions | 44 |
+| Answer-supported top1, evaluable | 0.750 |
+| Answer-supported at 5, evaluable | 0.955 |
+| Answer-supported top1, page-level evaluable | 0.795 |
+| Retrieval P95 | 7.5 ms |
 
 The 4,000-character parent window is the balanced setting. Larger windows were not adopted because they did not improve answer-supported top1. Chunk size was not increased further.
 
@@ -46,7 +50,7 @@ The 4,000-character parent window is the balanced setting. Larger windows were n
 
 | Type | Questions | Page hit@5 | Snippet hit@5 |
 |---|---:|---:|---:|
-| domain-relevant | 50 | 0.820 | 0.820 |
+| domain-relevant | 50 | 0.840 | 0.840 |
 | metrics-generated | 50 | 1.000 | 1.000 |
 | novel-generated | 50 | 0.940 | 0.940 |
 
@@ -54,7 +58,7 @@ The 4,000-character parent window is the balanced setting. Larger windows were n
 
 | Type | Questions | Page hit@5 | Snippet hit@5 |
 |---|---:|---:|---:|
-| 10-K | 112 | 0.929 | 0.929 |
+| 10-K | 112 | 0.938 | 0.938 |
 | 10-Q | 15 | 0.933 | 0.933 |
 | 8-K | 9 | 1.000 | 1.000 |
 | Earnings | 14 | 0.786 | 0.786 |
@@ -63,12 +67,14 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 
 ### Answer support
 
-Only **69/150** questions have the answer literally present in the gold evidence page; 49/50 `metrics-generated` answers are computed and not written on the page. On those 69 evaluable rows, answer-supported top1 is **0.913**, at 5 is **1.000**, and page-level top1 is **0.957**. The raw 0.427/0.467 numbers are retained for transparency, but they mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
+Only **44/150** questions have every numeric value in the answer present in one gold evidence page; 49/50 `metrics-generated` answers are computed and not written on the page. The strict metric requires all answer numbers, not any one number. On those 44 evaluable rows, answer-supported top1 is **0.750**, at 5 is **0.955**, and page-level top1 is **0.795**. The raw 0.227/0.307 numbers are retained for transparency, but they mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
 
 BGE was also measured on the evidence-page path: page@1 0.707→**0.720**,
-page@3 0.873→**0.913**, MRR 0.798→**0.808**, page@5 stays **0.920**.
-P95 rises from 8.2ms to **1.46s**, so the fast evidence-page path keeps
-title rerank; BGE is enabled only for the full-filing path.
+page@3 0.873→**0.913**, MRR 0.798→**0.808**; the earlier page@5 was **0.920**.
+The 2026-10-25 strict rerun with the bounded coverage candidate pool records
+page@5 **0.927**, but it still uses title rerank. P95 rises to **1.46s** with
+BGE, so the fast evidence-page path keeps title rerank; BGE is enabled only for
+the full-filing path.
 
 ## Full-filing benchmark
 
@@ -107,7 +113,7 @@ The 22 questions from the 60→80 document extension reach page hit@1 **0.545**,
 - A title-based top1 rerank promotes a top-3 page whose heading matches more query terms. In full-filing it raised page@1 0.327→0.407 and MRR 0.523→0.569 without changing page@5.
 - A FlashRank cross-encoder rerank on the top5 full-filing pages then raised page@1 0.407→0.478, MRR 0.569→0.624 and snippet@1 0.416→0.487; page@5 and snippet@5 stayed unchanged. It adds roughly 0.3s per query, so evidence-page keeps the cheaper title rerank.
 - A `BAAI/bge-reranker-v2-m3` INT8 ONNX rerank on the same top5 pages raised page@1 0.478→0.540, snippet@1 0.487→0.531 and MRR 0.624→0.664, while page@5 0.850 and snippet@5 0.858 stayed unchanged. It costs about 1.8s P95 on CPU; full-filing adopts it, FlashRank remains the fallback.
-- Snippet matching now also uses a compact character match, so PDF spacing/table-extraction differences such as `Cashandcashequivalents` no longer count as misses. Full-filing snippet@5 rose 0.779→0.858; evidence-page snippet@5 rose 0.907→0.920.
+- Snippet matching now also uses a compact character match, so PDF spacing/table-extraction differences such as `Cashandcashequivalents` no longer count as misses. Full-filing snippet@5 rose 0.779→0.858; evidence-page snippet@5 rose 0.907→0.927 in the strict rerun.
 - TOC/index pages are down-weighted.
 - Segment-result pages with a `managed basis` table get a page-level bonus.
 
@@ -131,12 +137,12 @@ methods cannot work with a stronger page index or layout-aware extraction.
 
 ## Limitations
 
-- Evidence-page retrieval is not full 10-K search. The 0.920 number must not be presented as full-filing accuracy.
+- Evidence-page retrieval is not full 10-K search. The 0.927 number must not be presented as full-filing accuracy.
 - The full-filing result is 0.850 page hit@5 on 61 parsed documents; BGE rerank improves page@1 to 0.540 and MRR to 0.664, but these are still not strong.
 - 19 of 80 selected documents were skipped due to HTTP 403, corrupt files, or no extractable text. That is selection bias.
 - The router contains domain and bank-report heuristics. It is development-tuned on these rows; the 22-question held-out extension is too small for a final claim.
 - Title, FlashRank and BGE rerankers are development-tuned on the 150 evidence-page rows and 113 full-filing questions; their gain needs a held-out confirmation. FlashRank adds roughly 0.3s per query; BGE INT8 ONNX adds roughly 1.8s P95 on CPU. The 22-question BGE extension reaches page@1 0.545 / page@5 0.773 / MRR 0.621, still too small for a final claim.
-- Snippet matching uses normalized token and compact-character matching; answer support checks numeric or answer-substring presence. Neither is human relevance.
+- Snippet matching uses normalized token and compact-character matching. Strict answer support requires every distinct numeric value in the answer to occur in the same evidence text; numeric substrings do not count, and nonnumeric answers use text containment. Neither metric is human relevance.
 - No model answer was generated. This is retrieval, not end-to-end answer accuracy.
 - FinanceBench is CC-BY-NC-4.0; the dataset and PDFs are gitignored and not redistributed.
 

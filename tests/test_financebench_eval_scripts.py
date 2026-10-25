@@ -9,6 +9,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -189,6 +191,33 @@ def test_answer_supported_text() -> None:
     assert page_eval.answer_supported_text("Revenue was 123 million.", "123")
     assert page_eval.answer_supported_text("The quick ratio was 0.69.", "0.69")
     assert not page_eval.answer_supported_text("Revenue was 123 million.", "456")
+
+
+def test_answer_support_requires_every_answer_number() -> None:
+    text = "Revenue was 123 million and the margin was 45%."
+    assert page_eval.answer_supported_text(text, "123 million and 45%")
+    assert not page_eval.answer_supported_text(text, "123 million and 46%")
+    assert not page_eval.answer_supported_text("Revenue was 123 million.", "123 and 45")
+    # Numeric equality, not a substring of a larger number.
+    assert not page_eval.answer_supported_text("Revenue was 1234 million.", "123")
+    assert page_eval.answer_supported_text("Revenue was 1,234 million.", "1234")
+
+
+def test_evaluation_home_requires_managed_marker_or_explicit_force(tmp_path) -> None:
+    home = tmp_path / "eval-home"
+    home.mkdir()
+    sentinel = home / "keep.txt"
+    sentinel.write_text("do not delete", encoding="utf-8")
+    with pytest.raises(ValueError, match="unmanaged|Refusing"):
+        page_eval.prepare_home(home)
+    assert sentinel.exists()
+
+    with pytest.raises(ValueError, match="protected"):
+        page_eval.prepare_home(Path.cwd())
+
+    page_eval.prepare_home(home, force=True)
+    assert (home / page_eval.MANAGED_HOME_MARKER).exists()
+    assert not sentinel.exists()
 
 
 def test_full_filing_flashrank_rerank_order() -> None:

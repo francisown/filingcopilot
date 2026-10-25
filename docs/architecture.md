@@ -58,11 +58,17 @@ The exported calculation keeps those inputs and user assumptions, but it is
 not a v1 research package. OCF less gross PP&E is a cashflow proxy, not unlevered
 FCF: the surface does not call the result enterprise value or an equity target.
 
-The default coverage rerank lives in `Retriever._coverage_hits`; it is
-deterministic, uses bilingual query expansion, IDF-weighted term coverage and a
-small section prior, and does not call a model. `reranking.py` remains an
-evaluation-only seam. Invalid score counts, nonfinite
-scores or scorer failures preserve the original order and evidence objects.
+The default coverage rerank lives in `Retriever._coverage_hits`; it is a
+deterministic second stage over a bounded candidate pool, using bilingual query
+expansion, IDF-weighted term coverage and a small section prior. The pool is
+the union of the FTS lexical leg and, when `embedding_mode=local` and
+`lexical_only` is false, the dense leg; each leg is capped by
+`retrieval_candidate_limit`. `lexical_only=True` never runs the dense leg.
+Coverage does not scan every passage in the filing scope. Backend labels show
+whether coverage used only FTS (`fts5+coverage`) or also dense candidates
+(`fts5+bge+coverage`). `reranking.py` remains an evaluation-only seam. Invalid
+score counts, nonfinite scores or scorer failures preserve the original order
+and evidence objects.
 The candidate evaluator requires complete frozen-ID coverage, no failed
 questions, strict recall and MRR improvements, and acceptable latency before
 marking a candidate eligible for integration. Eligibility alone does not change

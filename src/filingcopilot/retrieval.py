@@ -521,36 +521,6 @@ class Retriever:
         passages = self.corpus.passages(as_of, ticker, fiscal_year, filing_id)
         if section_title:
             passages = [p for p in passages if section_title.casefold() in p.section.casefold()]
-        if rerank_mode == "coverage":
-            ranked = self._coverage_hits(
-                terms, passages, section_weight=coverage_section_weight
-            )
-            return {
-                "query": query.strip(),
-                "query_rewrite": {
-                    "normalized": rewrite["normalized"],
-                    "added_terms": rewrite["added_terms"],
-                    "canonical_terms": rewrite["canonical_terms"],
-                    "retrieval_text": query,
-                    "mode": query_mode,
-                },
-                "backend": "fts5+coverage",
-                "embedding_unavailable": self.model_error,
-                "hits": ranked[: max(1, min(8, k))],
-                "eligible_passages": len(passages),
-                **(
-                    {
-                        "retrieval_diagnostics": {
-                            "candidate_ids": [item["passage"]["id"] for item in ranked],
-                            "candidate_limit_per_leg": candidate_limit,
-                            "rerank_mode": "coverage",
-                        }
-                    }
-                    if diagnostics
-                    else {}
-                ),
-                **({"section_title": section_title} if section_title else {}),
-            }
         # unicode61 does not segment continuous CJK prose. A bounded fallback
         # uses the already scoped passages, retaining the same publication,
         # company, year, filing and section boundaries as the vector leg.
@@ -562,6 +532,7 @@ class Retriever:
             matches = sorted((pair for pair in matches if pair[1]), key=lambda pair: (-pair[1], pair[0].id))
             lexical.extend(matches[:candidate_limit - len(lexical)])
         dense = []
+        dense_used = False
         backend = "fts5"
         if not lexical_only and self.settings.embedding_mode == "local" and passages:
             try:
@@ -572,6 +543,7 @@ class Retriever:
                         q = np.asarray(list(model.query_embed(query))[0], dtype=np.float32)
                         checkpoint()
                 if vectors is not None:
+                    dense_used = True
                     denom = np.linalg.norm(vectors, axis=1) * np.linalg.norm(q)
                     similarity = vectors @ q / np.maximum(denom, 1e-12)
                     dense = [
@@ -586,6 +558,48 @@ class Retriever:
             except Exception as exc:
                 # A damaged optional index or ONNX failure must not discard FTS results.
                 self.model_error = type(exc).__name__
+        if rerank_mode == "coverage":
+            # Coverage is a deterministic rerank over the bounded candidate
+            # pool. It must not scan every passage in the filing scope and must
+            # not discard the FTS/dense evidence already retrieved above.
+            candidates = {}
+            for passage, _ in lexical:
+                candidates[passage.id] = passage
+            for passage, _ in dense:
+                candidates[passage.id] = passage
+            candidate_passages = list(candidates.values())
+            ranked = self._coverage_hits(
+                terms, candidate_passages, section_weight=coverage_section_weight
+            )
+            return {
+                "query": query.strip(),
+                "query_rewrite": {
+                    "normalized": rewrite["normalized"],
+                    "added_terms": rewrite["added_terms"],
+                    "canonical_terms": rewrite["canonical_terms"],
+                    "retrieval_text": query,
+                    "mode": query_mode,
+                },
+                "backend": "fts5+bge+coverage" if dense_used else "fts5+coverage",
+                "embedding_unavailable": self.model_error,
+                "hits": ranked[: max(1, min(8, k))],
+                "eligible_passages": len(passages),
+                **(
+                    {
+                        "retrieval_diagnostics": {
+                            "candidate_ids": [item["passage"]["id"] for item in ranked],
+                            "candidate_limit_per_leg": candidate_limit,
+                            "coverage_candidates": len(candidate_passages),
+                            "coverage_lexical_candidates": len(lexical),
+                            "coverage_dense_candidates": len(dense),
+                            "rerank_mode": "coverage",
+                        }
+                    }
+                    if diagnostics
+                    else {}
+                ),
+                **({"section_title": section_title} if section_title else {}),
+            }
         combined = {}
         for leg, rows in (("lexical", lexical), ("dense", dense)):
             for rank, (passage, raw) in enumerate(rows, start=1):

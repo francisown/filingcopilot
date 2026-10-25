@@ -47,16 +47,16 @@ The output is `evaluation/external/data/financebench.jsonl` plus a manifest with
 the source URL, license, row count, and SHA256. The `data/` directory is
 gitignored; the dataset is not committed.
 
-**Measured result (2026-10-23):** evidence-page benchmark: 150 public rows, 163 evidence pages, company+year scope, section-aware 3,000-character chunks with a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.920 / page@1 0.707 / snippet hit@5 0.920 / answer-supported top1 0.427 / MRR 0.798**. Full-filing benchmark: 61 parsed PDFs and 113 questions with BGE ONNX reranking: **page hit@5 0.850 / page@1 0.540 / snippet hit@5 0.858 / snippet hit@1 0.531 / MRR 0.664**; BGE adds about 1.8s P95 on CPU. The 22-question new-document check reaches page hit@1 0.545 / page hit@5 0.773 / MRR 0.621 with BGE; it remains small and document-selected. The earlier global-corpus number (0.507/0.407) is retired because it ignored the product's selected-company scope. Full report:
+**Measured result (strict update 2026-10-25):** evidence-page benchmark: 150 public rows, 163 evidence pages, company+year scope, section-aware 3,000-character chunks with a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.927 / page@1 0.707 / snippet hit@5 0.927 / answer-supported top1 0.227 raw; 0.750 on 44 fully-supported rows / MRR 0.798**. The earlier any-one-number answer figures (0.427 / 0.913) are retired. Full-filing benchmark: 61 parsed PDFs and 113 questions with BGE ONNX reranking: **page hit@5 0.850 / page@1 0.540 / snippet hit@5 0.858 / snippet hit@1 0.531 / MRR 0.664**; BGE adds about 1.8s P95 on CPU. The 22-question new-document check reaches page hit@1 0.545 / page hit@5 0.773 / MRR 0.621 with BGE; it remains small and document-selected. The earlier global-corpus number (0.507/0.407) is retired because it ignored the product's selected-company scope. Full report:
 [`docs/financebench-scoped-2026-10-23.md`](../../docs/financebench-scoped-2026-10-23.md).
 
 ### 2. FinDER — answer-support benchmark
 
 Use FinDER when the metric is **answer-supported retrieval**, not raw FinanceBench
 answer matching. FinanceBench contains many computed answers that never appear on
-the evidence page; only 69/150 rows are answer-evaluable. FinDER exposes the
-reference excerpts directly, so the retrieved reference can be checked for the
-answer.
+the evidence page; only 44/150 rows have every answer number present in one gold
+page under the strict metric. FinDER exposes the reference excerpts directly, so
+the retrieved reference can be checked for the answer.
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\evaluate_finder.py `
@@ -68,14 +68,14 @@ answer.
 The script builds company-scoped reference corpora from question tickers/company
 aliases and reference headers, with category fallback for questions without a
 company match. It filters to the 1,085 `reasoning=True` rows by default and
-reports answer-supported top1/at5. Measured result: **answer top1 0.823, at5
-0.893**; on the 1,039 rows where the answer is present in a gold reference,
-**0.857 / 0.928**. Reference hit@5 is 0.598 and P95 is 287 ms. The category-only
-baseline is 0.794 / 0.876 with reference hit@5 0.371 and P95 309 ms; BM25-only
-company scope is 0.757 / 0.892. This is metadata filtering over reference
-excerpts, not full-filing page retrieval; answer support remains the primary
-metric. Company metadata is inferred without the answer column. License:
-CC-BY-NC-4.0; data is gitignored.
+reports answer-supported top1/at5. Strict result: **answer top1 0.082, at5
+0.136**; on the 227 rows where every answer number is present in one gold
+reference, **0.392 / 0.643**. Reference hit@5 is 0.598 and P95 is 274 ms. The
+strict metric requires every distinct numeric value in the answer; numeric
+substrings do not count. This is metadata filtering over reference excerpts, not
+full-filing page retrieval; answer support remains the primary metric. Company
+metadata is inferred without the answer column. License: CC-BY-NC-4.0; data is
+gitignored.
 
 ### 3. FiQA — the standard retrieval benchmark
 

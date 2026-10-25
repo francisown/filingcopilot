@@ -129,11 +129,13 @@ view, see [external evaluation datasets](../evaluation/external/README.md):
 `scripts/fetch_financebench.py` writes a local JSONL copy plus a license and
 SHA256 manifest under the gitignored `evaluation/external/data/` directory.
 
-**Scoped FinanceBench check (2026-10-23):** evidence-page benchmark: 150
-questions over 163 evidence pages, company+year scope, section-aware
-3,000-character chunks with a 4,000-character parent window and title-based
-top1 rerank: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920,
-answer-supported top1 0.427, MRR@5 0.798**. The
+**Scoped FinanceBench check (2026-10-25 strict re-run):** evidence-page
+benchmark: 150 questions over 163 evidence pages, company+year scope,
+section-aware 3,000-character chunks with a 4,000-character parent window and
+title-based top1 rerank: **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927,
+answer-supported top1 0.227 hit / 0.240 page raw; 0.750 hit / 0.795 page on
+44 fully-supported rows; MRR@5 0.798**. The earlier 2026-10-23 answer-support
+figures (0.427 / 0.913) used any-one-number matching and are retired. The
 full-filing benchmark covers 61 parsed PDFs and 113 questions with a BGE
 ONNX reranker over the top5 router pages: **page hit@5 0.850, page@1 0.540,
 snippet hit@5 0.858, snippet hit@1 0.531, MRR@5 0.664**. BGE adds about 1.8 s
@@ -142,27 +144,30 @@ MRR 0.624. BGE's 22-question 60→80 document extension reaches page hit@1 0.545
 page hit@5 0.773 and MRR 0.621; it is still small and document-selected. The
 earlier global-corpus number (0.507/0.407) was retired because it ignored the
 product's selected-company scope. Full report:
-[financebench-scoped-2026-10-23.md](financebench-scoped-2026-10-23.md).
+[financebench-scoped-2026-10-23.md](financebench-scoped-2026-10-23.md) and
+[strict result](validation/financebench-strict-2026-10-25.json).
 
-**FinDER answer-support (2026-10-24):** FinanceBench raw answer support is
-ceiling-limited: only 69/150 answers appear in the gold evidence page (49/50
-`metrics-generated` answers are computed), so its raw 0.427 is not a fair
-retrieval headline. On that evaluable subset, top1 is 0.913 and at5 is 1.000.
-For a cleaner answer-support benchmark we added FinDER (CC-BY-NC-4.0): 1,085
-`reasoning=True` rows. The default retriever scopes references by company when
-the question contains a ticker or company alias, and falls back to the FinDER
-category otherwise. Company metadata is inferred from reference headers and
-question text, never from the answer column; 600/1,085 questions are
-company-scoped and 382 company groups are built. This is metadata filtering over
-reference excerpts, not full-filing page retrieval.
+**Answer-support definition (2026-10-25):** a numeric answer is supported only
+when **every distinct numeric value** in the answer occurs in the same evidence
+text, after comma/decimal normalization; a number that is only a substring of a
+larger number does not count. Nonnumeric answers retain normalized text
+containment. The earlier implementation accepted any one matching number and
+therefore overstated support; for example, 795/1,085 FinDER reasoning rows had
+only a partial numeric match. The strict figures below are not comparable to
+the retired any-number values.
 
-Company scope + BM25 + FlashRank gives answer top1 **0.823** / at5 **0.893**;
-on the 1,039 rows whose answer is present in a gold reference, **0.857 / 0.928**.
-Reference hit@5 is **0.598** and P95 is **287 ms**. The category-only baseline
-is 0.794 / 0.876 with reference hit@5 0.371 and P95 309 ms; BM25-only company
-scope is 0.757 / 0.892. Answer support remains the primary metric because the
-benchmark still does not provide full-filing page scope. Script:
-`scripts/evaluate_finder.py`; result: `artifacts/finder-eval.json`.
+**FinDER answer-support (2026-10-25 strict re-run):** 1,085 `reasoning=True`
+rows, company-scoped reference corpus with category fallback, BM25 + FlashRank.
+The default retriever scopes references by company when the question contains a
+ticker or company alias, and falls back to the FinDER category otherwise.
+Company metadata is inferred from reference headers and question text, never
+from the answer column; 600/1,085 questions are company-scoped and 382 company
+groups are built. This is metadata filtering over reference excerpts, not
+full-filing page retrieval. Strict answer top1 is **0.082** / at5 **0.136**;
+on the 227 rows whose complete answer occurs in one gold reference, **0.392 /
+0.643**. Reference hit@5 is **0.598** and P95 is **274 ms**. Script:
+`scripts/evaluate_finder.py`; result:
+[strict result](validation/finder-strict-2026-10-25.json).
 
 ### Sampling uncertainty
 
@@ -179,12 +184,15 @@ by company/document.
 | Full-filing 22-question extension page@1 | 0.545 | 22 | 0.347–0.731 |
 | Full-filing 22-question extension page@5 | 0.773 | 22 | 0.566–0.899 |
 | FinanceBench evidence-page page@1 | 0.707 | 150 | 0.629–0.774 |
-| FinanceBench evidence-page page@5 | 0.920 | 150 | 0.865–0.954 |
-| FinanceBench evaluable answer top1 | 0.913 | 69 | 0.823–0.960 |
-| FinDER answer top1 | 0.823 | 1,085 | 0.799–0.845 |
-| FinDER answer at5 | 0.893 | 1,085 | 0.873–0.910 |
-| FinDER evaluable answer top1 | 0.857 | 1,039 | 0.834–0.877 |
-| FinDER evaluable answer at5 | 0.928 | 1,039 | 0.911–0.942 |
+| FinanceBench evidence-page page@5 | 0.927 | 150 | 0.874–0.959 |
+| FinanceBench strict answer top1 | 0.227 | 150 | 0.167–0.300 |
+| FinanceBench strict answer at5 | 0.307 | 150 | 0.239–0.385 |
+| FinanceBench evaluable strict answer top1 | 0.750 | 44 | 0.606–0.854 |
+| FinanceBench evaluable strict answer at5 | 0.955 | 44 | 0.849–0.987 |
+| FinDER strict answer top1 | 0.082 | 1,085 | 0.067–0.100 |
+| FinDER strict answer at5 | 0.136 | 1,085 | 0.117–0.158 |
+| FinDER evaluable strict answer top1 | 0.392 | 227 | 0.331–0.457 |
+| FinDER evaluable strict answer at5 | 0.643 | 227 | 0.579–0.703 |
 
 The 22-question extension is especially noisy: its page@5 interval spans
 0.57–0.90. None of these intervals addresses human relevance or correctness.

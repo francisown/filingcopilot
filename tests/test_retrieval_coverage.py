@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from filingcopilot.corpus import Corpus
@@ -94,6 +95,49 @@ def test_coverage_mode_rejects_invalid_section_weight(tmp_path):
     retriever = _retriever(tmp_path)
     with pytest.raises(ValueError, match="coverage section weight"):
         retriever.search("risk", AS_OF, ticker="AAPL", coverage_section_weight=-0.1)
+
+
+def test_coverage_mode_reranks_only_bounded_candidates(tmp_path):
+    retriever = _retriever(tmp_path)
+    result = retriever.search(
+        "What risks affect revenue from supply chain disruption?",
+        AS_OF,
+        ticker="AAPL",
+        k=3,
+        candidate_limit=2,
+        diagnostics=True,
+    )
+    diagnostics = result["retrieval_diagnostics"]
+    assert result["backend"] == "fts5+coverage"
+    assert diagnostics["candidate_limit_per_leg"] == 2
+    assert diagnostics["coverage_candidates"] <= 2
+    assert len(diagnostics["candidate_ids"]) <= 2
+
+
+def test_coverage_mode_uses_dense_candidates_when_available(tmp_path, monkeypatch):
+    retriever = _retriever(tmp_path)
+    retriever.settings = Settings(
+        home=tmp_path, embedding_mode="local", rerank_mode="coverage"
+    )
+
+    class FakeEmbedder:
+        def query_embed(self, query):
+            return [np.array([1.0, 0.0], dtype=np.float32)]
+
+    monkeypatch.setattr(
+        retriever, "_vectors", lambda passages: np.ones((len(passages), 2), dtype=np.float32)
+    )
+    monkeypatch.setattr(retriever, "_embedder", lambda: FakeEmbedder())
+
+    result = retriever.search(
+        "supply chain disruption",
+        AS_OF,
+        ticker="AAPL",
+        k=3,
+        diagnostics=True,
+    )
+    assert result["backend"] == "fts5+bge+coverage"
+    assert result["retrieval_diagnostics"]["coverage_dense_candidates"] > 0
 
 
 def test_bilingual_expansion_maps_customers_to_english():

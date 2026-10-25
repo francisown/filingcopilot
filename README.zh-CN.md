@@ -31,13 +31,13 @@ FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或�
 | 双语评测 | 140 题；100 道研究题：**81 完整、18 部分、1 无答案**；40 道边界题给出明确边界解释 |
 | 数值 oracle | **116 条与 SEC CompanyFacts 或算术检查完全一致，0 条不一致**；34 条超出检查器范围 |
 | FinanceBench full-filing | 61 份已解析 PDF、113 题，BGE ONNX rerank：**page hit@5 0.850、page@1 0.540、snippet hit@5 0.858、snippet hit@1 0.531、MRR 0.664**；rerank P95 1.84s；新增文档 held-out page@1 0.545 / page@5 0.773 |
-| FinanceBench evidence-page（诊断） | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.920、page@1 0.707、snippet hit@5 0.920、answer-supported top1 0.427 raw / 0.913 evaluable（69/150）、MRR 0.798** |
-| FinDER answer-support | 1,085 道 reasoning 题，company-scoped reference corpus + category fallback，BM25 + FlashRank：**answer-supported top1 0.823、at5 0.893**；1,039 道 evaluable 题上 **0.857 / 0.928**；ref hit@5 0.598，P95 287ms |
-| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,735 个全部通过** |
+| FinanceBench evidence-page（诊断） | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.927、page@1 0.707、snippet hit@5 0.927、answer-supported top1 0.227 hit / 0.240 page raw；44 道 evaluable 上 0.750 hit / 0.795 page、MRR 0.798** |
+| FinDER answer-support | 1,085 道 reasoning 题，company-scoped reference corpus + category fallback，BM25 + FlashRank：**answer-supported top1 0.082、at5 0.136**；227 道完整答案可评估题上 **0.392 / 0.643**；ref hit@5 0.598，P95 274ms |
+| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,744 个全部通过** |
 | 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
 | 代码 | 约 23k 行 Python，77 个源码模块 |
 
-**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。FinanceBench evidence-page 是 150 条公开数据、company+year scope，不等于完整 filing 检索；full-filing 是 61 份已解析 PDF、113 题，使用 BGE ONNX rerank（page@1 0.540、page@5 0.850、rerank P95 1.84s）；新增文档 22 题 held-out page@1 0.545 / page@5 0.773。两者都不是人工相关性或生产准确率。这些是工程测量，不是生产承诺。历史 417.1 秒使用的是 `mimo-v2.6-flash`。测试过 `deepseek-v4.1-flash`：全量 P95 降至 139.0 秒，但 answered 从 81/140 降到 64/140，negation 从 16/20 降到 4/20，因此拒绝该切换；`mimo-v2.6-flash` 保持默认。完整方法和分母见[评测](docs/evaluation.md)与[延迟记录](docs/latency-budget.md)。
+答案支持现在要求**答案中的每个不同数字**都出现在同一段证据文本中；旧的 any-one-number 数字（FinDER 0.823/0.893、FinanceBench 0.427/0.913）已作废。**先看限制再看数字：** 评测是自评的，没有独立人工金标准；使用模型的题目中位延迟 92.8 秒、P95 417.1 秒。FinanceBench evidence-page 是 150 条公开数据、company+year scope，不等于完整 filing 检索；full-filing 是 61 份已解析 PDF、113 题，使用 BGE ONNX rerank（page@1 0.540、page@5 0.850、rerank P95 1.84s）；新增文档 22 题 held-out page@1 0.545 / page@5 0.773。两者都不是人工相关性或生产准确率。这些是工程测量，不是生产承诺。历史 417.1 秒使用的是 `mimo-v2.6-flash`。测试过 `deepseek-v4.1-flash`：全量 P95 降至 139.0 秒，但 answered 从 81/140 降到 64/140，negation 从 16/20 降到 4/20，因此拒绝该切换；`mimo-v2.6-flash` 保持默认。完整方法和分母见[评测](docs/evaluation.md)与[延迟记录](docs/latency-budget.md)。
 
 ## 工作方式
 
@@ -80,7 +80,7 @@ python examples/credit-risk/demo.py demo
 - [案例研究（中文）](docs/case-study.zh-CN.md) · [Case study (English)](docs/case-study.md) — 问题、架构、评测、失败分类和限制。
 - [评测](docs/evaluation.md) — 140 题运行、检索金集、负面结果和精确分母。
 - [外部评测数据集](evaluation/external/README.md) — FinanceBench、DocFinQA、FiQA 的许可、规模和拉取方式。
-- [FinanceBench 测试](docs/financebench-scoped-2026-10-23.md) — 150 道 evidence-page 题（page hit@5 0.920、snippet hit@5 0.920）和 113 道 full-filing 题（0.850/0.858），含新增文档 held-out 与失败案例。
+- [FinanceBench 测试](docs/financebench-scoped-2026-10-23.md) — 150 道 evidence-page 题（page hit@5 0.927、snippet hit@5 0.927）和 113 道 full-filing 题（0.850/0.858），含新增文档 held-out 与失败案例。
 - [研究包协议](docs/research-package-protocol.md) — 冻结包里有什么，如何重放。
 - [项目导览](docs/showcase.zh-CN.md) — 离线示例和一条请求的代码阅读顺序。
 - [MCP 接入](docs/mcp-tools.md) · [参与贡献](CONTRIBUTING.md) · [完整快速开始](#快速开始)

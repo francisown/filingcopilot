@@ -17,6 +17,7 @@ import shutil
 import time
 import unicodedata
 from collections import Counter, defaultdict
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 import pandas as pd
@@ -50,17 +51,37 @@ def tokens(value: object) -> list[str]:
     return re.findall(r"[a-z0-9]+", norm(value))
 
 
+NUMBER_PATTERN = re.compile(
+    r"(?<![\w.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w)"
+)
+
+
+def numeric_values(value: object) -> set[Decimal]:
+    """Return exact numeric values, never substrings inside larger numbers."""
+    values: set[Decimal] = set()
+    for match in NUMBER_PATTERN.finditer(str(value)):
+        try:
+            values.add(Decimal(match.group(0).replace(",", "")))
+        except InvalidOperation:
+            continue
+    return values
+
+
 def answer_supported_text(text: object, answer: object) -> bool:
+    """Require every answer number to occur in the same evidence text.
+
+    A single matching number is not enough: an answer such as "10% growth and
+    $2bn revenue" must have both values supported. For nonnumeric answers keep
+    the existing normalized substring check. Numeric equality avoids the old
+    false positive where "10" matched "100".
+    """
     text_value = norm(text)
     answer_value = norm(answer)
     if not text_value or not answer_value:
         return False
-    numbers = re.findall(r"[-+]?\d[\d,.]*", answer_value)
+    numbers = numeric_values(answer_value)
     if numbers:
-        for number in numbers:
-            cleaned = number.replace(",", "").rstrip(".")
-            if cleaned and cleaned in text_value.replace(",", ""):
-                return True
+        return numbers <= numeric_values(text_value)
     return answer_value[:120] in text_value
 
 

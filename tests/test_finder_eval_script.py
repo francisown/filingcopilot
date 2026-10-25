@@ -75,3 +75,12 @@ def test_generic_single_word_alias_does_not_scope() -> None:
     ]
     _, row_scope, _ = finder_eval.build_company_scope(rows)
     assert row_scope[3] == "category:metrics"
+
+
+def test_answer_support_requires_every_answer_number() -> None:
+    text = "Revenue was 30 million and the margin was 12%."
+    assert finder_eval.answer_supported_text(text, "30 million and 12%")
+    assert not finder_eval.answer_supported_text(text, "30 million and 13%")
+    assert not finder_eval.answer_supported_text("Revenue was 30 million.", "30 and 12")
+    assert not finder_eval.answer_supported_text("Revenue was 300 million.", "30")
+    assert finder_eval.answer_supported_text("Revenue was 1,234 million.", "1234")

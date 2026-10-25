@@ -84,7 +84,7 @@ The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 
 
 Retrieval is measured on two levels. The internal 200-question exact-passage gold is a regression set; it measures strict paragraph identity, not human relevance. The product-scoped external check below is the number to report.
 
-**External retrieval update (2026-10-23).** The earlier FinanceBench global-corpus check was retired: it ignored the product's selected-company scope. The evidence-page benchmark now uses company+year scope, section-aware 3,000-character chunks, a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.920, page@1 0.707, snippet hit@5 0.920, answer-supported top1 0.427 raw / 0.913 evaluable, MRR 0.798**. The full-filing benchmark parses 61 PDFs and 113 questions: **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624**; the 22-question new-document check reaches 0.773 page hit@5. These are retrieval measurements, not answer accuracy or human relevance. See [the FinanceBench report](financebench-scoped-2026-10-23.md).
+**External retrieval update (2026-10-25 strict re-run).** The earlier FinanceBench global-corpus check was retired: it ignored the product's selected-company scope. The evidence-page benchmark now uses company+year scope, section-aware 3,000-character chunks, a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927, answer-supported top1 0.227 raw / 0.750 evaluable, MRR 0.798**. Answer support now requires every numeric value in the answer; the earlier any-one-number 0.427/0.913 figures are retired. The full-filing benchmark parses 61 PDFs and 113 questions: **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624**; the 22-question new-document check reaches 0.773 page hit@5. These are retrieval measurements, not answer accuracy or human relevance. See [the FinanceBench report](financebench-scoped-2026-10-23.md).
 
 For narrative claims, a first pass over 40 delivered claims recorded 95% supported, 5% unclear, and 0% unsupported. The project author was the sole reviewer and was not a domain specialist. The sample was selected from delivered claims, so it excludes rejected drafts and refusals. Independent domain review remains pending.
 
@@ -100,7 +100,7 @@ For narrative claims, a first pass over 40 delivered claims recorded 95% support
 - It does not prove general answer accuracy. There is no independent human gold standard.
 - It does not prove that every narrative claim is supported. Model review is not a human reviewer.
 - It does not prove production readiness. The latency, cost, and issuer coverage are not production-grade.
-- It does not prove human relevance or answer accuracy: the evidence-page check is 0.920 page hit@5 and 0.920 snippet hit@5, while the full-filing check is 0.850 and 0.858 on 61 parsed PDFs. The 22-question new-document check is 0.773 page hit@5.
+- It does not prove human relevance or answer accuracy: the evidence-page check is 0.927 page hit@5 and 0.927 snippet hit@5, while the full-filing check is 0.850 and 0.858 on 61 parsed PDFs. The 22-question new-document check is 0.773 page hit@5.
 
 ## Failure taxonomy
 
@@ -138,7 +138,7 @@ For a bank, the useful part is not "the model is smart." It is "the model's outp
 1. **Independent human review.** Recruit two or three credit-risk or financial-analysis reviewers, blind a sample of claims, and publish the disagreement rate. Without this, the 95% claim-support figure is only a self-review.
 2. **Latency and cost.** P95 of 417 seconds and 4.3M tokens are not acceptable for interactive use. The next step is caching, smaller models for extraction, parallel tool calls, and a hard cost budget per answer.
 3. **Credit-risk vertical.** The new `examples/credit-risk` demo reuses the corpus, passage, package, and verifier layers on synthetic policy and model-validation documents. The next step is an independent review of that vertical and a larger question set.
-4. **Retrieval.** The evidence-page check reaches page hit@5 0.920 and snippet hit@5 0.920; the full-filing check reaches 0.850 and 0.858 on 61 parsed PDFs. The next step is a real held-out split and table-aware retrieval for domain/earnings questions, not larger fixed chunks.
+4. **Retrieval.** The evidence-page check reaches page hit@5 0.927 and snippet hit@5 0.927; the full-filing check reaches 0.850 and 0.858 on 61 parsed PDFs. The next step is a real held-out split and table-aware retrieval for domain/earnings questions, not larger fixed chunks.
 5. **Coverage.** Foreign issuers, earnings calls, and cross-currency ADS bridges are still incomplete. Coverage should be described explicitly rather than implied.
 6. **Packaging.** The verifier is already separable. The next step is a small CLI distribution that a reviewer can run without installing the full application.
 
