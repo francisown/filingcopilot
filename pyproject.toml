@@ -25,6 +25,7 @@ evaluation = [
   "onnxruntime>=1.20,<2",
   "pandas>=2.0,<4",
   "pyarrow>=20,<30",
+  "pypdf>=5,<7",
   "tokenizers>=0.15,<1",
 ]
 dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
