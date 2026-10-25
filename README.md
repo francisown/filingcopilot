@@ -77,7 +77,7 @@ The same evidence layer runs on a synthetic credit-risk corpus:
 python examples/credit-risk/demo.py demo
 ```
 
-A click-by-click walkthrough is in [demo-script-3min.md](docs/outreach/demo-script-3min.md); the credit-risk vertical is documented in [examples/credit-risk/README.md](examples/credit-risk/README.md).
+A click-by-click walkthrough is in [demo.md](docs/demo.md); the credit-risk vertical is documented in [examples/credit-risk/README.md](examples/credit-risk/README.md).
 
 ## Start with the evidence
 

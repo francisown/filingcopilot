@@ -46,4 +46,4 @@ This wheel has not been uploaded to PyPI.
 The optional SVG badge contains the exact package-file checksum and requested
 mechanical checking scope. It does not authenticate an author, certify semantic
 support or endorse investment judgments. This is a local artifact, not a public
-badge service. See the [integration guide](add-verifiable-layer-to-financial-agent.md).
+badge service. This is an integration boundary, not an external certification.

@@ -90,7 +90,7 @@ A later 140-question paired experiment against `43d9a98` used identical required
 provider headers on both sides. Nonempty delivery rose from 97 to 129, while HTTP
 requests rose from 609 to 707 and median latency from 59.32 to 83.03 seconds.
 Further fixes followed that run; its figures are not current-release measurements.
-See [recent changes](release-2026-10-18.md).
+See the current repository history for later fixes.
 
 ## Retrieval
 
@@ -105,9 +105,8 @@ passage IDs. These are corpus-anchored retrieval measurements.
 In the focused-query diagnosis, 65 targets were absent from the candidate pool and
 83 were present but ranked below the returned top five. The recall-doubling target
 was not met. Cross-encoder and multilingual candidates failed the combined
-recall/MRR/latency gate and remain disabled. The
-[negative-result report](rerank-negative-result-2026-10-11.md) includes their setup
-and reproduction commands.
+recall/MRR/latency gate and remain disabled. The negative result is retained in
+the local evaluation archive.
 
 The internal exact-passage gold remains a regression set. It measures strict
 paragraph identity, not human relevance; the product-scoped external check below
@@ -203,14 +202,13 @@ fingerprints. Incomplete labels produce a separate subset report. Review miss-ra
 calibration requires its matching decision key.
 
 Independent-model calibration also checks the run trace: reviewer models must be
-distinct from every author model. The
-[2026-10-18 correction](reliability-followup-2026-10-18.md#review-calibration)
-documents the affected historical records.
+distinct from every author model. The affected historical records remain in the
+local archive.
 
 ## Reproduction and interpretation
 
 Use [test profiles](test-profiles.md) for regression commands and
-[release checks](publication-checks.md) for distribution validation. Checkpoints bind
+Checkpoints bind
 questions, source hashes, model configuration and budgets; a mismatched resume is
 rejected. Compare runs with their cache conditions and denominators intact.
 

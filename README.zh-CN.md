@@ -73,7 +73,7 @@ $env:FC_EMBEDDING_MODE = "off"
 python examples/credit-risk/demo.py demo
 ```
 
-逐步演示见 [3 分钟演示脚本](docs/outreach/demo-script-3min.md)；信贷风控垂直案例见 [examples/credit-risk/README.md](examples/credit-risk/README.md)。
+逐步演示见 [演示说明](docs/demo.md)；信贷风控垂直案例见 [examples/credit-risk/README.md](examples/credit-risk/README.md)。
 
 ## 从哪里开始
 
@@ -255,6 +255,5 @@ Web、CLI、REST 与 MCP 使用相同的研究能力和证据规则。
 | [独立验证器](docs/independent-verifier.md) | 独立安装和复算已导出的研究包。 |
 | [项目导览](docs/showcase.zh-CN.md) | 离线示例、模块职责和代码阅读顺序。 |
 | [开发与评测](docs/evaluation.md) | 评测方法、历史记录与当前限制。 |
-| [发布检查](docs/publication-checks.md) | 依赖、源码包和发布范围。 |
 
 项目代码采用 [MIT 许可证](LICENSE)。

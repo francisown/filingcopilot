@@ -41,7 +41,7 @@ Regression tests cover calculation rules, source and date checks, cancellation,
 provider failures and package compatibility. Retrieval experiments use a fixed
 200-question set. Model experiments record delivery, latency and token use separately.
 
-See [evaluation results](evaluation.md) for the datasets and denominators, and
-[release changes](release-2026-10-18.md) for the latest fixes. Independent human
+See [evaluation results](evaluation.md) for the datasets and denominators.
+Independent human
 review of complete answers remains incomplete. Offline consistency checks cover
 the recorded evidence and calculations; they do not reassess narrative meaning.

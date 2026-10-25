@@ -58,5 +58,4 @@
 [模块测试](../tests/test_company_modules.py)覆盖九个模块的映射、提示、提交限制及空结果。
 前端检查使用 `node scripts/check_company_workspace_ui.cjs`。
 
-历史现场记录见[模块矩阵](full-company-module-matrix-2026-10-13.md)和
-[质量复查](company-module-quality-rerun-2026-10-13.md)。这些记录对应当时的代码和来源。
+历史现场记录仅保留在本地评估档案，不随公开仓库分发。
