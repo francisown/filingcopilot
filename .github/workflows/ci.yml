@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - run: python -m pip install -e '.[dev,semantic]' wheel
+      - run: python -m pip install -e '.[dev,semantic,evaluation]' wheel
       - run: python -c "from importlib.metadata import version; from filingcopilot import __version__; assert version('filingcopilot') == __version__, (version('filingcopilot'), __version__)"
       - run: python -m ruff check src scripts tests
       - run: python scripts/check_mcp_readme_tools.py
