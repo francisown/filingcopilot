@@ -208,6 +208,9 @@ def _row(item: dict, result, elapsed_ms: int, review_model: str = "") -> dict:
         "cost_usd": result.usage.get("actual_cost_usd"),
         "run_id": result.id,
         "model_calls": result.usage.get("model_calls", 0),
+        "reported_tokens": result.usage.get("total_tokens"),
+        "prompt_tokens": result.usage.get("prompt_tokens"),
+        "completion_tokens": result.usage.get("completion_tokens"),
         "review_model": review_model or os.getenv("FC_REVIEW_MODEL", ""),
         "trace_summary": {
             "tool_calls": len(tool_steps),

@@ -87,12 +87,13 @@ the full 140-question run is intentionally not started.
 
 A model-control run on the same 20 questions compared `deepseek-v4.1-flash`
 with `mimo-v2.6-flash` under the same review model, corpus, budget and tools.
-DeepSeek recorded **11 answered / 9 partial**, **7.85 tool calls/question**,
-**0 direct-text rounds**, P95 **147.8s**; Mimo recorded **15/5**, **6.55**
-tool calls, **0 direct-text rounds**, P95 **250.3s** in that run, while an
-earlier Mimo run on the same questions was **11/9**. The trace does not support
-the “DeepSeek does not call tools” or “answers directly” hypotheses, and the
-Mimo run variance is large. See the
+DeepSeek recorded **11/9** and **13/7** in two runs, with **7.85/8.55** tool
+calls per question, **0 direct-text rounds**, and P95 **147.8s/132.4s**. Mimo
+recorded **11/9** and **15/5**, **6.55** tool calls and **0 direct-text
+rounds** in the traced run, with P95 **152.1s/250.3s**. The trace does not
+support the “DeepSeek does not call tools” or “answers directly” hypotheses;
+Mimo varied by four answers and DeepSeek by two, so single-run model
+comparisons are not stable. See the
 [model-control record](validation/model-control-2026-10-26/README.md). Older measurements below remain historical.
 This was a single current-source run, not a simultaneous rerun of the old GitHub
 baseline. Model review can still accept overly broad wording, particularly claims
