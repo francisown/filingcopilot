@@ -203,6 +203,19 @@ def test_answer_support_requires_every_answer_number() -> None:
     assert page_eval.answer_supported_text("Revenue was 1,234 million.", "1234")
 
 
+def test_answer_support_reports_partial_and_calculation() -> None:
+    partial = page_eval.answer_support_report(
+        ["Revenue was 123 million."], "Revenue was 123 million and 45% margin."
+    )
+    assert partial["status"] == "partial"
+    calc = page_eval.answer_support_report(
+        ["Revenue was 539.2 million and 427.7 million."],
+        "The increase was 111.5 million, calculated as 539.2 minus 427.7.",
+    )
+    assert calc["status"] == "full"
+    assert calc["calculation_supported"]
+
+
 def test_evaluation_home_requires_managed_marker_or_explicit_force(tmp_path) -> None:
     home = tmp_path / "eval-home"
     home.mkdir()

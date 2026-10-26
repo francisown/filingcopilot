@@ -18,10 +18,10 @@ import shutil
 import time
 from collections import defaultdict
 from datetime import date
-from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from filingcopilot.corpus import Corpus, stable_id
+from filingcopilot.eval_support import classify_support, require_file
 from filingcopilot.models import Filing, Passage
 from filingcopilot.retrieval import Retriever
 from filingcopilot.settings import Settings
@@ -436,32 +436,13 @@ def snippet_hit(hit: dict, snippets: list[str], page_texts: dict[tuple[str, int]
     return False
 
 
-NUMBER_PATTERN = re.compile(
-    r"(?<![\w.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w)"
-)
-
-
-def numeric_values(value: object) -> set[Decimal]:
-    """Return exact numeric values, never substrings inside larger numbers."""
-    values: set[Decimal] = set()
-    for match in NUMBER_PATTERN.finditer(str(value)):
-        try:
-            values.add(Decimal(match.group(0).replace(",", "")))
-        except InvalidOperation:
-            continue
-    return values
+def answer_support_report(texts: list[str], answer: object) -> dict:
+    return classify_support(texts, answer).as_dict()
 
 
 def answer_supported_text(text: str, answer: str) -> bool:
-    """Require every answer number to occur in the same evidence text."""
-    if not text or not answer:
-        return False
-    text = norm(text)
-    answer_value = norm(answer)
-    numbers = numeric_values(answer_value)
-    if numbers:
-        return numbers <= numeric_values(text)
-    return answer_value[:120] in text
+    """Compatibility helper: full support against one evidence text."""
+    return answer_support_report([text], answer)["status"] == "full"
 
 
 def answer_support_page(hit: dict, answer: str, page_texts: dict[tuple[str, int], str]) -> bool:
@@ -635,16 +616,34 @@ def evaluate(
             for rank, hit in enumerate(hits, 1)
             if snippet_hit(hit, snippets, page_texts, parent_chars)
         ]
+        answer_text = row.get("answer", "")
+        expanded_hits = [
+            expand_hit(hit, page_texts, parent_chars) for hit in hits
+        ]
+        page_hit_texts = []
+        for hit in hits:
+            passage = hit["passage"]
+            match = re.search(r"page\s+(\d+)", passage.get("locator", ""))
+            page_hit_texts.append(
+                page_texts.get((passage.get("filing_id"), int(match.group(1))), "")
+                if match
+                else ""
+            )
+        top1_report = answer_support_report(
+            [expanded_hits[0]] if expanded_hits else [], answer_text
+        )
+        at5_report = answer_support_report(expanded_hits, answer_text)
+        top1_page_report = answer_support_report(
+            [page_hit_texts[0]] if page_hit_texts else [], answer_text
+        )
+        at5_page_report = answer_support_report(page_hit_texts, answer_text)
+        gold_texts = [page_texts.get(pair, "") for pair in gold_pages] + snippets
+        evaluable_report = answer_support_report(gold_texts, answer_text)
         answer_support_ranks = [
             rank
             for rank, hit in enumerate(hits, 1)
-            if answer_support(hit, row.get("answer", ""), page_texts, parent_chars)
+            if answer_support(hit, answer_text, page_texts, parent_chars)
         ]
-        answer_text = row.get("answer", "")
-        gold_text = " ".join(page_texts.get(pair, "") for pair in gold_pages)
-        answer_evaluable = answer_supported_text(gold_text, answer_text) or any(
-            answer_supported_text(snippet, answer_text) for snippet in snippets
-        )
         results.append(
             {
                 "id": row["financebench_id"],
@@ -654,21 +653,27 @@ def evaluate(
                 "question_type": row.get("question_type"),
                 "question": row["question"],
                 "answer": row.get("answer"),
-                "answer_evaluable": answer_evaluable,
+                "answer_evaluable": evaluable_report["status"] == "full",
+                "answer_evaluable_status": evaluable_report["status"],
                 "page_hit": bool(page_ranks),
                 "snippet_hit": bool(snippet_ranks),
                 "page_rank": page_ranks[0] if page_ranks else None,
                 "snippet_rank": snippet_ranks[0] if snippet_ranks else None,
-                "answer_supported_top1": bool(hits)
-                and answer_support(hits[0], row.get("answer", ""), page_texts, parent_chars),
-                "answer_supported_at_5": bool(answer_support_ranks),
+                "answer_supported_top1": top1_report["status"] == "full",
+                "answer_partial_top1": top1_report["status"] == "partial",
+                "answer_unsupported_top1": top1_report["status"] == "unsupported",
+                "answer_support_top1": top1_report,
+                "answer_supported_at_5": at5_report["status"] == "full",
+                "answer_partial_at_5": at5_report["status"] == "partial",
+                "answer_unsupported_at_5": at5_report["status"] == "unsupported",
+                "answer_support_at_5": at5_report,
                 "answer_support_rank": answer_support_ranks[0] if answer_support_ranks else None,
-                "answer_supported_top1_page": bool(hits)
-                and answer_support_page(hits[0], row.get("answer", ""), page_texts),
-                "answer_supported_at_5_page": any(
-                    answer_support_page(hit, row.get("answer", ""), page_texts)
-                    for hit in hits
-                ),
+                "answer_supported_top1_page": top1_page_report["status"] == "full",
+                "answer_partial_top1_page": top1_page_report["status"] == "partial",
+                "answer_supported_at_5_page": at5_page_report["status"] == "full",
+                "answer_partial_at_5_page": at5_page_report["status"] == "partial",
+                "answer_support_top1_page": top1_page_report,
+                "answer_support_at_5_page": at5_page_report,
                 "elapsed_ms": elapsed,
             }
         )
@@ -684,11 +689,23 @@ def evaluate(
         "snippet_hit_at_5": sum(row["snippet_hit"] for row in results) / n,
         "mrr_at_5": sum(1 / row["page_rank"] for row in results if row["page_rank"]) / n,
         "answer_supported_top1": sum(row["answer_supported_top1"] for row in results) / n,
+        "answer_partial_top1": sum(row["answer_partial_top1"] for row in results) / n,
+        "answer_unsupported_top1": sum(row["answer_unsupported_top1"] for row in results) / n,
         "answer_supported_at_5": sum(row["answer_supported_at_5"] for row in results) / n,
+        "answer_partial_at_5": sum(row["answer_partial_at_5"] for row in results) / n,
+        "answer_unsupported_at_5": sum(row["answer_unsupported_at_5"] for row in results) / n,
         "answer_supported_top1_page": sum(row["answer_supported_top1_page"] for row in results) / n,
+        "answer_partial_top1_page": sum(row["answer_partial_top1_page"] for row in results) / n,
         "answer_supported_at_5_page": sum(row["answer_supported_at_5_page"] for row in results) / n,
+        "answer_partial_at_5_page": sum(row["answer_partial_at_5_page"] for row in results) / n,
         "answer_evaluable_questions": sum(
             1 for row in results if row["answer_evaluable"]
+        ),
+        "answer_partial_evaluable_questions": sum(
+            1 for row in results if row["answer_evaluable_status"] == "partial"
+        ),
+        "answer_unsupported_evaluable_questions": sum(
+            1 for row in results if row["answer_evaluable_status"] == "unsupported"
         ),
         "answer_supported_top1_evaluable": sum(
             row["answer_supported_top1"] for row in results if row["answer_evaluable"]
@@ -770,6 +787,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("artifacts/financebench-eval.json"))
     args = parser.parse_args()
 
+    require_file(args.data, "FinanceBench JSONL")
     rows = [json.loads(line) for line in args.data.read_text(encoding="utf-8").splitlines() if line.strip()]
     rows = rows[: args.limit] if args.limit else rows
     corpus_info = build_corpus(
@@ -818,6 +836,12 @@ def main() -> None:
         "parent_chars": args.parent_chars,
         "top1_rerank": args.top1_rerank,
         "rerank": args.rerank,
+        "support_definition": (
+            "full requires every key number, unit and period in one evidence set; "
+            "verified calculation inputs may support a result that is not copied "
+            "verbatim; partial means some required values are present; unsupported "
+            "means no required number is covered"
+        ),
         "avg_chunk_chars": corpus_info["avg_chunk_chars"],
         "corpus_pages": corpus_info["pages"],
         "corpus_passages": corpus_info["passages"],

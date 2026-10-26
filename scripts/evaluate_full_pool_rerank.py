@@ -8,6 +8,7 @@ from datetime import date
 from pathlib import Path
 
 from filingcopilot.corpus import Corpus
+from filingcopilot.eval_support import require_file
 from filingcopilot.local_models import verify_model_snapshot
 from filingcopilot.reranking import rerank_candidates, scoped_candidate_hits
 from filingcopilot.retrieval import Retriever
@@ -35,9 +36,11 @@ def main():
     parser.add_argument('--frozen-diagnosis', type=Path, default=Path('artifacts/retrieval-frozen-diagnosis-2026-10-11.json'))
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
+    require_file(args.gold, "retrieval gold")
+    require_file(args.frozen_diagnosis, "frozen retrieval diagnosis")
     raw = args.gold.read_bytes()
     old = json.loads(args.frozen_diagnosis.read_text(encoding='utf-8'))
-    snapshot = Path(old['source_snapshot'])
+    snapshot = require_file(Path(old['source_snapshot']), "frozen source snapshot")
     source_sha = hashlib.sha256(snapshot.read_bytes()).hexdigest()
     # Prior 1.0.3 diagnosis recorded the backup hash before Corpus constructor
     # incremented SQLite's header counter. Accept only that exact two-field

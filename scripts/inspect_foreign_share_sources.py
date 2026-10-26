@@ -6,16 +6,22 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+from filingcopilot.eval_support import require_file
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
     rows = []
     for ticker in ('PDD','BABA'):
-        replay = json.loads((ROOT/f'artifacts/third-round-cold-{ticker}-2026-10-11.json').read_text())
+        replay_path = require_file(
+            ROOT/f'artifacts/third-round-cold-{ticker}-2026-10-11.json',
+            f"frozen {ticker} replay",
+        )
+        replay = json.loads(replay_path.read_text())
         source = max(replay['sources'], key=lambda f:f['period_end'])
         path = ROOT/replay['scope']/'sec-cache'/(hashlib.sha256(source['source_url'].encode()).hexdigest()+'.cache')
-        content = path.read_bytes()
+        content = require_file(path, f"frozen {ticker} SEC source cache").read_bytes()
         assert hashlib.sha256(content).hexdigest() == source['content_sha256']
         soup = BeautifulSoup(content,'html.parser')
         eps = []

@@ -17,10 +17,11 @@ import shutil
 import time
 import unicodedata
 from collections import Counter, defaultdict
-from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 import pandas as pd
+
+from filingcopilot.eval_support import classify_support
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "evaluation" / "external" / "data" / "finder.parquet"
@@ -51,38 +52,13 @@ def tokens(value: object) -> list[str]:
     return re.findall(r"[a-z0-9]+", norm(value))
 
 
-NUMBER_PATTERN = re.compile(
-    r"(?<![\w.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w)"
-)
-
-
-def numeric_values(value: object) -> set[Decimal]:
-    """Return exact numeric values, never substrings inside larger numbers."""
-    values: set[Decimal] = set()
-    for match in NUMBER_PATTERN.finditer(str(value)):
-        try:
-            values.add(Decimal(match.group(0).replace(",", "")))
-        except InvalidOperation:
-            continue
-    return values
+def answer_support_report(texts: list[str], answer: object) -> dict:
+    return classify_support(texts, answer).as_dict()
 
 
 def answer_supported_text(text: object, answer: object) -> bool:
-    """Require every answer number to occur in the same evidence text.
-
-    A single matching number is not enough: an answer such as "10% growth and
-    $2bn revenue" must have both values supported. For nonnumeric answers keep
-    the existing normalized substring check. Numeric equality avoids the old
-    false positive where "10" matched "100".
-    """
-    text_value = norm(text)
-    answer_value = norm(answer)
-    if not text_value or not answer_value:
-        return False
-    numbers = numeric_values(answer_value)
-    if numbers:
-        return numbers <= numeric_values(text_value)
-    return answer_value[:120] in text_value
+    """Compatibility helper: full support against one evidence text."""
+    return answer_support_report([str(text)], answer)["status"] == "full"
 
 
 def build_corpus(rows: list[dict]) -> tuple[list[str], dict[str, int]]:
@@ -465,27 +441,31 @@ def main() -> None:
             if norm(reference) in corpus_index
         }
         ranks = [rank for rank, (index, _) in enumerate(top, 1) if index in gold]
-        answer_top1 = bool(top) and answer_supported_text(
-            corpus[top[0][0]], row["answer"]
+        top1_report = answer_support_report(
+            [corpus[top[0][0]]] if top else [], row["answer"]
         )
-        answer_at5 = any(
-            answer_supported_text(corpus[index], row["answer"]) for index, _ in top
+        at5_report = answer_support_report(
+            [corpus[index] for index, _ in top], row["answer"]
         )
-        answer_evaluable = any(
-            answer_supported_text(reference, row["answer"])
-            for reference in row["references"]
-        )
+        evaluable_report = answer_support_report(row["references"], row["answer"])
         results.append(
             {
                 "id": row["_id"],
                 "question": row["text"],
                 "category": row["category"],
                 "answer": row["answer"],
-                "answer_evaluable": answer_evaluable,
+                "answer_evaluable": evaluable_report["status"] == "full",
+                "answer_evaluable_status": evaluable_report["status"],
                 "reference_hit": bool(ranks),
                 "reference_rank": ranks[0] if ranks else None,
-                "answer_supported_top1": answer_top1,
-                "answer_supported_at_5": answer_at5,
+                "answer_supported_top1": top1_report["status"] == "full",
+                "answer_partial_top1": top1_report["status"] == "partial",
+                "answer_unsupported_top1": top1_report["status"] == "unsupported",
+                "answer_support_top1": top1_report,
+                "answer_supported_at_5": at5_report["status"] == "full",
+                "answer_partial_at_5": at5_report["status"] == "partial",
+                "answer_unsupported_at_5": at5_report["status"] == "unsupported",
+                "answer_support_at_5": at5_report,
                 "elapsed_ms": (time.perf_counter() - started) * 1000,
             }
         )
@@ -495,6 +475,12 @@ def main() -> None:
 
     n = len(results) or 1
     evaluable = [row for row in results if row["answer_evaluable"]]
+    partial_evaluable = [
+        row for row in results if row["answer_evaluable_status"] == "partial"
+    ]
+    unsupported_evaluable = [
+        row for row in results if row["answer_evaluable_status"] == "unsupported"
+    ]
     ne = len(evaluable) or 1
     durations = sorted(latencies)
     summary = {
@@ -510,9 +496,21 @@ def main() -> None:
         "reference_hit_at_5": sum(row["reference_hit"] for row in results) / n,
         "answer_supported_top1": sum(row["answer_supported_top1"] for row in results)
         / n,
+        "answer_partial_top1": sum(row["answer_partial_top1"] for row in results) / n,
+        "answer_unsupported_top1": sum(
+            row["answer_unsupported_top1"] for row in results
+        )
+        / n,
         "answer_supported_at_5": sum(row["answer_supported_at_5"] for row in results)
         / n,
+        "answer_partial_at_5": sum(row["answer_partial_at_5"] for row in results) / n,
+        "answer_unsupported_at_5": sum(
+            row["answer_unsupported_at_5"] for row in results
+        )
+        / n,
         "answer_evaluable_questions": len(evaluable),
+        "answer_partial_evaluable_questions": len(partial_evaluable),
+        "answer_unsupported_evaluable_questions": len(unsupported_evaluable),
         "answer_supported_top1_evaluable": sum(
             row["answer_supported_top1"] for row in evaluable
         )
@@ -536,6 +534,12 @@ def main() -> None:
             "reasoning rows excluded unless --include-reasoning"
         ),
         "rerank": args.rerank,
+        "support_definition": (
+            "full requires every key number, unit and period in one evidence set; "
+            "verified calculation inputs may support a result that is not copied "
+            "verbatim; partial means some required values are present; unsupported "
+            "means no required number is covered"
+        ),
         "summary": summary,
         "rows": results,
     }

@@ -64,9 +64,10 @@ The fetcher verifies the ONNX file's size and SHA256:
 
 These are the latest recorded values, with 95% Wilson intervals where the
 sample is binomial. They are not guaranteed to reproduce byte-for-byte if
-upstream PDFs change or return 403. Answer support is strict: every distinct
-numeric value in the answer must occur in the same evidence text. The earlier
-any-one-number values are retired and are not comparable.
+upstream PDFs change or return 403. Answer support reports full/partial/
+unsupported: full requires every key number, unit and period in the evidence
+set; verified calculation inputs can support a result that is not copied
+verbatim. The earlier any-one-number values are retired and are not comparable.
 
 | Check | Estimate | n | 95% interval |
 |---|---:|---:|---:|
@@ -75,14 +76,15 @@ any-one-number values are retired and are not comparable.
 | Full-filing snippet@5 | 0.858 | 113 | 0.782–0.911 |
 | 22-question extension page@5 | 0.773 | 22 | 0.566–0.899 |
 | Evidence-page page@5 | 0.927 | 150 | 0.874–0.959 |
-| Evidence-page strict answer top1 | 0.227 | 150 | 0.167–0.300 |
-| Evidence-page evaluable strict answer top1 | 0.750 | 44 | 0.606–0.854 |
-| FinDER strict answer top1 | 0.082 | 1,085 | 0.067–0.100 |
-| FinDER strict answer at5 | 0.136 | 1,085 | 0.117–0.158 |
-| FinDER evaluable strict answer top1 | 0.392 | 227 | 0.331–0.457 |
+| Evidence-page full answer top1 | 0.213 | 150 | 0.155–0.286 |
+| Evidence-page full answer at5 | 0.293 | 150 | 0.226–0.371 |
+| Evidence-page full answer top1, full-evaluable | 0.738 | 42 | 0.589–0.847 |
+| FinDER full answer top1 | 0.098 | 1,085 | 0.081–0.117 |
+| FinDER full answer at5 | 0.160 | 1,085 | 0.140–0.183 |
+| FinDER full answer top1, full-evaluable | 0.409 | 259 | 0.351–0.470 |
 
-Strict records: [FinDER](validation/finder-strict-2026-10-25.json) and
-[FinanceBench](validation/financebench-strict-2026-10-25.json).
+Support records: [FinDER](validation/finder-support-2026-10-26.json) and
+[FinanceBench](validation/financebench-support-2026-10-26.json).
 
 ## Known reproducibility limits
 

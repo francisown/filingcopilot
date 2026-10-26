@@ -84,3 +84,16 @@ def test_answer_support_requires_every_answer_number() -> None:
     assert not finder_eval.answer_supported_text("Revenue was 30 million.", "30 and 12")
     assert not finder_eval.answer_supported_text("Revenue was 300 million.", "30")
     assert finder_eval.answer_supported_text("Revenue was 1,234 million.", "1234")
+
+
+def test_answer_support_reports_partial_and_calculation() -> None:
+    partial = finder_eval.answer_support_report(
+        ["Revenue was 30 million."], "Revenue was 30 million and 12% margin."
+    )
+    assert partial["status"] == "partial"
+    calc = finder_eval.answer_support_report(
+        ["Revenue was 539.2 million and 427.7 million."],
+        "The increase was 111.5 million, calculated as 539.2 minus 427.7.",
+    )
+    assert calc["status"] == "full"
+    assert calc["calculation_supported"]

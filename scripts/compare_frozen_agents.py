@@ -20,6 +20,7 @@ from datetime import date
 from pathlib import Path
 
 from filingcopilot.corpus import Corpus
+from filingcopilot.eval_support import require_file
 from filingcopilot.models import Fact, Filing, Passage
 from filingcopilot.retrieval import Retriever
 from filingcopilot.settings import Settings
@@ -85,8 +86,18 @@ def ensure_case_sources(home, bundle):
 def freeze(home, output, settings, upstream):
     rows = []
     for ticker in ('PDD','BABA'):
-        replay = json.loads((ROOT/f'artifacts/third-round-cold-{ticker}-2026-10-11.json').read_text())
+        replay_path = require_file(
+            ROOT/f'artifacts/third-round-cold-{ticker}-2026-10-11.json',
+            f"frozen {ticker} replay",
+        )
+        replay = json.loads(replay_path.read_text())
         source_home = ROOT/replay['scope']
+        if not source_home.is_dir():
+            raise SystemExit(
+                f"Missing frozen replay scope for {ticker}: {source_home}. "
+                "Restore the local .filingcopilot archive; the summary JSON is tracked, "
+                "but the replay corpus was never part of the repository."
+            )
         # Cold replay stores evidence directly in the scope, not in main corpus.
         corpus = Corpus(source_home, readonly=True)
         available = [Filing.model_validate(f) for f in corpus.catalog(date(2026,10,11), ticker)]

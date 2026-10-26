@@ -1,0 +1,44 @@
+{
+  "schema": "filingcopilot.validation/eval-support/v1",
+  "recorded_at": "2026-10-26",
+  "benchmark": "FinDER",
+  "dataset": "Linq-AI-Research/FinDER",
+  "license": "CC-BY-NC-4.0",
+  "scope": "1,085 reasoning rows; company-scoped reference corpus with category fallback; BM25 + FlashRank",
+  "support_definition": "full requires every key number, unit and period in one evidence set; verified calculation inputs may support a result that is not copied verbatim; partial means some required values are present; unsupported means no required number is covered.",
+  "configuration": {
+    "rows": 1085,
+    "scope": "company",
+    "company_scopes": 382,
+    "company_scoped_questions": 600,
+    "corpus_references": 5912,
+    "rerank": "flashrank"
+  },
+  "metrics": {
+    "questions": 1085,
+    "answer_supported_top1": 0.09769585253456221,
+    "answer_partial_top1": 0.6663594470046083,
+    "answer_unsupported_top1": 0.2359447004608295,
+    "answer_supported_at_5": 0.16036866359447005,
+    "answer_partial_at_5": 0.6995391705069124,
+    "answer_unsupported_at_5": 0.1400921658986175,
+    "answer_evaluable_questions": 259,
+    "answer_partial_evaluable_questions": 777,
+    "answer_unsupported_evaluable_questions": 49,
+    "answer_supported_top1_evaluable": 0.4092664092664093,
+    "answer_supported_at_5_evaluable": 0.637065637065637,
+    "reference_hit_at_1": 0.423963133640553,
+    "reference_hit_at_5": 0.5981566820276498,
+    "p50_ms": 212.42569999958505,
+    "p95_ms": 271.48920000036014
+  },
+  "artifact": {
+    "path": "artifacts/finder-eval-support.json",
+    "sha256": "38a4f47540a96cba28b12a364445c716134263d0e520ee86ca713afeb8f8544a"
+  },
+  "source_scripts": {
+    "scripts/evaluate_finder.py": "f859990ff89c0cf48a7d5ed5c9b6949c2cbd2cd599de8665f241c9ffea25511f",
+    "src/filingcopilot/eval_support.py": "d0d41c3b6b05321293069b44f7e90816c0a91e08d210f4d7a621605b691d3bd1"
+  },
+  "note": "Previous any-one-number figures (top1 0.823 / at5 0.893) are retired. Partial is not counted as full support."
+}

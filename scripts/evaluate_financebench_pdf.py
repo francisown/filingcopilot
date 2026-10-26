@@ -23,6 +23,7 @@ from fastembed import TextEmbedding
 from pypdf import PdfReader
 
 from filingcopilot.domain import DEFAULT_DOMAIN
+from filingcopilot.eval_support import classify_support, require_file
 from filingcopilot.retrieval import _coverage_text, _matches_coverage_term, rewrite_query
 from filingcopilot.retrieval_query import lexical_terms, retrieval_text
 
@@ -828,6 +829,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts" / "financebench-pdf.json")
     args = parser.parse_args()
 
+    require_file(args.data, "FinanceBench JSONL")
     rows = [json.loads(line) for line in args.data.read_text(encoding="utf-8").splitlines() if line.strip()]
     by_doc: dict[str, list[dict]] = defaultdict(list)
     for row in rows:
@@ -934,6 +936,13 @@ def main() -> None:
             elif bge_reranker is not None:
                 ranked = rerank_bge_pages(ranked, pages, question, bge_reranker)
             page_ranks = [position for position, (page, _, _) in enumerate(ranked, 1) if page == gold_page]
+            answer = row.get("answer") or row.get("Answer") or ""
+            answer_top1 = classify_support(
+                [pages[ranked[0][0]]] if ranked else [], answer
+            )
+            answer_at5 = classify_support(
+                [pages[page] for page, _, _ in ranked], answer
+            )
             snippet_evaluable = bool((evidence.get("evidence_text") or "").strip())
             snippet_ranks = []
             if snippet_evaluable:
@@ -958,6 +967,14 @@ def main() -> None:
                     "snippet_evaluable": snippet_evaluable,
                     "snippet_hit": bool(snippet_ranks),
                     "snippet_rank": snippet_ranks[0] if snippet_ranks else None,
+                    "answer_supported_top1": answer_top1.status == "full",
+                    "answer_partial_top1": answer_top1.status == "partial",
+                    "answer_unsupported_top1": answer_top1.status == "unsupported",
+                    "answer_supported_at_5": answer_at5.status == "full",
+                    "answer_partial_at_5": answer_at5.status == "partial",
+                    "answer_unsupported_at_5": answer_at5.status == "unsupported",
+                    "answer_support_top1": answer_top1.as_dict(),
+                    "answer_support_at_5": answer_at5.as_dict(),
                 }
             )
             print(
@@ -983,6 +1000,12 @@ def main() -> None:
         "snippet_hit_at_3_evaluable": sum(1 for row in snippet_rows if row["snippet_rank"] and row["snippet_rank"] <= 3) / snippet_n,
         "snippet_hit_at_5_evaluable": sum(row["snippet_hit"] for row in snippet_rows) / snippet_n,
         "mrr_at_5": sum(1 / row["page_rank"] for row in results if row["page_rank"]) / n,
+        "answer_supported_top1": sum(row["answer_supported_top1"] for row in results) / n,
+        "answer_partial_top1": sum(row["answer_partial_top1"] for row in results) / n,
+        "answer_unsupported_top1": sum(row["answer_unsupported_top1"] for row in results) / n,
+        "answer_supported_at_5": sum(row["answer_supported_at_5"] for row in results) / n,
+        "answer_partial_at_5": sum(row["answer_partial_at_5"] for row in results) / n,
+        "answer_unsupported_at_5": sum(row["answer_unsupported_at_5"] for row in results) / n,
     }
     report = {
         "schema": "filingcopilot.financebench-pdf/v1",
@@ -994,6 +1017,12 @@ def main() -> None:
         "parent_chars": args.parent_chars,
         "top1_rerank": args.top1_rerank,
         "rerank": args.rerank,
+        "support_definition": (
+            "full requires every key number, unit and period in one evidence set; "
+            "verified calculation inputs may support a result that is not copied "
+            "verbatim; partial means some required values are present; unsupported "
+            "means no required number is covered"
+        ),
         "summary": summary,
         "rows": results,
     }

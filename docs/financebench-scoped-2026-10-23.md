@@ -1,9 +1,9 @@
-# FinanceBench check — 2026-10-23, strict update 2026-10-25
+# FinanceBench check — 2026-10-23, support update 2026-10-26
 
 This note reports two different retrieval layers. They are not interchangeable.
 
 - **Headline:** full-filing retrieval is **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
-- **Diagnostic:** evidence-page retrieval is **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927, answer-supported top1 0.227 hit / 0.240 page raw; 0.750 / 0.795 on 44 fully-supported rows; MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search. The earlier 0.427/0.913 answer-support values used any-one-number matching and are retired.
+- **Diagnostic:** evidence-page retrieval is **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927, answer full/partial/unsupported top1 0.213/0.140/0.647 raw; page-level 0.227/0.147/0.627; 42 full-evaluable rows 0.738 top1 / 0.952 at5; MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search. The earlier 0.427/0.913 any-one-number values are retired.
 
 ## Evidence-page benchmark
 
@@ -35,14 +35,18 @@ repository root, current directory and user home are always rejected.
 | Snippet hit@3 | 0.873 |
 | Snippet hit@5 | **0.927** |
 | MRR@5 | **0.798** |
-| Answer-supported top1, raw | 0.227 |
-| Answer-supported top1, page-level | 0.240 |
-| Answer-supported at 5, raw | 0.307 |
-| Answer-evaluable questions | 44 |
-| Answer-supported top1, evaluable | 0.750 |
-| Answer-supported at 5, evaluable | 0.955 |
-| Answer-supported top1, page-level evaluable | 0.795 |
-| Retrieval P95 | 7.5 ms |
+| Full answer top1, raw | 0.213 |
+| Partial answer top1, raw | 0.140 |
+| Unsupported answer top1, raw | 0.647 |
+| Full answer top1, page-level | 0.227 |
+| Full answer at 5, raw | 0.293 |
+| Partial answer at 5, raw | 0.173 |
+| Unsupported answer at 5, raw | 0.533 |
+| Full-evaluable questions | 42 |
+| Full answer top1, full-evaluable | 0.738 |
+| Full answer at 5, full-evaluable | 0.952 |
+| Full answer top1, page-level full-evaluable | 0.786 |
+| Retrieval P95 | 6.8 ms |
 
 The 4,000-character parent window is the balanced setting. Larger windows were not adopted because they did not improve answer-supported top1. Chunk size was not increased further.
 
@@ -67,11 +71,11 @@ Domain-relevant and earnings questions remain the weak groups. Table-aware chunk
 
 ### Answer support
 
-Only **44/150** questions have every numeric value in the answer present in one gold evidence page; 49/50 `metrics-generated` answers are computed and not written on the page. The strict metric requires all answer numbers, not any one number. On those 44 evaluable rows, answer-supported top1 is **0.750**, at 5 is **0.955**, and page-level top1 is **0.795**. The raw 0.227/0.307 numbers are retained for transparency, but they mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
+Only **42/150** questions have a full answer in the gold evidence set; 28 are partial and 80 unsupported. The classifier requires all key numbers, units and periods, and can accept verified calculation inputs instead of a literal result. On the 42 full-evaluable rows, full top1 is **0.738**, at 5 is **0.952**, and page-level top1 is **0.786**. Partial is not counted as full. The raw 0.213/0.293 numbers mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
 
 BGE was also measured on the evidence-page path: page@1 0.707→**0.720**,
 page@3 0.873→**0.913**, MRR 0.798→**0.808**; the earlier page@5 was **0.920**.
-The 2026-10-25 strict rerun with the bounded coverage candidate pool records
+The 2026-10-26 support rerun with the bounded coverage candidate pool records
 page@5 **0.927**, but it still uses title rerank. P95 rises to **1.46s** with
 BGE, so the fast evidence-page path keeps title rerank; BGE is enabled only for
 the full-filing path.
@@ -142,7 +146,7 @@ methods cannot work with a stronger page index or layout-aware extraction.
 - 19 of 80 selected documents were skipped due to HTTP 403, corrupt files, or no extractable text. That is selection bias.
 - The router contains domain and bank-report heuristics. It is development-tuned on these rows; the 22-question held-out extension is too small for a final claim.
 - Title, FlashRank and BGE rerankers are development-tuned on the 150 evidence-page rows and 113 full-filing questions; their gain needs a held-out confirmation. FlashRank adds roughly 0.3s per query; BGE INT8 ONNX adds roughly 1.8s P95 on CPU. The 22-question BGE extension reaches page@1 0.545 / page@5 0.773 / MRR 0.621, still too small for a final claim.
-- Snippet matching uses normalized token and compact-character matching. Strict answer support requires every distinct numeric value in the answer to occur in the same evidence text; numeric substrings do not count, and nonnumeric answers use text containment. Neither metric is human relevance.
+- Snippet matching uses normalized token and compact-character matching. Answer support reports full/partial/unsupported: full requires every key number, unit and period, and allows verified calculation inputs to support a result not copied verbatim; numeric substrings do not count. Neither metric is human relevance.
 - No model answer was generated. This is retrieval, not end-to-end answer accuracy.
 - FinanceBench is CC-BY-NC-4.0; the dataset and PDFs are gitignored and not redistributed.
 
