@@ -36,7 +36,7 @@ Three things a chat-only RAG demo usually does not do:
 | FinanceBench full-filing | 61 parsed PDFs, 113 questions, BGE ONNX rerank: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR 0.664**; rerank P95 1.84s; new-document held-out page@1 0.545 / page@5 0.773 |
 | FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920, answer full/partial/unsupported top1 0.207/0.133/0.660 raw; page-level 0.213/0.147/0.640; 42 full-evaluable: 0.738 top1 / 0.929 at5, MRR 0.784** |
 | FinDER answer-support | 1,085 reasoning questions, company-scoped reference corpus with category fallback, BM25 + FlashRank: **full/partial/unsupported top1 0.098/0.666/0.236; at5 0.160/0.700/0.140**; 259 full-evaluable rows: **0.409 / 0.637**; ref hit@5 0.598, P95 271ms |
-| Tests | **1,656 passed** at the recorded evaluation source; **1,754 passed** on the current branch |
+| Tests | **1,656 passed** at the recorded evaluation source; **1,757 passed** on the current branch |
 | Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
 | Codebase | ~23k lines of Python across 77 source modules |
 
@@ -225,7 +225,10 @@ keyword search does not need them.
 
 New research uses the selected interface language. Original filing excerpts remain in their
 source language, and saved answers keep the language in which they were generated.
-Changing the interface does not rewrite an old answer or its exported package.
+Changing the interface does not rewrite an old answer or its exported package. For an
+English saved answer, the result header's **中文** action opens an on-demand Chinese
+translation overlay; it does not change the global language or replace the English
+answer and source excerpts.
 
 CLI and MCP research default to English. Select Chinese with `--language zh` in the CLI
 or `language: "zh"` in REST/MCP requests. For example:

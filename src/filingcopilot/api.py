@@ -23,7 +23,13 @@ from .jobs import ResearchJobConflict, ResearchJobs
 from .localization import header_language, request_from_header
 from .localization import text as translate_text
 from .market import MarketError, MarketUnavailable, statistics, symbol
-from .models import CompanyLookup, CompanyPreparation, FollowupRequest, ResearchRequest
+from .models import (
+    CompanyLookup,
+    CompanyPreparation,
+    FollowupRequest,
+    ResearchRequest,
+    TranslationRequest,
+)
 from .runtime_identity import RuntimeIdentity
 from .scenarios import ScenarioRequest
 from .service import FilingCopilot
@@ -507,6 +513,20 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
     def research_plan(request: ResearchRequest, accept_language: str | None = Header(default=None)):
         request = request_from_header(request, accept_language)
         return service.localize_research_plan(service.research_plan(request), request.language)
+
+    @app.post("/api/translate")
+    async def translate_answer(request: TranslationRequest):
+        try:
+            translations = await run_in_threadpool(
+                service.translate_texts, request.texts, request.target
+            )
+            return {"translations": translations, "target": request.target}
+        except ValueError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except httpx.HTTPError as exc:
+            raise HTTPException(
+                status_code=502, detail="模型翻译请求失败，请稍后重试。"
+            ) from exc
 
     @app.get("/api/evidence/{evidence_id}")
     def evidence(evidence_id: str, as_of: date | None = None):

@@ -212,6 +212,11 @@ class FollowupRequest(StrictModel):
     language: Literal["zh", "en"] = "en"
 
 
+class TranslationRequest(StrictModel):
+    texts: list[str] = Field(min_length=1, max_length=30)
+    target: Literal["zh"] = "zh"
+
+
 class CompanyLookup(StrictModel):
     query: str = Field(min_length=1, max_length=120)
     translate: bool = True

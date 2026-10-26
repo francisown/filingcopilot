@@ -92,3 +92,20 @@ main{margin-left:216px;padding:0 28px 26px;max-width:1900px}header{height:64px;d
 .company-inline-number .number-value{color:#2f3f22}
 .company-inline-number .number-period{color:#6b7a58}
 .company-inline-progress{font-size:12px;color:#355984;line-height:1.8;margin:7px 0;overflow-wrap:anywhere}
+
+/* On-demand Chinese view for a single saved answer. It is deliberately an
+   overlay so opening it never replaces the English answer or resets reading
+   position. */
+.inline-translation-button{margin-left:auto}
+.inline-translation-panel{position:fixed;z-index:30;top:82px;right:26px;width:min(540px,calc(100vw - 34px));max-height:calc(100vh - 108px);overflow:auto;overscroll-behavior:contain;padding:20px 22px;background:#fff;border:1px solid #c9d7e8;border-radius:8px;box-shadow:0 16px 48px #10213a33;color:#243b56}
+.inline-translation-panel[hidden]{display:none}
+.inline-translation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid #e4ebf3}
+.inline-translation-head h3{font-size:14px;font-weight:600;margin:0;color:#173252}
+.inline-translation-close{border:0;background:transparent;color:#5b718c;font-size:24px;line-height:1;padding:0 4px;cursor:pointer}
+.inline-translation-close:hover{color:#173252}
+.inline-translation-row{padding:12px 0;border-bottom:1px solid #edf1f6}
+.inline-translation-row:last-of-type{border-bottom:0}
+.inline-translation-row strong{display:block;font-size:11px;font-weight:600;color:#5a7390;margin-bottom:5px}
+.inline-translation-row p{margin:0;font-size:13px;line-height:1.9;color:#263f5c;overflow-wrap:anywhere}
+.inline-translation-note{font-size:11px;line-height:1.7;color:#6a7b91;margin:12px 0 0;padding-top:11px;border-top:1px solid #edf1f6}
+@media(max-width:700px){.inline-translation-panel{top:64px;right:12px;width:calc(100vw - 24px);max-height:calc(100vh - 80px);padding:17px}.inline-translation-button{font-size:11px}}

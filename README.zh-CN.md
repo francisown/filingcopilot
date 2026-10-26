@@ -33,7 +33,7 @@ FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或�
 | FinanceBench full-filing | 61 份已解析 PDF、113 题，BGE ONNX rerank：**page hit@5 0.850、page@1 0.540、snippet hit@5 0.858、snippet hit@1 0.531、MRR 0.664**；rerank P95 1.84s；新增文档 held-out page@1 0.545 / page@5 0.773 |
 | FinanceBench evidence-page（诊断） | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.920、page@1 0.687、snippet hit@5 0.920、answer full/partial/unsupported top1 0.207/0.133/0.660 raw；page-level 0.213/0.147/0.640；42 道 full-evaluable 上 0.738 top1 / 0.929 at5、MRR 0.784** |
 | FinDER answer-support | 1,085 道 reasoning 题，company-scoped reference corpus + category fallback，BM25 + FlashRank：**full/partial/unsupported top1 0.098/0.666/0.236；at5 0.160/0.700/0.140**；259 道 full-evaluable 上 **0.409 / 0.637**；ref hit@5 0.598，P95 271ms |
-| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,754 个全部通过** |
+| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,757 个全部通过** |
 | 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
 | 代码 | 约 23k 行 Python，77 个源码模块 |
 
@@ -180,7 +180,7 @@ FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 ## 如何使用
 
 首次打开时，界面默认英文，不受浏览器语言影响；右上角可选择中文，并在本机记住主动选择的语言。
-新研究按当前界面语言生成回答。原始财报摘录和已保存的历史回答保留其原有语言，切换界面不会改写研究包。
+新研究按当前界面语言生成回答。原始财报摘录和已保存的历史回答保留其原有语言，切换界面不会改写研究包。英文回答标题旁新增“中文”按钮，按需在右侧打开当前回答的中文对照，不会切换全局语言、替换英文原文或重置阅读位置。
 
 ### 1. 找到公司，先查看行情
 
