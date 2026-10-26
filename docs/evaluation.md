@@ -159,7 +159,13 @@ are retired. The full-filing benchmark covers 61 parsed PDFs and 113 questions
 with a BGE ONNX reranker over the top5 router pages: **page hit@5 0.850,
 page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR@5 0.664**.
 The strict support classification did not improve these full-filing metrics;
-they are recorded retrieval measurements, not a quality improvement. BGE adds
+they are recorded retrieval measurements, not a quality improvement. A
+2026-10-26 full-filing rerun recorded page@1 **0.540**, page@5 **0.850**,
+snippet@5 **0.858**, MRR **0.664**, and strict answer
+full/partial/unsupported top1 **0.221 / 0.186 / 0.593**; at5
+**0.319 / 0.248 / 0.434**. The page/snippet result is unchanged within noise;
+the support result is diagnostic, not a claimed quality gain. See the
+[frozen record](validation/financebench-full-2026-10-26.json). BGE adds
 about 1.8 s P95 on CPU. BGE's 22-question 60→80 document extension reaches page
 hit@1 0.545, page hit@5 0.773 and MRR 0.621; it is still small and
 document-selected. Full report:

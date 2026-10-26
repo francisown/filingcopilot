@@ -1,0 +1,42 @@
+{
+  "schema": "filingcopilot.validation/financebench-full/v1",
+  "recorded_at": "2026-10-26",
+  "benchmark": "FinanceBench full-filing",
+  "source_commit": "f2f12f4",
+  "dataset": "PatronusAI/financebench",
+  "license": "CC-BY-NC-4.0",
+  "configuration": {
+    "docs": 80,
+    "retrieval": "router",
+    "strategy": "section",
+    "top1_rerank": "title",
+    "rerank": "bge",
+    "max_questions_per_document": 20
+  },
+  "metrics": {
+    "questions": 113,
+    "docs": 61,
+    "page_hit_at_1": 0.5398230088495575,
+    "page_hit_at_3": 0.7876106194690266,
+    "page_hit_at_5": 0.8495575221238938,
+    "snippet_evaluable_questions": 113,
+    "snippet_hit_at_1": 0.5309734513274337,
+    "snippet_hit_at_3": 0.7964601769911505,
+    "snippet_hit_at_5": 0.8584070796460177,
+    "snippet_hit_at_1_evaluable": 0.5309734513274337,
+    "snippet_hit_at_3_evaluable": 0.7964601769911505,
+    "snippet_hit_at_5_evaluable": 0.8584070796460177,
+    "mrr_at_5": 0.6635693215339233,
+    "answer_supported_top1": 0.22123893805309736,
+    "answer_partial_top1": 0.18584070796460178,
+    "answer_unsupported_top1": 0.5929203539823009,
+    "answer_supported_at_5": 0.3185840707964602,
+    "answer_partial_at_5": 0.24778761061946902,
+    "answer_unsupported_at_5": 0.4336283185840708
+  },
+  "artifact": {
+    "path": "artifacts/financebench-pdf-current.json",
+    "sha256": "3e6e8e7b42cbe205d1d048e52115a5194c7e8899a09af84518ec019c6218a95c"
+  },
+  "note": "Page/snippet metrics are essentially unchanged from the prior recorded run; strict support classification did not improve them. Held-out 22 was not separately isolated in this run."
+}
