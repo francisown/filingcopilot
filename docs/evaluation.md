@@ -68,7 +68,10 @@ HTTP requests in completed questions, with in-flight usage unknown.
 
 The [machine-readable record](validation/live-evaluation-2026-10-19.json) includes
 configuration, source fingerprints, per-question answers and gaps, audit results,
-and the separate follow-up checks. Older measurements below remain historical.
+and the separate follow-up checks. The 18 partial rows are classified in the
+[partial-answer triage](validation/partial-triage-2026-10-26.md): 3 calculation,
+5 evidence-missing, 5 timeout/model, 4 correct refusal/scope limitation, and 1
+review-independence issue. Older measurements below remain historical.
 This was a single current-source run, not a simultaneous rerun of the old GitHub
 baseline. Model review can still accept overly broad wording, particularly claims
 about what an entire filing does not say based on selected excerpts; independent
