@@ -1,0 +1,21 @@
+{
+  "schema": "filingcopilot.validation/retrieval-fusion/v1",
+  "recorded_at": "2026-10-26",
+  "questions": 200,
+  "candidate_limit_per_leg": 75,
+  "coverage_scan_limit": 10000,
+  "query_mode": "focused",
+  "embedding_mode": "off",
+  "weights": {
+    "lexical": 1.0,
+    "title": 0.6,
+    "period": 0.6,
+    "coverage": 1.5,
+    "dense": 1.0
+  },
+  "recall_at_5": 0.355,
+  "mrr_at_5": 0.21975,
+  "candidate_hit_rate": 0.94,
+  "p50_ms": 84.83370000612922,
+  "p95_ms": 164.98739999951795
+}

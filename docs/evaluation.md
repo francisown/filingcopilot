@@ -101,13 +101,14 @@ passage IDs. These are corpus-anchored retrieval measurements.
 |---|---:|---:|
 | Full query, 25 candidates (historical) | 0.155 | 0.084333 |
 | Focused query, 75 candidates, anchor weight 0.05 (historical) | 0.260 | 0.150333 |
-| Focused query, 75 candidates, fused title/period/coverage (2026-10-26) | **0.340** | **0.189417** |
+| Focused query, 75 candidates, fused title/period/coverage (2026-10-26) | **0.355** | **0.21975** |
 
 The fused 2026-10-26 local rerun used the same 200-question gold set, 75
-candidates per leg and embedding mode off; P95 was about 172 ms. Candidate
-coverage was 94%, but 120 questions still had the target present outside the
-returned top five. The target of Recall@5 ≥ 0.35 was not met; this is a ranking
-shortfall, not a candidate-recall shortfall. Cross-encoder and multilingual
+candidates per leg, a bounded 10,000-passage coverage scan and embedding mode
+off. Candidate hit rate was 94%; P50/P95 was 84.8/165.0 ms. Recall@5 ≥ 0.35 was
+met and MRR improved from the 0.150 historical focused result. The result is
+[frozen here](validation/retrieval-fusion-2026-10-26.json); the 22-question
+FinanceBench held-out set was not re-run in this offline pass. Cross-encoder and multilingual
 candidates failed the combined recall/MRR/latency gate and remain disabled. The
 negative result is retained in the local evaluation archive.
 

@@ -64,8 +64,9 @@ coverage scoring, and optional dense embeddings. The legs are deduplicated and
 fused with weighted reciprocal-rank scores; each leg is capped by
 `retrieval_candidate_limit`, while the union is allowed to contain candidates
 from multiple legs. `lexical_only=True` never runs the dense leg. Coverage is
-available for the `coverage` rerank mode and is evaluated over the bounded
-candidate union, not by silently scanning or replacing the other legs. Backend
+available for the `coverage` rerank mode and is evaluated over the scoped
+candidate set, capped at 10,000 passages; it never silently replaces the other
+legs or scans an unbounded global corpus. Backend
 labels list the legs actually used (for example `fts5+title+period+coverage`);
 diagnostics carry per-source candidate counts and scan counts. `reranking.py`
 remains an evaluation-only seam. Invalid score counts, nonfinite scores or

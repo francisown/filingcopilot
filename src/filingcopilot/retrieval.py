@@ -25,6 +25,17 @@ from .settings import Settings
 
 ALIASES = DEFAULT_DOMAIN.query_expansions
 
+DEFAULT_SOURCE_WEIGHTS = {
+    "lexical": 1.0,
+    "title": 0.6,
+    "period": 0.6,
+    "coverage": 1.5,
+    "dense": 1.0,
+}
+# Coverage is allowed to inspect a bounded scoped slice, never an unbounded
+# global corpus. Above this cap the already-built candidate pool is reused.
+COVERAGE_SCAN_LIMIT = 10000
+
 # Finance questions are full of stable abbreviations.  Expand them before
 # punctuation normalization so that ``P/E`` survives as one concept instead
 # of becoming two unrelated tokens.  This is deliberately deterministic and
@@ -493,6 +504,7 @@ class Retriever:
         query_mode: str | None = None,
         candidate_limit: int | None = None,
         diagnostics: bool = False,
+        source_weights: dict[str, float] | None = None,
     ) -> dict:
         checkpoint()
         rerank_mode = rerank_mode or self.settings.rerank_mode
@@ -583,8 +595,15 @@ class Retriever:
             if period_fts
             else []
         )
+        base_candidates = {}
+        for passage, _ in [*lexical, *title, *period, *dense]:
+            base_candidates[passage.id] = passage
+        base_passages = list(base_candidates.values())
+        coverage_pool = passages if len(passages) <= COVERAGE_SCAN_LIMIT else base_passages
         coverage_items = (
-            self._coverage_hits(terms, passages, section_weight=coverage_section_weight)
+            self._coverage_hits(
+                terms, coverage_pool, section_weight=coverage_section_weight
+            )
             if rerank_mode == "coverage" and terms
             else []
         )
@@ -603,13 +622,14 @@ class Retriever:
             "coverage": coverage_rows,
             "dense": dense,
         }
-        source_weights = {
+        weights = {
+            **DEFAULT_SOURCE_WEIGHTS,
             "lexical": lexical_weight,
-            "title": 0.8,
-            "period": 0.6,
-            "coverage": 0.9,
             "dense": dense_weight,
+            **(source_weights or {}),
         }
+        if any(value < 0 for value in weights.values()):
+            raise ValueError("retrieval source weights must be non-negative")
         combined = {}
         for leg, rows in sources.items():
             for rank, (passage, raw) in enumerate(rows, start=1):
@@ -617,7 +637,7 @@ class Retriever:
                     passage.id,
                     {"passage": passage.model_dump(mode="json"), "score": 0.0, "legs": {}},
                 )
-                item["score"] += source_weights[leg] / (rrf_k + rank)
+                item["score"] += weights[leg] / (rrf_k + rank)
                 if leg == "coverage":
                     item["legs"]["coverage"] = coverage_details.get(passage.id)
                 else:
@@ -671,8 +691,17 @@ class Retriever:
                             leg: len(rows) for leg, rows in sources.items()
                         },
                         "coverage_candidates": len(coverage_rows),
-                        "coverage_scanned": len(passages) if coverage_items else 0,
+                        "coverage_scanned": len(coverage_pool) if coverage_items else 0,
                         "rerank_mode": rerank_mode,
+                        "candidate_details": [
+                            {
+                                "id": item["passage"]["id"],
+                                "score": item["score"],
+                                "section": item["passage"].get("section", ""),
+                                "legs": item["legs"],
+                            }
+                            for item in ranked
+                        ],
                     }
                 }
                 if diagnostics
