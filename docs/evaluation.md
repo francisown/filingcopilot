@@ -99,14 +99,17 @@ passage IDs. These are corpus-anchored retrieval measurements.
 
 | Configuration | Recall@5 | MRR@5 |
 |---|---:|---:|
-| Full query, 25 candidates | 0.155 | 0.084333 |
-| Focused query, 75 candidates, anchor weight 0.05 | 0.260 | 0.150333 |
+| Full query, 25 candidates (historical) | 0.155 | 0.084333 |
+| Focused query, 75 candidates, anchor weight 0.05 (historical) | 0.260 | 0.150333 |
+| Focused query, 75 candidates, fused title/period/coverage (2026-10-26) | **0.340** | **0.189417** |
 
-In the focused-query diagnosis, 65 targets were absent from the candidate pool and
-83 were present but ranked below the returned top five. The recall-doubling target
-was not met. Cross-encoder and multilingual candidates failed the combined
-recall/MRR/latency gate and remain disabled. The negative result is retained in
-the local evaluation archive.
+The fused 2026-10-26 local rerun used the same 200-question gold set, 75
+candidates per leg and embedding mode off; P95 was about 172 ms. Candidate
+coverage was 94%, but 120 questions still had the target present outside the
+returned top five. The target of Recall@5 ≥ 0.35 was not met; this is a ranking
+shortfall, not a candidate-recall shortfall. Cross-encoder and multilingual
+candidates failed the combined recall/MRR/latency gate and remain disabled. The
+negative result is retained in the local evaluation archive.
 
 The internal exact-passage gold remains a regression set. It measures strict
 paragraph identity, not human relevance; the product-scoped external check below

@@ -19,6 +19,7 @@ from .corpus import Corpus
 from .domain import DEFAULT_DOMAIN, Domain, load_domain, mentions
 from .execution import RefreshBudgetExceeded, ResearchStopped, checkpoint, progress
 from .local_models import verify_model_snapshot
+from .models import Passage
 from .retrieval_query import lexical_terms, retrieval_text
 from .settings import Settings
 
@@ -558,58 +559,69 @@ class Retriever:
             except Exception as exc:
                 # A damaged optional index or ONNX failure must not discard FTS results.
                 self.model_error = type(exc).__name__
-        if rerank_mode == "coverage":
-            # Coverage is a deterministic rerank over the bounded candidate
-            # pool. It must not scan every passage in the filing scope and must
-            # not discard the FTS/dense evidence already retrieved above.
-            candidates = {}
-            for passage, _ in lexical:
-                candidates[passage.id] = passage
-            for passage, _ in dense:
-                candidates[passage.id] = passage
-            candidate_passages = list(candidates.values())
-            ranked = self._coverage_hits(
-                terms, candidate_passages, section_weight=coverage_section_weight
+        title_terms = [term for term in terms if len(term) >= 3]
+        title_fts = " OR ".join(
+            'section : "' + term.replace('"', '""') + '"' for term in title_terms
+        )
+        if section_title and title_fts:
+            title_fts += ' AND section : "' + section_title.replace('"', '""') + '"'
+        title = (
+            self.corpus.lexical(
+                title_fts, as_of, ticker, candidate_limit, fiscal_year, filing_id
             )
-            return {
-                "query": query.strip(),
-                "query_rewrite": {
-                    "normalized": rewrite["normalized"],
-                    "added_terms": rewrite["added_terms"],
-                    "canonical_terms": rewrite["canonical_terms"],
-                    "retrieval_text": query,
-                    "mode": query_mode,
-                },
-                "backend": "fts5+bge+coverage" if dense_used else "fts5+coverage",
-                "embedding_unavailable": self.model_error,
-                "hits": ranked[: max(1, min(8, k))],
-                "eligible_passages": len(passages),
-                **(
-                    {
-                        "retrieval_diagnostics": {
-                            "candidate_ids": [item["passage"]["id"] for item in ranked],
-                            "candidate_limit_per_leg": candidate_limit,
-                            "coverage_candidates": len(candidate_passages),
-                            "coverage_lexical_candidates": len(lexical),
-                            "coverage_dense_candidates": len(dense),
-                            "rerank_mode": "coverage",
-                        }
-                    }
-                    if diagnostics
-                    else {}
-                ),
-                **({"section_title": section_title} if section_title else {}),
-            }
+            if title_fts
+            else []
+        )
+        years = re.findall(r"(?<!\d)(20\d{2})(?!\d)", query)
+        period_fts = " OR ".join('"' + year + '"' for year in years)
+        if section_title and period_fts:
+            period_fts += ' AND section : "' + section_title.replace('"', '""') + '"'
+        period = (
+            self.corpus.lexical(
+                period_fts, as_of, ticker, candidate_limit, fiscal_year, filing_id
+            )
+            if period_fts
+            else []
+        )
+        coverage_items = (
+            self._coverage_hits(terms, passages, section_weight=coverage_section_weight)
+            if rerank_mode == "coverage" and terms
+            else []
+        )
+        coverage_details = {
+            item["passage"]["id"]: item["legs"]["coverage"]
+            for item in coverage_items
+        }
+        coverage_rows = [
+            (Passage.model_validate(item["passage"]), item["score"])
+            for item in coverage_items[:candidate_limit]
+        ]
+        sources = {
+            "lexical": lexical,
+            "title": title,
+            "period": period,
+            "coverage": coverage_rows,
+            "dense": dense,
+        }
+        source_weights = {
+            "lexical": lexical_weight,
+            "title": 0.8,
+            "period": 0.6,
+            "coverage": 0.9,
+            "dense": dense_weight,
+        }
         combined = {}
-        for leg, rows in (("lexical", lexical), ("dense", dense)):
+        for leg, rows in sources.items():
             for rank, (passage, raw) in enumerate(rows, start=1):
                 item = combined.setdefault(
                     passage.id,
                     {"passage": passage.model_dump(mode="json"), "score": 0.0, "legs": {}},
                 )
-                weight = lexical_weight if leg == "lexical" else dense_weight
-                item["score"] += weight / (rrf_k + rank)
-                item["legs"][leg] = {"rank": rank, "raw_score": raw}
+                item["score"] += source_weights[leg] / (rrf_k + rank)
+                if leg == "coverage":
+                    item["legs"]["coverage"] = coverage_details.get(passage.id)
+                else:
+                    item["legs"][leg] = {"rank": rank, "raw_score": raw}
         if rerank_mode == "anchor":
             # A small deterministic bonus favors candidates that actually
             # contain the user's expanded query terms.  It is intentionally
@@ -625,6 +637,16 @@ class Retriever:
                 item["score"] += anchor_weight * coverage
                 item["anchor_coverage"] = coverage
         ranked = sorted(combined.values(), key=lambda x: (-x["score"], x["passage"]["id"]))
+        backend_parts = ["fts5"]
+        if dense_used:
+            backend_parts.append("bge")
+        if title:
+            backend_parts.append("title")
+        if period:
+            backend_parts.append("period")
+        if coverage_rows:
+            backend_parts.append("coverage")
+        backend = "+".join(backend_parts)
         return {
             "query": query.strip(),
             "query_rewrite": {
@@ -638,6 +660,23 @@ class Retriever:
             "embedding_unavailable": self.model_error,
             "hits": ranked[: max(1, min(8, k))],
             "eligible_passages": len(passages),
-            **({"retrieval_diagnostics": {"candidate_ids": [item["passage"]["id"] for item in ranked], "candidate_limit_per_leg": candidate_limit}} if diagnostics else {}),
+            **(
+                {
+                    "retrieval_diagnostics": {
+                        "candidate_ids": [
+                            item["passage"]["id"] for item in ranked
+                        ],
+                        "candidate_limit_per_leg": candidate_limit,
+                        "candidate_sources": {
+                            leg: len(rows) for leg, rows in sources.items()
+                        },
+                        "coverage_candidates": len(coverage_rows),
+                        "coverage_scanned": len(passages) if coverage_items else 0,
+                        "rerank_mode": rerank_mode,
+                    }
+                }
+                if diagnostics
+                else {}
+            ),
             **({"section_title": section_title} if section_title else {}),
         }

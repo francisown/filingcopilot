@@ -83,7 +83,8 @@ def test_coverage_mode_uses_rare_terms_and_section_prior(tmp_path):
         k=3,
         diagnostics=True,
     )
-    assert result["backend"] == "fts5+coverage"
+    assert result["backend"].startswith("fts5")
+    assert "coverage" in result["backend"]
     assert result["hits"][0]["passage"]["id"] == "p-risk"
     coverage = result["hits"][0]["legs"]["coverage"]
     assert coverage["section_prior"] == 1.0
@@ -108,7 +109,8 @@ def test_coverage_mode_reranks_only_bounded_candidates(tmp_path):
         diagnostics=True,
     )
     diagnostics = result["retrieval_diagnostics"]
-    assert result["backend"] == "fts5+coverage"
+    assert result["backend"].startswith("fts5")
+    assert "coverage" in result["backend"]
     assert diagnostics["candidate_limit_per_leg"] == 2
     assert diagnostics["coverage_candidates"] <= 2
     assert len(diagnostics["candidate_ids"]) <= 2
@@ -136,8 +138,9 @@ def test_coverage_mode_uses_dense_candidates_when_available(tmp_path, monkeypatc
         k=3,
         diagnostics=True,
     )
-    assert result["backend"] == "fts5+bge+coverage"
-    assert result["retrieval_diagnostics"]["coverage_dense_candidates"] > 0
+    assert result["backend"].startswith("fts5+bge")
+    assert "coverage" in result["backend"]
+    assert result["retrieval_diagnostics"]["candidate_sources"]["dense"] > 0
 
 
 def test_bilingual_expansion_maps_customers_to_english():

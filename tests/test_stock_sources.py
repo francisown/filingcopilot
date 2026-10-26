@@ -270,7 +270,7 @@ def test_lexical_preparation_does_not_load_embeddings_and_default_still_tries_hy
     tools.retriever._vectors = broken_vectors
     context, records = stock_source_context(tools, "AAPL", {"fiscal_year": 2025})
     assert context["found"] and not attempts
-    assert all(r["result"]["backend"] == "fts5" for r in records)
+    assert all(r["result"]["backend"].startswith("fts5") for r in records)
     result = tools.search_passages("operating income", "AAPL", filing_id=annual.id)
     assert attempts and result["hits"] and result["embedding_unavailable"] == "OSError"
 
