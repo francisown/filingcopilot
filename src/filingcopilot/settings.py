@@ -46,7 +46,11 @@ class Settings:
     # A full company brief performs source preparation plus model drafting and
     # independent review. Four minutes was too easy to exhaust on a slow or
     # rate-limited provider; the deadline remains configurable via the env file.
-    research_timeout: float = 420.0
+    research_timeout: float = 300.0
+    # Keep a final-answer review window instead of spending the entire budget
+    # on another research round. This is a cooperative guard; the hard deadline
+    # remains research_timeout.
+    review_reserve_seconds: float = 30.0
     refresh_timeout: float = 20.0
     model_attempts: int = 3
     retry_base_delay: float = 1.0
@@ -103,7 +107,8 @@ class Settings:
             review_batch_size=max(1, min(8, int(os.getenv("FC_REVIEW_BATCH_SIZE", "2")))),
             min_model_interval=max(0.0, min(60.0, float(os.getenv("FC_MIN_MODEL_INTERVAL", "21")))),
             model_timeout=max(1.0, min(180.0, float(os.getenv("FC_MODEL_TIMEOUT", "60")))),
-            research_timeout=max(1.0, min(1800.0, float(os.getenv("FC_RESEARCH_TIMEOUT", "420")))),
+            research_timeout=max(1.0, min(1800.0, float(os.getenv("FC_RESEARCH_TIMEOUT", "300")))),
+            review_reserve_seconds=max(0.0, min(300.0, float(os.getenv("FC_REVIEW_RESERVE_SECONDS", "30")))),
             refresh_timeout=max(1.0, min(60.0, float(os.getenv("FC_REFRESH_TIMEOUT", "20")))),
             model_attempts=max(1, min(5, int(os.getenv("FC_MODEL_ATTEMPTS", "3")))),
             retry_base_delay=max(0.0, min(10.0, float(os.getenv("FC_RETRY_BASE_DELAY", "1")))),

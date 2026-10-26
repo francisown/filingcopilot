@@ -1,5 +1,10 @@
 # Latency and cost budget
 
+**2026-10-26 default:** `FC_RESEARCH_TIMEOUT=300` with
+`FC_REVIEW_RESERVE_SECONDS=30`. New research rounds stop when only the final
+review reserve remains. The historical 417s run below predates this change and
+has not yet been re-run on the public API.
+
 ## Measured problem
 
 The recorded 140-question run used models for 60 questions:

@@ -313,6 +313,23 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
     def reason(self, state: AgentState) -> dict:
         if stopped():
             return {**state, "action": "end"}
+        control = current_control()
+        if (
+            control
+            and control.remaining is not None
+            and control.time_budget is not None
+            and control.time_budget > self.settings.review_reserve_seconds * 2
+            and control.remaining <= self.settings.review_reserve_seconds
+        ):
+            state["trace"].append(
+                {
+                    "stage": "review_reserve",
+                    "remaining_seconds": round(control.remaining, 3),
+                    "reserve_seconds": self.settings.review_reserve_seconds,
+                    "reason": "stop new research before final review reserve",
+                }
+            )
+            return {**state, "action": "end"}
         round_limit = state.get("round_limit", self.settings.max_rounds)
         if state["rounds"] >= round_limit:
             return {
