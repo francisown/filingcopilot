@@ -1,0 +1,217 @@
+{
+  "schema": "filingcopilot.semantic-gold/v1",
+  "version": "2026-10-11",
+  "categories": [
+    "numeric",
+    "causality",
+    "negation",
+    "risk",
+    "cross_period",
+    "insufficient_evidence",
+    "market_outage"
+  ],
+  "notes": "Versioned question set for coverage and evidence-boundary evaluation; it is not a generated-answer accuracy claim.",
+  "count": 20,
+  "items": [
+    {
+      "id": "semantic-numeric-001",
+      "category": "numeric",
+      "language": "zh",
+      "ticker": "MSFT",
+      "fiscal_year": 2025,
+      "question": "微软 FY2025 营业收入和净利润是多少？",
+      "expected_behavior": "answer_with_typed_fact_or_calculation",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-numeric-002",
+      "category": "numeric",
+      "language": "en",
+      "ticker": "NVDA",
+      "fiscal_year": 2022,
+      "question": "What were NVIDIA's FY2022 revenue and net income?",
+      "expected_behavior": "answer_with_typed_fact_or_calculation",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-numeric-003",
+      "category": "numeric",
+      "language": "zh",
+      "ticker": "TSM",
+      "fiscal_year": 2023,
+      "question": "台积电 FY2023 经营活动现金流是多少，来源是什么？",
+      "expected_behavior": "answer_with_typed_fact_or_calculation",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-numeric-004",
+      "category": "numeric",
+      "language": "en",
+      "ticker": "AAPL",
+      "fiscal_year": 2024,
+      "question": "What was Apple's FY2024 operating income margin?",
+      "expected_behavior": "answer_with_typed_fact_or_calculation",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-causality-001",
+      "category": "causality",
+      "language": "zh",
+      "ticker": "TSM",
+      "fiscal_year": 2023,
+      "question": "台积电 FY2023 收入变化的披露原因是什么？",
+      "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-causality-002",
+      "category": "causality",
+      "language": "en",
+      "ticker": "AAPL",
+      "fiscal_year": 2024,
+      "question": "Why did Apple's revenue change in FY2024, based on filed evidence?",
+      "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-causality-003",
+      "category": "causality",
+      "language": "zh",
+      "ticker": "AMZN",
+      "fiscal_year": 2025,
+      "question": "亚马逊 的 FY2025 利润率变化由哪些已披露因素解释？",
+      "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-causality-004",
+      "category": "causality",
+      "language": "en",
+      "ticker": "MSFT",
+      "fiscal_year": 2022,
+      "question": "Which disclosed drivers explain Microsoft's FY2022 growth?",
+      "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-risk-001",
+      "category": "risk",
+      "language": "zh",
+      "ticker": "TSM",
+      "fiscal_year": 2022,
+      "question": "台积电 FY2022 的监管、需求和集中度风险有哪些？",
+      "expected_behavior": "cite_risk_evidence_and_keep_scope",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-risk-002",
+      "category": "risk",
+      "language": "en",
+      "ticker": "AAPL",
+      "fiscal_year": 2023,
+      "question": "What regulatory, demand, and concentration risks did Apple disclose for FY2023?",
+      "expected_behavior": "cite_risk_evidence_and_keep_scope",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-risk-003",
+      "category": "risk",
+      "language": "zh",
+      "ticker": "AMZN",
+      "fiscal_year": 2024,
+      "question": "亚马逊 FY2024 年报有哪些需要持续跟踪的风险？",
+      "expected_behavior": "cite_risk_evidence_and_keep_scope",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-risk-004",
+      "category": "risk",
+      "language": "en",
+      "ticker": "MSFT",
+      "fiscal_year": 2025,
+      "question": "Which risks should an analyst track in Microsoft's FY2025 filing?",
+      "expected_behavior": "cite_risk_evidence_and_keep_scope",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-negation-001",
+      "category": "negation",
+      "language": "zh",
+      "ticker": "NVDA",
+      "fiscal_year": 2022,
+      "question": "英伟达 FY2022 是否披露没有重大供应链影响？请核对原文。",
+      "expected_behavior": "preserve_negation_and_require_exact_support",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-negation-002",
+      "category": "negation",
+      "language": "en",
+      "ticker": "TSM",
+      "fiscal_year": 2023,
+      "question": "Did TSMC state that there was no material supply-chain impact in FY2023?",
+      "expected_behavior": "preserve_negation_and_require_exact_support",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-negation-003",
+      "category": "negation",
+      "language": "zh",
+      "ticker": "AAPL",
+      "fiscal_year": 2024,
+      "question": "苹果 FY2024 是否明确否认需求下降？",
+      "expected_behavior": "preserve_negation_and_require_exact_support",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-negation-004",
+      "category": "negation",
+      "language": "en",
+      "ticker": "AMZN",
+      "fiscal_year": 2025,
+      "question": "Does the FY2025 filing deny a demand decline for Amazon?",
+      "expected_behavior": "preserve_negation_and_require_exact_support",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-cross_period-001",
+      "category": "cross_period",
+      "language": "zh",
+      "ticker": "MSFT",
+      "fiscal_year": 2022,
+      "question": "比较 微软 FY2022 与上一财年的收入增长，期间是否一致？",
+      "expected_behavior": "same_period_comparison_or_explicit_gap",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-cross_period-002",
+      "category": "cross_period",
+      "language": "en",
+      "ticker": "NVDA",
+      "fiscal_year": 2023,
+      "question": "Compare NVIDIA's FY2023 revenue with the prior fiscal year using the same period basis.",
+      "expected_behavior": "same_period_comparison_or_explicit_gap",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-cross_period-003",
+      "category": "cross_period",
+      "language": "zh",
+      "ticker": "TSM",
+      "fiscal_year": 2024,
+      "question": "台积电 FY2024 经营现金流同比是否可计算？",
+      "expected_behavior": "same_period_comparison_or_explicit_gap",
+      "minimum_answer_chars": 40
+    },
+    {
+      "id": "semantic-cross_period-004",
+      "category": "cross_period",
+      "language": "en",
+      "ticker": "AAPL",
+      "fiscal_year": 2025,
+      "question": "Can Apple's FY2025 operating cash flow growth be calculated without mixing periods?",
+      "expected_behavior": "same_period_comparison_or_explicit_gap",
+      "minimum_answer_chars": 40
+    }
+  ]
+}
