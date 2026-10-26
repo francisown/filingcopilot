@@ -75,9 +75,9 @@ verbatim. The earlier any-one-number values are retired and are not comparable.
 | Full-filing page@5 | 0.850 | 113 | 0.772–0.904 |
 | Full-filing snippet@5 | 0.858 | 113 | 0.782–0.911 |
 | 22-question extension page@5 | 0.773 | 22 | 0.566–0.899 |
-| Evidence-page page@5 | 0.927 | 150 | 0.874–0.959 |
-| Evidence-page full answer top1 | 0.213 | 150 | 0.155–0.286 |
-| Evidence-page full answer at5 | 0.293 | 150 | 0.226–0.371 |
+| Evidence-page page@5 | 0.920 | 150 | 0.866–0.954 |
+| Evidence-page full answer top1 | 0.207 | 150 | 0.150–0.279 |
+| Evidence-page full answer at5 | 0.287 | 150 | 0.221–0.364 |
 | Evidence-page full answer top1, full-evaluable | 0.738 | 42 | 0.589–0.847 |
 | FinDER full answer top1 | 0.098 | 1,085 | 0.081–0.117 |
 | FinDER full answer at5 | 0.160 | 1,085 | 0.140–0.183 |

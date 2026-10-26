@@ -5,7 +5,7 @@
   "dataset": "PatronusAI/financebench",
   "license": "CC-BY-NC-4.0",
   "scope": "150 questions; company+year scope; section 3,000-character chunks with 4,000-character parent window and title-based top1 rerank",
-  "support_definition": "full requires every key number, unit and period in one evidence set; verified calculation inputs may support a result that is not copied verbatim; partial means some required values are present; unsupported means no required number is covered.",
+  "support_definition": "full requires every key number, unit and period in one evidence set; verified calculation inputs may support a result that is not copied verbatim; partial means some required values are present; unsupported means no required number is covered. Layers record evidence retrieval, input coverage, answer proof, calculation requirement and multi-reference support.",
   "configuration": {
     "questions": 150,
     "mode": "coverage",
@@ -19,39 +19,78 @@
   },
   "metrics": {
     "questions": 150,
-    "page_hit_at_1": 0.7066666666666667,
+    "page_hit_at_1": 0.6866666666666666,
     "page_hit_at_3": 0.8733333333333333,
-    "page_hit_at_5": 0.9266666666666666,
-    "snippet_hit_at_1": 0.6533333333333333,
-    "snippet_hit_at_3": 0.8733333333333333,
-    "snippet_hit_at_5": 0.9266666666666666,
-    "mrr_at_5": 0.7989999999999999,
-    "answer_supported_top1": 0.21333333333333335,
-    "answer_partial_top1": 0.14,
-    "answer_unsupported_top1": 0.6466666666666666,
-    "answer_supported_at_5": 0.29333333333333333,
-    "answer_partial_at_5": 0.17333333333333334,
+    "page_hit_at_5": 0.92,
+    "snippet_hit_at_1": 0.6333333333333333,
+    "snippet_hit_at_3": 0.8666666666666667,
+    "snippet_hit_at_5": 0.92,
+    "mrr_at_5": 0.7843333333333333,
+    "answer_supported_top1": 0.20666666666666667,
+    "answer_partial_top1": 0.13333333333333333,
+    "answer_unsupported_top1": 0.66,
+    "answer_supported_at_5": 0.2866666666666667,
+    "answer_partial_at_5": 0.18,
     "answer_unsupported_at_5": 0.5333333333333333,
-    "answer_supported_top1_page": 0.22666666666666666,
+    "answer_supported_top1_page": 0.21333333333333335,
     "answer_partial_top1_page": 0.14666666666666667,
-    "answer_supported_at_5_page": 0.29333333333333333,
-    "answer_partial_at_5_page": 0.17333333333333334,
+    "answer_supported_at_5_page": 0.2866666666666667,
+    "answer_partial_at_5_page": 0.18,
     "answer_evaluable_questions": 42,
     "answer_partial_evaluable_questions": 28,
     "answer_unsupported_evaluable_questions": 80,
     "answer_supported_top1_evaluable": 0.7380952380952381,
-    "answer_supported_at_5_evaluable": 0.9523809523809523,
-    "answer_supported_top1_page_evaluable": 0.7857142857142857,
-    "p50_ms": 4.947500001435401,
-    "p95_ms": 6.830099999206141
+    "answer_supported_at_5_evaluable": 0.9285714285714286,
+    "answer_supported_top1_page_evaluable": 0.7619047619047619,
+    "p50_ms": 8.078099999693222,
+    "p95_ms": 11.424099997384474,
+    "by_question_type": {
+      "domain-relevant": {
+        "questions": 50,
+        "page_hit_at_5": 0.86,
+        "snippet_hit_at_5": 0.86
+      },
+      "metrics-generated": {
+        "questions": 50,
+        "page_hit_at_5": 1.0,
+        "snippet_hit_at_5": 1.0
+      },
+      "novel-generated": {
+        "questions": 50,
+        "page_hit_at_5": 0.9,
+        "snippet_hit_at_5": 0.9
+      }
+    },
+    "by_doc_type": {
+      "10k": {
+        "questions": 112,
+        "page_hit_at_5": 0.9375,
+        "snippet_hit_at_5": 0.9375
+      },
+      "10q": {
+        "questions": 15,
+        "page_hit_at_5": 0.9333333333333333,
+        "snippet_hit_at_5": 0.9333333333333333
+      },
+      "8k": {
+        "questions": 9,
+        "page_hit_at_5": 1.0,
+        "snippet_hit_at_5": 1.0
+      },
+      "Earnings": {
+        "questions": 14,
+        "page_hit_at_5": 0.7142857142857143,
+        "snippet_hit_at_5": 0.7142857142857143
+      }
+    }
   },
   "artifact": {
-    "path": "artifacts/financebench-eval-support.json",
-    "sha256": "4a0954b741a10f7bcb288656c6e9b2a0ec5f31ae94a0ddc46fb0538342c0157c"
+    "path": "artifacts/financebench-eval-layers.json",
+    "sha256": "70727b5858226eb8ed362c14624f1152562b342bc054b68d9da38000b6ba9f0d"
   },
   "source_scripts": {
     "scripts/evaluate_financebench.py": "361acf7943dd6ddef43626204390ef2ff5238fa640800aeccb7a662cba9d040c",
-    "src/filingcopilot/eval_support.py": "d0d41c3b6b05321293069b44f7e90816c0a91e08d210f4d7a621605b691d3bd1"
+    "src/filingcopilot/eval_support.py": "687d3112cf945aa10d435215d68fd4807d6b9240f9a815f39879e4cf8d579643"
   },
   "note": "Previous any-one-number figures (0.427 raw / 0.913 evaluable) are retired. Partial is not counted as full support."
 }

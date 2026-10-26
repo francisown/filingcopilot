@@ -151,10 +151,10 @@ SHA256 manifest under the gitignored `evaluation/external/data/` directory.
 **Scoped FinanceBench check (2026-10-26 support re-run):** evidence-page
 benchmark: 150 questions over 163 evidence pages, company+year scope,
 section-aware 3,000-character chunks with a 4,000-character parent window and
-title-based top1 rerank: **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927,
-answer full/partial/unsupported top1 0.213/0.140/0.647 raw; page-level
-0.227/0.147/0.627; on 42 full-evaluable rows 0.738 top1 / 0.952 at5; MRR@5
-0.798**. The earlier 2026-10-23 any-one-number answer figures (0.427 / 0.913)
+title-based top1 rerank: **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920,
+answer full/partial/unsupported top1 0.207/0.133/0.660 raw; page-level
+0.213/0.147/0.640; on 42 full-evaluable rows 0.738 top1 / 0.929 at5; MRR@5
+0.784**. The earlier 2026-10-23 any-one-number answer figures (0.427 / 0.913)
 are retired. The full-filing benchmark covers 61 parsed PDFs and 113 questions
 with a BGE ONNX reranker over the top5 router pages: **page hit@5 0.850,
 page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR@5 0.664**.
@@ -209,13 +209,13 @@ by company/document.
 | FinanceBench full-filing snippet@5 | 0.858 | 113 | 0.782–0.911 |
 | Full-filing 22-question extension page@1 | 0.545 | 22 | 0.347–0.731 |
 | Full-filing 22-question extension page@5 | 0.773 | 22 | 0.566–0.899 |
-| FinanceBench evidence-page page@1 | 0.707 | 150 | 0.629–0.774 |
-| FinanceBench evidence-page page@5 | 0.927 | 150 | 0.874–0.959 |
-| FinanceBench full answer top1 | 0.213 | 150 | 0.155–0.286 |
-| FinanceBench partial answer top1 | 0.140 | 150 | 0.093–0.205 |
-| FinanceBench unsupported answer top1 | 0.647 | 150 | 0.567–0.719 |
-| FinanceBench full answer at5 | 0.293 | 150 | 0.226–0.371 |
-| FinanceBench partial answer at5 | 0.173 | 150 | 0.121–0.242 |
+| FinanceBench evidence-page page@1 | 0.687 | 150 | 0.609–0.755 |
+| FinanceBench evidence-page page@5 | 0.920 | 150 | 0.865–0.954 |
+| FinanceBench full answer top1 | 0.207 | 150 | 0.150–0.278 |
+| FinanceBench partial answer top1 | 0.133 | 150 | 0.088–0.197 |
+| FinanceBench unsupported answer top1 | 0.660 | 150 | 0.581–0.731 |
+| FinanceBench full answer at5 | 0.287 | 150 | 0.220–0.364 |
+| FinanceBench partial answer at5 | 0.180 | 150 | 0.127–0.249 |
 | FinanceBench unsupported answer at5 | 0.533 | 150 | 0.454–0.611 |
 | FinDER full answer top1 | 0.098 | 1,085 | 0.081–0.117 |
 | FinDER partial answer top1 | 0.666 | 1,085 | 0.638–0.694 |

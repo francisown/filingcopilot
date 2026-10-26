@@ -55,3 +55,27 @@ def test_missing_period_or_unit_prevents_full() -> None:
     no_unit = classify_support(["Revenue was 123."], "Revenue was 123 million.")
     assert no_unit.status == "partial"
     assert no_unit.missing_units
+
+
+def test_multi_reference_inputs_can_support_calculation() -> None:
+    report = classify_support(
+        ["Revenue was 539.2 million.", "Prior revenue was 427.7 million."],
+        "Revenue increased by 111.5 million, calculated as 539.2 minus 427.7.",
+    )
+    assert report.status == "full"
+    assert report.multi_reference_support
+    assert report.calculation_required
+    assert report.as_dict()["layers"]["evidence_retrieval"] == "found"
+    assert report.as_dict()["layers"]["input_coverage"] == "full"
+    assert report.as_dict()["layers"]["answer_proof"] == "proved"
+
+
+def test_evidence_found_but_incomplete_inputs_is_partial() -> None:
+    report = classify_support(
+        ["Revenue was 539.2 million."],
+        "Revenue increased by 111.5 million, calculated as 539.2 minus 427.7.",
+    )
+    assert report.status == "partial"
+    assert report.as_dict()["layers"]["evidence_retrieval"] == "found"
+    assert report.as_dict()["layers"]["input_coverage"] == "partial"
+    assert report.as_dict()["layers"]["answer_proof"] == "partial"

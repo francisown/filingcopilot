@@ -34,9 +34,9 @@ Three things a chat-only RAG demo usually does not do:
 | Bilingual evaluation | 140 questions; 100 research questions: **81 complete, 18 partial, 1 no answer**; 40 boundary questions answered with explicit limits |
 | Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
 | FinanceBench full-filing | 61 parsed PDFs, 113 questions, BGE ONNX rerank: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR 0.664**; rerank P95 1.84s; new-document held-out page@1 0.545 / page@5 0.773 |
-| FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927, answer full/partial/unsupported top1 0.213/0.140/0.647 raw; page-level 0.227/0.147/0.627; 42 full-evaluable: 0.738 top1 / 0.952 at5, MRR 0.798** |
+| FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920, answer full/partial/unsupported top1 0.207/0.133/0.660 raw; page-level 0.213/0.147/0.640; 42 full-evaluable: 0.738 top1 / 0.929 at5, MRR 0.784** |
 | FinDER answer-support | 1,085 reasoning questions, company-scoped reference corpus with category fallback, BM25 + FlashRank: **full/partial/unsupported top1 0.098/0.666/0.236; at5 0.160/0.700/0.140**; 259 full-evaluable rows: **0.409 / 0.637**; ref hit@5 0.598, P95 271ms |
-| Tests | **1,656 passed** at the recorded evaluation source; **1,752 passed** on the current branch |
+| Tests | **1,656 passed** at the recorded evaluation source; **1,754 passed** on the current branch |
 | Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
 | Codebase | ~23k lines of Python across 77 source modules |
 
@@ -89,7 +89,7 @@ A click-by-click walkthrough is in [demo.md](docs/demo.md); the credit-risk vert
 - [Data and model licenses](docs/data-licenses.md) — code MIT versus non-commercial benchmark data.
 - [Independent review protocol](docs/independent-review-protocol.md) — the review that has **not** been completed yet.
 - [Core scope](docs/core-scope.md) and [latency budget](docs/latency-budget.md) — what is core, what is optional, and why 417s P95 remains unresolved.
-- [FinanceBench check](docs/financebench-scoped-2026-10-23.md) — 150 evidence-page questions (page hit@5 0.927, snippet hit@5 0.927) and 113 full-filing questions (0.850/0.858), with the 22-question new-document check and failure cases.
+- [FinanceBench check](docs/financebench-scoped-2026-10-23.md) — 150 evidence-page questions (page hit@5 0.920, snippet hit@5 0.920) and 113 full-filing questions (0.850/0.858), with the 22-question new-document check and failure cases.
 - [Research package protocol](docs/research-package-protocol.md) — what a frozen package contains and how it is replayed.
 - [Project overview](docs/showcase.md) — try the offline example and follow one request through the code.
 - [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md) · [Full quick start](#quick-start)

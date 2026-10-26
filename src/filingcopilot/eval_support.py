@@ -151,6 +151,11 @@ class SupportReport:
     calculations: tuple[Calculation, ...] = ()
     calculation_supported: bool = True
     evidence_count: int = 0
+    evidence_retrieval: str = "missing"
+    input_coverage: str = "missing"
+    answer_proof: str = "unsupported"
+    multi_reference_support: bool = False
+    calculation_required: bool = False
 
     def as_dict(self) -> dict:
         def numbers(values: Iterable[Decimal]) -> list[str]:
@@ -158,6 +163,13 @@ class SupportReport:
 
         return {
             "status": self.status,
+            "layers": {
+                "evidence_retrieval": self.evidence_retrieval,
+                "input_coverage": self.input_coverage,
+                "answer_proof": self.answer_proof,
+            },
+            "multi_reference_support": self.multi_reference_support,
+            "calculation_required": self.calculation_required,
             "numbers": numbers(self.numbers),
             "matched_numbers": numbers(self.matched_numbers),
             "missing_numbers": numbers(self.missing_numbers),
@@ -275,7 +287,11 @@ def classify_support(texts: Sequence[str], answer: object) -> SupportReport:
     evidence = [norm(text) for text in texts if text]
     answer_value = norm(answer)
     if not evidence or not answer_value:
-        return SupportReport("unsupported", evidence_count=len(evidence))
+        return SupportReport(
+            "unsupported",
+            evidence_count=len(evidence),
+            evidence_retrieval="found" if evidence else "missing",
+        )
 
     numbers = numeric_values(answer_value)
     units = unit_values(answer_value)
@@ -291,7 +307,14 @@ def classify_support(texts: Sequence[str], answer: object) -> SupportReport:
         text_tokens = set().union(*(set(re.findall(r"[a-z0-9]+", text)) for text in evidence))
         overlap = len(answer_tokens & text_tokens) / max(1, len(answer_tokens))
         status = "full" if exact else "partial" if overlap >= 0.80 else "unsupported"
-        return SupportReport(status, evidence_count=len(evidence))
+        return SupportReport(
+            status,
+            evidence_count=len(evidence),
+            evidence_retrieval="found",
+            input_coverage="full" if exact else "partial" if overlap >= 0.80 else "missing",
+            answer_proof="proved" if status == "full" else "partial" if status == "partial" else "unsupported",
+            multi_reference_support=len(evidence) > 1 and status != "unsupported",
+        )
 
     result_values = set().union(*(item.result_values for item in relations)) if relations else set()
     operand_values = set().union(*(item.operands for item in relations)) if relations else set()
@@ -314,6 +337,12 @@ def classify_support(texts: Sequence[str], answer: object) -> SupportReport:
         status = "partial"
     else:
         status = "unsupported"
+    if not missing and not missing_units and not missing_periods and calculation_supported:
+        input_coverage = "full"
+    elif matched:
+        input_coverage = "partial"
+    else:
+        input_coverage = "missing"
     return SupportReport(
         status=status,
         numbers=frozenset(numbers),
@@ -326,4 +355,9 @@ def classify_support(texts: Sequence[str], answer: object) -> SupportReport:
         calculations=relations,
         calculation_supported=calculation_supported,
         evidence_count=len(evidence),
+        evidence_retrieval="found",
+        input_coverage=input_coverage,
+        answer_proof="proved" if status == "full" else "partial" if status == "partial" else "unsupported",
+        multi_reference_support=len(evidence) > 1 and status != "unsupported",
+        calculation_required=bool(relations),
     )

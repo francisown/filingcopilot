@@ -31,9 +31,9 @@ FilingCopilot 是一个本地优先的 SEC 财报研究工作台。用中文或�
 | 双语评测 | 140 题；100 道研究题：**81 完整、18 部分、1 无答案**；40 道边界题给出明确边界解释 |
 | 数值 oracle | **116 条与 SEC CompanyFacts 或算术检查完全一致，0 条不一致**；34 条超出检查器范围 |
 | FinanceBench full-filing | 61 份已解析 PDF、113 题，BGE ONNX rerank：**page hit@5 0.850、page@1 0.540、snippet hit@5 0.858、snippet hit@1 0.531、MRR 0.664**；rerank P95 1.84s；新增文档 held-out page@1 0.545 / page@5 0.773 |
-| FinanceBench evidence-page（诊断） | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.927、page@1 0.707、snippet hit@5 0.927、answer full/partial/unsupported top1 0.213/0.140/0.647 raw；page-level 0.227/0.147/0.627；42 道 full-evaluable 上 0.738 top1 / 0.952 at5、MRR 0.798** |
+| FinanceBench evidence-page（诊断） | 150 题，company+year，section 3000 + parent 4000：**page hit@5 0.920、page@1 0.687、snippet hit@5 0.920、answer full/partial/unsupported top1 0.207/0.133/0.660 raw；page-level 0.213/0.147/0.640；42 道 full-evaluable 上 0.738 top1 / 0.929 at5、MRR 0.784** |
 | FinDER answer-support | 1,085 道 reasoning 题，company-scoped reference corpus + category fallback，BM25 + FlashRank：**full/partial/unsupported top1 0.098/0.666/0.236；at5 0.160/0.700/0.140**；259 道 full-evaluable 上 **0.409 / 0.637**；ref hit@5 0.598，P95 271ms |
-| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,752 个全部通过** |
+| 测试 | 记录源码通过 **1,656 个测试**；当前分支 **1,754 个全部通过** |
 | 入口 | 浏览器、CLI、REST API 和 **30 个 MCP 工具**共用同一研究服务 |
 | 代码 | 约 23k 行 Python，77 个源码模块 |
 
@@ -80,7 +80,7 @@ python examples/credit-risk/demo.py demo
 - [案例研究（中文）](docs/case-study.zh-CN.md) · [Case study (English)](docs/case-study.md) — 问题、架构、评测、失败分类和限制。
 - [评测](docs/evaluation.md) — 140 题运行、检索金集、负面结果和精确分母。
 - [外部评测数据集](evaluation/external/README.md) — FinanceBench、DocFinQA、FiQA 的许可、规模和拉取方式。
-- [FinanceBench 测试](docs/financebench-scoped-2026-10-23.md) — 150 道 evidence-page 题（page hit@5 0.927、snippet hit@5 0.927）和 113 道 full-filing 题（0.850/0.858），含新增文档 held-out 与失败案例。
+- [FinanceBench 测试](docs/financebench-scoped-2026-10-23.md) — 150 道 evidence-page 题（page hit@5 0.920、snippet hit@5 0.920）和 113 道 full-filing 题（0.850/0.858），含新增文档 held-out 与失败案例。
 - [研究包协议](docs/research-package-protocol.md) — 冻结包里有什么，如何重放。
 - [项目导览](docs/showcase.zh-CN.md) — 离线示例和一条请求的代码阅读顺序。
 - [MCP 接入](docs/mcp-tools.md) · [参与贡献](CONTRIBUTING.md) · [完整快速开始](#快速开始)

@@ -3,7 +3,7 @@
 This note reports two different retrieval layers. They are not interchangeable.
 
 - **Headline:** full-filing retrieval is **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624** on 61 parsed PDFs and 113 questions; the 22-question new-document check is 0.773.
-- **Diagnostic:** evidence-page retrieval is **page hit@5 0.927, page@1 0.707, snippet hit@5 0.927, answer full/partial/unsupported top1 0.213/0.140/0.647 raw; page-level 0.227/0.147/0.627; 42 full-evaluable rows 0.738 top1 / 0.952 at5; MRR 0.798** on 150 rows. It ranks known evidence pages; it is not full 10-K search. The earlier 0.427/0.913 any-one-number values are retired.
+- **Diagnostic:** evidence-page retrieval is **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920, answer full/partial/unsupported top1 0.207/0.133/0.660 raw; page-level 0.213/0.147/0.640; 42 full-evaluable rows 0.738 top1 / 0.929 at5; MRR 0.784** on 150 rows. It ranks known evidence pages; it is not full 10-K search. The earlier 0.427/0.913 any-one-number values are retired.
 
 ## Evidence-page benchmark
 
@@ -29,12 +29,12 @@ repository root, current directory and user home are always rejected.
 | Metric | Result |
 |---|---:|
 | Questions | 150 |
-| Page hit@1 | 0.707 |
-| Page hit@5 | **0.927** |
+| Page hit@1 | 0.687 |
+| Page hit@5 | **0.920** |
 | Snippet hit@1 | 0.653 |
 | Snippet hit@3 | 0.873 |
-| Snippet hit@5 | **0.927** |
-| MRR@5 | **0.798** |
+| Snippet hit@5 | **0.920** |
+| MRR@5 | **0.784** |
 | Full answer top1, raw | 0.213 |
 | Partial answer top1, raw | 0.140 |
 | Unsupported answer top1, raw | 0.647 |
@@ -44,8 +44,8 @@ repository root, current directory and user home are always rejected.
 | Unsupported answer at 5, raw | 0.533 |
 | Full-evaluable questions | 42 |
 | Full answer top1, full-evaluable | 0.738 |
-| Full answer at 5, full-evaluable | 0.952 |
-| Full answer top1, page-level full-evaluable | 0.786 |
+| Full answer at 5, full-evaluable | 0.929 |
+| Full answer top1, page-level full-evaluable | 0.762 |
 | Retrieval P95 | 6.8 ms |
 
 The 4,000-character parent window is the balanced setting. Larger windows were not adopted because they did not improve answer-supported top1. Chunk size was not increased further.
@@ -54,9 +54,9 @@ The 4,000-character parent window is the balanced setting. Larger windows were n
 
 | Type | Questions | Page hit@5 | Snippet hit@5 |
 |---|---:|---:|---:|
-| domain-relevant | 50 | 0.840 | 0.840 |
+| domain-relevant | 50 | 0.860 | 0.860 |
 | metrics-generated | 50 | 1.000 | 1.000 |
-| novel-generated | 50 | 0.940 | 0.940 |
+| novel-generated | 50 | 0.900 | 0.900 |
 
 ### By document type
 
@@ -65,18 +65,18 @@ The 4,000-character parent window is the balanced setting. Larger windows were n
 | 10-K | 112 | 0.938 | 0.938 |
 | 10-Q | 15 | 0.933 | 0.933 |
 | 8-K | 9 | 1.000 | 1.000 |
-| Earnings | 14 | 0.786 | 0.786 |
+| Earnings | 14 | 0.714 | 0.714 |
 
 Domain-relevant and earnings questions remain the weak groups. Table-aware chunking at the same size did not improve them enough to justify the snippet loss.
 
 ### Answer support
 
-Only **42/150** questions have a full answer in the gold evidence set; 28 are partial and 80 unsupported. The classifier requires all key numbers, units and periods, and can accept verified calculation inputs instead of a literal result. On the 42 full-evaluable rows, full top1 is **0.738**, at 5 is **0.952**, and page-level top1 is **0.786**. Partial is not counted as full. The raw 0.213/0.293 numbers mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
+Only **42/150** questions have a full answer in the gold evidence set; 28 are partial and 80 unsupported. The classifier requires all key numbers, units and periods, and can accept verified calculation inputs instead of a literal result. On the 42 full-evaluable rows, full top1 is **0.738**, at 5 is **0.929**, and page-level top1 is **0.762**. Partial is not counted as full. The raw 0.207/0.287 numbers mix in calculation answers that no evidence page contains and should not be used as a retrieval headline.
 
 BGE was also measured on the evidence-page path: page@1 0.707→**0.720**,
 page@3 0.873→**0.913**, MRR 0.798→**0.808**; the earlier page@5 was **0.920**.
 The 2026-10-26 support rerun with the bounded coverage candidate pool records
-page@5 **0.927**, but it still uses title rerank. P95 rises to **1.46s** with
+page@5 **0.920**, but it still uses title rerank. P95 rises to **1.46s** with
 BGE, so the fast evidence-page path keeps title rerank; BGE is enabled only for
 the full-filing path.
 
@@ -117,7 +117,7 @@ The 22 questions from the 60→80 document extension reach page hit@1 **0.545**,
 - A title-based top1 rerank promotes a top-3 page whose heading matches more query terms. In full-filing it raised page@1 0.327→0.407 and MRR 0.523→0.569 without changing page@5.
 - A FlashRank cross-encoder rerank on the top5 full-filing pages then raised page@1 0.407→0.478, MRR 0.569→0.624 and snippet@1 0.416→0.487; page@5 and snippet@5 stayed unchanged. It adds roughly 0.3s per query, so evidence-page keeps the cheaper title rerank.
 - A `BAAI/bge-reranker-v2-m3` INT8 ONNX rerank on the same top5 pages raised page@1 0.478→0.540, snippet@1 0.487→0.531 and MRR 0.624→0.664, while page@5 0.850 and snippet@5 0.858 stayed unchanged. It costs about 1.8s P95 on CPU; full-filing adopts it, FlashRank remains the fallback.
-- Snippet matching now also uses a compact character match, so PDF spacing/table-extraction differences such as `Cashandcashequivalents` no longer count as misses. Full-filing snippet@5 rose 0.779→0.858; evidence-page snippet@5 rose 0.907→0.927 in the strict rerun.
+- Snippet matching now also uses a compact character match, so PDF spacing/table-extraction differences such as `Cashandcashequivalents` no longer count as misses. Full-filing snippet@5 rose 0.779→0.858; evidence-page snippet@5 rose 0.907→0.920 in the support rerun.
 - TOC/index pages are down-weighted.
 - Segment-result pages with a `managed basis` table get a page-level bonus.
 
@@ -141,7 +141,7 @@ methods cannot work with a stronger page index or layout-aware extraction.
 
 ## Limitations
 
-- Evidence-page retrieval is not full 10-K search. The 0.927 number must not be presented as full-filing accuracy.
+- Evidence-page retrieval is not full 10-K search. The 0.920 number must not be presented as full-filing accuracy.
 - The full-filing result is 0.850 page hit@5 on 61 parsed documents; BGE rerank improves page@1 to 0.540 and MRR to 0.664, but these are still not strong.
 - 19 of 80 selected documents were skipped due to HTTP 403, corrupt files, or no extractable text. That is selection bias.
 - The router contains domain and bank-report heuristics. It is development-tuned on these rows; the 22-question held-out extension is too small for a final claim.
