@@ -155,6 +155,36 @@ def _row(item: dict, result, elapsed_ms: int, review_model: str = "") -> dict:
         and not timed_out
     )
     wrong_refusal = refused and expected != "reasonable_refusal_with_actionable_gap" and not timed_out
+    trace = result.trace
+    tool_steps = [
+        step
+        for step in trace
+        if step.get("tool") or step.get("stage") == "tool"
+    ]
+    model_steps = [
+        step
+        for step in trace
+        if step.get("stage") in {"reason", "model", "model_request", "review", "semantic_review"}
+    ]
+    tool_names = sorted(
+        {
+            str(step.get("tool") or step.get("stage"))
+            for step in tool_steps
+        }
+    )
+    direct_text_rounds = sum(
+        1
+        for step in model_steps
+        if step.get("finish_reason") == "stop" and not step.get("tool_calls")
+    )
+    author_ms = round(
+        sum(float(step.get("duration_ms") or 0) for step in trace if step.get("stage") in {"reason", "model"}),
+        3,
+    )
+    review_ms = round(
+        sum(float(step.get("duration_ms") or 0) for step in trace if step.get("stage") in {"review", "semantic_review"}),
+        3,
+    )
     return {
         "id": item["id"],
         "category": item["category"],
@@ -179,6 +209,19 @@ def _row(item: dict, result, elapsed_ms: int, review_model: str = "") -> dict:
         "run_id": result.id,
         "model_calls": result.usage.get("model_calls", 0),
         "review_model": review_model or os.getenv("FC_REVIEW_MODEL", ""),
+        "trace_summary": {
+            "tool_calls": len(tool_steps),
+            "tool_names": tool_names,
+            "model_steps": len(model_steps),
+            "direct_text_rounds": direct_text_rounds,
+            "author_ms": author_ms,
+            "review_ms": review_ms,
+            "finish_reasons": [
+                step.get("finish_reason")
+                for step in model_steps
+                if step.get("finish_reason")
+            ],
+        },
     }
 
 

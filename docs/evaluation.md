@@ -83,7 +83,17 @@ timeout/runner errors. The same 20 IDs in the historical run were **17
 answered / 3 partial**, so the complete-rate acceptance failed despite the
 latency target passing. The full checkpoint, per-question results and request
 log are in the [frozen 20-question record](validation/live-20-2026-10-26/);
-the full 140-question run is intentionally not started. Older measurements below remain historical.
+the full 140-question run is intentionally not started.
+
+A model-control run on the same 20 questions compared `deepseek-v4.1-flash`
+with `mimo-v2.6-flash` under the same review model, corpus, budget and tools.
+DeepSeek recorded **11 answered / 9 partial**, **7.85 tool calls/question**,
+**0 direct-text rounds**, P95 **147.8s**; Mimo recorded **15/5**, **6.55**
+tool calls, **0 direct-text rounds**, P95 **250.3s** in that run, while an
+earlier Mimo run on the same questions was **11/9**. The trace does not support
+the “DeepSeek does not call tools” or “answers directly” hypotheses, and the
+Mimo run variance is large. See the
+[model-control record](validation/model-control-2026-10-26/README.md). Older measurements below remain historical.
 This was a single current-source run, not a simultaneous rerun of the old GitHub
 baseline. Model review can still accept overly broad wording, particularly claims
 about what an entire filing does not say based on selected excerpts; independent

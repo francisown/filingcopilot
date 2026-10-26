@@ -1,0 +1,297 @@
+[
+  {
+    "id": "semantic-negation-001",
+    "category": "negation",
+    "ticker": "NVDA",
+    "question": "英伟达 FY2022 是否披露没有重大供应链影响？请核对原文。",
+    "expected_behavior": "preserve_negation_and_require_exact_support",
+    "status": "partial",
+    "answer": "In Item 7 MD&A the filing states: \"During fiscal year 2022, we made substantial strides in broadening our supply base to scale our company and better serve customer demand. We expect to remain supply-constrained into the first half of fiscal year 2023, primarily in Gaming and Networking.\" This is a disclosure of continuing supply constraints, not of their absence.\nItem 1A Risk Factors states: \"COVID-19 has impacted, and continues to impact, our workforce and operations and those of our customers, partners, vendors and suppliers... the limited availability of our supply chain and logistical services, may have a material net negative impact on our business and financial results,\" and notes that stronger global demand has limited the availability of capacity and components.\nThe only \"no material impact to date\" wording located in the searched FY2022 passages concerns global sustainability regulations, renewable-energy compliance costs and climate-related business trends, which is a separate subject from supply-chain impacts.\nWhat the cited excerpts support is narrower than either version of the proposition: they contain no affirmative statement that supply-chain impacts were immaterial, they affirmatively disclose that the company remained supply-constrained during the reported period, and their material-impact language is forward-looking potential harm rather than a realized material supply-chain impact. The searched passages therefore neither confirm the proposed disclosure of \"no material supply chain impact\" nor establish a realized material impact, leaving that proposition unresolved on this evidence.",
+    "evidence_ids": [
+      "passage-2825394215a908cad98f",
+      "passage-8fdbd038450206bbdb02",
+      "passage-b3372a61eaa413aac0d5",
+      "passage-c27ffdd51e70d2ff13bc"
+    ],
+    "answer_claims": 4,
+    "has_citation": true,
+    "citation_supported": true,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "verification_findings": 2,
+    "budget_timeout": false,
+    "reasonable_refusal": false,
+    "wrong_refusal": false,
+    "gaps": [
+      "No passage was located in the searched FY2022 excerpts that affirmatively states whether a realized material supply-chain impact did or did not occur; only supply-constraint disclosures and forward-looking risk language were found.",
+      "Focused searches of the FY2022 risk factors and MD&A excerpts were performed; a full document-wide review of every section was not conducted."
+    ],
+    "latency_ms": 78158,
+    "cost_usd": null,
+    "run_id": "run-ce49c2045a7147ef94380f1ce074e5e0",
+    "model_calls": 9,
+    "review_model": "glm-5.3-flash",
+    "trace_summary": {
+      "tool_calls": 7,
+      "tool_names": [
+        "search_passages",
+        "submit_answer"
+      ],
+      "model_steps": 9,
+      "direct_text_rounds": 0,
+      "author_ms": 62147.0,
+      "review_ms": 15461.0,
+      "finish_reasons": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ]
+    },
+    "evaluation_fingerprint": "ddf0449d8e88e21823e023c1e2807066001a7bf0d9c05dd9e77e910b65e6704a"
+  },
+  {
+    "id": "semantic-negation-002",
+    "category": "negation",
+    "ticker": "TSM",
+    "question": "Did TSMC state that there was no material supply-chain impact in FY2023?",
+    "expected_behavior": "preserve_negation_and_require_exact_support",
+    "status": "partial",
+    "answer": "In the FY2023 annual report, TSMC frames supply-chain effects as forward-looking risks: it lists supply chain disruption among events that could interrupt its operations, and states that limited supply or long delivery cycles for equipment could negatively affect its financial condition and results of operations.\nThe filing's statement that its current results of operations had not been materially affected addresses the expanded U.S. export control regulations and countermeasures, not supply-chain conditions.\nOn raw materials, TSMC stated that it has obtained and believes it will continue to obtain a sufficient supply of wafers, an adequacy statement rather than a statement that supply-chain impact was immaterial.\nThe passages searched do not support the proposed claim: TSMC did not state in the retrieved FY2023 disclosures that there was no material supply-chain impact; its materiality disclaimers in that filing concern export controls and inflation, while supply-chain disruption is presented only as a risk.",
+    "evidence_ids": [
+      "passage-0c27cadf0ac63528637c",
+      "passage-1149ebf2c32bc61da013",
+      "passage-597cdbc7bcdff1292f71",
+      "passage-687e91b2e2aab85850c7",
+      "passage-810d7dd58986f4f15650",
+      "passage-9c09a7251a4fed88e3bb",
+      "passage-abfaacd1f93623802f39"
+    ],
+    "answer_claims": 4,
+    "has_citation": true,
+    "citation_supported": true,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "verification_findings": 1,
+    "budget_timeout": false,
+    "reasonable_refusal": false,
+    "wrong_refusal": false,
+    "gaps": [
+      "The searches covered selected excerpts of TSMC's FY2023 annual report (filing 0001193125-24-099840); no passage retrieved addresses a realized FY2023 supply-chain impact directly, so a document-wide absence of such a statement was not established."
+    ],
+    "latency_ms": 74422,
+    "cost_usd": null,
+    "run_id": "run-378d73aa34a64cf5aa428bff515e6ddc",
+    "model_calls": 9,
+    "review_model": "glm-5.3-flash",
+    "trace_summary": {
+      "tool_calls": 10,
+      "tool_names": [
+        "search_passages",
+        "submit_answer"
+      ],
+      "model_steps": 9,
+      "direct_text_rounds": 0,
+      "author_ms": 64131.0,
+      "review_ms": 9010.0,
+      "finish_reasons": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ]
+    },
+    "evaluation_fingerprint": "ddf0449d8e88e21823e023c1e2807066001a7bf0d9c05dd9e77e910b65e6704a"
+  },
+  {
+    "id": "semantic-negation-004",
+    "category": "negation",
+    "ticker": "AMZN",
+    "question": "Does the FY2025 filing deny a demand decline for Amazon?",
+    "expected_behavior": "preserve_negation_and_require_exact_support",
+    "status": "partial",
+    "answer": "The searched excerpts of the FY2025 Form 10-K do not support the proposition that the filing denies a demand decline; on the contrary, the filing treats demand softening and demand fluctuations as risks that may occur, so the proposed claim of an explicit denial is not established by this evidence.\nIn Item 1A, the filing states that its revenue and operating profit growth depends on the continued growth of demand, and that a softening of demand, whether caused by changes in customer preferences or a weakening of the U.S. or global economies, may result in decreased revenue or growth.\nThe same filing's risk factors also disclose that demand for its products and services can fluctuate significantly for reasons including recessionary fears or rising inflation, and that changes in customer demand and consumer spending patterns create inventory risks that may adversely affect operating results.\nMD&A reports year-over-year sales growth together with a foreign exchange effect on net sales, but revenue growth does not by itself establish the direction of customer demand, so it cannot serve as an affirmative denial that demand declined.",
+    "evidence_ids": [
+      "passage-1753af546b28b661ffd0",
+      "passage-546fafb94ed2f221a09f",
+      "passage-9aa4df6dcf68fc17ef1d",
+      "passage-ca2c3d1d7e3b14868c59"
+    ],
+    "answer_claims": 4,
+    "has_citation": true,
+    "citation_supported": true,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "verification_findings": 1,
+    "budget_timeout": false,
+    "reasonable_refusal": false,
+    "wrong_refusal": false,
+    "gaps": [
+      "Only demand-, spending- and revenue-related excerpts of the FY2025 10-K were searched; no passage explicitly denying an actual demand decline was found in those excerpts, and document-wide absence was not established.",
+      "The searched excerpts do not disclose an actual measured demand trend for the fiscal year, so whether demand in fact declined cannot be determined from them."
+    ],
+    "latency_ms": 115517,
+    "cost_usd": null,
+    "run_id": "run-6fb3a21d58bf4c0684eda2a3c6650c10",
+    "model_calls": 9,
+    "review_model": "glm-5.3-flash",
+    "trace_summary": {
+      "tool_calls": 10,
+      "tool_names": [
+        "list_filings",
+        "search_passages",
+        "submit_answer"
+      ],
+      "model_steps": 9,
+      "direct_text_rounds": 0,
+      "author_ms": 94246.0,
+      "review_ms": 20604.0,
+      "finish_reasons": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ]
+    },
+    "evaluation_fingerprint": "ddf0449d8e88e21823e023c1e2807066001a7bf0d9c05dd9e77e910b65e6704a"
+  },
+  {
+    "id": "semantic-risk-001",
+    "category": "risk",
+    "ticker": "TSM",
+    "question": "台积电 FY2022 的监管、需求和集中度风险有哪些？",
+    "expected_behavior": "cite_risk_evidence_and_keep_scope",
+    "status": "partial",
+    "answer": "TSM also discloses antitrust and compliance exposure across multiple jurisdictions, citing a European Commission information request from 2017 that it cooperated with and that was closed in May 2020, and warning that adverse antitrust outcomes could harm its business and subject it to significant legal liability.\nEnvironmental and climate regulation is another disclosed regulatory risk: the renamed Taiwan Climate Change Response Act establishes a carbon fee system expected to take effect by 2024 at a rate not yet determined, which TSM says could result in increased operating costs and affect it financially to a certain extent.\nOn demand risk, TSM describes the electronics and semiconductor markets as cyclical with rapid fluctuations in product demand, so downturns and overcapacity can reduce foundry demand and depress revenue, margins and earnings if cost reductions do not offset the decline; it also notes that deteriorating economic or financial conditions at customers may decrease demand for its products and services, with systemic financial stress able to produce decreased customer demand and supplier or customer insolvency.\nOn concentration risk, TSM warns that having one or more large customers accounting for a significant share of revenue makes it vulnerable to the loss or significant curtailment of their purchases, that a concentrated customer base exposes revenue to seasonal demand swings from large customers, and that consolidation among its customers may further increase revenue concentration.",
+    "evidence_ids": [
+      "passage-16c3418c7e63c38720b4",
+      "passage-4892e67689bd53045338",
+      "passage-497fd2cf8bbce9572425",
+      "passage-653127436d955ba52955",
+      "passage-66885aef58c4ef142763",
+      "passage-770569ecf712c4fbb12b",
+      "passage-902ed8ae5cd0f4960924",
+      "passage-9151625596c092a92ee8",
+      "passage-c2f41a56f6420b7eb55a",
+      "passage-dcc5edee25c1b59e760d"
+    ],
+    "answer_claims": 4,
+    "has_citation": true,
+    "citation_supported": true,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "verification_findings": 9,
+    "budget_timeout": false,
+    "reasonable_refusal": false,
+    "wrong_refusal": false,
+    "gaps": [
+      "The FY2022 customer-concentration percentages (top-ten and largest-customer shares of net revenue) appear only in narrative Risk Factors text and could not be bound as a typed numeric fact, so no numeric concentration claim was submitted.",
+      "The specific October 2022 U.S. export-control provisions and the one-year authorization for the Nanjing fab could not be cited with accepted evidence IDs, so the export-control risk is reported only through the filing's general trade-barrier, export-control and regulatory-change language.",
+      "Some claims failed evidence checks and were withheld or removed."
+    ],
+    "latency_ms": 211209,
+    "cost_usd": null,
+    "run_id": "run-57aab034780c4b97892a63cd430c4dc6",
+    "model_calls": 10,
+    "review_model": "glm-5.3-flash",
+    "trace_summary": {
+      "tool_calls": 9,
+      "tool_names": [
+        "search_passages",
+        "submit_answer"
+      ],
+      "model_steps": 10,
+      "direct_text_rounds": 0,
+      "author_ms": 183019.0,
+      "review_ms": 27116.0,
+      "finish_reasons": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ]
+    },
+    "evaluation_fingerprint": "ddf0449d8e88e21823e023c1e2807066001a7bf0d9c05dd9e77e910b65e6704a"
+  },
+  {
+    "id": "semantic-risk-003",
+    "category": "risk",
+    "ticker": "AMZN",
+    "question": "亚马逊 FY2024 年报有哪些需要持续跟踪的风险？",
+    "expected_behavior": "cite_risk_evidence_and_keep_scope",
+    "status": "partial",
+    "answer": "The FY2024 annual report flags intensifying competition as a risk to track, noting new well-funded competitors, alliances and AI, machine learning and cloud technologies that could force Amazon to raise spending or cut prices, reducing sales and profits.\nRegulatory and legal exposure needs ongoing monitoring, as the filing describes expanding government proceedings spanning antitrust, privacy, labor, taxes, data security and AI, including price-fixing and monopolization suits by state attorneys general and the FTC whose outcomes are inherently unpredictable.\nCybersecurity and data-loss risk remains a standing concern, with Amazon maintaining processes to manage unauthorized-access threats to its systems and third-party vendors, and Item 1A directing readers to its data-loss and security-incident risk discussion.\nOperational resilience and seasonality warrant tracking: the filing cites occasional system interruptions that can block order fulfillment, plus concentrated fourth-quarter demand that raises peak staffing, shipping-cost and inventory-markdown risks if forecasts are wrong.\nMacro and financial variables identified for continued attention include foreign-exchange fluctuations, inflation, interest rates, global economic and geopolitical conditions, and customer demand, with the MD&A warning that currency volatility may significantly affect reported results and comparisons.\nTwo further trackable risks are fulfillment-network staffing constraints that raise payroll costs and reduce productivity, and the possibility that significant investments in new technologies, products or services fail to recoup their costs or meet profitability expectations.",
+    "evidence_ids": [
+      "passage-1adebc977a0d64a29a9f",
+      "passage-2b5773e319fe7ae4ae2c",
+      "passage-2eaba69ef283466efe6d",
+      "passage-52121950f740c529789c",
+      "passage-9f22cd64f54d913924b2",
+      "passage-ca535afe68e5a2ce2960",
+      "passage-db32f2b46b6e39f74c7e",
+      "passage-e2eb74f513f804c56cdf",
+      "passage-f0ed3ecb7bf351a93d1c",
+      "passage-ff5861b38ac76c0c66d9"
+    ],
+    "answer_claims": 6,
+    "has_citation": true,
+    "citation_supported": true,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "verification_findings": 0,
+    "budget_timeout": false,
+    "reasonable_refusal": false,
+    "wrong_refusal": false,
+    "gaps": [
+      "The cited excerpts cover selected Item 1A, Item 1C and MD&A passages of the FY2024 10-K; other risk headings in the full filing were not exhaustively reviewed."
+    ],
+    "latency_ms": 185095,
+    "cost_usd": null,
+    "run_id": "run-a3ac54f37a7f4136a838966a5351bfbe",
+    "model_calls": 8,
+    "review_model": "glm-5.3-flash",
+    "trace_summary": {
+      "tool_calls": 9,
+      "tool_names": [
+        "search_passages",
+        "submit_answer"
+      ],
+      "model_steps": 8,
+      "direct_text_rounds": 0,
+      "author_ms": 167347.0,
+      "review_ms": 16687.0,
+      "finish_reasons": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ]
+    },
+    "evaluation_fingerprint": "ddf0449d8e88e21823e023c1e2807066001a7bf0d9c05dd9e77e910b65e6704a"
+  }
+]
