@@ -71,7 +71,19 @@ configuration, source fingerprints, per-question answers and gaps, audit results
 and the separate follow-up checks. The 18 partial rows are classified in the
 [partial-answer triage](validation/partial-triage-2026-10-26.md): 3 calculation,
 5 evidence-missing, 5 timeout/model, 4 correct refusal/scope limitation, and 1
-review-independence issue. Older measurements below remain historical.
+review-independence issue.
+
+**20-question live check (2026-10-26, frozen `f2f12f4`):** 20 stratified
+questions (4 each: numeric, causality, risk, negation, cross-period) were run
+with a fresh copy of the 62-filing corpus, `mimo-v2.6-flash` /
+`glm-5.3-flash`, and the 300s budget with 30s review reserve. It recorded
+**11 answered, 9 partial, 0 abstained**, coverage **0.55**, P50/P95
+**47.8s / 152.1s**, numeric mismatch **0**, citation binding **1.0**, and no
+timeout/runner errors. The same 20 IDs in the historical run were **17
+answered / 3 partial**, so the complete-rate acceptance failed despite the
+latency target passing. The full checkpoint, per-question results and request
+log are in the [frozen 20-question record](validation/live-20-2026-10-26/);
+the full 140-question run is intentionally not started. Older measurements below remain historical.
 This was a single current-source run, not a simultaneous rerun of the old GitHub
 baseline. Model review can still accept overly broad wording, particularly claims
 about what an entire filing does not say based on selected excerpts; independent
@@ -145,7 +157,9 @@ answer full/partial/unsupported top1 0.213/0.140/0.647 raw; page-level
 0.798**. The earlier 2026-10-23 any-one-number answer figures (0.427 / 0.913)
 are retired. The full-filing benchmark covers 61 parsed PDFs and 113 questions
 with a BGE ONNX reranker over the top5 router pages: **page hit@5 0.850,
-page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR@5 0.664**. BGE adds
+page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR@5 0.664**.
+The strict support classification did not improve these full-filing metrics;
+they are recorded retrieval measurements, not a quality improvement. BGE adds
 about 1.8 s P95 on CPU. BGE's 22-question 60→80 document extension reaches page
 hit@1 0.545, page hit@5 0.773 and MRR 0.621; it is still small and
 document-selected. Full report:
