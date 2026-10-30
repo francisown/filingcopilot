@@ -226,12 +226,18 @@ _SEGMENT_STOPWORDS = {
 }
 
 
-def _required_slot_status(slots: list[tuple[str, str, list[str]]], counts: dict[str, int]) -> tuple[dict, list[str]]:
+def _required_slot_status(
+    slots: list[tuple[str, str, list[str]]],
+    counts: dict[str, int],
+    evidence_ids: dict[str, list[str]] | None = None,
+) -> tuple[dict, list[str]]:
     """Return deterministic coverage state for the narrative requirement register."""
+    evidence_ids = evidence_ids or {}
     status = {
         slot: {
             "required": True,
             "hits": int(counts.get(slot, 0)),
+            "evidence_ids": list(dict.fromkeys(evidence_ids.get(slot, []))),
             "status": "covered" if counts.get(slot, 0) else "unresolved",
         }
         for slot, _, _ in slots
@@ -536,6 +542,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             ("反证", r"supply[- ]chain|供应链|demand|需求", ["impact", "disrupt", "interrupt", "declin", "affected", "影响", "中断", "下降"]),
         ]
     slot_counts = {}
+    slot_evidence_ids: dict[str, list[str]] = {}
     seen_segment_names = set()
     # Anchor the scan to entities the question actually names.  The filing can
     # contain many capitalized labels ("Other", "Fixed", table headers, and
@@ -646,6 +653,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             if purpose not in entry["purposes"]:
                 entry["purposes"].append(purpose)
             slot_counts[slot] = slot_counts.get(slot, 0) + 1
+            slot_evidence_ids.setdefault(slot, []).append(item["id"])
             seen_segment_names.update(segment_names)
             if slot != "分部" and slot_counts[slot] >= 2:
                 break
@@ -720,7 +728,9 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                     },
                 }
             )
-    slot_status, unresolved_slots = _required_slot_status(slots, slot_counts)
+    slot_status, unresolved_slots = _required_slot_status(
+        slots, slot_counts, slot_evidence_ids
+    )
     # A candidate for one required part is useful evidence, but it is not a
     # feasible complete answer when another required part was never observed.
     # Keeping this distinction deterministic prevents the author from treating
@@ -739,6 +749,9 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
         "full_filing_scan": True,
         "full_filing_passage_count": len(all_passages),
         "evidence_slots": slot_counts,
+        "slot_evidence_ids": {
+            slot: list(dict.fromkeys(ids)) for slot, ids in slot_evidence_ids.items()
+        },
         "slot_status": slot_status,
         "unresolved_slots": unresolved_slots,
         # The model cannot otherwise tell a completed full-document scan from a

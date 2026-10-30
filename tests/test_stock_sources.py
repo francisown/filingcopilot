@@ -185,7 +185,13 @@ def test_narrative_context_exposes_required_slot_status(sources):
     )
     assert set(context["slot_status"]) == {"否定", "反证"}
     assert set(context["unresolved_slots"]) <= {"否定", "反证"}
-    assert all(item["required"] and item["hits"] >= 0 for item in context["slot_status"].values())
+    assert all(
+        item["required"]
+        and item["hits"] >= 0
+        and item["evidence_ids"] == context["slot_evidence_ids"].get(slot, [])
+        and all(evidence_id in tools.ledger for evidence_id in item["evidence_ids"])
+        for slot, item in context["slot_status"].items()
+    )
     assert context["answerability"] == (
         "supported_candidate" if not context["unresolved_slots"] else "insufficient_candidate"
     )
@@ -196,6 +202,7 @@ def test_required_slot_register_does_not_treat_one_slot_as_complete():
         [("cause", "", []), ("period", "", [])], {"cause": 2}
     )
     assert status["cause"]["status"] == "covered"
+    assert status["cause"]["evidence_ids"] == []
     assert status["period"]["status"] == "unresolved"
     assert unresolved == ["period"]
 
