@@ -207,6 +207,20 @@ def test_required_slot_register_does_not_treat_one_slot_as_complete():
     assert unresolved == ["period"]
 
 
+def test_reviewer_receives_compact_narrative_requirement_register(sources):
+    tools, _, _ = sources
+    context, _ = narrative_source_context(
+        tools, "AAPL", "Did Apple state that there was no material supply-chain impact in FY2025?"
+    )
+    register = ReviewMixin._narrative_requirement_context(
+        {"narrative_context": context}
+    )
+    assert register["category"] == "negation"
+    assert register["unresolved_slots"] == context["unresolved_slots"]
+    assert register["slot_evidence_ids"] == context["slot_evidence_ids"]
+    assert "evidence" not in register
+
+
 def test_narrative_scan_prioritizes_a_question_named_segment_acronym(tools):
     """Question anchors must beat unrelated table prose without issuer rules."""
     filing = add_source(tools, "AMZN:annual", ticker="AMZN", end="2025-09-27")
