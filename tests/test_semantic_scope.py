@@ -136,6 +136,28 @@ def test_numeric_only_delivery_keeps_an_explicit_explanation_gap(tools):
     assert any(t["stage"] == "answer_coverage" for t in answer.trace)
 
 
+@pytest.mark.parametrize(
+    "question",
+    [
+        "Does the FY2025 filing deny a demand decline?",
+        "Did the company state there was no material supply-chain impact?",
+        "What regulatory and demand risks does Apple disclose?",
+    ],
+)
+def test_source_excerpt_or_fact_alone_cannot_complete_narrative_questions(question):
+    from filingcopilot.semantic_boundaries import narrative_completeness_errors
+
+    assert narrative_completeness_errors(
+        [{"kind": "fact"}], question
+    )
+    assert narrative_completeness_errors(
+        [{"kind": "excerpt"}], question
+    )
+    assert not narrative_completeness_errors(
+        [{"kind": "narrative"}], question
+    )
+
+
 @pytest.mark.parametrize("question,statement,source", [
     ("Does the filing deny a demand decline?",
      "The warning that demand could decline is the opposite of a denial.",

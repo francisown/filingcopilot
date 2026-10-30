@@ -155,17 +155,30 @@ def currency_direction_conflict(statement: str, sources: list[str]) -> str | Non
 
 
 def narrative_completeness_errors(accepted: list[dict], question: str) -> list[str]:
-    """Reject numeric-only completion of an explicit explanation/risk request.
+    """Reject evidence-only completion of an explicit narrative request.
 
-    Presence of prose is only a necessary condition, not proof that its meaning
-    covers every requested aspect. That still needs content review.
+    Presence of an excerpt is only a necessary source check, not an answer. A
+    cause, risk, or negation question needs at least one synthesized narrative
+    or analysis claim. Otherwise a numeric fact or a pasted source passage can
+    be incorrectly reported as ``answered`` after review removes the model's
+    actual conclusion.
     """
     explanation = r"\b(?:why|drivers?|causes?|explain|risks?)\b|原因|归因|因素|解释|风险"
-    if (accepted and re.search(explanation, question, re.I)
-            and all(c["kind"] in ("fact", "calculation", "market", "valuation") for c in accepted)):
+    negation = (
+        r"\b(?:deny|denies|denied|no material|without material|did not state|"
+        r"does not state|whether the filing)\b"
+        r"|否认|没有重大|无重大|是否(?:明确)?(?:披露|说明|否认)"
+    )
+    requires_synthesis = bool(re.search(f"(?:{explanation})|(?:{negation})", question, re.I))
+    if (
+        accepted
+        and requires_synthesis
+        and not any(c["kind"] in ("analysis", "narrative") for c in accepted)
+    ):
         return [
-            "The requested explanation is missing: verified figures alone do not answer "
-            "a cause or risk question. Add a supported explanation or disclose this specific gap."
+            "The requested explanation/narrative conclusion is missing: verified figures or source excerpts "
+            "alone do not answer a cause, risk, or negation question. Add a supported synthesis "
+            "or disclose this specific gap."
         ]
     return []
 
