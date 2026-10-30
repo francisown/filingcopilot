@@ -8,7 +8,11 @@ from filingcopilot.agent import ResearchAgent
 from filingcopilot.agent_review import ReviewMixin
 from filingcopilot.audit import audit_package, create_package
 from filingcopilot.execution import ResearchCancelled, ResearchControl, research_scope
-from filingcopilot.fundamentals import narrative_source_context, stock_source_context
+from filingcopilot.fundamentals import (
+    _required_slot_status,
+    narrative_source_context,
+    stock_source_context,
+)
 from filingcopilot.models import Filing, Passage, ResearchRequest, StatementFact
 from filingcopilot.settings import Settings
 
@@ -172,6 +176,28 @@ def test_narrative_source_context_reports_the_scope_it_actually_scanned(sources)
     assert scope["period_end"] == str(annual.period_end)
     assert set(scope["slot_hits"]) <= {"否定", "反证"}
     assert "not a retrieval failure" in scope["zero_slot_meaning"]
+
+
+def test_narrative_context_exposes_required_slot_status(sources):
+    tools, annual, _ = sources
+    context, _ = narrative_source_context(
+        tools, "AAPL", "Did Apple state that there was no material supply-chain impact in FY2025?"
+    )
+    assert set(context["slot_status"]) == {"否定", "反证"}
+    assert set(context["unresolved_slots"]) <= {"否定", "反证"}
+    assert all(item["required"] and item["hits"] >= 0 for item in context["slot_status"].values())
+    assert context["answerability"] == (
+        "supported_candidate" if not context["unresolved_slots"] else "insufficient_candidate"
+    )
+
+
+def test_required_slot_register_does_not_treat_one_slot_as_complete():
+    status, unresolved = _required_slot_status(
+        [("cause", "", []), ("period", "", [])], {"cause": 2}
+    )
+    assert status["cause"]["status"] == "covered"
+    assert status["period"]["status"] == "unresolved"
+    assert unresolved == ["period"]
 
 
 def test_narrative_scan_prioritizes_a_question_named_segment_acronym(tools):

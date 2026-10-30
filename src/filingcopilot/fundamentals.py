@@ -226,6 +226,19 @@ _SEGMENT_STOPWORDS = {
 }
 
 
+def _required_slot_status(slots: list[tuple[str, str, list[str]]], counts: dict[str, int]) -> tuple[dict, list[str]]:
+    """Return deterministic coverage state for the narrative requirement register."""
+    status = {
+        slot: {
+            "required": True,
+            "hits": int(counts.get(slot, 0)),
+            "status": "covered" if counts.get(slot, 0) else "unresolved",
+        }
+        for slot, _, _ in slots
+    }
+    return status, [slot for slot, item in status.items() if item["status"] != "covered"]
+
+
 def _segment_labels(text: str) -> set[str]:
     """Extract report-specific business labels without a company vocabulary.
 
@@ -707,6 +720,12 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                     },
                 }
             )
+    slot_status, unresolved_slots = _required_slot_status(slots, slot_counts)
+    # A candidate for one required part is useful evidence, but it is not a
+    # feasible complete answer when another required part was never observed.
+    # Keeping this distinction deterministic prevents the author from treating
+    # one good paragraph as proof of a multi-part explanation.
+    answerability = "supported_candidate" if slot_status and not unresolved_slots else "insufficient_candidate"
     return {
         "found": bool(observed),
         "ticker": ticker,
@@ -720,6 +739,8 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
         "full_filing_scan": True,
         "full_filing_passage_count": len(all_passages),
         "evidence_slots": slot_counts,
+        "slot_status": slot_status,
+        "unresolved_slots": unresolved_slots,
         # The model cannot otherwise tell a completed full-document scan from a
         # few retrieved excerpts, so it hedges with "selected passages only" and
         # that hedge becomes a blocking gap. State the scope in plain words, and
@@ -734,12 +755,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                 "passage matched that pattern; it is not a retrieval failure."
             ),
         },
-        "answerability": (
-            "supported_candidate"
-            if (category == "risk" and all(slot_counts.get(slot, 0) for slot, _, _ in slots))
-            or (category != "risk" and any(slot_counts.values()))
-            else "insufficient_candidate"
-        ),
+        "answerability": answerability,
         "note": "预取的申报原文只是候选证据；仍需通过检索、提交和核验后才能形成结论。",
     }, records
 

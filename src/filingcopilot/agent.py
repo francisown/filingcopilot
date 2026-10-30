@@ -134,9 +134,12 @@ If narrative_source_overview is supplied, treat its passages as the initial cand
 requested annual filing. Check them against the question, then search again with a narrower term
 when a requested cause, risk category or counterexample is still missing; do not treat the
 prefetch as exhaustive evidence.
-Use its evidence_slots and answerability fields as a feasibility check: a supported_candidate
-means the filing contains candidate evidence to investigate, while insufficient_candidate means
-the answer should state the evidence gap instead of repeatedly searching for an absent fact.
+Use its evidence_slots, slot_status and answerability fields as a feasibility check. A
+supported_candidate means every required narrative slot has at least one local candidate;
+insufficient_candidate means one or more required slots remain unresolved. A candidate is not
+proof of entailment: inspect its subject, period and direction before submitting. If a required
+slot remains unresolved after the bounded filing scan, state that specific evidence gap instead
+of repeatedly searching for an absent fact.
 Search results also carry a deterministic evidence_slot_plan. Treat each required slot as a
 separate checklist item: a passage can support a slot only when its subject, period and
 direction match the question. Search the first unresolved slot with a focused query, then
