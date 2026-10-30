@@ -21,7 +21,7 @@ function node(tag='div', cls='', text='') {
 const context = vm.createContext({
   $:selector=>{if(!nodes.has(selector))nodes.set(selector,node());return nodes.get(selector);},
   el:node, state:{packageSupport:true}, labels:{partial:'部分回答',answered:'回答完成'}, stageNames:{},
-  displayResearchMarket(){}, renderCompanyUpdates(){}, renderCapexBasis(){},
+  displayResearchMarket(){}, renderCompanyUpdates(){}, renderCapexBasis(){}, renderReviewDisclosure(){}, renderEvidenceFootnotes(){},
   addAuditButton(){}, addReferencedFigures(){}, renderSourceRefresh(){}, renderDeadlineActions(){},
   changeView(){}, renderTrend(){}, renderComparison(){},
 });

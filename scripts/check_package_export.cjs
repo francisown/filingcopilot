@@ -17,7 +17,7 @@ const context = vm.createContext({
   $: selector => {if(!nodes.has(selector))nodes.set(selector,node());return nodes.get(selector);},
   el: (tag, cls, text) => Object.assign(node(tag), {className:cls, textContent:text}),
   state:{packageSupport:true}, labels:{partial:'部分回答'},
-  displayResearchMarket(){}, renderCompanyUpdates(){}, renderCapexBasis(){}, addAuditButton(){}, addReferencedFigures(){},
+  displayResearchMarket(){}, renderCompanyUpdates(){}, renderCapexBasis(){}, renderReviewDisclosure(){}, renderEvidenceFootnotes(){}, addAuditButton(){}, addReferencedFigures(){},
   Blob: class {constructor(parts, options){this.parts=parts;this.options=options;}},
   URL:{createObjectURL(blob){blobs.push(blob);return 'blob:retained';},revokeObjectURL(){}},
   setTimeout(){}, fetch: async (path, options) => {
