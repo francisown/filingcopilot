@@ -103,7 +103,7 @@ Copy `.env.example` to `.env` and set values locally. Never commit `.env`.
 | `FC_RESEARCH_TIMEOUT` | Cooperative research ceiling; the public example is 3,000 seconds |
 | `FC_EMBEDDING_MODE` | `off` for keyword retrieval or `local` for optional local embeddings |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata |
-| `FC_MAX_COST_USD` | Optional ceiling when token prices are configured |
+| `FC_MAX_COST_USD` | Optional ceiling; requires both token prices and is rejected otherwise |
 
 Model requests may incur provider charges. The application does not place trades. New filing preparation requires network access and a compliant SEC user agent; existing local data can be queried offline.
 

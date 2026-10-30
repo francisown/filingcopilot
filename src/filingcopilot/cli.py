@@ -312,6 +312,11 @@ def main():
                 "refusing a non-loopback bind: FilingCopilot has no authentication "
                 "or tenant isolation; use a loopback reverse proxy with its own auth"
             )
+        if not is_loopback_host(args.host) and not service.settings.auth_token:
+            parser.error(
+                "non-loopback web/API bind requires FC_AUTH_TOKEN; use an authenticated "
+                "TLS proxy for stronger identity controls"
+            )
         import uvicorn
 
         from .api import create_app

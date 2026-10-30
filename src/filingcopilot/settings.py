@@ -137,6 +137,16 @@ class Settings:
     market_config: Path | None = None
     twelve_data_api_key: str = ""
 
+    def __post_init__(self) -> None:
+        # A dollar ceiling cannot be enforced without both provider prices.
+        # Reject the ambiguous configuration instead of presenting a limit
+        # that silently has no effect.
+        if self.max_cost_usd is not None and self.max_cost_usd > 0 and not self.pricing_configured:
+            raise ValueError(
+                "max_cost_usd requires both model_input_price_per_million "
+                "and model_output_price_per_million"
+            )
+
     @property
     def review_configuration_warnings(self) -> tuple[str, ...]:
         """Explain when semantic review is not independent of the research model."""

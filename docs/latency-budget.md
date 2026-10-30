@@ -1,8 +1,9 @@
 # Latency and cost budget
 
-The default cooperative research ceiling is **3,000 seconds**. Narrative routes
-may receive a larger internal allowance when the claim shape requires it. Set
-`FC_RESEARCH_TIMEOUT=0` or `none` only for an explicitly unlimited local run.
+The default cooperative research ceiling is **3,000 seconds**. It is the
+effective wall-clock limit for every question shape; narrative routes do not
+silently extend it. Set `FC_RESEARCH_TIMEOUT=0` or `none` only for an explicitly
+unlimited local run.
 
 ## Latest measured workflow
 
@@ -26,10 +27,10 @@ problem is therefore serial model/tool orchestration, not passage lookup.
 
 Usage reports always retain provider-reported token counts. Dollar estimates are
 emitted only when both `FC_MODEL_INPUT_PRICE_PER_MILLION` and
-`FC_MODEL_OUTPUT_PRICE_PER_MILLION` are configured. Set `FC_MAX_COST_USD` with
-those prices to stop a run cooperatively after the current model call finishes.
-Without prices, the report explicitly leaves cost unpriced rather than inventing
-a number.
+`FC_MODEL_OUTPUT_PRICE_PER_MILLION` are configured. `FC_MAX_COST_USD` must be
+used with both prices; the application rejects a partial cost configuration
+instead of displaying a ceiling that cannot be enforced. With no prices, cost
+remains unconfigured rather than being guessed.
 
 ## Design constraints
 

@@ -1,7 +1,10 @@
 import asyncio
+import sys
 
+import pytest
 from fastapi.testclient import TestClient
 
+from filingcopilot import cli
 from filingcopilot.auth import SharedTokenVerifier, authorization_token
 from filingcopilot.cli import bind_allowed, is_loopback_host
 from filingcopilot.mcp_server import create_mcp
@@ -22,6 +25,19 @@ def test_non_loopback_requires_explicit_container_or_proxy_override() -> None:
     assert not bind_allowed("0.0.0.0")
     assert bind_allowed("0.0.0.0", allow_non_loopback=True)
     assert bind_allowed("127.0.0.1")
+
+
+def test_serve_non_loopback_requires_authentication(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr("filingcopilot.settings.load_dotenv", lambda *a, **k: False)
+    monkeypatch.setenv("FC_HOME", str(tmp_path))
+    monkeypatch.delenv("FC_AUTH_TOKEN", raising=False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["filingcopilot", "serve", "--host", "0.0.0.0", "--allow-non-loopback"],
+    )
+    with pytest.raises(SystemExit, match="2"):
+        cli.main()
 
 
 def test_shared_http_auth_accepts_bearer_and_basic_password_only() -> None:

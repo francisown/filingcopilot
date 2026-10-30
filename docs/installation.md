@@ -66,9 +66,10 @@ docker compose up --build
 
 The host port remains bound to `127.0.0.1`. The image uses an explicit
 `--allow-non-loopback` flag only inside the container so Uvicorn can listen on
-the container interface. Set `FC_AUTH_TOKEN` in the environment for the
-built-in single-user web/API and streamable MCP HTTP guard, and still add TLS, an authenticated reverse
-proxy and per-user limits before any remote publication.
+the container interface. Compose requires `FC_AUTH_TOKEN` before it starts the
+container; the built-in single-user web/API and streamable MCP HTTP guard use
+that token. Still add TLS, an authenticated reverse proxy and per-user limits
+before any remote publication.
 
 See the [README](../README.md#try-it-before-configuring-a-model) for the first question and
 [configuration example](../.env.example) for optional providers. Install local

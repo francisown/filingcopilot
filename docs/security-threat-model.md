@@ -9,7 +9,8 @@ remote deployments still need TLS, an authenticated proxy and rate limits.
 ## Deployment boundary
 
 - `filingcopilot serve` defaults to `127.0.0.1`; the MCP HTTP server also binds
-  loopback.
+  loopback. Any explicit non-loopback bind requires `FC_AUTH_TOKEN` in addition
+  to `--allow-non-loopback`.
 - The Docker image must listen on the container interface, so it passes an
   explicit `--allow-non-loopback` flag. Compose still publishes the host port
   on `127.0.0.1`; changing that mapping requires an authenticated reverse proxy.
@@ -31,8 +32,8 @@ remote deployments still need TLS, an authenticated proxy and rate limits.
 
 | Threat | Current mitigation | Residual risk |
 |---|---|---|
-| Accidental remote exposure | Loopback defaults; the CLI refuses a non-loopback bind | A loopback reverse proxy must still add its own authentication and TLS |
-| Unauthenticated API/MCP access | Loopback defaults; optional `FC_AUTH_TOKEN` for web/API and streamable MCP HTTP | MCP stdio is process-local; deployments without the token still need an authenticated boundary |
+| Accidental remote exposure | Loopback defaults; non-loopback CLI binds require an explicit override and token | A loopback reverse proxy must still add its own authentication and TLS |
+| Unauthenticated API/MCP access | Loopback defaults; non-loopback web/API and streamable MCP HTTP require `FC_AUTH_TOKEN` | Loopback mode remains a single-user local boundary; deployments still need TLS and an authenticated proxy |
 | Prompt injection in filings | Model review and evidence checks are scoped to supplied evidence; no formal instruction/data separation | A malicious filing can still influence a model-generated narrative |
 | Tool abuse / destructive actions | Tools operate on the configured local home; intent is bounded by request contracts | No OS sandbox or per-tool capability policy |
 | Secret leakage | Environment-only keys; package redaction | Logs, crash dumps, or third-party model providers may retain prompts |

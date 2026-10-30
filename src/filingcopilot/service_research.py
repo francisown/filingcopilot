@@ -10,7 +10,6 @@ from .execution import ResearchControl, ResearchStopped, progress, research_scop
 from .fundamentals import is_stock_question
 from .localization import prepare_answer, request_language
 from .models import Claim, FollowupRequest, ResearchAnswer, ResearchRequest, Submission
-from .retrieval_query import question_shape
 from .status import classify_status_reason
 from .verification import verify_submission
 
@@ -149,20 +148,13 @@ class ResearchMixin:
         )
 
     def _research_budget(self, request: ResearchRequest) -> float | None:
-        """Scale the whole-research deadline by how much work the question needs.
+        """Return the configured whole-research deadline.
 
-        A question that asks one typed figure produces one claim; a question that
-        asks for drivers, risks or a denial produces a set of independently
-        checked claims (median 5+ for risk). The 2026-10-28 fault attribution over
-        60 narrative questions found 16 of 18 non-answers were deadline
-        truncation concentrated in narrative shapes, with zero retrieval misses
-        and zero model failures. Doubling the budget for those shapes is a
-        general property of claim count, not a per-question patch.
+        The setting is an effective upper bound for every question shape. The
+        wall-clock limit must remain predictable for callers and deployment
+        operators; claim count is handled by round and tool budgets.
         """
-        base = self.settings.research_timeout
-        if base is None:
-            return None
-        return base if question_shape(request.question) == "other" else base * 2
+        return self.settings.research_timeout
 
     @request_language
     def research(self, request: ResearchRequest, control=None) -> ResearchAnswer:

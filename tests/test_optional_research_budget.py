@@ -43,6 +43,11 @@ def test_cost_reporting_requires_both_provider_prices(tmp_path):
     ).pricing_configured
 
 
+def test_cost_ceiling_rejects_missing_provider_prices(tmp_path):
+    with pytest.raises(ValueError, match="requires both"):
+        Settings(home=tmp_path, max_cost_usd=0.10)
+
+
 def test_unlimited_control_does_not_renew_or_expire():
     control = ResearchControl()
     control.start_budget(None)
@@ -83,8 +88,8 @@ def test_cost_budget_is_not_enforced_without_both_prices():
     assert not control.cost_exceeded
 
 
-def test_narrative_questions_get_twice_the_budget_of_a_single_figure(monkeypatch, tmp_path):
-    """Claim count scales the deadline: drivers/risks/denials need more than one number."""
+def test_all_question_shapes_use_the_configured_effective_deadline(monkeypatch, tmp_path):
+    """The configured wall-clock ceiling is stable across question shapes."""
     monkeypatch.setattr("filingcopilot.settings.load_dotenv", lambda *a, **k: False)
     monkeypatch.setenv("FC_HOME", str(tmp_path))
     monkeypatch.setenv("FC_RESEARCH_TIMEOUT", "300")
@@ -110,4 +115,4 @@ def test_narrative_questions_get_twice_the_budget_of_a_single_figure(monkeypatch
     base = ResearchRequest(question="What was FY2024 revenue?", ticker="AAPL", as_of=date(2026, 10, 8))
     narrative = ResearchRequest(question="What are the FY2022 risks?", ticker="AAPL", as_of=date(2026, 10, 8))
     assert service._research_budget(base) == 300
-    assert service._research_budget(narrative) == 600
+    assert service._research_budget(narrative) == 300

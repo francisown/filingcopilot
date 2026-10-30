@@ -60,3 +60,21 @@ def test_evidence_slot_plan_is_deterministic_and_question_specific():
     assert [slot["id"] for slot in risk] == ["period", "risk_disclosure", "customer_concentration"]
     assert [slot["id"] for slot in cause] == ["period", "change", "driver"]
     assert evidence_slot_plan("Why did operating margin decline in FY2024?") == cause
+
+
+def test_retrieval_keeps_period_in_evidence_slot_plan_after_scoping(tmp_path):
+    corpus = Corpus(Path(tmp_path))
+    filing = Filing(id="f", ticker="AAPL", company="Apple", cik="0000320193",
+                    accession="0000320193-24-000001", form="10-K", filed=date(2024, 11, 1),
+                    period_end=date(2024, 9, 30), source_url="https://www.sec.gov/Archives/a.htm",
+                    content_sha256="a" * 64)
+    source = Passage(id="p", filing_id="f", ticker="AAPL", section="风险",
+                     text="Supply chain risk could affect revenue in FY2024.",
+                     source_url=filing.source_url, locator="paragraph 1")
+    corpus.ingest(filing, [], [source])
+    result = Retriever(corpus, Settings(home=Path(tmp_path), embedding_mode="off")).search(
+        "Apple FY2024 supply chain risks", date(2024, 12, 1), "AAPL"
+    )
+    assert result["evidence_slot_plan"][0] == {
+        "id": "period", "required": True, "terms": ["2024"]
+    }

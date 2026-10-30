@@ -47,10 +47,10 @@ call a model. For `calculate`, pass observed local fact IDs. Use the dedicated t
 for nested trailing flows and margins; the server rechecks sources and dates.
 
 The default MCP transport is stdio. Streamable HTTP binds to loopback only unless
-`--allow-non-loopback` is supplied. When `FC_AUTH_TOKEN` is configured, MCP HTTP
-requires it as a Bearer token; this is one shared local credential, not user or
-tenant isolation. Put TLS, identity and rate limits in a reverse proxy for remote
-use.
+`--allow-non-loopback` is supplied. Any non-loopback MCP HTTP bind also requires
+`FC_AUTH_TOKEN` as a Bearer token; this is one shared local credential, not user
+or tenant isolation. Put TLS, identity and rate limits in a reverse proxy for
+remote use.
 
 When adding or removing a tool, update the server registry, the expected set in
 `scripts/smoke_mcp.py` and the list above together. Run the smoke checks for both transports.

@@ -107,6 +107,10 @@ class Corpus:
                                (update.available_day.isoformat(), row["id"]))
             db.execute("PRAGMA user_version=7")
 
+    def _ensure_writable(self) -> None:
+        if self.readonly:
+            raise RuntimeError("Readonly corpus cannot be modified")
+
     @contextmanager
     def connect(self):
         db = (sqlite3.connect(self.path.resolve().as_uri()+'?mode=ro', uri=True, timeout=20)
@@ -129,6 +133,7 @@ class Corpus:
         Readers never take this lock, so a parallel evaluator keeps reading while
         a refresh or a repaired filing writes.
         """
+        self._ensure_writable()
         with self._write_lock, self.connect() as db:
             yield db
 
@@ -209,10 +214,11 @@ class Corpus:
     def register_company(self, ticker: str, company) -> None:
         from .domain import Company
 
+        self._ensure_writable()
         validated = Company.model_validate(company)
         if not re.fullmatch(r"[A-Z][A-Z0-9.-]{0,9}", ticker):
             raise ValueError("Company registry keys must be uppercase ticker symbols")
-        with self.connect() as db:
+        with self._write_connect() as db:
             prior = db.execute(
                 "SELECT payload FROM discovered_companies WHERE ticker=?", (ticker,)
             ).fetchone()
@@ -345,6 +351,7 @@ class Corpus:
             }
 
     def load_snapshot(self, path: Path) -> list[dict]:
+        self._ensure_writable()
         snapshot = json.loads(path.read_text(encoding="utf-8"))
         result = []
         for entry in snapshot["filings"]:
@@ -362,6 +369,7 @@ class Corpus:
         with self.connect() as db:
             if db.execute("SELECT count(*) FROM filings").fetchone()[0]:
                 return
+        self._ensure_writable()
         sample = files("filingcopilot").joinpath("samples", "sec-demo.json")
         if sample.is_file():
             self.load_snapshot(Path(str(sample)))
@@ -513,7 +521,8 @@ class Corpus:
         return None
 
     def save_run(self, result: dict, package: dict | None = None) -> None:
-        with self.connect() as db:
+        self._ensure_writable()
+        with self._write_connect() as db:
             db.execute(
                 "INSERT INTO runs (id,payload) VALUES (?,?)",
                 (result["id"], json.dumps(result, ensure_ascii=False)),
@@ -526,7 +535,8 @@ class Corpus:
 
     def update_run(self, result: dict, package: dict | None = None) -> None:
         """Replace a just-created run when lineage metadata is attached."""
-        with self.connect() as db:
+        self._ensure_writable()
+        with self._write_connect() as db:
             db.execute(
                 "UPDATE runs SET payload=? WHERE id=?",
                 (json.dumps(result, ensure_ascii=False), result["id"]),

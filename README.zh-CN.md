@@ -103,7 +103,7 @@ FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 | `FC_RESEARCH_TIMEOUT` | 协作式研究上限；公开示例为 3,000 秒 |
 | `FC_EMBEDDING_MODE` | `off` 使用关键词检索，`local` 使用可选本地向量 |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 可选的供应商请求元数据 |
-| `FC_MAX_COST_USD` | 配置 token 单价后可设置单次费用上限 |
+| `FC_MAX_COST_USD` | 单次费用上限；必须同时配置两项 token 单价，否则启动时拒绝 |
 
 模型请求可能产生供应商费用，应用不会下单交易。准备新的财报需要网络和合规的 SEC 用户代理；已有本地资料可以离线查询。
 

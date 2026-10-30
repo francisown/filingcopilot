@@ -860,7 +860,11 @@ class Retriever:
             "embedding_unavailable": self.model_error,
             "hits": ranked[: max(1, min(8, k))],
             "eligible_passages": len(passages),
-            "evidence_slot_plan": evidence_slot_plan(query),
+            # Keep the original expanded question here. ``query`` is the
+            # scoped retrieval form and deliberately removes a known ticker
+            # and year, but those fields are still required by the agent's
+            # evidence checklist and by downstream diagnostics.
+            "evidence_slot_plan": evidence_slot_plan(phrase_source),
             **(
                 {
                     "retrieval_diagnostics": {
