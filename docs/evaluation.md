@@ -35,6 +35,30 @@ cases and are reported separately. `citation_binding_rate` means that an
 evidence ID was observed and bound; it is not an independent human judgment of
 semantic entailment.
 
+## Targeted post-change check
+
+After the narrative requirement, reviewer-context and bounded synthesis-retry
+changes, the eight previously incomplete narrative rows were rerun together
+with one previously answered control row. This was a single stochastic,
+single-worker DeepSeek research / Mimo review run; it is a diagnostic and does
+not replace the 140-question population result above.
+
+| Metric | Result |
+|---|---:|
+| Captured rows | **9 / 9** |
+| Answered / partial | **4 / 5** |
+| Previously partial rows that became answered | **4 / 8** |
+| Unsupported claims / numeric errors | **0 / 0** |
+| Runner errors / deadline timeouts | **0 / 0** |
+| Model-backed P50 / P95 | **168.0 s / 331.4 s** |
+| Reported tokens | **607,852** |
+
+One previously answered control row became partial in this run, so the result
+shows a promising failure-path improvement but is not sufficient to claim a
+global accuracy increase. The remaining partial rows were limited by missing
+direct filing attribution, document-wide negative evidence, or another
+unfinished model synthesis.
+
 ## Retrieval
 
 The [latest retrieval snapshot](validation/retrieval-diversity-2026-10-29.json)

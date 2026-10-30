@@ -36,9 +36,11 @@
 | 内部检索 span/page/nugget Recall@5 | **0.615 / 0.635 / 0.710** |
 | 内部检索延迟 | **P50 66 毫秒 / P95 168 毫秒** |
 | 数值 oracle | **116 个精确匹配，0 个不匹配**；34 条超出检查范围 |
-| 回归测试 | **1,840 个通过** |
+| 回归测试 | **此前完整回归 1,847 个通过；最新修改后的针对性测试 195 个通过** |
 
 这些是工程和工作流测量，不是独立人工准确率研究。外部答案支持使用严格的 `full / partial / unsupported` 分类，分母和限制见[评测记录](docs/evaluation.md)。最新机器可读记录只保留[全量报告](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json)、[失败摘要](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/failures.json)和[检索快照](docs/validation/retrieval-diversity-2026-10-29.json)。
+
+最新针对性薄弱题检查覆盖 9 道此前困难的叙述题：**4 道完成、5 道 partial**，unsupported claim、数值错误、runner error 和时间预算超时均为 0。限制和解释见[评测记录](docs/evaluation.md)；这轮小样本不能替代 91/100 的全量结果。
 
 ## 请求如何处理
 
