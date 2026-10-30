@@ -155,3 +155,98 @@ def test_context_preserves_original_text_dates_and_decimal_strings():
         "custom": {"points": [1, 2]},
     }
     assert json.loads(model_context_json(context)) == context
+
+
+def test_context_compacts_statement_wrappers_but_keeps_rows_and_ids():
+    payload = json.loads(
+        model_context_json(
+            {
+                "statement": "income",
+                "rows": [{"id": "row-1", "metric": "revenue", "value": "10"}],
+                "evidence": [
+                    {
+                        "id": "row-1",
+                        "kind": "fact",
+                        "text": "large source wrapper",
+                        "filing": {"id": "filing-1", "html": "x" * 5000},
+                    }
+                ],
+            }
+        )
+    )
+    assert payload["rows"][0]["id"] == "row-1"
+    assert payload["evidence_ids"] == ["row-1"]
+    assert "evidence" not in payload
+
+
+def test_context_compacts_search_diagnostics_but_keeps_source_locator():
+    payload = json.loads(
+        model_context_json(
+            {
+                "query": "risk",
+                "backend": "fts5+decomposed+title",
+                "hits": [
+                    {
+                        "passage": {
+                            "id": "p-1",
+                            "filing_id": "AAPL:2025",
+                            "ticker": "AAPL",
+                            "text": "Supply disruptions could adversely affect operations.",
+                            "section": "Risk Factors",
+                            "source_url": "https://example.test/filing",
+                            "locator": "paragraph 1",
+                            "page": 12,
+                        },
+                        "score": 0.8,
+                        "legs": {"lexical": {"rank": 1, "raw_score": -4}},
+                        "anchor_coverage": 4,
+                        "diversity": {"overlap_penalty": 0.1},
+                    }
+                ],
+                "evidence_slot_plan": [{"id": "risk_disclosure", "required": True}],
+                "continuations": [
+                    {
+                        "id": "p-2",
+                        "filing_id": "AAPL:2025",
+                        "ticker": "AAPL",
+                        "text": "The disruption may also increase costs.",
+                        "section": "Risk Factors",
+                        "locator": "paragraph 2",
+                    }
+                ],
+            }
+        )
+    )
+    assert payload["hits"][0]["passage"]["id"] == "p-1"
+    assert payload["hits"][0]["passage"]["page"] == 12
+    assert "legs" not in payload["hits"][0]
+    assert "anchor_coverage" not in payload["hits"][0]
+    assert payload["evidence_slot_plan"][0]["id"] == "risk_disclosure"
+    assert payload["continuations"][0]["id"] == "p-2"
+
+
+def test_context_deduplicates_repeated_passage_text_across_rounds():
+    hit = {
+        "passage": {
+            "id": "p-repeat",
+            "filing_id": "AAPL:2025",
+            "ticker": "AAPL",
+            "text": "The same paragraph is returned by two related searches.",
+            "section": "Risk Factors",
+            "page": 9,
+        },
+        "score": 0.7,
+    }
+    seen = set()
+    first = json.loads(model_context_json({"hits": [hit]}, seen_passage_ids=seen))
+    second = json.loads(model_context_json({"hits": [hit]}, seen_passage_ids=seen))
+
+    assert first["hits"][0]["passage"]["text"].startswith("The same")
+    assert second["hits"][0]["passage"] == {
+        "id": "p-repeat",
+        "filing_id": "AAPL:2025",
+        "ticker": "AAPL",
+        "section": "Risk Factors",
+        "page": 9,
+        "reused": True,
+    }

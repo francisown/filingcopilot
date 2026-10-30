@@ -25,6 +25,70 @@ if TYPE_CHECKING:
     from .agent import AgentState
 
 
+_PLACEHOLDER_GAPS = {
+    "placeholder",
+    "placeholdergap",
+    "tbd",
+    "todo",
+    "待补充",
+    "待补",
+    "待定",
+    "暂无",
+    "暂无内容",
+    "未填写",
+    "占位",
+    "占位符",
+    "n/a",
+    "na",
+    "none",
+    "null",
+    "unknown",
+    "不详",
+    "无",
+    "-",
+    "—",
+    "…",
+    "...",
+}
+
+
+def _is_placeholder_gap(value: object) -> bool:
+    """Return true only for a gap that carries no explanation.
+
+    Do not broaden this to substring matching: statements such as "没有披露" or
+    "无法确认" are meaningful evidence boundaries and must remain visible.
+    """
+    text = str(value or "").strip().casefold()
+    if not text:
+        return True
+    # Providers sometimes wrap a token in punctuation or code formatting.
+    normalized = text.strip(" \t\r\n.,;:!?。！？、，；：()[]{}<>`*_\"'“”‘’")
+    return normalized in _PLACEHOLDER_GAPS
+
+
+def _agreed_fact(items: list[dict]) -> dict | None:
+    """Return one observation when every duplicate reports the same figure.
+
+    The completion guard exists to keep *competing* versions out of a
+    calculation, not to punish a corpus that legitimately stored the same fact
+    twice (same value, currency, unit and period under another id). Values that
+    disagree still return None so the gap survives.
+    """
+    if not items:
+        return None
+    signatures = {
+        (
+            str(item.get("value")),
+            item.get("unit"),
+            item.get("currency"),
+            item.get("start"),
+            item.get("end"),
+        )
+        for item in items
+    }
+    return items[0] if len(signatures) == 1 else None
+
+
 class ExecutionMixin:
     def _complete_filing_answer(self, state: AgentState, gaps: list[str]) -> tuple[list[str], bool]:
         """Retain only verified observed math; retire only resolved numeric gaps.
@@ -127,6 +191,35 @@ class ExecutionMixin:
             not state["verified"]
             and not stopped()
             and not stock_question
+            and model_failure_trace
+        ):
+            # Preserve source material already retrieved when both model calls
+            # fail.  These are exact excerpts with an explicit partial gap;
+            # they never stand in for an unverified synthesis.
+            excerpts = self._observed_narrative_excerpt_fallback(state)
+            for detail in excerpts:
+                detail["index"] = max(
+                    (claim["index"] for claim in state["verified"]), default=-1
+                ) + 1
+                state["verified"].append(detail)
+            if excerpts:
+                message = (
+                    "模型请求未完成；已保留与问题直接相关的原文摘录，未生成未经核验的综合判断。"
+                    if re.search(r"[\u4e00-\u9fff]", question)
+                    else "The model request did not complete; directly relevant filing excerpts are retained, and no unverified synthesis is presented."
+                )
+                gaps.append(message)
+                state["trace"].append(
+                    {
+                        "stage": "narrative_excerpt_fallback",
+                        "accepted_excerpts": len(excerpts),
+                        "reason": "exact observed filing passages retained after model failure",
+                    }
+                )
+        if (
+            not state["verified"]
+            and not stopped()
+            and not stock_question
             and state.get("module")
             and model_failure_trace
         ):
@@ -148,13 +241,239 @@ class ExecutionMixin:
                         "reason": "exact observed source retained after factual module model failure",
                     }
                 )
-        if narrative_completeness_errors(state["verified"], question):
+        explanation_errors = narrative_completeness_errors(state["verified"], question)
+        if explanation_errors:
+            # A provider can submit valid calculations while losing every
+            # narrative sentence during review.  Preserve a few exact passages
+            # already observed from the same filing so the user can inspect the
+            # disclosed drivers, but keep the answer partial: an excerpt is
+            # source material, not a synthesized causal conclusion.
+            excerpts = self._observed_narrative_excerpt_fallback(state)
+            if excerpts:
+                for detail in excerpts:
+                    detail["index"] = max(
+                        (claim.get("index", -1) for claim in state["verified"]),
+                        default=-1,
+                    ) + 1
+                    state["verified"].append(detail)
+                chinese = bool(re.search(r"[\u4e00-\u9fff]", question))
+                gaps.append(
+                    "模型未完成原因或风险归纳；已保留同一申报中的逐字摘录，摘录不等同于综合结论。"
+                    if chinese
+                    else "The model did not complete the causal or risk synthesis; exact excerpts from the same filing are retained, but excerpts are not a synthesized conclusion."
+                )
+                state["trace"].append({
+                    "stage": "narrative_excerpt_completion",
+                    "accepted_excerpts": len(excerpts),
+                    "reason": "numeric-only verified draft; retained exact filing passages instead of inventing synthesis",
+                })
+            # Exact excerpts improve inspectability but do not satisfy an
+            # explanation request. Preserve the original translated blocking
+            # gap so the status remains partial and the UI states the missing
+            # synthesis.
             gaps.append(translate_text(
                 "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。"
             ))
-            state["trace"].append({"stage": "answer_coverage", "explanation_present": False,
-                                   "reason": "Verified figures do not answer the requested explanation"})
+            state["trace"].append({
+                "stage": "answer_coverage",
+                "explanation_present": bool(excerpts),
+                "reason": "Verified figures alone do not answer the requested explanation",
+            })
         return gaps, fallback_complete
+
+    @staticmethod
+    def _narrative_excerpt_score(passage: dict, category: str | None, base_score: float = 0.0) -> float:
+        """Rank exact fallback passages by the requested narrative slot.
+
+        The fallback is used precisely when the model did not synthesize an
+        explanation, so a generic search score is too weak: it can select a
+        cash-flow or foreign-exchange paragraph for a margin question. These
+        lexical boosts are only for choosing source text; they never promote a
+        passage into a causal claim.
+        """
+        text = str(passage.get("text") or "")
+        folded = text.casefold()
+        section = str(passage.get("section") or "").casefold()
+        purposes = {str(value) for value in passage.get("purposes") or []}
+        score = float(base_score)
+        purpose_weights = {
+            "经营变化原因": 18,
+            "利润率原因": 22,
+            "分部变化原因": 20,
+            "现金与费用原因": 12,
+            "整份申报扫描:原因": 22,
+            "整份申报扫描:分部": 20,
+            "监管与需求风险": 18,
+            "供应与经营风险": 18,
+            "客户集中风险": 22,
+            "整份申报扫描:监管": 18,
+            "整份申报扫描:需求": 18,
+            "整份申报扫描:集中度": 22,
+        }
+        score += max(
+            (weight for purpose, weight in purpose_weights.items() if purpose in purposes),
+            default=0,
+        )
+        if category == "causality":
+            direct = len(re.findall(
+                r"primarily|mainly|due to|driven by|reflecting|attributed|came from|"
+                r"increased|decreased|increase|decline|主要|由于|驱动|归因|增加|减少|下降",
+                folded,
+                re.I,
+            ))
+            topic = len(re.findall(
+                r"revenue|net sales|gross margin|operating margin|operating income|"
+                r"gross profit|cost of sales|operating expenses?|segment|费用|收入|利润率|"
+                r"营业利润|毛利|销售额|分部",
+                folded,
+                re.I,
+            ))
+            score += direct * 4 + min(topic, 8) * 2
+            if re.search(
+                r"management|md&a|results of operations|operating results|经营|运营",
+                section,
+                re.I,
+            ):
+                score += 6
+            if re.search(
+                r"cash from operations|cash used in (?:financing|investing)|"
+                r"现金流量|衍生工具|derivative",
+                folded,
+                re.I,
+            ) and not re.search(
+                r"gross margin|operating margin|operating income|cost of sales|"
+                r"operating expenses?|毛利率|营业利润率|营业利润|费用",
+                folded,
+                re.I,
+            ):
+                score -= 18
+            if re.search(r"risk factors?|market risk|风险因素|市场风险", section, re.I) and not re.search(
+                r"operating income|operating margin|gross margin|营业利润|利润率",
+                folded,
+                re.I,
+            ):
+                score -= 10
+        elif category == "risk":
+            risk_hits = len(re.findall(
+                r"risk|adverse|regulat|export|supply|customer|demand|compliance|"
+                r"风险|监管|出口|供应|客户|需求|合规",
+                folded,
+                re.I,
+            ))
+            score += min(risk_hits, 12) * 3
+            if re.search(r"risk factors?|business|风险因素|业务", section, re.I):
+                score += 8
+        elif category == "negation":
+            denial_hits = len(re.findall(
+                r"no material|not materially|did not|without material|"
+                r"supply[- ]chain|demand|impact|没有重大|未造成重大|供应链|需求|影响",
+                folded,
+                re.I,
+            ))
+            score += min(denial_hits, 10) * 4
+        return score
+
+    @staticmethod
+    def _observed_narrative_excerpt_fallback(state: AgentState) -> list[dict]:
+        """Keep exact, scoped filing passages after a narrative model failure.
+
+        This path is available only after the narrative prefetch scanned the
+        requested filing and marked it as a supported candidate.  It retains a
+        small, purpose-diverse set of source passages so a provider outage does
+        not erase useful evidence or produce a fabricated conclusion.
+        """
+        context = state.get("narrative_context") or {}
+        if context.get("answerability") != "supported_candidate":
+            return []
+        tools, focus = state["tools"], state.get("focus_ticker")
+        filing_id = (context.get("filing") or {}).get("id")
+        candidates: dict[str, tuple[int, float, dict]] = {}
+
+        def add(passage: dict, score: float = 0.0) -> None:
+            item_id = passage.get("id")
+            if (
+                not item_id
+                or passage.get("kind", "passage") != "passage"
+                or not passage.get("text")
+                or (focus and passage.get("ticker") != focus)
+                or (filing_id and passage.get("filing_id") != filing_id)
+                or len(passage.get("text", "")) > 4000
+            ):
+                return
+            canonical = tools.corpus.evidence(item_id, tools.as_of)
+            if canonical is not None:
+                passage = {
+                    **canonical,
+                    "purposes": passage.get("purposes") or canonical.get("purposes", []),
+                }
+            existing = tools.ledger.get(item_id)
+            if existing is None or (
+                passage.get("purposes") and not existing.get("purposes")
+            ):
+                tools.ledger[item_id] = passage
+            score = ExecutionMixin._narrative_excerpt_score(
+                passage, context.get("category"), score
+            )
+            purposes = passage.get("purposes") or []
+            purpose_count = len(purposes) or 1
+            current = candidates.get(item_id)
+            if current is None or (purpose_count, score) > (current[0], current[1]):
+                candidates[item_id] = (purpose_count, score, passage)
+
+        # The filing-wide scan is purpose-labeled and therefore gets priority
+        # over the broad query hits.  Query scores alone can rank an incidental
+        # passage above the requested risk slot.
+        for index, passage in enumerate(context.get("evidence", [])):
+            add(passage, 0.5 - index / 1000.0)
+        for trace in state.get("trace", []):
+            if trace.get("tool") != "search_passages":
+                continue
+            for hit in (trace.get("result") or {}).get("hits", []):
+                add(hit.get("passage") or {}, float(hit.get("score") or 0))
+        if not candidates:
+            return []
+
+        limit = {"risk": 3, "causality": 3, "negation": 2}.get(
+            context.get("category"), 2
+        )
+        ranked = sorted(
+            candidates.values(),
+            key=lambda value: (value[1], value[0], value[2].get("id", "")),
+            reverse=True,
+        )
+        selected: list[dict] = []
+        observed_purposes: set[str] = set()
+        for _, _, passage in ranked:
+            purposes = set(passage.get("purposes") or [])
+            # Causal fallback passages are already scored for direct drivers,
+            # margin terms and MD&A scope. Forcing purpose diversity there can
+            # replace a second strong segment explanation with an unrelated
+            # cash-flow or tax paragraph. Keep diversity for broad risk and
+            # negation briefs, where separate slots are genuinely useful.
+            if (
+                context.get("category") != "causality"
+                and selected
+                and purposes
+                and not purposes - observed_purposes
+            ):
+                continue
+            selected.append(passage)
+            observed_purposes.update(purposes)
+            if len(selected) >= limit:
+                break
+        claims, _ = verify_submission(
+            Submission(
+                claims=[
+                    Claim(kind="excerpt", evidence_ids=[passage["id"]], statement=passage["text"])
+                    for passage in selected
+                ]
+            ),
+            tools,
+            state["question"],
+            focus_ticker=focus,
+            allow_excerpts=True,
+        )
+        return claims
 
     @staticmethod
     def _observed_module_excerpt_fallback(state: AgentState) -> list[dict]:
@@ -330,6 +649,7 @@ class ExecutionMixin:
                 continue
             started = time.perf_counter()
             arguments = {}
+            fingerprint = None
             try:
                 state["tool_count"] += 1
                 if state["tool_count"] > self.settings.max_tool_calls:
@@ -341,14 +661,70 @@ class ExecutionMixin:
                     control.record_tool(name)
                 fingerprint = json.dumps([name, arguments], sort_keys=True)
                 if name != "submit_answer" and fingerprint in state["seen"]:
-                    raise ValueError("Duplicate call: use the previously returned evidence")
+                    cached = state.get("tool_cache", {}).get(fingerprint)
+                    if cached is None:
+                        raise ValueError("Duplicate call: use the previously returned evidence")
+                    result = cached
+                    state["trace"].append(
+                        {
+                            "step": len(state["trace"]) + 1,
+                            "stage": "tool_cache_hit",
+                            "tool": name,
+                            "arguments": arguments,
+                            "result": result,
+                            "duration_ms": 0,
+                        }
+                    )
+                    state["messages"].append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": call["id"],
+                            "content": model_context_json(
+                                result,
+                                seen_passage_ids=state.setdefault("context_passage_ids", set()),
+                            ),
+                        }
+                    )
+                    continue
                 state["seen"].add(fingerprint)
                 if wants_update_summary(state["question"]) and name != "submit_answer":
                     raise ValueError(
                         "Notice summary may only submit claims from supplied notice excerpts"
                     )
                 if name == "submit_answer":
-                    submission = parse_submission(arguments)
+                    candidate = parse_submission(arguments)
+                    # Models sometimes use a literal placeholder as the only
+                    # gap while they are still deciding what to submit. It is
+                    # not a meaningful disclosure and must follow the same
+                    # bounded retry path as an empty payload.
+                    meaningful_gaps = [
+                        gap
+                        for gap in candidate.gaps
+                        if not _is_placeholder_gap(gap)
+                    ]
+                    if len(meaningful_gaps) != len(candidate.gaps):
+                        candidate = Submission(claims=list(candidate.claims), gaps=meaningful_gaps)
+                    # An empty tool call is not a completed abstention. Some
+                    # providers emit ``claims=[]`` before they have finished
+                    # reading the evidence; treating that call as terminal
+                    # loses a supported answer. Give the model two bounded
+                    # chances to turn the observed ledger into claims or a
+                    # specific gap, while preserving the existing honest
+                    # abstention after the limit.
+                    if (
+                        not candidate.claims
+                        and not candidate.gaps
+                        and int(state.get("empty_submission_attempts", 0)) < 2
+                    ):
+                        state["empty_submission_attempts"] = int(
+                            state.get("empty_submission_attempts", 0)
+                        ) + 1
+                        submission = None
+                        raise ValueError(
+                            "Empty submission is not complete. Use the observed evidence "
+                            "to submit supported claims, or put the specific missing part in gaps."
+                        )
+                    submission = candidate
                     if wants_update_summary(state["question"]):
                         try:
                             self._validate_update_summary(submission, state)
@@ -418,11 +794,29 @@ class ExecutionMixin:
                     "duration_ms": round((time.perf_counter() - started) * 1000),
                 }
             )
+            if name != "submit_answer" and fingerprint is not None:
+                state.setdefault("tool_cache", {})[fingerprint] = result
             state["messages"].append(
                 {
                     "role": "tool",
                     "tool_call_id": call["id"],
-                    "content": model_context_json(result),
+                    "content": model_context_json(
+                        result,
+                        seen_passage_ids=state.setdefault("context_passage_ids", set()),
+                    ),
+                }
+            )
+        if state.get("truncated_turn") and not submission:
+            state["truncated_turn"] = False
+            state["messages"].append(
+                {
+                    "role": "user",
+                    "content": (
+                        "The previous turn was truncated at the output limit. Stop "
+                        "exploring and call submit_answer now: at most four short "
+                        "claims built from the evidence already returned, and put "
+                        "anything unsupported into gaps."
+                    ),
                 }
             )
         return {**state, "submission": submission, "action": "verify" if submission else "reason"}
@@ -586,6 +980,22 @@ class ExecutionMixin:
         if not focus or not years:
             return []
         metrics, ratios = tools.domain.requests(question)
+        if not metrics and not ratios and compares_prior_year(question):
+            # "Explain FY2022 growth" names no metric, yet completeness requires a
+            # growth result. Use the metric the verified answer already presents:
+            # that is the quantity the question is asking to grow, and the
+            # existing period/unit guards still decide whether it can be computed.
+            observed = {
+                evidence_id
+                for claim in state.get("verified", [])
+                if claim.get("kind") == "fact"
+                for evidence_id in claim.get("evidence_ids", [])
+            }
+            metrics = {
+                tools.ledger[evidence_id].get("metric")
+                for evidence_id in observed
+                if evidence_id in tools.ledger
+            } - {None}
         facts = {}
         for item in tools.ledger.values():
             if item.get("kind") == "fact" and item.get("ticker") == focus:
@@ -601,9 +1011,13 @@ class ExecutionMixin:
         for operation, left, right in pairs:
             if stopped():
                 break
-            if len(facts.get(left, [])) != 1 or len(facts.get(right, [])) != 1:
+            left_fact = _agreed_fact(facts.get(left, []))
+            right_fact = _agreed_fact(facts.get(right, []))
+            if left_fact is None or right_fact is None:
+                # Competing values for the same metric and year stay a gap; a
+                # duplicate observation that reports the same amount does not.
                 continue
-            ids = [facts[left][0]["id"], facts[right][0]["id"]]
+            ids = [left_fact["id"], right_fact["id"]]
             existing = next((item for item in tools.ledger.values()
                              if item.get("operation") == operation and item.get("input_ids") == ids), None)
             if existing:

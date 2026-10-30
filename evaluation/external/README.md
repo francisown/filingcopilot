@@ -48,7 +48,8 @@ the source URL, license, row count, and SHA256. The `data/` directory is
 gitignored; the dataset is not committed.
 
 **Measured result (support update 2026-10-26):** evidence-page benchmark: 150 public rows, 163 evidence pages, company+year scope, section-aware 3,000-character chunks with a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.920 / page@1 0.687 / snippet hit@5 0.920 / full/partial/unsupported answer top1 0.207/0.133/0.660 raw; 0.738 on 42 full-evaluable rows / MRR 0.784**. The earlier any-one-number answer figures (0.427 / 0.913) are retired. Full-filing benchmark: 61 parsed PDFs and 113 questions with BGE ONNX reranking: **page hit@5 0.850 / page@1 0.540 / snippet hit@5 0.858 / snippet hit@1 0.531 / MRR 0.664**; BGE adds about 1.8s P95 on CPU. The 22-question new-document check reaches page hit@1 0.545 / page hit@5 0.773 / MRR 0.621 with BGE; it remains small and document-selected. The earlier global-corpus number (0.507/0.407) is retired because it ignored the product's selected-company scope. Full report:
-[`docs/financebench-scoped-2026-10-23.md`](../../docs/financebench-scoped-2026-10-23.md).
+the retained machine-readable [FinanceBench support record](../../docs/validation/financebench-support-2026-10-26.json)
+and the release-facing [evaluation summary](../../docs/evaluation.md).
 
 ### 2. FinDER — answer-support benchmark
 

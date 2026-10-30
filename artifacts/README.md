@@ -23,6 +23,6 @@ The public repository keeps methodology and current limitations in:
 
 - [Evaluation limits](../docs/evaluation.md)
 - [Reproducing the evaluation](../docs/reproducing-evaluation.md)
-- [FinanceBench results](../docs/financebench-scoped-2026-10-23.md)
+- [FinanceBench results](../docs/validation/financebench-support-2026-10-26.json)
 
 Do not treat local artifacts as a current production accuracy claim.

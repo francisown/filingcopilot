@@ -884,7 +884,7 @@ class _SubmissionVerifier:
             and any(
                 int(e["filing"]["period_end"][:4]) not in self.requested_years
                 for e in evidence
-                if e["kind"] == "passage"
+                if e["kind"] in ("passage", "statement_fact")
             )
         ):
             self.errors.append(f"claim {index}: filing fiscal year does not match requested years")
@@ -893,7 +893,7 @@ class _SubmissionVerifier:
             is_quarterly_question(self.question)
             and not is_stock_question(self.question)
             and any(
-                e["kind"] == "passage" and e["filing"]["form"] not in ("10-Q", "10-Q/A")
+                e["kind"] in ("passage", "statement_fact") and e["filing"]["form"] not in ("10-Q", "10-Q/A")
                 for e in evidence
             )
         ):
@@ -1026,18 +1026,46 @@ class _SubmissionVerifier:
         if claim.kind == "analysis":
             if not self._check_analysis(index, claim, evidence):
                 return
-        elif not claim.statement or any(e["kind"] != "passage" for e in evidence):
-            self.errors.append(f"claim {index}: narrative needs text and passage-only evidence")
-            return
-        if _financial_number_tokens(claim.statement) or re.search(
-            r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I
-        ):
+        elif not claim.statement or any(e["kind"] not in ("passage", "statement_fact") for e in evidence):
             self.errors.append(
-                f"claim {index}: financial amounts and percentages need typed "
-                "fact/calculation claims; rewrite this narrative qualitatively"
+                f"claim {index}: narrative needs text and passage or structured-row evidence"
             )
             return
-        source_texts = [e["text"] for e in evidence if e["kind"] == "passage"]
+        source_texts = [
+            e["text"] if e["kind"] == "passage" else render_numeric(e, self.tools.domain)
+            for e in evidence
+            if e["kind"] in ("passage", "statement_fact")
+        ]
+        amounts = _financial_number_tokens(claim.statement)
+        percent = re.search(
+            r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I
+        )
+        if amounts or percent:
+            if any(e["kind"] == "statement_fact" for e in evidence):
+                self.errors.append(
+                    f"claim {index}: structured statement rows may support a qualitative narrative, "
+                    "but their values must be submitted as a typed fact or calculation"
+                )
+                return
+            # A figure that appears verbatim in a cited passage is a quotation,
+            # not a computed metric. Filings disclose concentration percentages
+            # only in prose ("one customer represented 10% or more of total trade
+            # receivables"), so requiring a typed fact made those disclosures
+            # impossible to deliver at all.
+            def spoken(value: str) -> str:
+                return re.sub(r"\s+", "", value)
+
+            quoted = spoken(" ".join(source_texts))
+            unquoted = [token for token in amounts if spoken(token) not in quoted]
+            if percent and spoken(percent.group(0)) not in quoted:
+                unquoted.append(percent.group(0))
+            if unquoted:
+                self.errors.append(
+                    f"claim {index}: financial amounts and percentages need typed "
+                    "fact/calculation claims or a verbatim quote from a cited passage; "
+                    "rewrite this narrative qualitatively"
+                )
+                return
         conflict = investment_cash_conflict(claim.statement, source_texts)
         if conflict:
             self.errors.append(f"claim {index}: {conflict}")
@@ -1094,11 +1122,25 @@ class _SubmissionVerifier:
             if self.semantic_review is None:
                 self.errors.append("Narrative verification unavailable; descriptive claims were withheld")
             else:
-                try:
-                    batch = ReviewBatch.model_validate(self.semantic_review(self.question, self.narratives))
-                    indexes = [v.index for v in batch.verdicts]
-                    if sorted(indexes) != sorted(n["index"] for n in self.narratives):
-                        raise ValueError("Reviewer must return every claim exactly once")
+                # One reviewer call is one network hop. A single failure used to
+                # withhold every narrative claim at once, so retry before deciding
+                # the whole answer cannot be verified.
+                batch = None
+                for _attempt in range(2):
+                    try:
+                        candidate = ReviewBatch.model_validate(
+                            self.semantic_review(self.question, self.narratives)
+                        )
+                        indexes = [v.index for v in candidate.verdicts]
+                        if sorted(indexes) != sorted(n["index"] for n in self.narratives):
+                            raise ValueError("Reviewer must return every claim exactly once")
+                        batch = candidate
+                        break
+                    except Exception:
+                        batch = None
+                if batch is None:
+                    self.errors.append("Narrative verifier failed; descriptive claims were withheld")
+                else:
                     verdicts = {v.index: v for v in batch.verdicts}
                     for narrative in self.narratives:
                         verdict = verdicts[narrative["index"]]
@@ -1116,8 +1158,6 @@ class _SubmissionVerifier:
                             )
                         else:
                             self.errors.append(f"claim {verdict.index}: {verdict.reason}")
-                except Exception:
-                    self.errors.append("Narrative verifier failed; descriptive claims were withheld")
 
 
 

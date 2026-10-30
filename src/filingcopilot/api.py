@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 import re
 import sys
 from contextlib import asynccontextmanager
@@ -15,6 +16,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import __version__
+from .auth import authorization_token
 from .company_page import build_company_page
 from .comparison import ComparisonRequest
 from .dcf import DcfRequest, dcf_source_inputs, sourced_dcf_sensitivity
@@ -38,6 +40,11 @@ from .trends import TrendRequest
 from .watchlist import WatchlistSelection
 
 _CJK = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+
+
+def _endpoint_budget(configured: float | None, cap: float) -> float | None:
+    """Apply a quick-read cap only when a whole-research deadline is configured."""
+    return None if configured is None else min(cap, configured)
 
 
 def _api_error_message(detail: object, language: str) -> str:
@@ -108,11 +115,37 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
         return await call_next(request)
 
     @app.middleware('http')
+    async def require_authentication(request, call_next):
+        # Lightweight service doubles used by offline API tests do not expose
+        # Settings; they represent the default no-token local mode.
+        configured = getattr(getattr(service, "settings", None), "auth_token", None)
+        if configured is not None:
+            supplied = authorization_token(request.headers.get("authorization"))
+            if supplied is None or not hmac.compare_digest(supplied, configured):
+                return JSONResponse(
+                    {"detail": "需要 API 凭证。"},
+                    status_code=401,
+                    headers={
+                        "WWW-Authenticate": 'Bearer realm="filingcopilot", Basic realm="filingcopilot"'
+                    },
+                )
+        return await call_next(request)
+
+    @app.middleware('http')
     async def security_headers(request, call_next):
         response = await call_next(request)
         response.headers.setdefault('X-Content-Type-Options', 'nosniff')
         response.headers.setdefault('X-Frame-Options', 'DENY')
         response.headers.setdefault('Referrer-Policy', 'no-referrer')
+        response.headers.setdefault(
+            'Content-Security-Policy',
+            "default-src 'self'; script-src 'self'; style-src 'self'; "
+            "img-src 'self' data:; connect-src 'self'; object-src 'none'; "
+            "base-uri 'none'; frame-ancestors 'none'",
+        )
+        response.headers.setdefault(
+            'Permissions-Policy', 'camera=(), geolocation=(), microphone=()'
+        )
         return response
     app.state.service = service
     app.state.research_jobs = jobs
@@ -137,6 +170,13 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             "review_model": service.settings.review_model or None,
             "review_batch_size": service.settings.review_batch_size,
             "review_configuration_warnings": list(service.settings.review_configuration_warnings),
+            "sampling": {
+                "temperature": service.settings.model_temperature,
+                "top_p": service.settings.model_top_p,
+                "seed": service.settings.model_seed,
+            },
+            "pricing_configured": service.settings.pricing_configured,
+            "cost_budget_usd": service.settings.max_cost_usd,
             "embedding_mode": service.settings.embedding_mode,
             "embedding_model": service.settings.embedding_model,
             "rerank_mode": service.settings.rerank_mode,
@@ -308,7 +348,7 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
     ):
         try:
             control = ResearchControl()
-            control.start_budget(min(40, service.settings.research_timeout))
+            control.start_budget(_endpoint_budget(service.settings.research_timeout, 40))
             with research_scope(control):
                 return build_company_page(
                     service,
@@ -394,7 +434,7 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             if knowledge_date > date.today() or not 1 <= quarters <= 12:
                 raise ValueError("日期不能晚于今天，季度数量须为 1 至 12。")
             control = ResearchControl()
-            control.start_budget(min(20, service.settings.research_timeout))
+            control.start_budget(_endpoint_budget(service.settings.research_timeout, 20))
             with research_scope(control):
                 preparation = None
                 capabilities = service.capabilities(ticker)

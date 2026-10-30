@@ -26,6 +26,9 @@ macOS/Linux 的安装命令及解释器选择见[安装说明](installation.md)�
 | `FC_SEC_USER_AGENT` | 下载 SEC 文件所需的联系人和邮箱。 |
 | `FC_API_BASE` / `FC_API_KEY` | 支持工具调用的 OpenAI 兼容模型接口及密钥。 |
 | `FC_MODEL` / `FC_REVIEW_MODEL` | 研究模型和复核模型；应使用不同模型进行独立复核。 |
+| `FC_MODEL_TEMPERATURE` / `FC_MODEL_TOP_P` / `FC_MODEL_SEED` | 可选的采样固定参数；用于重复实验，供应商不支持时留空。 |
+| `FC_MODEL_INPUT_PRICE_PER_MILLION` / `FC_MODEL_OUTPUT_PRICE_PER_MILLION` | 可选的模型 token 单价；两项同时配置后才会记录美元成本。 |
+| `FC_MAX_COST_USD` | 可选的单次研究费用上限；只在上述两项单价齐全时停止后续模型轮次。 |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 供应商要求的额外请求头或会话标识。额外请求头使用 JSON 对象。 |
 | `FC_EMBEDDING_MODE` | `off` 使用关键词检索；`local` 启用可选的本地向量检索。 |
 | `FC_HOME` | 数据库、缓存及研究记录目录，默认 `.filingcopilot`。 |

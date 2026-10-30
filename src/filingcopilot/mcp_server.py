@@ -3,8 +3,10 @@ from __future__ import annotations
 import json
 from datetime import date
 
+from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
 
+from .auth import SharedTokenVerifier
 from .comparison import ComparisonRequest
 from .models import ResearchRequest
 from .service import FilingCopilot
@@ -12,14 +14,69 @@ from .settings import Settings
 from .trends import TrendRequest
 
 
-def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMCP:
+def _evidence_ids(value) -> set[str]:
+    """Collect IDs explicitly referenced by a tool result."""
+    found: set[str] = set()
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key == "evidence_ids" and isinstance(item, list):
+                found.update(str(v) for v in item if v)
+            elif (key == "id" or key.endswith("_id")) and isinstance(item, str):
+                found.add(item)
+            else:
+                found.update(_evidence_ids(item))
+    elif isinstance(value, list):
+        for item in value:
+            found.update(_evidence_ids(item))
+    return found
+
+
+def _with_bound_evidence(result: dict, tools) -> dict:
+    """Attach only evidence used by this result, with an omission receipt.
+
+    The complete ledger remains available through ``search_passages`` and the
+    saved research package. Returning every observed passage from every small
+    MCP calculation made responses grow quadratically across a multi-step
+    client conversation.
+    """
+    ids = _evidence_ids(result)
+    selected = [item for item_id, item in tools.ledger.items() if item_id in ids]
+    omitted = [item_id for item_id in tools.ledger if item_id not in ids]
+    return {
+        **result,
+        "observed_evidence": selected,
+        "observed_evidence_count": len(tools.ledger),
+        "omitted_observed_evidence_ids": omitted,
+    }
+
+
+def create_mcp(
+    service: FilingCopilot | None = None,
+    port: int = 8124,
+    host: str = "127.0.0.1",
+) -> FastMCP:
     service = service or FilingCopilot(Settings.from_env())
+    auth_token = getattr(getattr(service, "settings", None), "auth_token", None)
+    auth = None
+    token_verifier = None
+    if auth_token:
+        # FastMCP's standard Bearer middleware protects only the streamable HTTP
+        # endpoint.  stdio remains process-local, and loopback HTTP remains safe
+        # for the default local mode when no token is configured.
+        auth = AuthSettings(
+            issuer_url=f"http://{host}:{port}",
+            resource_server_url=f"http://{host}:{port}/mcp",
+            validate_token_resource=False,
+        )
+        token_verifier = SharedTokenVerifier(auth_token)
     mcp = FastMCP(
         "FilingCopilot",
         instructions="Evidence-grounded annual, rolling-quarter and complete statement research. "
         "Use as_of to prevent future information. Arithmetic must use observed facts; missing rows stay missing.",
-        host="127.0.0.1",
+        host=host,
         port=port,
+        auth=auth,
+        token_verifier=token_verifier,
     )
 
     @mcp.tool()
@@ -50,11 +107,11 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         )
         external = service.discovery.prepare_external_updates(ticker, day) if refresh else None
         tools = service.tools(day)
+        result = tools.get_company_updates(ticker)
         return {
-            **tools.get_company_updates(ticker),
+            **_with_bound_evidence(result, tools),
             "preparation": prepared,
             "external_preparation": external,
-            "observed_evidence": list(tools.ledger.values()),
         }
 
     @mcp.tool()
@@ -66,7 +123,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         ask_financial_question for automatic disclosure refresh before the calculation."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_cashflow(ticker, period, fiscal_year)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_ttm_financial_fact(ticker: str, metric: str, as_of: str) -> dict:
@@ -75,7 +132,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         ask_financial_question for automatic annual/quarterly acquisition first."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_ttm_financial_fact(ticker, metric)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_ttm_margin(ticker: str, ratio: str, as_of: str) -> dict:
@@ -84,7 +141,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         Call ask_financial_question to acquire annual/quarterly disclosures first."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_ttm_margin(ticker, ratio)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_stock_valuation(ticker: str, as_of: str, fiscal_year: int | None = None) -> dict:
@@ -93,7 +150,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         verifies company/currency/share basis and returns bound evidence and preparation status."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_stock_valuation(ticker, fiscal_year)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_provider_ttm_valuation(ticker: str, as_of: str, include_pe: bool = True) -> dict:
@@ -102,7 +159,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         Raw snapshots are separately bound; negative/stale/mismatched inputs withhold P/E."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_provider_ttm_valuation(ticker, include_pe)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_historical_valuation(ticker: str, as_of: str, period: str = "5Y") -> dict:
@@ -112,7 +169,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         not historical TTM/forward P/E or a cheap/expensive conclusion."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_historical_valuation(ticker, period)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def prepare_quarterly(ticker: str, as_of: str) -> dict:
@@ -126,7 +183,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         prepare_quarterly first to check for new filings. Cash flow is separately dated."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_quarterly_overview(ticker, period)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_quarterly_fact(
@@ -145,7 +202,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         Missing periods remain explicit and are never filled with zero or calendar-quarter guesses."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_quarterly_sequence(ticker, metrics, quarters)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def get_statement(
@@ -159,7 +216,7 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         unregistered XBRL labels and explicit segment/geography dimensions."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_statement(ticker, statement, period_end, filing_id)
-        return {**result, "observed_evidence": list(tools.ledger.values())}
+        return _with_bound_evidence(result, tools)
 
     @mcp.tool()
     def find_stock(query: str) -> dict:
@@ -223,7 +280,8 @@ def create_mcp(service: FilingCopilot | None = None, port: int = 8124) -> FastMC
         range change and maximum drawdown. Quotes may be delayed. Does not call a model."""
         tools = service.tools(date.fromisoformat(as_of))
         result = tools.get_stock_market(ticker, period)
-        return {**result, "evidence": list(tools.ledger.values())}
+        bounded = _with_bound_evidence(result, tools)
+        return {**bounded, "evidence": bounded["observed_evidence"]}
 
     @mcp.tool()
     def find_company(query: str, translate: bool = True) -> dict:

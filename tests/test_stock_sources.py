@@ -5,10 +5,11 @@ from datetime import date
 import pytest
 
 from filingcopilot.agent import ResearchAgent
+from filingcopilot.agent_review import ReviewMixin
 from filingcopilot.audit import audit_package, create_package
 from filingcopilot.execution import ResearchCancelled, ResearchControl, research_scope
-from filingcopilot.fundamentals import stock_source_context
-from filingcopilot.models import Filing, Passage, ResearchRequest
+from filingcopilot.fundamentals import narrative_source_context, stock_source_context
+from filingcopilot.models import Filing, Passage, ResearchRequest, StatementFact
 from filingcopilot.settings import Settings
 
 # Integration, persistence, subprocess, or concurrency scope; included in full runs.
@@ -85,6 +86,161 @@ def test_candidates_use_current_quarter_and_annual_risks_without_foreign_sources
     assert {e["form"] for e in context["evidence"]} == {"10-K", "10-Q"}
     assert all(e["id"] in tools.ledger and "filing" not in e for e in context["evidence"])
     assert all(e["text"] == tools.ledger[e["id"]]["text"] for e in context["evidence"])
+
+
+@pytest.mark.parametrize(
+    ("question", "category", "expected_purposes"),
+    [
+        ("苹果 FY2025 的监管、需求和集中度风险有哪些？", "risk", {"监管与需求风险", "客户集中风险", "供应与经营风险"}),
+        ("Did Apple state that there was no material supply-chain impact in FY2025?", "negation", {"否定原文", "反向证据", "管理层表述"}),
+        ("Why did Apple's revenue change in FY2025?", "causality", {"经营变化原因", "分部变化原因", "现金与费用原因"}),
+    ],
+)
+def test_narrative_source_context_is_bound_to_requested_annual_filing(
+    sources, question, category, expected_purposes
+):
+    tools, annual, quarter = sources
+    context, records = narrative_source_context(tools, "AAPL", question)
+    assert context["found"] and context["category"] == category
+    assert context["filing"]["id"] == annual.id
+    assert len(records) == 3
+    assert {record["purpose"] for record in records} == expected_purposes
+    assert all(record["arguments"]["filing_id"] == annual.id for record in records)
+    assert all(record["arguments"]["lexical_only"] for record in records)
+    assert all(item["filing_id"] == annual.id for item in context["evidence"])
+    assert all(item["id"] in tools.ledger for item in context["evidence"])
+    assert context["answerability"] in {"supported_candidate", "insufficient_candidate"}
+
+
+def test_broad_risk_question_does_not_require_unrequested_concentration(sources):
+    tools, annual, _ = sources
+    context, records = narrative_source_context(
+        tools, "AAPL", "Which risks should an analyst track in Apple's FY2025 filing?"
+    )
+    assert context["category"] == "risk"
+    assert "集中度" not in context["evidence_slots"]
+    assert not any(record["purpose"] == "客户集中风险" for record in records)
+    assert all(record["arguments"]["filing_id"] == annual.id for record in records)
+
+
+def test_concentration_prefetch_includes_filing_bound_structured_rows(sources):
+    tools, annual, _ = sources
+    tools.corpus.add_statement_facts(
+        annual,
+        [
+            StatementFact(
+                id="AAPL:customer-concentration",
+                filing_id=annual.id,
+                ticker="AAPL",
+                statement="other",
+                metric="customer_concentration",
+                label="Major customer revenue",
+                concept="custom:MajorCustomerRevenue",
+                value="0.10",
+                unit="xbrli:pure",
+                fiscal_year=2025,
+                end=annual.period_end,
+                source_url=annual.source_url,
+                locator="customer concentration row",
+                dimensions={"customer": "major"},
+                dimension_labels={"customer": "Major customer"},
+            )
+        ],
+    )
+    context, records = narrative_source_context(
+        tools, "AAPL", "Which customer concentration risks did Apple disclose for FY2025?"
+    )
+    rows = context["structured_evidence"]
+    assert rows and rows[0]["id"] == "AAPL:customer-concentration"
+    assert rows[0]["filing_id"] == annual.id
+    assert any(record["tool"] == "get_statement" for record in records)
+
+
+def test_narrative_source_context_reports_the_scope_it_actually_scanned(sources):
+    """The model must be told a full scan happened, or it hedges into a blocking gap."""
+    tools, annual, _ = sources
+    context, _ = narrative_source_context(
+        tools, "AAPL", "Did Apple state that there was no material supply-chain impact in FY2025?"
+    )
+    scope = context["scan_scope"]
+    assert context["full_filing_scan"] is True
+    assert scope["passages_scanned"] == len(
+        tools.corpus.passages(tools.as_of, "AAPL", filing_id=annual.id)
+    )
+    assert scope["passages_scanned"] == context["full_filing_passage_count"] > 0
+    assert scope["filing_form"] == annual.form
+    assert scope["period_end"] == str(annual.period_end)
+    assert set(scope["slot_hits"]) <= {"否定", "反证"}
+    assert "not a retrieval failure" in scope["zero_slot_meaning"]
+
+
+def test_narrative_scan_prioritizes_a_question_named_segment_acronym(tools):
+    """Question anchors must beat unrelated table prose without issuer rules."""
+    filing = add_source(tools, "AMZN:annual", ticker="AMZN", end="2025-09-27")
+    tools.corpus.ingest(
+        filing,
+        [],
+        [
+            Passage(
+                id=filing.id + ":aws",
+                filing_id=filing.id,
+                ticker=filing.ticker,
+                section="Operating results",
+                text="AWS sales increased primarily due to customer usage and pricing.",
+                source_url=filing.source_url,
+                locator="AWS causal paragraph",
+            ),
+            Passage(
+                id=filing.id + ":policy",
+                filing_id=filing.id,
+                ticker=filing.ticker,
+                section="Revenue recognition",
+                text="Service revenue is recognized when performance obligations are satisfied.",
+                source_url=filing.source_url,
+                locator="policy paragraph",
+            ),
+        ],
+    )
+    context, _ = narrative_source_context(
+        tools,
+        "AMZN",
+        "根据期末为2025-09-27的年报，AWS收入增长的主要原因是什么？",
+    )
+    assert any("AWS sales increased" in item["text"] for item in context["evidence"])
+
+
+def test_narrative_source_context_is_bounded_and_does_not_fabricate_missing_filings(sources):
+    tools, _, _ = sources
+    context, records = narrative_source_context(
+        tools, "AAPL", "Why did Apple's revenue change in FY2025?", max_searches=1
+    )
+    assert context["found"] and len(records) == 1
+    context, records = narrative_source_context(
+        tools, "AAPL", "Why did Apple's revenue change in FY2030?"
+    )
+    assert not context["found"] and records == []
+
+
+def test_required_gap_triggers_one_exact_filing_followup_search(sources):
+    tools, annual, _ = sources
+    state = {
+        "focus_ticker": "AAPL",
+        "question": "Why did Apple's FY2025 revenue change?",
+        "trace": [
+            {
+                "stage": "narrative_source_preparation",
+                "result": {"filing": {"id": annual.id}},
+            }
+        ],
+        "tools": tools,
+        "tool_count": 0,
+        "usage": {},
+    }
+    result = ReviewMixin._retrieve_gap_evidence(state, ["revenue growth sales"])
+    assert result and result["arguments"]["filing_id"] == annual.id
+    assert result["evidence"]
+    assert state["usage"]["tool_calls"] == 1
+    assert state["trace"][-1]["stage"] == "gap_evidence_retrieval"
 
 
 @pytest.mark.parametrize("quarter_id", ["MSFT:quarter", "not-observed"])

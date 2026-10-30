@@ -148,13 +148,22 @@ def _row(item: dict, result, elapsed_ms: int, review_model: str = "") -> dict:
         or "时间预算已用完" in gap_text
         or "时间预算结束" in gap_text
     )
+    # A provider failure is not the system choosing to refuse. Counting it as a
+    # wrong refusal turns an infrastructure outage into a quality signal.
+    aborted = "Model request failed" in gap_text
     reasonable_refusal = (
         expected == "reasonable_refusal_with_actionable_gap"
         and refused
         and bool(result.gaps)
         and not timed_out
+        and not aborted
     )
-    wrong_refusal = refused and expected != "reasonable_refusal_with_actionable_gap" and not timed_out
+    wrong_refusal = (
+        refused
+        and expected != "reasonable_refusal_with_actionable_gap"
+        and not timed_out
+        and not aborted
+    )
     trace = result.trace
     tool_steps = [
         step
@@ -275,6 +284,7 @@ def run(
                     ticker=item["ticker"],
                     as_of=as_of,
                     mode="agent",
+                    language=item.get("language", "en"),
                 )
             )
             row = _row(
@@ -374,7 +384,16 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("artifacts/semantic-evaluation-2026-10-11.json"))
     parser.add_argument("--limit", type=int)
     parser.add_argument("--checkpoint", type=Path, default=Path("artifacts/semantic-evaluation-checkpoint-2026-10-11.json"))
-    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help=(
+            "Concurrent workers. Keep at 1: two workers on one corpus produced "
+            "'attempt to write a readonly database' rows in the 140-question run "
+            "of 2026-10-28."
+        ),
+    )
     parser.add_argument("--resume", type=Path, help="Reuse captured rows from this exact configuration; never reruns them")
     parser.add_argument("--as-of", default="2026-10-08")
     args = parser.parse_args()

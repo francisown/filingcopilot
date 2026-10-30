@@ -84,7 +84,13 @@ class ResearchJobs:
                 "request": payload,
             }
             self.jobs[job_id] = job
-            job["control"] = ResearchControl(lambda event: self._publish(job_id, event))
+            settings = getattr(self.service, "settings", None)
+            job["control"] = ResearchControl(
+                lambda event: self._publish(job_id, event),
+                max_cost_usd=getattr(settings, "max_cost_usd", None),
+                input_price_per_million=getattr(settings, "model_input_price_per_million", None),
+                output_price_per_million=getattr(settings, "model_output_price_per_million", None),
+            )
             self._publish(job_id, {"stage": "queued", "message": "研究已排队，等待执行。"})
             job["future"] = self.pool.submit(self._run, job_id, request)
             return self.get(job_id)

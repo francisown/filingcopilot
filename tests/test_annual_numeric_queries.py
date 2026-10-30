@@ -168,9 +168,17 @@ def test_future_annual_year_has_gap_without_fetching_unrelated_reports(tmp_path)
 def test_offline_reference_missing_year_does_not_implicitly_acquire(tmp_path):
     service = service_at(tmp_path)
     service.discovery.fetcher.fetch = lambda *args, **kwargs: pytest.fail("Offline reference must use existing evidence")
-    answer = service.research(historical_request(mode="reference", auto_acquire=False))
+    request = historical_request(mode="reference", auto_acquire=False).model_copy(
+        update={"ticker": "TSM", "question": "What was TSM's FY2022 revenue?"}
+    )
+    answer = service.research(request)
     assert answer.status == "abstained" and answer.usage["model_calls"] == 0
     assert any("2022" in gap for gap in answer.gaps)
+    assert answer.status_reason == "source_not_acquired"
+    assert any(
+        item.get("stage") == "source_coverage" and item.get("status") == "not_acquired"
+        for item in answer.trace
+    )
 
 
 def test_reference_explicit_acquisition_can_fetch_missing_annual_year(tmp_path):

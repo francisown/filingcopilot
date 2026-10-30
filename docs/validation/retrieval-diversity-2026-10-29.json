@@ -1,0 +1,164 @@
+{
+  "schema": "filingcopilot.retrieval-ablation/v1",
+  "gold": {
+    "path": "evaluation\\retrieval_gold_v2.json",
+    "version": "2026-10-27-span",
+    "questions": 200
+  },
+  "retriever": {
+    "embedding_mode": "off",
+    "rerank_mode": "diversity",
+    "anchor_weight": 0.05,
+    "k": 5
+  },
+  "variants": {
+    "fts5": {
+      "questions": 200,
+      "recall_at_5": 0.125,
+      "mrr_at_5": 0.048333,
+      "span_recall_at_5": 0.615,
+      "span_mrr_at_5": 0.341833,
+      "page_recall_at_5": 0.635,
+      "page_questions_with_label": 200,
+      "nugget_recall_at_5": 0.710185,
+      "nugget_questions": 45,
+      "span_scope": "gold evidence matched by any 8-word span in a delivered top-5 passage; survives re-chunking, unlike a chunk id",
+      "equivalence_recall_at_5": 1.0,
+      "label_ceiling": {
+        "median_equivalent_passages": 17,
+        "single_id_upper_bound_at_5": 0.294118,
+        "scope": "a random ranking among equivalents scores about k / equivalents"
+      },
+      "backend_counts": {
+        "fts5+title": 80,
+        "fts5+phrase+decomposed+title": 26,
+        "fts5+phrase+title": 36,
+        "fts5+decomposed+title": 20,
+        "fts5": 32,
+        "fts5+phrase+decomposed": 4,
+        "fts5+phrase": 2
+      },
+      "rows_with_dense_hit": 0,
+      "embedding_errors": {},
+      "p50_ms": 64.112,
+      "p95_ms": 167.565
+    },
+    "hybrid_rrf": {
+      "questions": 200,
+      "recall_at_5": 0.125,
+      "mrr_at_5": 0.048333,
+      "span_recall_at_5": 0.615,
+      "span_mrr_at_5": 0.341833,
+      "page_recall_at_5": 0.635,
+      "page_questions_with_label": 200,
+      "nugget_recall_at_5": 0.710185,
+      "nugget_questions": 45,
+      "span_scope": "gold evidence matched by any 8-word span in a delivered top-5 passage; survives re-chunking, unlike a chunk id",
+      "equivalence_recall_at_5": 1.0,
+      "label_ceiling": {
+        "median_equivalent_passages": 17,
+        "single_id_upper_bound_at_5": 0.294118,
+        "scope": "a random ranking among equivalents scores about k / equivalents"
+      },
+      "backend_counts": {
+        "fts5+title": 80,
+        "fts5+phrase+decomposed+title": 26,
+        "fts5+phrase+title": 36,
+        "fts5+decomposed+title": 20,
+        "fts5": 32,
+        "fts5+phrase+decomposed": 4,
+        "fts5+phrase": 2
+      },
+      "rows_with_dense_hit": 0,
+      "embedding_errors": {},
+      "p50_ms": 62.609,
+      "p95_ms": 162.325
+    }
+  },
+  "hybrid_delta": {
+    "recall_at_5": 0.0,
+    "mrr_at_5": 0.0
+  },
+  "baseline": {
+    "rerank_mode": "anchor",
+    "fts5": {
+      "questions": 200,
+      "recall_at_5": 0.12,
+      "mrr_at_5": 0.048,
+      "span_recall_at_5": 0.615,
+      "span_mrr_at_5": 0.342167,
+      "page_recall_at_5": 0.625,
+      "page_questions_with_label": 200,
+      "nugget_recall_at_5": 0.691667,
+      "nugget_questions": 45,
+      "span_scope": "gold evidence matched by any 8-word span in a delivered top-5 passage; survives re-chunking, unlike a chunk id",
+      "equivalence_recall_at_5": 1.0,
+      "label_ceiling": {
+        "median_equivalent_passages": 17,
+        "single_id_upper_bound_at_5": 0.294118,
+        "scope": "a random ranking among equivalents scores about k / equivalents"
+      },
+      "backend_counts": {
+        "fts5+title": 80,
+        "fts5+phrase+decomposed+title": 26,
+        "fts5+phrase+title": 36,
+        "fts5+decomposed+title": 20,
+        "fts5": 32,
+        "fts5+phrase+decomposed": 4,
+        "fts5+phrase": 2
+      },
+      "rows_with_dense_hit": 0,
+      "embedding_errors": {},
+      "p50_ms": 32.754,
+      "p95_ms": 126.997
+    },
+    "hybrid_rrf": {
+      "questions": 200,
+      "recall_at_5": 0.12,
+      "mrr_at_5": 0.048,
+      "span_recall_at_5": 0.615,
+      "span_mrr_at_5": 0.342167,
+      "page_recall_at_5": 0.625,
+      "page_questions_with_label": 200,
+      "nugget_recall_at_5": 0.691667,
+      "nugget_questions": 45,
+      "span_scope": "gold evidence matched by any 8-word span in a delivered top-5 passage; survives re-chunking, unlike a chunk id",
+      "equivalence_recall_at_5": 1.0,
+      "label_ceiling": {
+        "median_equivalent_passages": 17,
+        "single_id_upper_bound_at_5": 0.294118,
+        "scope": "a random ranking among equivalents scores about k / equivalents"
+      },
+      "backend_counts": {
+        "fts5+title": 80,
+        "fts5+phrase+decomposed+title": 26,
+        "fts5+phrase+title": 36,
+        "fts5+decomposed+title": 20,
+        "fts5": 32,
+        "fts5+phrase+decomposed": 4,
+        "fts5+phrase": 2
+      },
+      "rows_with_dense_hit": 0,
+      "embedding_errors": {},
+      "p50_ms": 33.527,
+      "p95_ms": 130.86
+    }
+  },
+  "baseline_delta": {
+    "recall_at_5": 0.005,
+    "mrr_at_5": 0.000333,
+    "span_recall_at_5": 0.0,
+    "page_recall_at_5": 0.01,
+    "nugget_recall_at_5": 0.018518
+  },
+  "not_integrated": [
+    "neural_query_rewrite",
+    "multilingual_embedding",
+    "cross_encoder_rerank"
+  ],
+  "decision": "enable_diversity_rerank",
+  "notes": [
+    "The hybrid variant is only comparable when its backend reports fts5+bge+rrf.",
+    "Use --limit for a bounded pilot; local embedding generation is intentionally measured in the report."
+  ]
+}

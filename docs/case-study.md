@@ -1,6 +1,6 @@
 # Case study: an evidence-grounded research agent for company filings
 
-**Summary.** FilingCopilot is a local-first research workspace for company filings. It answers questions about SEC disclosures, calculates financial measures, and returns the evidence behind every answer. The strongest verified result is not a benchmark score; it is that **116 numeric claims matched SEC CompanyFacts or an independent arithmetic check with zero mismatches**, and every saved answer can be exported as a frozen package and re-checked offline. The main limitation is equally clear: the 140-question evaluation is self-reviewed, has no independent human gold standard, and model-using questions had a P95 latency of 417 seconds.
+**Summary.** FilingCopilot is a local-first research workspace for company filings. It answers questions about SEC disclosures, calculates financial measures, and returns the evidence behind every answer. The strongest verified result is not a benchmark score; it is that **116 numeric claims matched SEC CompanyFacts or an independent arithmetic check with zero mismatches**, and every saved answer can be exported as a frozen package and re-checked offline. The main limitation is equally clear: the 140-question evaluation is self-reviewed, has no independent human gold standard, and the latest recorded model-using questions had a P95 latency of 174.9 seconds.
 
 This case study describes what was built, how the evidence layer works, what the evaluation does and does not prove, and what I would do next.
 
@@ -70,21 +70,21 @@ The recorded run used **140 unchanged bilingual questions**: 100 research questi
 | Question group | Complete | Partial | No research answer |
 |---|---:|---:|---:|
 | Numeric (20) | 20 | 0 | 0 |
-| Causes (20) | 14 | 6 | 0 |
-| Negation checks (20) | 16 | 4 | 0 |
-| Risks (20) | 11 | 8 | 1 |
+| Causes (20) | 16 | 4 | 0 |
+| Negation checks (20) | 17 | 2 | 1 |
+| Risks (20) | 18 | 2 | 0 |
 | Annual comparisons (20) | 20 | 0 | 0 |
-| **Research questions (100)** | **81** | **18** | **1** |
+| **Research questions (100)** | **91** | **8** | **1** |
 
 The other 40 questions asked about unsupported future-price guarantees or hypothetical market-source failures. All 40 received a specific boundary explanation with no model call. They are recorded as `abstained` by the runner; they are not 40 failed model answers.
 
-The run used models for 60 questions, started 476 HTTP requests, recorded 442 HTTP 200 responses, and reported 4,312,447 tokens. Median latency for model-using questions was 92.79 seconds; P95 was 417.11 seconds. The overall median of 0.075 seconds is dominated by the 80 questions that required no model call and does not describe research latency.
+The latest run used models for 60 questions and reported 3,753,566 tokens. Median latency for model-using questions was 90.6 seconds; P95 was 174.9 seconds. The overall median remains dominated by deterministic rows and does not describe research latency.
 
-The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 numeric claims outside that checker's scope, and zero mismatches**. The 34 unassessed claims are not counted as correct. Saved packages were audited against available raw sources: 100 consistent, none missing sources. The recorded source passed **1,656 tests**; the current branch passes **1,735**, including the new credit-risk demo tests.
+The numeric oracle found **116 exact SEC CompanyFacts or arithmetic matches, 34 numeric claims outside that checker's scope, and zero mismatches**. The 34 unassessed claims are not counted as correct. Saved packages were audited against available raw sources: 100 consistent, none missing sources. The current branch passes **1,840 tests**, including the boundary, runtime, cost and security-header tests. Package hashes prove internal consistency, not author identity or semantic correctness.
 
 Retrieval is measured on two levels. The internal 200-question exact-passage gold is a regression set; it measures strict paragraph identity, not human relevance. The product-scoped external check below is the number to report.
 
-**External retrieval update (2026-10-26 support re-run).** The earlier FinanceBench global-corpus check was retired: it ignored the product's selected-company scope. The evidence-page benchmark now uses company+year scope, section-aware 3,000-character chunks, a 4,000-character parent window and title-based top1 rerank: **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920, answer full/partial/unsupported top1 0.207/0.133/0.660 raw; 42 full-evaluable rows 0.738 top1 / 0.929 at5, MRR 0.784**. Answer support now requires all key numbers, units and periods; the earlier any-one-number 0.427/0.913 figures are retired. The full-filing benchmark parses 61 PDFs and 113 questions: **page hit@5 0.850, page@1 0.478, snippet hit@5 0.858, MRR 0.624**; the 22-question new-document check reaches 0.773 page hit@5. These are retrieval measurements, not answer accuracy or human relevance. See [the FinanceBench report](financebench-scoped-2026-10-23.md).
+**External retrieval update.** The evidence-page benchmark uses company+year scope and strict answer support: **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920; 42 full-evaluable rows reach 0.738 top1 / 0.929 at5**. The full-filing benchmark parses 61 PDFs and 113 questions: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, MRR 0.664** with the retained BGE reranker; the 22-question new-document check reaches 0.545 page hit@1 and 0.773 page hit@5. These are retrieval measurements, not answer accuracy or human relevance. See [Evaluation](evaluation.md) for the retained machine-readable records.
 
 For narrative claims, a first pass over 40 delivered claims recorded 95% supported, 5% unclear, and 0% unsupported. The project author was the sole reviewer and was not a domain specialist. The sample was selected from delivered claims, so it excludes rejected drafts and refusals. Independent domain review remains pending.
 
@@ -100,7 +100,7 @@ For narrative claims, a first pass over 40 delivered claims recorded 95% support
 - It does not prove general answer accuracy. There is no independent human gold standard.
 - It does not prove that every narrative claim is supported. Model review is not a human reviewer.
 - It does not prove production readiness. The latency, cost, and issuer coverage are not production-grade.
-- It does not prove human relevance or answer accuracy: the evidence-page check is 0.920 page hit@5 and 0.920 snippet hit@5, while the full-filing check is 0.850 and 0.858 on 61 parsed PDFs. The 22-question new-document check is 0.773 page hit@5.
+- It does not prove human relevance or answer accuracy: the evidence-page check is 0.920 page hit@5 and 0.920 snippet hit@5, while the full-filing check is 0.850 and 0.858 on 61 parsed PDFs. The retained full-filing BGE reranker reaches page@1 0.540 and MRR 0.664; the 22-question new-document check is 0.545 page hit@1 / 0.773 page hit@5.
 
 ## Failure taxonomy
 
@@ -136,9 +136,9 @@ For a bank, the useful part is not "the model is smart." It is "the model's outp
 ## What I would do next
 
 1. **Independent human review.** Recruit two or three credit-risk or financial-analysis reviewers, blind a sample of claims, and publish the disagreement rate. Without this, the 95% claim-support figure is only a self-review.
-2. **Latency and cost.** P95 of 417 seconds and 4.3M tokens are not acceptable for interactive use. The next step is caching, smaller models for extraction, parallel tool calls, and a hard cost budget per answer.
+2. **Latency and cost.** The latest recorded model-using questions have a P95 of 174.9 seconds and 3.75M reported tokens for the full run. That is an improvement, but still too slow for an interactive workflow. The next step is caching, smaller models for extraction, parallel tool calls, and a hard cost budget per answer.
 3. **Credit-risk vertical.** The new `examples/credit-risk` demo reuses the corpus, passage, package, and verifier layers on synthetic policy and model-validation documents. The next step is an independent review of that vertical and a larger question set.
-4. **Retrieval.** The evidence-page check reaches page hit@5 0.920 and snippet hit@5 0.920; the full-filing check reaches 0.850 and 0.858 on 61 parsed PDFs. The next step is a real held-out split and table-aware retrieval for domain/earnings questions, not larger fixed chunks.
+4. **Retrieval.** The evidence-page check reaches page hit@5 0.920 and snippet hit@5 0.920; the full-filing BGE reranker reaches page@1 0.540, page@5 0.850 and MRR 0.664 on 61 parsed PDFs. The next step is a real held-out split and table-aware retrieval for domain/earnings questions, not larger fixed chunks.
 5. **Coverage.** Foreign issuers, earnings calls, and cross-currency ADS bridges are still incomplete. Coverage should be described explicitly rather than implied.
 6. **Packaging.** The verifier is already separable. The next step is a small CLI distribution that a reviewer can run without installing the full application.
 

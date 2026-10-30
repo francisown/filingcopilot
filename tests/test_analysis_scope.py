@@ -343,3 +343,33 @@ def test_period_labels_never_call_non_ascii_strftime(tools, monkeypatch):
     )
     assert bool(accepted) is True
     assert bool(errors) is False
+
+
+def test_a_narrative_may_quote_a_percentage_that_is_verbatim_in_the_passage(tools):
+    """Filings disclose concentration only in prose; a quote is not a computed metric."""
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    tools.ledger["p1"]["text"] = (
+        "As of September 30, 2023, one customer represented 10% or more of total trade receivables."
+    )
+    claim = Claim(
+        kind="narrative",
+        statement="One customer represented 10% or more of total trade receivables.",
+        evidence_ids=["p1"],
+    )
+    accepted, errors = verify_submission(
+        Submission(claims=[claim]), tools, "Which concentration risks did Apple disclose?", approve, "AAPL"
+    )
+    assert accepted and not any("financial amounts" in error for error in errors)
+
+
+def test_a_narrative_may_not_state_a_percentage_the_passage_does_not_contain(tools):
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    claim = Claim(
+        kind="narrative",
+        statement="One customer represented 12% or more of total trade receivables.",
+        evidence_ids=["p1"],
+    )
+    accepted, errors = verify_submission(
+        Submission(claims=[claim]), tools, "Which concentration risks did Apple disclose?", approve, "AAPL"
+    )
+    assert not accepted and any("financial amounts" in error for error in errors)

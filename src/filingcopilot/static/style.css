@@ -109,3 +109,5 @@ main{margin-left:216px;padding:0 28px 26px;max-width:1900px}header{height:64px;d
 .inline-translation-row p{margin:0;font-size:13px;line-height:1.9;color:#263f5c;overflow-wrap:anywhere}
 .inline-translation-note{font-size:11px;line-height:1.7;color:#6a7b91;margin:12px 0 0;padding-top:11px;border-top:1px solid #edf1f6}
 @media(max-width:700px){.inline-translation-panel{top:64px;right:12px;width:calc(100vw - 24px);max-height:calc(100vh - 80px);padding:17px}.inline-translation-button{font-size:11px}}
+
+.answer-item>.citations{display:none}.claim-footnote-mark{font-size:.72em;line-height:0;vertical-align:super;margin-left:4px;color:#315b95;font-weight:600}.evidence-footnotes{margin-top:20px;padding-top:13px}.evidence-footnote-list{margin:10px 0 0;padding-left:26px}.evidence-footnote{padding:9px 0;border-bottom:1px solid #e8edf4;font-size:12px;line-height:1.8}.evidence-footnote-number{margin-right:7px;color:#315b95}.evidence-footnote-label{color:#52647d}.evidence-footnote-text{margin:4px 0;color:#43566e;white-space:pre-wrap}.evidence-footnote .cite{margin-top:3px}

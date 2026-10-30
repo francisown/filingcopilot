@@ -219,6 +219,531 @@ def stock_source_context(tools, ticker, overview, quarterly=None, max_searches=3
     }, records
 
 
+_SEGMENT_STOPWORDS = {
+    "the", "our", "the company", "company", "net", "total", "consolidated",
+    "increase", "decrease", "year", "years", "fiscal", "operating", "reported",
+    "主要", "合并", "总计", "收入", "营收", "销售", "利润", "利润率",
+}
+
+
+def _segment_labels(text: str) -> set[str]:
+    """Extract report-specific business labels without a company vocabulary.
+
+    Segment names vary by issuer (AWS, North America, HPC, Products, etc.).
+    The extractor uses the local passage's own label-plus-measure phrasing
+    instead of maintaining a ticker-specific allowlist.
+    """
+    labels: set[str] = set()
+    label = r"(?:[A-Z][A-Za-z0-9&/'-]*(?:\s+[A-Z][A-Za-z0-9&/'-]*){0,4}|[\u3400-\u9fff]{1,12})"
+    measure = r"(?i:segment|platform|revenue|sales|net sales|income|margin|profit|分部|平台|收入|营收|销售|利润|利润率)"
+    for match in re.finditer(rf"(?P<label>{label})\s+(?:{measure})", text):
+        value = re.sub(r"\s+", " ", match.group("label")).strip(" ,;:()[]")
+        folded = value.casefold()
+        if not value or folded in _SEGMENT_STOPWORDS:
+            continue
+        words = folded.split()
+        if len(words) > 1 and any(word in _SEGMENT_STOPWORDS for word in words):
+            continue
+        labels.add(folded)
+    return labels
+
+
+_CONCENTRATION_SIGNAL = re.compile(
+    r"(?:no|cannot|one|\d+)\s*(?:single\s+)?customer|major customer|"
+    r"significant customer|ten (?:largest )?customers?|客户集中",
+    re.I,
+)
+_PERCENTAGE = re.compile(r"\d+(?:\.\d+)?\s*%")
+_ACCOUNTING_POLICY = re.compile(
+    r"performance obligation|revenue recognition|third-party products|deferred revenue|"
+    r"履约义务|收入确认",
+    re.I,
+)
+
+
+def _concentration_bonus(slot: str, text: str) -> int:
+    """A concentration question is answered by a threshold disclosure, not policy prose.
+
+    Phrase counting alone let a revenue-recognition paragraph outrank the actual
+    "one customer represented 10% or more" sentence, which sat last out of eight
+    candidates in the Apple FY2023 filing.
+    """
+    if slot != "集中度":
+        return 0
+    if _CONCENTRATION_SIGNAL.search(text) and _PERCENTAGE.search(text):
+        return 6
+    if _ACCOUNTING_POLICY.search(text):
+        return -5
+    return 0
+
+
+def narrative_source_context(tools, ticker: str, question: str, max_searches: int = 3):
+    """Preselect filing passages for narrative questions before model drafting.
+
+    Causal, risk and negation questions used to begin with only typed numbers;
+    the model then had to discover the relevant MD&A or risk-factor passages
+    while also budgeting a submission and review.  This small deterministic
+    prefetch keeps the search bound to the requested annual filing and gives
+    the model a useful starting set.  It is a candidate set, never a verified
+    conclusion, so the normal ledger and claim verifier still decide what can
+    be delivered.
+    """
+    ticker = ticker.upper()
+    text = str(question)
+    folded = text.casefold()
+    negative = bool(
+        re.search(
+            r"否认|没有重大|无重大|是否明确|是否披露没有|\bdeny\w*\b|\bno material\b|"
+            r"\b(?:supply[- ]chain|demand)\b.{0,30}\b(?:declin\w*|impact)\b",
+            folded,
+            re.I,
+        )
+    )
+    risk = bool(
+        re.search(
+            r"风险|\brisk\w*\b|监管|\bregulat\w*\b|集中度|\bconcentrat\w*\b|"
+            r"需要持续跟踪|\btrack\b",
+            folded,
+            re.I,
+        )
+    )
+    cause = bool(
+        re.search(
+            r"原因|归因|驱动|变化|增长|利润率|因素|解释|\bwhy\b|\bdriver\w*\b|"
+            r"\bcause\w*\b|\bexplain\w*\b|\bgrowth\b|\bmargin\b|\brevenue change\b",
+            folded,
+            re.I,
+        )
+    )
+    if negative:
+        category = "negation"
+        plans = [
+            ("否定原文", "no material supply chain impact demand decline denied"),
+            ("反向证据", "supply chain disruption demand decline affected results"),
+            ("管理层表述", "management discussion demand supply chain impact"),
+        ]
+    elif risk:
+        category = "risk"
+        plans = [
+            ("监管与需求风险", "Risk Factors regulatory competition export controls demand macroeconomic"),
+            ("供应与经营风险", "Risk Factors supply chain suppliers customers operations"),
+        ]
+        if re.search(
+            r"集中度|集中风险|客户集中|单一客户|大客户|concentrat\w*|"
+            r"major\s+customers?|top\s+customers?|significant\s+customers?|"
+            r"customer\s+concentration|single[- ]customer",
+            folded,
+            re.I,
+        ):
+            plans.insert(
+                1,
+                ("客户集中风险", "Risk Factors customer concentration major customers revenue concentration"),
+            )
+    elif cause:
+        category = "causality"
+        margin = bool(re.search(r"利润率|\bmargin\b|gross margin|operating margin", folded, re.I))
+        plans = [
+            (
+                "经营变化原因",
+                "net revenue net sales increased decreased mainly attributed primarily due to",
+            ),
+            (
+                "利润率原因" if margin else "分部变化原因",
+                (
+                    "MD&A gross margin operating margin change mix volume price cost foreign exchange"
+                    if margin
+                    else "segment revenue net sales increase decrease mainly came from primarily due to demand products",
+                ),
+            ),
+            ("现金与费用原因", "MD&A operating income expenses cost of sales research development selling general administrative"),
+        ]
+    else:
+        return None, []
+
+    filings = tools.corpus.catalog(tools.as_of, ticker)
+    annual_forms = set(tools.domain.annual_forms(ticker))
+    annuals = [f for f in filings if f["form"] in annual_forms]
+    years = [int(value) for value in re.findall(r"(?<!\d)(20\d{2})(?!\d)", text)]
+    requested_year = max(years) if years else None
+    scoped = [f for f in annuals if requested_year is None or int(f["period_end"][:4]) == requested_year]
+    if requested_year is not None and not scoped:
+        return {
+            "found": False,
+            "ticker": ticker,
+            "category": category,
+            "filing": None,
+            "evidence": [],
+            "missing": [f"requested annual filing FY{requested_year} is unavailable"],
+            "searches_performed": 0,
+        }, []
+    filing = max(scoped or annuals, key=lambda f: (f["period_end"], f["filed"], f["id"]), default=None)
+    if filing is None:
+        return {
+            "found": False,
+            "ticker": ticker,
+            "category": category,
+            "filing": None,
+            "evidence": [],
+            "missing": ["requested annual filing is unavailable"],
+            "searches_performed": 0,
+        }, []
+
+    records, observed, missing = [], {}, []
+    budget = max(0, min(3, int(max_searches)))
+    section_patterns = {
+        "causality": r"management.*discussion|md&a|operating results|results of operations",
+        "risk": r"riskfactors|risk factors|business",
+        "negation": r"management.*discussion|md&a|riskfactors|risk factors|operating results",
+    }
+    section_pattern = section_patterns[category]
+    for purpose, query in plans[:budget]:
+        checkpoint()
+        arguments = {
+            "query": query,
+            "ticker": ticker,
+            "k": 8,
+            "filing_id": filing["id"],
+            "lexical_only": True,
+        }
+        started = time.perf_counter()
+        try:
+            result = tools.search_passages(**arguments)
+        except ResearchStopped:
+            raise
+        except Exception as exc:
+            result = {"hits": [], "error_type": type(exc).__name__, "recoverable": True}
+        hits = list(result.get("hits", []))
+        ranked = []
+        for rank, hit in enumerate(hits):
+            section = re.sub(r"\s+", "", hit["passage"].get("section", "")).casefold()
+            preferred = bool(re.search(section_pattern, section, re.I))
+            ranked.append((0 if preferred else 1, rank, hit))
+        ranked.sort(key=lambda item: (item[0], item[1], item[2]["passage"]["id"]))
+        # Two passages per purpose keep the initial context compact. The full
+        # hit set remains in the ledger, and the gap-driven follow-up can fetch
+        # more exact text when the first candidates do not cover the question.
+        selected = [hit for _, _, hit in ranked[:2]]
+        records.append(
+            {
+                "stage": "tool",
+                "tool": "search_passages",
+                "preparation": "narrative_source",
+                "category": category,
+                "purpose": purpose,
+                "arguments": arguments,
+                "result": result,
+                "selection": {
+                    "candidate_count": len(hits),
+                    "selected_ids": [hit["passage"]["id"] for hit in selected],
+                    "method": "section_priority_then_rank",
+                },
+                "duration_ms": round((time.perf_counter() - started) * 1000),
+            }
+        )
+        if not hits:
+            # A zero-hit keyword search is not yet a result: the full-filing scan
+            # below decides whether the topic is absent from the document. Saying
+            # "retrieval failed" here pushed the model into an unnecessary gap.
+            missing.append(
+                f"{purpose}关键词检索未命中；是否在整份申报中出现，以下方 scan_scope 的全文扫描为准。"
+            )
+        for hit in selected:
+            item = tools.ledger[hit["passage"]["id"]]
+            entry = observed.setdefault(
+                item["id"],
+                {
+                    k: item[k]
+                    for k in ("id", "kind", "ticker", "text", "section", "filing_id", "source_url")
+                }
+                | {
+                    "form": item["filing"]["form"],
+                    "filed": item["filing"]["filed"],
+                    "period_end": item["filing"]["period_end"],
+                    "purposes": [],
+                },
+            )
+            if purpose not in entry["purposes"]:
+                entry["purposes"].append(purpose)
+    # Query ranking can still miss a small but decisive paragraph.  Scan the
+    # already locked annual filing once and fill the question-specific slots
+    # from the complete local passage set.  This is local retrieval, not an
+    # extra model call or an unscoped web search.
+    all_passages = tools.corpus.passages(tools.as_of, ticker, filing_id=filing["id"])
+    if category == "causality":
+        margin = bool(re.search(r"利润率|\bmargin\b|gross margin|operating margin", folded, re.I))
+        topic_terms = (
+            ["gross margin", "operating margin", "gross profit", "cost", "expense", "tax", "mix", "foreign exchange"]
+            if margin
+            else [
+                "revenue", "net sales", "segment", "platform", "business",
+                "sales", "income", "demand", "volume", "price", "mix", "products",
+            ]
+        )
+        # Keep the ranking generic: issuer-specific labels are extracted from
+        # the passage itself by _segment_labels rather than hard-coded here.
+        segment_pattern = (
+            r"(?:[A-Z][A-Za-z0-9&/'-]*(?:\s+[A-Z][A-Za-z0-9&/'-]*){0,4}|"
+            r"[\u3400-\u9fff]{1,12})\s+(?i:segment|platform|revenue|sales|net sales|"
+            r"income|margin|profit|分部|平台|收入|营收|销售|利润|利润率)"
+        )
+        segment_direct_pattern = segment_pattern
+        slots = [
+            ("原因", r"mainly|primarily|driven by|due to|reflecting|attributed|came from|influenced by|led by|reflects|主要|由于|驱动|归因", topic_terms),
+            (
+                "分部",
+                segment_pattern,
+                ["mainly", "primarily", "driven", "due", "reflecting", "attributed", "came from", "主要", "由于", "驱动", "归因"],
+            ),
+        ]
+    elif category == "risk":
+        slots = [
+            ("监管", r"regulat|export control|tariff|antitrust|competition|监管|出口管制|关税|反垄断|竞争", ["risk", "adverse", "compliance"]),
+            ("需求", r"demand|macroeconomic|customer usage|unit sales|需求|宏观|客户|销量", ["risk", "decline", "growth", "economic"]),
+        ]
+        concentration_requested = bool(
+            re.search(
+                r"集中度|集中风险|客户集中|单一客户|大客户|concentrat\w*|"
+                r"major\s+customers?|top\s+customers?|significant\s+customers?|"
+                r"customer\s+concentration|single[- ]customer",
+                folded,
+                re.I,
+            )
+        )
+        if concentration_requested:
+            # A loose ``customer.*revenue`` matches across half a page and lets
+            # revenue-recognition boilerplate outrank the actual disclosure.
+            slots.append(
+                ("集中度", r"concentration|major customer|significant customer|10%|"
+                 r"customer.{0,40}revenue|集中|主要客户|客户.{0,10}收入|经销商",
+                 ["risk", "revenue", "customer"]),
+            )
+    else:
+        slots = [
+            ("否定", r"no material|not materially|did not|has not|without material|没有重大|未造成重大|未受到重大|否认", ["supply", "demand", "impact"]),
+            ("反证", r"supply[- ]chain|供应链|demand|需求", ["impact", "disrupt", "interrupt", "declin", "affected", "影响", "中断", "下降"]),
+        ]
+    slot_counts = {}
+    seen_segment_names = set()
+    # Anchor the scan to entities the question actually names.  The filing can
+    # contain many capitalized labels ("Other", "Fixed", table headers, and
+    # accounting concepts) that look like segments to a surface matcher.  A
+    # label that occurs in the question is a source-independent signal that
+    # the passage is about the requested business unit; it does not introduce
+    # an issuer vocabulary or assert that the label is a valid segment.
+    question_folded = folded
+    question_acronyms = {
+        value.casefold()
+        for value in re.findall(r"(?<![A-Za-z0-9])[A-Z][A-Z0-9&/-]{1,}(?![A-Za-z0-9])", text)
+    }
+    for slot, pattern, topic_terms in slots:
+        ranked = []
+        for passage in all_passages:
+            text_value = passage.text.casefold()
+            phrase_hits = len(re.findall(pattern, text_value, re.I))
+            if slot == "分部" and not re.search(
+                r"mainly|primarily|driven by|due to|reflecting|attributed|came from|influenced by|led by|reflects|主要|由于|驱动|归因",
+                text_value,
+                re.I,
+            ):
+                continue
+            if slot == "分部" and not re.search(
+                r"revenue|net sales|sales|income|margin|profit|收入|营收|销售|利润|利润率",
+                text_value,
+                re.I,
+            ):
+                continue
+            segment_names = set()
+            if slot == "分部":
+                segment_names = _segment_labels(passage.text)
+                specific_direct = bool(
+                    re.search(
+                        segment_direct_pattern,
+                        passage.text,
+                    )
+                )
+                if not segment_names or (segment_names <= seen_segment_names and not specific_direct):
+                    continue
+            if not phrase_hits:
+                continue
+            topic_hits = sum(term.casefold() in text_value for term in topic_terms)
+            section_bonus = 1 if re.search(r"management|md&a|results|risk|business", passage.section, re.I) else 0
+            specific_segment_bonus = (
+                4
+                if slot == "分部"
+                and re.search(
+                    segment_direct_pattern,
+                    passage.text,
+                )
+                else 0
+            )
+            question_segment_bonus = (
+                24
+                if slot == "分部"
+                and any(
+                    name in question_folded or name in question_acronyms
+                    for name in segment_names
+                    if name not in _SEGMENT_STOPWORDS
+                )
+                else 0
+            )
+            causal_segment_bonus = (
+                6
+                if slot == "分部"
+                and re.search(segment_direct_pattern, passage.text)
+                and re.search(
+                    r"increased|decreased|growth|increase|decline|primarily|mainly|due to|"
+                    r"driven|reflecting|attributed|增长|下降|增加|减少|主要|由于|驱动|归因",
+                    text_value,
+                    re.I,
+                )
+                else 0
+            )
+            ranked.append(
+                (
+                    phrase_hits * 3
+                    + topic_hits * 2
+                    + section_bonus
+                    + specific_segment_bonus
+                    + question_segment_bonus
+                    + causal_segment_bonus
+                    + _concentration_bonus(slot, passage.text),
+                    passage,
+                )
+            )
+        ranked.sort(key=lambda item: (-item[0], item[1].id))
+        candidate_rows = ranked[:20] if slot == "分部" else ranked[:2]
+        for _, passage in candidate_rows:
+            item = tools.ledger.setdefault(passage.id, tools.corpus.evidence(passage.id, tools.as_of))
+            if not item:
+                continue
+            entry = observed.setdefault(
+                item["id"],
+                {
+                    k: item[k]
+                    for k in ("id", "kind", "ticker", "text", "section", "filing_id", "source_url")
+                }
+                | {
+                    "form": item["filing"]["form"],
+                    "filed": item["filing"]["filed"],
+                    "period_end": item["filing"]["period_end"],
+                    "purposes": [],
+                },
+            )
+            purpose = f"整份申报扫描:{slot}"
+            if purpose not in entry["purposes"]:
+                entry["purposes"].append(purpose)
+            slot_counts[slot] = slot_counts.get(slot, 0) + 1
+            seen_segment_names.update(segment_names)
+            if slot != "分部" and slot_counts[slot] >= 2:
+                break
+            if slot == "分部" and slot_counts[slot] >= 8:
+                break
+        if len(observed) >= 8 and all(slot_counts.get(name, 0) for name, _, _ in slots):
+            break
+    structured_evidence = []
+    if category == "risk" and concentration_requested:
+        # Customer concentration is frequently disclosed in a dimensional
+        # statement row rather than a prose risk paragraph. Prefetch only the
+        # requested filing and a focused row set; the normal verifier still
+        # decides whether a submitted qualitative claim is entailed.
+        checkpoint()
+        statement_query = (
+            "customer concentration major direct customer segment revenue "
+            "accounts receivable"
+        )
+        statement_arguments = {
+            "ticker": ticker,
+            "statement": "all",
+            "filing_id": filing["id"],
+            "query": statement_query,
+            "limit": 24,
+        }
+        try:
+            statement_result = tools.get_statement(**statement_arguments)
+        except (ValueError, OSError) as exc:
+            statement_result = {
+                "found": False,
+                "rows": [],
+                "evidence": [],
+                "error_type": type(exc).__name__,
+            }
+        for item in statement_result.get("evidence", []):
+            structured_evidence.append(
+                {
+                    "id": item["id"],
+                    "kind": "statement_fact",
+                    "ticker": item["ticker"],
+                    "filing_id": item["filing_id"],
+                    "statement": item["statement"],
+                    "metric": item["metric"],
+                    "label": item["label"],
+                    "concept": item["concept"],
+                    "value": item["value"],
+                    "unit": item["unit"],
+                    "start": item.get("start"),
+                    "end": item["end"],
+                    "dimensions": item.get("dimensions", {}),
+                    "dimension_labels": item.get("dimension_labels", {}),
+                    "locator": item["locator"],
+                    "source_url": item["source_url"],
+                    "form": item["filing"]["form"],
+                    "filed": item["filing"]["filed"],
+                    "period_end": item["filing"]["period_end"],
+                }
+            )
+        if structured_evidence:
+            records.append(
+                {
+                    "stage": "tool",
+                    "tool": "get_statement",
+                    "preparation": "narrative_source",
+                    "purpose": "客户集中结构化行",
+                    "arguments": statement_arguments,
+                    "result": statement_result,
+                    "selection": {
+                        "candidate_count": statement_result.get("row_count", 0),
+                        "selected_ids": [item["id"] for item in structured_evidence],
+                        "method": "focused_statement_row_query",
+                    },
+                }
+            )
+    return {
+        "found": bool(observed),
+        "ticker": ticker,
+        "category": category,
+        "filing": {k: filing[k] for k in ("id", "form", "period_end", "filed", "source_url")},
+        "evidence": list(observed.values()),
+        "structured_evidence": structured_evidence,
+        "missing": missing,
+        "searches_performed": len(records),
+        "selection_strategy": "hybrid_query_plus_filing_scan",
+        "full_filing_scan": True,
+        "full_filing_passage_count": len(all_passages),
+        "evidence_slots": slot_counts,
+        # The model cannot otherwise tell a completed full-document scan from a
+        # few retrieved excerpts, so it hedges with "selected passages only" and
+        # that hedge becomes a blocking gap. State the scope in plain words, and
+        # say what a zero slot count means: it is a result, not a failed search.
+        "scan_scope": {
+            "passages_scanned": len(all_passages),
+            "filing_form": filing["form"],
+            "period_end": filing["period_end"],
+            "slot_hits": dict(slot_counts),
+            "zero_slot_meaning": (
+                "A slot with zero hits means the whole filing was scanned and no "
+                "passage matched that pattern; it is not a retrieval failure."
+            ),
+        },
+        "answerability": (
+            "supported_candidate"
+            if (category == "risk" and all(slot_counts.get(slot, 0) for slot, _, _ in slots))
+            or (category != "risk" and any(slot_counts.values()))
+            else "insufficient_candidate"
+        ),
+        "note": "预取的申报原文只是候选证据；仍需通过检索、提交和核验后才能形成结论。",
+    }, records
+
+
 def stock_trailing_context(tools, ticker: str) -> dict:
     """Prepare compact trailing operating data; full provenance remains in the ledger."""
     observed, missing, warnings = {}, [], []

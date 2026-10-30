@@ -75,3 +75,48 @@ The candidate evaluator requires complete frozen-ID coverage, no failed
 questions, strict recall and MRR improvements, and acceptable latency before
 marking a candidate eligible for integration. Eligibility alone does not change
 runtime defaults or establish human semantic accuracy.
+
+The default second stage now preserves the original question terms in every
+causal, risk and negation sub-query, then applies a bounded diversity pass to
+the top 20 near candidates. Search results also expose a deterministic
+`evidence_slot_plan` (period, driver, counterevidence, concentration, and so on)
+so the agent can search the first unresolved part instead of repeating a broad
+query. This is planning metadata, not evidence: only the verified ledger can
+promote a passage into an answer claim.
+
+Before a scoped passage search, the service checks whether the requested issuer
+and fiscal period are actually present in the local corpus. If the scope is
+missing and an SEC source is supported, it prepares only that annual or
+quarterly filing set, then reruns the same bounded retrieval. A failed refresh
+is returned as a warning and leaves the answer unsupported; it never widens the
+scope or invents a substitute document.
+
+Search responses are projected separately at the author-model boundary: source
+text, IDs and locators remain, while ranking diagnostics stay in the trace; the
+same passage is not resent verbatim on later rounds. The evidence ledger and
+exported research package retain the complete objects.
+
+Narrative prefetch uses the question shape to decide which evidence slots are
+required. Regulatory, demand and supply/operations risk are general risk slots;
+customer concentration is added only when the question asks for concentration or major
+customer exposure. This keeps an absent, unrequested disclosure from turning an
+otherwise supported risk answer into a false partial result. The submit schema
+also caps narrative answers at five independently supportable claims, so the
+model cannot silently turn several unrelated categories into one compound claim
+that must be repaired later. When a filing supports a qualitative concentration
+risk but does not provide a customer or supplier percentage, the missing number
+remains visible as a caveat without being mistaken for a missing risk category.
+For an explicit concentration request, the same filing's focused structured
+statement rows are prefetched alongside prose passages. Narrative verification
+accepts those rows as source-bound support for a qualitative claim, while still
+rejecting invented percentages or treating an absent row as zero. If a submitted
+cause or risk answer contains only verified figures, one filing-scoped gap search
+is attempted before the bounded repair turn so the author can use missing source
+text rather than repeatedly guessing.
+
+If review still removes every explanatory sentence from a numeric-only cause or
+risk draft, execution retains a few exact passages from that same filing. Those
+passages are labeled as source excerpts and the answer remains partial; the
+fallback cannot manufacture a causal conclusion. Causal excerpt selection favors
+MD&A, margin, segment-driver and operating-expense passages, while risk and
+negation questions keep separate topic slots.

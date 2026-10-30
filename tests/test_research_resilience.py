@@ -269,6 +269,46 @@ def test_observed_calculation_preserves_budget_version_and_period_guards(tools, 
         assert state["trace"][0].get("error")
 
 
+def test_growth_request_without_named_metric_uses_the_answered_metric(tools):
+    """Completeness asks for growth the question never named; use the delivered fact."""
+    tools.get_financial_fact("AAPL", "revenue", 2025)
+    tools.get_financial_fact("AAPL", "revenue", 2024)
+    state = {
+        "tools": tools,
+        "question": "Explain Apple's FY2025 growth in the filing.",
+        "focus_ticker": "AAPL",
+        "tool_count": 0,
+        "usage": {},
+        "trace": [],
+        "verified": [{"kind": "fact", "evidence_ids": ["rev25"]}],
+    }
+    ids = ExecutionMixin._complete_observed_calculations(state, 4)
+    growth = [e for e in tools.ledger.values() if e.get("operation") == "growth"]
+    assert ids and len(growth) == 1
+    assert growth[0]["value"] == "100"
+    assert growth[0]["unit"] == "%"
+
+
+def test_agreeing_duplicate_observations_do_not_block_requested_growth(tools):
+    """The guard exists for competing values, not for a twice-stored identical fact."""
+    tools.get_financial_fact("AAPL", "revenue", 2025)
+    tools.get_financial_fact("AAPL", "revenue", 2024)
+    tools.ledger["rev24-copy"] = {**tools.ledger["rev24"], "id": "rev24-copy"}
+    state = {
+        "tools": tools,
+        "question": "AAPL FY2025 营业收入同比增长率是多少？",
+        "focus_ticker": "AAPL",
+        "tool_count": 0,
+        "usage": {},
+        "trace": [],
+    }
+    ExecutionMixin._complete_observed_calculations(state, 4)
+    growth = [e for e in tools.ledger.values() if e.get("operation") == "growth"]
+    assert len(growth) == 1
+    assert growth[0]["value"] == "100"
+    assert growth[0]["unit"] == "%"
+
+
 def test_service_fallback_preserves_explanation_gap_in_english(tools):
     class ObserveThenSilent(SilentGateway):
         calls = 0

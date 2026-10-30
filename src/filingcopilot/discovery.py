@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import threading
@@ -27,8 +28,14 @@ from .execution import progress as report_progress
 from .external_updates import PublicExternalFetcher
 from .hkex import HKEXFetcher, HKEXSource, acquire_hkex_updates, hkex_scope
 from .ingestion import SecFetcher, SecRefreshDeferred, acquire_company
-from .models import Fact, Filing, Passage, ResearchRequest, StatementFact
+from .models import PARSER_VERSION, Fact, Filing, Passage, ResearchRequest, StatementFact
 from .preview import cached_financial_preview
+
+
+def _parse_is_current(filing: dict) -> bool:
+    """A stored parse produced by an older extractor is stale by definition."""
+    return filing.get("parser_version") == PARSER_VERSION
+
 
 DIRECTORY_URL = "https://www.sec.gov/files/company_tickers.json"
 # Exchange symbols such as 0700.HK and 2330.TW legitimately begin with a
@@ -54,6 +61,8 @@ def normalise_name(text: str) -> str:
 
 
 class CompanyDiscovery:
+    _source_refresh_lock = threading.RLock()
+
     def __init__(self, service, fetcher=None):
         self.service = service
         self.fetcher = fetcher or SecFetcher(
@@ -68,6 +77,31 @@ class CompanyDiscovery:
         )
         self.hkex_fetcher = HKEXFetcher(service.settings.home / "external-cache")
         self.cninfo_fetcher = CNInfoFetcher(service.settings.home / "external-cache")
+
+    def _cached_filing_is_valid(self, filing: dict) -> bool:
+        """Check that the immutable local bytes still match a filing record."""
+        # Test and offline adapters may intentionally provide synthetic bytes
+        # without exposing the production SEC cache. Their own fetch contract
+        # remains authoritative; only the real SEC fetcher can repair a raw
+        # source on demand.
+        if not isinstance(self.fetcher, SecFetcher):
+            return True
+        source_url = filing.get("source_url")
+        expected = filing.get("content_sha256")
+        if not isinstance(source_url, str) or not isinstance(expected, str):
+            return False
+        path = self.service.settings.home / "sec-cache" / (
+            hashlib.sha256(source_url.encode()).hexdigest() + ".cache"
+        )
+        try:
+            if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+                return False
+        except OSError:
+            return False
+        # The raw bytes are intact but the parse may predate an extractor fix
+        # (chunking, filters, page tracking). A stale parse self-heals here: the
+        # cached bytes are re-extracted with the current code on next use.
+        return _parse_is_current(filing)
 
     def search(self, query: str, translate: bool = True) -> dict:
         query = query.strip()
@@ -209,7 +243,16 @@ class CompanyDiscovery:
             domain = self.service.refresh_domain()
             local = self.service.corpus.catalog(as_of, ticker)
             forms = self._annual_forms(ticker)
-            if any(f["form"] in forms for f in local) and ticker in domain.companies and not state_path.exists():
+            local_annual = [f for f in local if f["form"] in forms]
+            source_refresh_needed = any(
+                not self._cached_filing_is_valid(filing) for filing in local_annual
+            )
+            if (
+                local_annual
+                and ticker in domain.companies
+                and not state_path.exists()
+                and not source_refresh_needed
+            ):
                 if ticker in domain.financial_profiles:
                     emit("extracting", "正在从已有原件核对登记的原币年度数字…")
                     self.service.enrich_cached_facts(ticker)
@@ -259,7 +302,7 @@ class CompanyDiscovery:
 
             entries = acquire_company(
                 self.fetcher, ticker, years, domain=domain, as_of=as_of, progress=emit, forms=forms,
-                on_entry=retain,
+                on_entry=retain, force_refresh=source_refresh_needed,
             )
             if not entries:
                 raise ValueError(
@@ -505,7 +548,16 @@ class CompanyDiscovery:
         if not TICKER.fullmatch(ticker) or as_of > date.today() or years not in (3, 5):
             raise ValueError("股票代码、知悉日期或趋势范围无效。")
         listing = self.service.market.directory.listing(ticker)
-        if listing and (not listing.filings_supported or not listing.annual_financials):
+        # SEC US 10-K issuers use the standard XBRL annual pipeline even when
+        # the local stock-directory entry omits the optional capability flag.
+        # The explicit ``annual_financials`` gate is meaningful for foreign
+        # 20-F entries, where native-currency extraction must be registered;
+        # applying it to every listing made ordinary US companies such as AMZN
+        # look permanently unavailable on a fresh corpus.
+        if listing and (
+            not listing.filings_supported
+            or (listing.annual_form == "20-F" and not listing.annual_financials)
+        ):
             return {
                 "checked": False,
                 "warning": "此证券尚未接入年度财务数字；可查看价格走势或选择已接入 SEC 财务的公司。",
@@ -600,7 +652,14 @@ class CompanyDiscovery:
         if as_of > date.today():
             raise ValueError("股票代码或知悉日期无效。")
         listing = self.service.market.directory.listing(ticker)
-        if listing and (not listing.filings_supported or not listing.annual_financials):
+        # SEC US 10-K issuers use the standard XBRL annual pipeline even when
+        # the local stock-directory entry omits the optional capability flag.
+        # The explicit ``annual_financials`` gate is meaningful for foreign
+        # 20-F entries, where native-currency extraction must be registered.
+        if listing and (
+            not listing.filings_supported
+            or (listing.annual_form == "20-F" and not listing.annual_financials)
+        ):
             return {
                 "found": False,
                 "checked": False,
@@ -709,6 +768,15 @@ class CompanyDiscovery:
         return ticker, as_of.isoformat(), forms[0] + (":" + cache_scope if cache_scope else "")
 
     def _check_disclosures(self, ticker, as_of, forms, years, label, cache_scope=None, fiscal_years=None):
+        # Multiple evaluation workers can share the same corpus home. Serialize
+        # the fetch-and-replace transaction so an older response cannot overwrite
+        # a newer raw source after another worker has repaired it.
+        with self._source_refresh_lock:
+            return self._check_disclosures_locked(
+                ticker, as_of, forms, years, label, cache_scope, fiscal_years
+            )
+
+    def _check_disclosures_locked(self, ticker, as_of, forms, years, label, cache_scope=None, fiscal_years=None):
         ticker = ticker.strip().upper()
         if not TICKER.fullmatch(ticker) or as_of > date.today():
             raise ValueError("股票代码或知悉日期无效。")
@@ -725,6 +793,15 @@ class CompanyDiscovery:
             if previous and time.monotonic() - previous[0] < 3600:
                 return deepcopy(previous[1]), True
             local = [f for f in self.service.corpus.catalog(as_of, ticker) if f["form"] in forms]
+            source_refresh_needed = any(
+                not self._cached_filing_is_valid(filing)
+                for filing in local
+                if filing["form"] in forms
+                and (
+                    fiscal_years is None
+                    or int(filing["period_end"][:4]) in set(fiscal_years)
+                )
+            )
             try:
                 entries = acquire_company(
                     self.fetcher,
@@ -734,12 +811,14 @@ class CompanyDiscovery:
                     as_of=as_of,
                     forms=forms,
                     **({"fiscal_years": fiscal_years} if fiscal_years is not None else {}),
+                    force_refresh=source_refresh_needed,
                 )
                 acquired = []
                 for entry in entries:
                     filing = Filing.model_validate(entry["filing"])
                     # An accession is immutable. Preserve its original local locators.
-                    if any(f["id"] == filing.id for f in local):
+                    existing = next((f for f in local if f["id"] == filing.id), None)
+                    if existing and existing.get("content_sha256") == filing.content_sha256:
                         self.service.corpus.add_facts(
                             filing, [Fact.model_validate(f) for f in entry.get('facts', [])]
                         )
@@ -749,6 +828,18 @@ class CompanyDiscovery:
                         ]
                         if rows:
                             self.service.corpus.add_statement_facts(filing, rows)
+                        continue
+                    if existing:
+                        self.service.corpus.ingest(
+                            filing,
+                            [Fact.model_validate(f) for f in entry.get("facts", [])],
+                            [Passage.model_validate(p) for p in entry.get("passages", [])],
+                            [
+                                StatementFact.model_validate(f)
+                                for f in entry.get("statement_facts", [])
+                            ],
+                        )
+                        acquired.append({"filing": filing.id, "refreshed": True})
                         continue
                     acquired.append(
                         self.service.corpus.ingest(

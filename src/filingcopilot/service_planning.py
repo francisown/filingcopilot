@@ -67,6 +67,28 @@ def _market_failure_policy(question: str) -> bool:
     )
 
 
+def market_failure_policy_message(language: str) -> str:
+    """Return the deterministic answer for a missing quote source."""
+    if language == "en":
+        return (
+            "The market source is unavailable, so conclusions that depend on a current quote "
+            "— including P/E, return, or price conclusions — are withheld. Filing figures and "
+            "disclosure analysis verified with their source and date remain usable. Refresh "
+            "the market source and rerun the valuation when a current quote is available."
+        )
+    return (
+        "当前行情源不可用，因此暂停依赖当前报价的市盈率、回报率和价格结论。已经按来源与知悉日期核验的年报数字及披露分析仍可使用；"
+        "行情源恢复后请刷新报价，再重新计算相关估值。"
+    )
+
+
+def market_failure_gap_message(language: str) -> str:
+    """Return a short status note without repeating the delivered guidance."""
+    if language == "en":
+        return "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
+    return "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
+
+
 class PlanningMixin:
     def _ttm_comparison_plan(self, request: ResearchRequest, labels: list[str]) -> dict:
         self.refresh_domain()
@@ -179,7 +201,7 @@ class PlanningMixin:
             }
         failure_policy = _market_failure_policy(request.question)
         boundary = (
-            "如果行情源不可用，应明确报告行情缺口，暂停依赖该报价的市盈率、回报和价格判断；仍可保留通过来源与日期核验的年报数字及披露分析，不得编造价格或把旧报价当作当前报价。此处说明系统处理规则，未实际触发行情故障或执行故障注入测试。"
+            market_failure_policy_message(request.language)
             if failure_policy else _forecast_boundary(request.question)
         )
         if boundary:
@@ -566,7 +588,7 @@ class PlanningMixin:
         input_price = self.settings.model_input_price_per_million
         output_price = self.settings.model_output_price_per_million
         estimated_cost = None
-        if input_price is not None or output_price is not None:
+        if self.settings.pricing_configured:
             estimated_cost = round(
                 (prompt_tokens / 1_000_000) * (input_price or 0)
                 + (completion_tokens / 1_000_000) * (output_price or 0),
@@ -577,7 +599,10 @@ class PlanningMixin:
         latency = tool_calls * 0.35 + model_calls * self.settings.model_timeout
         if model_calls > 1:
             latency += (model_calls - 1) * self.settings.min_model_interval
-        latency = round(min(float(plan.get("time_budget_seconds", self.settings.research_timeout)), latency), 1)
+        time_budget = plan.get("time_budget_seconds", self.settings.research_timeout)
+        if time_budget is not None:
+            latency = min(float(time_budget), latency)
+        latency = round(latency, 1)
         return {
             "estimated_model_calls": model_calls,
             "estimated_tool_calls": tool_calls,
@@ -585,6 +610,12 @@ class PlanningMixin:
             "estimated_completion_tokens": completion_tokens,
             "estimated_total_tokens": total_tokens,
             "estimated_cost_usd": estimated_cost,
+            "cost_budget_usd": self.settings.max_cost_usd,
+            "cost_budget_warning": bool(
+                estimated_cost is not None
+                and self.settings.max_cost_usd is not None
+                and estimated_cost >= self.settings.max_cost_usd
+            ),
             "estimated_latency_seconds": latency,
             "time_budget_seconds": plan.get("time_budget_seconds", self.settings.research_timeout),
             "cost_basis": (

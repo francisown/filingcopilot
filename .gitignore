@@ -5,6 +5,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
+.workbuddy/
 *.egg-info/
 build/
 dist/
@@ -20,6 +21,12 @@ artifacts/*
 /scripts/analysis/
 /scripts/fc_gold_facts.py
 /scripts/fc_report.py
+/docs/research/
+/docs/validation/live-*/
+/docs/validation/model-control-*/
+/docs/validation/progress-log.md
+/docs/validation/retrieval-*.json
+/evaluation/evidence_annotations.json
 .financebench-eval*/
 
 models/

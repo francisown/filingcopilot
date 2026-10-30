@@ -25,6 +25,11 @@ def is_loopback_host(host: str) -> bool:
         return False
 
 
+def bind_allowed(host: str, allow_non_loopback: bool = False) -> bool:
+    """Keep loopback safe by default while supporting container networking."""
+    return is_loopback_host(host) or allow_non_loopback
+
+
 def main():
     parser = argparse.ArgumentParser(prog="filingcopilot")
     parser.add_argument("--home", help="Absolute evidence database and cache directory")
@@ -35,9 +40,20 @@ def main():
     web = commands.add_parser("serve")
     web.add_argument("--port", type=int, default=8159)
     web.add_argument("--host", default="127.0.0.1")
+    web.add_argument(
+        "--allow-non-loopback",
+        action="store_true",
+        help="Allow a container or trusted reverse proxy to bind beyond loopback; add auth/TLS externally.",
+    )
     mcp = commands.add_parser("mcp")
     mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio")
     mcp.add_argument("--port", type=int, default=8124)
+    mcp.add_argument("--host", default="127.0.0.1")
+    mcp.add_argument(
+        "--allow-non-loopback",
+        action="store_true",
+        help="Allow streamable HTTP outside loopback; FC_AUTH_TOKEN and TLS/proxy controls are still required.",
+    )
     ask = commands.add_parser("ask")
     ask.add_argument("question")
     ask.add_argument("--ticker")
@@ -291,7 +307,7 @@ def main():
             print(content)
         return
     if args.command == "serve":
-        if not is_loopback_host(args.host):
+        if not bind_allowed(args.host, args.allow_non_loopback):
             parser.error(
                 "refusing a non-loopback bind: FilingCopilot has no authentication "
                 "or tenant isolation; use a loopback reverse proxy with its own auth"
@@ -304,7 +320,16 @@ def main():
     elif args.command == "mcp":
         from .mcp_server import create_mcp
 
-        create_mcp(service, args.port).run(transport=args.transport)
+        if args.transport == "streamable-http":
+            if not bind_allowed(args.host, args.allow_non_loopback):
+                parser.error(
+                    "refusing a non-loopback MCP HTTP bind; use --allow-non-loopback explicitly"
+                )
+            if not is_loopback_host(args.host) and not service.settings.auth_token:
+                parser.error(
+                    "non-loopback MCP HTTP requires FC_AUTH_TOKEN; use an authenticated TLS proxy for stronger identity controls"
+                )
+        create_mcp(service, args.port, host=args.host).run(transport=args.transport)
     elif args.command == "ask":
         result = service.research(
             ResearchRequest(

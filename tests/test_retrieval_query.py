@@ -5,7 +5,7 @@ from filingcopilot.corpus import Corpus
 from filingcopilot.domain import DEFAULT_DOMAIN
 from filingcopilot.models import Filing, Passage
 from filingcopilot.retrieval import Retriever
-from filingcopilot.retrieval_query import retrieval_text
+from filingcopilot.retrieval_query import evidence_slot_plan, retrieval_text
 from filingcopilot.settings import Settings
 
 
@@ -52,3 +52,11 @@ def test_scoped_rewrite_removes_request_boilerplate_but_retains_negation():
 def test_unrecognized_scope_does_not_strip_another_company_or_year():
     text = retrieval_text("Microsoft FY2023 China demand", DEFAULT_DOMAIN, "AAPL", 2024)
     assert all(term in text for term in ["Microsoft", "FY2023", "China", "demand"])
+
+
+def test_evidence_slot_plan_is_deterministic_and_question_specific():
+    risk = evidence_slot_plan("What customer concentration risks did Apple disclose in FY2024?")
+    cause = evidence_slot_plan("Why did operating margin decline in FY2024?")
+    assert [slot["id"] for slot in risk] == ["period", "risk_disclosure", "customer_concentration"]
+    assert [slot["id"] for slot in cause] == ["period", "change", "driver"]
+    assert evidence_slot_plan("Why did operating margin decline in FY2024?") == cause

@@ -105,3 +105,72 @@ def test_fallback_respects_the_named_fiscal_year(tools):
     )
     assert len(selected) == 1
     assert selected[0]["evidence_ids"] == ["rev25"]
+
+
+def test_narrative_model_failure_keeps_scoped_exact_excerpt(tools):
+    passage = tools.corpus.evidence("p1", tools.as_of)
+    state = {
+        "tools": tools,
+        "question": "What risks does AAPL disclose?",
+        "focus_ticker": "AAPL",
+        "narrative_context": {
+            "answerability": "supported_candidate",
+            "category": "risk",
+            "filing": {"id": "AAPL:old"},
+            "evidence": [passage],
+        },
+        "trace": [
+            {
+                "tool": "search_passages",
+                "result": {"hits": [{"passage": passage, "score": 1.0}]},
+            },
+            {"stage": "model_error", "error_type": "APITimeoutError"},
+        ],
+    }
+    claims = ExecutionMixin._observed_narrative_excerpt_fallback(state)
+    assert len(claims) == 1
+    assert claims[0]["kind"] == "excerpt"
+    assert claims[0]["evidence_ids"] == ["p1"]
+    assert claims[0]["verification"] == "exact_source_excerpt"
+
+
+def test_narrative_excerpt_fallback_requires_supported_scan(tools):
+    state = {
+        "tools": tools,
+        "question": "What risks does AAPL disclose?",
+        "focus_ticker": "AAPL",
+        "narrative_context": {"answerability": "not_supported", "category": "risk"},
+        "trace": [],
+    }
+    assert ExecutionMixin._observed_narrative_excerpt_fallback(state) == []
+
+
+def test_numeric_only_narrative_keeps_exact_filing_context(tools):
+    """A reviewed numeric draft must not erase the passages found for its explanation."""
+    passage = tools.corpus.evidence("p1", tools.as_of)
+    state = {
+        "tools": tools,
+        "question": "Why did AAPL revenue change in FY2025?",
+        "focus_ticker": None,
+        "verified": [{
+            "index": 0,
+            "kind": "fact",
+            "text": "Revenue: 100",
+            "evidence_ids": ["rev25"],
+        }],
+        "narrative_context": {
+            "answerability": "supported_candidate",
+            "category": "causality",
+            "filing": {"id": "AAPL:old"},
+            "evidence": [passage],
+        },
+        "trace": [{
+            "tool": "search_passages",
+            "result": {"hits": [{"passage": passage, "score": 1.0}]},
+        }],
+        "errors": [],
+        "module": None,
+    }
+    gaps, _ = ExecutionMixin()._complete_filing_answer(state, [])
+    assert any(claim["kind"] == "excerpt" for claim in state["verified"])
+    assert any("exact excerpts" in gap for gap in gaps)

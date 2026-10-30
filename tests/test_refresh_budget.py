@@ -32,7 +32,12 @@ def test_failed_refresh_leaves_budget_for_cached_research(tmp_path, monkeypatch,
 
     monkeypatch.setattr("filingcopilot.ingestion.httpx.get", get)
     service = FilingCopilot(
-        Settings(home=tmp_path, embedding_mode="off", sec_user_agent="test@example.test"),
+        Settings(
+            home=tmp_path,
+            embedding_mode="off",
+            sec_user_agent="test@example.test",
+            research_timeout=300,
+        ),
         gateway=object(),
     )
 

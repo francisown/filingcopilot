@@ -20,7 +20,7 @@ from .domain import DEFAULT_DOMAIN, Domain, load_domain, mentions
 from .execution import RefreshBudgetExceeded, ResearchStopped, checkpoint, progress
 from .local_models import verify_model_snapshot
 from .models import Passage
-from .retrieval_query import lexical_terms, retrieval_text
+from .retrieval_query import decomposition, evidence_slot_plan, lexical_terms, retrieval_text
 from .settings import Settings
 
 ALIASES = DEFAULT_DOMAIN.query_expansions
@@ -31,6 +31,12 @@ DEFAULT_SOURCE_WEIGHTS = {
     "period": 0.6,
     "coverage": 1.5,
     "dense": 1.0,
+    # An exact domain phrase ("net sales") is a precise signal that the generic
+    # word-OR query cannot express, so it is fused as its own leg.
+    "phrase": 2.0,
+    # Thematic sub-queries are weaker than an exact phrase but reach paragraphs
+    # the question's own wording never mentions.
+    "decomposed": 0.9,
 }
 # Coverage is allowed to inspect a bounded scoped slice, never an unbounded
 # global corpus. Above this cap the already-built candidate pool is reused.
@@ -122,6 +128,12 @@ def expand_query(query: str, aliases: dict | None = None) -> str:
 
 
 _COVERAGE_SECTION_WEIGHT = 0.15
+# These are deliberately small because the fused RRF score is the primary
+# relevance signal.  Diversity is only allowed to break near ties between
+# passages that are already in the candidate pool.
+_DIVERSITY_OVERLAP_WEIGHT = 0.002
+_DIVERSITY_SECTION_WEIGHT = 0.002
+_DIVERSITY_POOL_SIZE = 20
 
 
 def _coverage_text(value: str) -> str:
@@ -485,6 +497,112 @@ class Retriever:
             for score, coverage, prior, matched, passage in scored
         ]
 
+    def _multiword_aliases(self, query: str) -> list[str]:
+        """Domain aliases of two or more words that the query already contains.
+
+        Only the domain config supplies real phrases; ``query_expansions`` holds
+        space-separated word lists, so it is not a phrase source.
+        """
+        folded = query.casefold()
+        phrases: set[str] = set()
+        for metric in self.domain.metrics.values():
+            phrases.update(alias for alias in metric.aliases if " " in alias)
+        for ratio in self.domain.ratios.values():
+            phrases.update(alias for alias in ratio.aliases if " " in alias)
+        return sorted(
+            (phrase for phrase in phrases if phrase.casefold() in folded),
+            key=len,
+            reverse=True,
+        )
+
+    @staticmethod
+    def _diversity_terms(text: str) -> set[str]:
+        """Return stable lexical units for the near-duplicate penalty.
+
+        This is intentionally independent of the query and of the gold set.
+        CJK characters are kept as single units because SQLite FTS5 does not
+        segment continuous Chinese text; English and numeric tokens retain
+        the same normalization used by the coverage leg.
+        """
+        normalized = _coverage_text(text)
+        return set(re.findall(r"[a-z0-9%]+|[\u4e00-\u9fff]", normalized))
+
+    @classmethod
+    def _diversify_ranked(
+        cls,
+        ranked: list[dict],
+        *,
+        limit: int,
+        overlap_weight: float = _DIVERSITY_OVERLAP_WEIGHT,
+        section_weight: float = _DIVERSITY_SECTION_WEIGHT,
+    ) -> list[dict]:
+        """Select a relevant, non-redundant prefix from an existing ranking.
+
+        The first passage is always the highest fused score.  Later choices
+        receive a small penalty for lexical overlap and repeated sections.  A
+        candidate can only move ahead of another candidate when the fused
+        scores are close, so this stage cannot recover a passage that the
+        retrieval legs failed to find.
+        """
+        if limit <= 0 or len(ranked) <= 1:
+            return ranked[:limit]
+        remaining = list(enumerate(ranked))
+        selected: list[dict] = []
+        selected_terms: list[set[str]] = []
+        selected_sections: set[str] = set()
+        while remaining and len(selected) < limit:
+            best_position = 0
+            best_key = None
+            for position, (original_rank, item) in enumerate(remaining):
+                passage = item["passage"]
+                terms = cls._diversity_terms(
+                    f'{passage.get("text", "")} {passage.get("section", "")}'
+                )
+                overlaps = []
+                for prior in selected_terms:
+                    union = terms | prior
+                    overlaps.append(len(terms & prior) / len(union) if union else 0.0)
+                overlap = max(overlaps, default=0.0)
+                section = str(passage.get("section", "")).casefold().strip()
+                repeated_section = 1.0 if section and section in selected_sections else 0.0
+                adjusted = item["score"] - overlap_weight * overlap - section_weight * repeated_section
+                # Preserve the original fused order for exact ties.  The
+                # original rank also keeps this stable across Python versions.
+                key = (adjusted, -item["score"], -original_rank, passage.get("id", ""))
+                if best_key is None or key > best_key:
+                    best_key = key
+                    best_position = position
+            _, chosen = remaining.pop(best_position)
+            passage = chosen["passage"]
+            chosen_terms = cls._diversity_terms(
+                f'{passage.get("text", "")} {passage.get("section", "")}'
+            )
+            chosen["diversity"] = {
+                "overlap_penalty": round(
+                    overlap_weight
+                    * max(
+                        (
+                            len(chosen_terms & prior) / len(chosen_terms | prior)
+                            if (chosen_terms | prior)
+                            else 0.0
+                        )
+                        for prior in selected_terms
+                    ),
+                    6,
+                )
+                if selected_terms
+                else 0.0,
+                "repeated_section": bool(
+                    str(passage.get("section", "")).casefold().strip() in selected_sections
+                ),
+            }
+            selected.append(chosen)
+            selected_terms.append(chosen_terms)
+            section = str(passage.get("section", "")).casefold().strip()
+            if section:
+                selected_sections.add(section)
+        return selected
+
     def search(
         self,
         query: str,
@@ -501,6 +619,8 @@ class Retriever:
         rerank_mode: str | None = None,
         anchor_weight: float = 0.05,
         coverage_section_weight: float = _COVERAGE_SECTION_WEIGHT,
+        diversity_overlap_weight: float = _DIVERSITY_OVERLAP_WEIGHT,
+        diversity_section_weight: float = _DIVERSITY_SECTION_WEIGHT,
         query_mode: str | None = None,
         candidate_limit: int | None = None,
         diagnostics: bool = False,
@@ -518,11 +638,16 @@ class Retriever:
             raise ValueError("retrieval anchor weight must be non-negative")
         if coverage_section_weight < 0:
             raise ValueError("retrieval coverage section weight must be non-negative")
-        if rerank_mode not in {"rrf", "anchor", "coverage"}:
+        if diversity_overlap_weight < 0 or diversity_section_weight < 0:
+            raise ValueError("retrieval diversity weights must be non-negative")
+        if rerank_mode not in {"rrf", "anchor", "coverage", "diversity"}:
             raise ValueError("unknown retrieval rerank mode")
         if query_mode not in {"full", "focused"} or not 1 <= candidate_limit <= 100:
             raise ValueError("invalid retrieval query mode or candidate limit")
         rewrite = rewrite_query(query.strip(), self.domain.query_expansions, self.domain)
+        # Phrase detection reads the expanded query: ``retrieval_text`` below
+        # tokenises to single words and would erase "net sales".
+        phrase_source = rewrite["expanded"]
         query = rewrite["expanded"]
         if query_mode == "focused":
             query = retrieval_text(query, self.domain, ticker, fiscal_year)
@@ -531,6 +656,43 @@ class Retriever:
         if section_title and fts:
             fts = "(" + fts + ') AND section : "' + section_title.replace('"', '""') + '"'
         lexical = self.corpus.lexical(fts, as_of, ticker, candidate_limit, fiscal_year, filing_id) if fts else []
+        decomposed: list = []
+        if getattr(self.settings, "retrieval_multi_query", True):
+            seen_ids: set[str] = set()
+            for sub_query in decomposition(phrase_source)[:3]:
+                expanded_sub = rewrite_query(
+                    sub_query, self.domain.query_expansions, self.domain
+                )["expanded"]
+                # Keep the user's metric, segment and direction terms in every
+                # thematic leg.  The old fixed decompositions (for example,
+                # ``risk factors regulatory competition``) could outrank the
+                # requested disclosure simply because they dropped the actual
+                # subject of the question.  This remains a bounded lexical
+                # candidate leg; it does not add a model call or widen the
+                # company/year scope.
+                sub_text = retrieval_text(
+                    f"{query} {expanded_sub}", self.domain, ticker, fiscal_year
+                )
+                sub_terms = lexical_terms(sub_text)
+                sub_fts = " OR ".join('"' + term + '"' for term in sub_terms)
+                if not sub_fts:
+                    continue
+                for passage, score in self.corpus.lexical(
+                    sub_fts, as_of, ticker, candidate_limit, fiscal_year, filing_id
+                ):
+                    if passage.id in seen_ids:
+                        continue
+                    seen_ids.add(passage.id)
+                    decomposed.append((passage, score))
+        phrase_terms = self._multiword_aliases(phrase_source)
+        phrase_fts = " OR ".join('"' + term + '"' for term in phrase_terms)
+        phrase = (
+            self.corpus.lexical(
+                phrase_fts, as_of, ticker, candidate_limit, fiscal_year, filing_id
+            )
+            if phrase_fts
+            else []
+        )
         passages = self.corpus.passages(as_of, ticker, fiscal_year, filing_id)
         if section_title:
             passages = [p for p in passages if section_title.casefold() in p.section.casefold()]
@@ -617,6 +779,8 @@ class Retriever:
         ]
         sources = {
             "lexical": lexical,
+            "phrase": phrase,
+            "decomposed": decomposed,
             "title": title,
             "period": period,
             "coverage": coverage_rows,
@@ -642,7 +806,7 @@ class Retriever:
                     item["legs"]["coverage"] = coverage_details.get(passage.id)
                 else:
                     item["legs"][leg] = {"rank": rank, "raw_score": raw}
-        if rerank_mode == "anchor":
+        if rerank_mode in {"anchor", "diversity"}:
             # A small deterministic bonus favors candidates that actually
             # contain the user's expanded query terms.  It is intentionally
             # optional so a later cross-encoder can be evaluated at the same
@@ -657,7 +821,23 @@ class Retriever:
                 item["score"] += anchor_weight * coverage
                 item["anchor_coverage"] = coverage
         ranked = sorted(combined.values(), key=lambda x: (-x["score"], x["passage"]["id"]))
+        if rerank_mode == "diversity":
+            # Diversity is a top-of-list tie breaker.  Reordering the entire
+            # candidate set would let a low-scoring passage leapfrog relevant
+            # evidence simply because it came from another section.
+            pool_size = min(len(ranked), max(k * 4, _DIVERSITY_POOL_SIZE))
+            diverse_head = self._diversify_ranked(
+                ranked[:pool_size],
+                limit=pool_size,
+                overlap_weight=diversity_overlap_weight,
+                section_weight=diversity_section_weight,
+            )
+            ranked = diverse_head + ranked[pool_size:]
         backend_parts = ["fts5"]
+        if phrase:
+            backend_parts.append("phrase")
+        if decomposed:
+            backend_parts.append("decomposed")
         if dense_used:
             backend_parts.append("bge")
         if title:
@@ -680,6 +860,7 @@ class Retriever:
             "embedding_unavailable": self.model_error,
             "hits": ranked[: max(1, min(8, k))],
             "eligible_passages": len(passages),
+            "evidence_slot_plan": evidence_slot_plan(query),
             **(
                 {
                     "retrieval_diagnostics": {
@@ -699,6 +880,7 @@ class Retriever:
                                 "score": item["score"],
                                 "section": item["passage"].get("section", ""),
                                 "legs": item["legs"],
+                                **({"diversity": item["diversity"]} if "diversity" in item else {}),
                             }
                             for item in ranked
                         ],

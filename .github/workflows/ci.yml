@@ -62,6 +62,11 @@ jobs:
       - run: node scripts/check_company_market_ui.cjs
       - run: node scripts/check_market_loading_ui.cjs
       - run: node scripts/check_market_outage_ui.cjs
+      - name: Validate local container
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.10'
+        run: |
+          docker compose config --quiet
+          docker build --tag filingcopilot-ci .
       - run: python scripts/smoke_mcp.py --output artifacts/ci/mcp-smoke.json
       - run: python -m filingcopilot evaluate --output artifacts/evaluation.json
       - run: python -m pip wheel --no-deps . --wheel-dir dist

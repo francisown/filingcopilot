@@ -7,9 +7,17 @@ from dataclasses import replace
 from datetime import date
 
 from .agent import ResearchAgent
+from .annual_numbers import annual_years
 from .cashflow import cashflow_explanation, cashflow_scope, is_cashflow_question
 from .comparison import ComparisonRequest, question_benchmark
-from .execution import ResearchStopped, checkpoint, progress, run_step, stopped
+from .execution import (
+    RefreshBudgetExceeded,
+    ResearchStopped,
+    checkpoint,
+    progress,
+    run_step,
+    stopped,
+)
 from .fundamentals import STOCK_GAPS, is_stock_question
 from .market import question_period
 from .models import Claim, ResearchAnswer, ResearchRequest, Submission
@@ -18,6 +26,7 @@ from .quarterly import (
     is_quarterly_question,
     requested_fiscal_quarter,
 )
+from .service_planning import market_failure_gap_message, market_failure_policy_message
 from .tools import ResearchTools
 from .trends import TrendRequest, trend_years
 from .ttm import is_ttm_question
@@ -26,13 +35,129 @@ from .verification import verify_submission
 
 
 class ExecutionMixin:
+    def _source_needs_preparation(self, request, plan) -> bool:
+        """Return whether the requested filing scope is missing locally.
+
+        Agent requests used to enter the model with whatever happened to be in
+        the local corpus. That made a fresh installation silently answer from
+        an incomplete dataset. Check the concrete ticker and any explicit fiscal
+        years before research so the discovery layer can acquire the exact SEC
+        reports that the question needs.
+        """
+        ticker = (request.ticker or "").strip().upper()
+        if not ticker:
+            return False
+        domain = self.refresh_domain()
+        if ticker not in domain.companies:
+            return True
+        annual_forms = domain.annual_forms(ticker)
+        filings = [
+            row
+            for row in self.corpus.catalog(request.as_of, ticker)
+            if row.get("form") in annual_forms
+        ]
+        if not filings:
+            return True
+        years = tuple(annual_years(request.question))
+        if years:
+            observed_years = {
+                int(row["period_end"][:4])
+                for row in filings
+                if row.get("period_end")
+            }
+            if any(year not in observed_years for year in years):
+                return True
+            relevant = [
+                row for row in filings
+                if row.get("period_end") and int(row["period_end"][:4]) in years
+            ]
+        else:
+            relevant = [
+                max(filings, key=lambda row: (row.get("period_end", ""), row.get("filed", ""), row.get("id", "")))
+            ]
+        # A catalog row is not enough to answer from a traceable filing.  The
+        # raw SEC bytes must still be present and match the immutable content
+        # hash before retrieval can use the parsed passages.  Test/offline
+        # fetchers remain authoritative through the discovery boundary.
+        return any(not self.discovery._cached_filing_is_valid(row) for row in relevant)
+
+    def _prepare_research_sources(self, request, plan):
+        """Acquire missing annual sources while preserving the existing cache."""
+        ticker = (request.ticker or "").strip().upper()
+        years = tuple(annual_years(request.question))
+        if (
+            plan.get("kind") == "filing"
+            and years
+            and len(years) <= 3
+            and not any(year > request.as_of.year for year in years)
+        ):
+            return run_step(
+                "annual_research_preparation",
+                "正在获取问题涉及年度的 SEC 年报原文和数字。",
+                self.discovery.prepare_annual_facts,
+                ticker,
+                request.as_of,
+                years,
+            )
+        return run_step(
+            "company_preparation",
+            "正在检查并获取知悉日期前的 SEC 年报。",
+            self.discovery.prepare,
+            ticker,
+            request.as_of,
+        )
+
     def _research(self, request: ResearchRequest):
         started = time.perf_counter()
         preparation_trace = []
+        source_preparation_failed = False
         checkpoint()
         progress("planning", "正在检查问题范围与知悉日期。")
         plan = self.research_plan(request)
         if not plan["ready"]:
+            if plan.get("guidance_only"):
+                policy_text = market_failure_policy_message(request.language)
+                policy_id = "policy-market-source-unavailable"
+                answer = ResearchAnswer(
+                    id="run-" + uuid.uuid4().hex,
+                    question=request.question,
+                    as_of=request.as_of,
+                    mode=request.mode,
+                    status="partial",
+                    status_reason="source_unavailable",
+                    answer=[
+                        {
+                            "kind": "narrative",
+                            "text": policy_text,
+                            "statement": policy_text,
+                            "evidence_ids": [policy_id],
+                            "verification": "deterministic",
+                        }
+                    ],
+                    gaps=[market_failure_gap_message(request.language)],
+                    evidence=[
+                        {
+                            "id": policy_id,
+                            "kind": "system_policy",
+                            "ticker": request.ticker or "",
+                            "section": "Market-source failure policy",
+                            "text": policy_text,
+                            "locator": "service_planning.market_failure_policy_message",
+                        }
+                    ],
+                    trace=[
+                        {
+                            "stage": "guidance",
+                            "kind": "market_source_failure_policy",
+                            "message": plan["message"],
+                        }
+                    ],
+                    usage={"model_calls": 0, "total_tokens": 0},
+                    elapsed_ms=round((time.perf_counter() - started) * 1000),
+                    model=None,
+                    research_type="filing",
+                )
+                return answer, self.refresh_domain(), request.ticker
             raise ValueError(plan["message"] + " 可选问题：" + " / ".join(plan["suggestions"]))
         if request.as_of > date.today():
             raise ValueError("知悉日期不能晚于今天。")
@@ -147,21 +272,40 @@ class ExecutionMixin:
         plan = self.research_plan(request)
         if not plan["ready"]:
             raise ValueError(plan["message"] + " 可选问题：" + " / ".join(plan["suggestions"]))
-        if (
+        should_prepare = (
             request.auto_acquire
-            and not market_question
-            and not plan.get("annual_numeric_direct")
-            and plan["kind"] not in ("updates", "provider_valuation", "trend", "benchmark")
+            or (
+                request.mode == "agent"
+                and bool(request.ticker)
+                and not market_question
+                and not plan.get("annual_numeric_direct")
+                and plan["kind"] in ("filing", "stock")
+                and (plan["kind"] == "filing" or bool(annual_years(request.question)))
+                and self._source_needs_preparation(request, plan)
+            )
+        )
+        if should_prepare and not market_question and not plan.get("annual_numeric_direct") and plan["kind"] not in (
+            "updates", "provider_valuation", "trend", "benchmark", "historical_valuation", "valuation"
         ):
             if not request.ticker:
                 raise ValueError("自动采集需要明确选择一家公司。")
-            prepared = run_step(
-                "company_preparation",
-                "正在检查并获取年报。",
-                self.discovery.prepare,
-                request.ticker,
-                request.as_of,
-            )
+            try:
+                prepared = self._prepare_research_sources(request, plan)
+            except (ResearchStopped, RefreshBudgetExceeded):
+                raise
+            except Exception as exc:
+                # A failed SEC refresh must not discard already indexed local
+                # evidence. Continue into the normal research path with an
+                # explicit warning; if no usable evidence exists, the agent
+                # will return a scoped source gap instead of fabricating an
+                # answer.
+                prepared = {
+                    "ticker": request.ticker,
+                    "checked": False,
+                    "warning": "SEC 原文检查未完成；将继续使用已缓存资料，缺失部分会明确列出。",
+                    "error_type": type(exc).__name__,
+                }
+                source_preparation_failed = True
             preparation_trace.append({"stage": "company_preparation", "result": prepared})
         tools = self.tools(request.as_of)
         checkpoint()
@@ -259,6 +403,7 @@ class ExecutionMixin:
                     fallback = self.updates_reference(request, tools, focus, prepared)
                     fallback.trace = answer.trace + fallback.trace
                     fallback.usage = answer.usage
+                    fallback.review_independence = answer.review_independence
                     fallback.gaps = [
                         "模型摘要未完成，已保留逐字核验的官方公告摘录。",
                         *fallback.gaps,
@@ -618,7 +763,7 @@ class ExecutionMixin:
                 if not focus:
                     companies = tools.domain.company_scope(request.question)
                     focus = next(iter(companies)) if len(companies) == 1 else None
-                if focus and self.settings.sec_user_agent:
+                if focus and self.settings.sec_user_agent and not source_preparation_failed:
                     if not re.search(r"20\d{2}", request.question):
                         annual_prepared = run_step(
                             "annual_refresh",
@@ -664,6 +809,15 @@ class ExecutionMixin:
                         preparation_trace.append(
                             {"stage": "external_updates_preparation", "result": external}
                         )
+                elif focus and self.settings.sec_user_agent and source_preparation_failed:
+                    warning = "本轮已记录 SEC 原文准备失败，跳过重复刷新；继续使用可用缓存。"
+                    for stage in ("annual_refresh", "quarterly_preparation", "updates_preparation"):
+                        preparation_trace.append(
+                            {
+                                "stage": stage,
+                                "result": {"ticker": focus, "checked": False, "warnings": [warning]},
+                            }
+                        )
             tools.refresh_status = [
                 {
                     "stage": entry["stage"],
@@ -679,6 +833,10 @@ class ExecutionMixin:
             self._publish_cached_preview(request)
             answer = ResearchAgent(self.settings, self.gateway).run(request, tools)
             for entry in preparation_trace:
+                if entry["stage"] == "company_preparation" and entry["result"].get("warning"):
+                    answer.gaps.append(entry["result"]["warning"])
+                    if answer.answer:
+                        answer.status = "partial"
                 if entry["stage"] == "updates_preparation":
                     answer.gaps.extend(entry["result"].get("warnings", []))
                     if answer.gaps and answer.answer:

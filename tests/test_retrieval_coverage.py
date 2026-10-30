@@ -143,6 +143,42 @@ def test_coverage_mode_uses_dense_candidates_when_available(tmp_path, monkeypatc
     assert result["retrieval_diagnostics"]["candidate_sources"]["dense"] > 0
 
 
+def test_diversity_rerank_is_deterministic_and_prefers_new_sections():
+    items = [
+        {
+            "passage": {"id": "p1", "section": "Item 1", "text": "revenue demand customers"},
+            "score": 1.000,
+        },
+        {
+            "passage": {"id": "p2", "section": "Item 1", "text": "revenue demand customers"},
+            "score": 0.999,
+        },
+        {
+            "passage": {"id": "p3", "section": "Item 7", "text": "cash flow investments"},
+            "score": 0.998,
+        },
+    ]
+    first = Retriever._diversify_ranked(items, limit=3)
+    second = Retriever._diversify_ranked(items, limit=3)
+    assert [item["passage"]["id"] for item in first] == ["p1", "p3", "p2"]
+    assert [item["passage"]["id"] for item in first] == [item["passage"]["id"] for item in second]
+    assert first[1]["diversity"]["repeated_section"] is False
+
+
+def test_diversity_mode_is_reported_in_search_diagnostics(tmp_path):
+    retriever = _retriever(tmp_path)
+    retriever.settings = Settings(home=tmp_path, embedding_mode="off", rerank_mode="diversity")
+    result = retriever.search(
+        "revenue",
+        AS_OF,
+        ticker="AAPL",
+        k=3,
+        diagnostics=True,
+    )
+    assert result["retrieval_diagnostics"]["rerank_mode"] == "diversity"
+    assert all("diversity" in item for item in result["hits"])
+
+
 def test_bilingual_expansion_maps_customers_to_english():
     expanded = rewrite_query(
         "业务、产品、服务和客户", DEFAULT_DOMAIN.query_expansions, DEFAULT_DOMAIN

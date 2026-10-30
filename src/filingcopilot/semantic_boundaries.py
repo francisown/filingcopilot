@@ -168,3 +168,173 @@ def narrative_completeness_errors(accepted: list[dict], question: str) -> list[s
             "a cause or risk question. Add a supported explanation or disclose this specific gap."
         ]
     return []
+
+
+def withheld_only(errors) -> bool:
+    """True when every verifier message is a rejected claim and none is a coverage gap.
+
+    A rejected sentence removes content but can leave the requested coverage
+    intact; a coverage message means a requested item was never supported. Only
+    the second kind should downgrade a delivered answer to partial.
+    """
+    messages = [str(error) for error in errors or []]
+    return bool(messages) and all(message.startswith("claim ") for message in messages)
+
+
+def nonblocking_gap(question: str, gap: str, *, full_scan: bool = False) -> bool:
+    """Classify methodological caveats that should not erase a complete answer.
+
+    These notes remain visible to callers, but a risk answer does not become
+    incomplete merely because the filing gives no probability estimate, and a
+    negation answer does not become incomplete solely because the search was
+    excerpt-scoped. Required evidence still stays blocking.
+    """
+    q = str(question).casefold()
+    g = str(gap).casefold()
+    if "独立核验" in g or "reviewer independence" in g or "not an independent check" in g:
+        return True
+    risk = bool(re.search(r"风险|\brisk\w*\b|监管|\bregulat\w*\b", q, re.I))
+    negation = bool(re.search(r"否认|没有重大|无重大|\bdeny\b|\bno material\b|需求下降|demand.{0,20}declin", q, re.I))
+    cause = bool(re.search(r"原因|驱动|归因|利润率|\bwhy\b|\bdriver|\bcause|\bmargin", q, re.I))
+    scope_note = bool(
+        re.search(
+            r"selected excerpts?|selected passages?|selected .* sections|not exhaustive|"
+            r"document-wide|entire filing|full review|所选摘录|选定段落|未穷尽|整份文件|"
+            r"其他.*未|未全面",
+            g,
+            re.I,
+        )
+    )
+    unresolved = bool(
+        re.search(r"remains? unresolved|cannot be determined|not resolved|仍未解决|尚未解决|"
+                  r"无法确定|未能确定|仍未有结论|尚未有结论|"
+                  r"没有.*披露|未找到.*明确|no passage|no explicit|not located|not retrieved|未检索到", g, re.I)
+    )
+    if risk and re.search(
+        r"not includ(?:ed|ible) within the (?:five|5)[ -]?claim limit|"
+        r"(?:未能|无法)纳入(?:五|5)条(?:断言|主张|答案)|"
+        r"(?:已|达到).{0,12}(?:五|5)条(?:断言|主张|答案).{0,12}(?:上限|限制)",
+        g,
+        re.I,
+    ) and not unresolved:
+        # The answer contract intentionally bounds a broad risk brief. Omitted
+        # extra categories remain visible as a note, but they do not make the
+        # requested answer incomplete when every delivered claim is verified.
+        return True
+    if risk and re.search(r"集中度|集中风险|客户集中|单一客户|大客户|concentrat", q, re.I) and re.search(
+        r"(?:no|not|without)\s+(?:numeric|quantified|quantitative)\s+"
+        r"(?:single[- ]customer|customer|supplier)?\s*(?:revenue|sales)?\s*concentration|"
+        r"(?:未见|未发现|没有|未披露|未给出).{0,40}(?:客户|供应商|单一|主要).{0,35}"
+        r"(?:收入|销售额|营收).{0,25}(?:占比|比例|数值|量化|百分比)|"
+        r"(?:客户|供应商).{0,25}(?:收入|销售额|营收).{0,25}(?:未披露|没有披露|未量化|无量化)",
+        g,
+        re.I,
+    ) and not unresolved:
+        # A risk brief may still be answered from qualitative concentration
+        # evidence when the filing does not provide the requested percentage.
+        # Keep the missing number visible without treating it as a missing risk
+        # category.
+        return True
+    if negation and scope_note and not unresolved:
+        return True
+    if negation and full_scan and not re.search(
+        r"failed evidence checks|断言未|withheld|已停止或移除|"
+        r"remains? unresolved|cannot be determined|无法确定|未能确定|尚待确认|仍有待|"
+        r"time budget|时间预算|research was aborted|模型请求失败",
+        g,
+        re.I,
+    ):
+        # A completed full-filing scan is the backing a negative finding needs:
+        # "the filing does not deny X" is then an evidence-backed result, not an
+        # unfinished search. Earlier phrasing lists kept losing to the model's
+        # own words ("no passage examined", "the searched excerpts"), so the
+        # default is now the scan itself, with only the three hard blocks above.
+        return True
+    if negation and full_scan and re.search(
+        r"document-wide|entire filing|whole filing|anywhere in the filing|"
+        r"exhaustive review|full filing|整份文件|整份年报|全文|穷尽扫描|全篇|"
+        # The model reports the scan result in its own words: "no passage
+        # examined/expressly denying…", "the searched excerpts …", "limited to
+        # the cited passages". These are the same scope statement.
+        r"no passage (?:examined|expressly|retrieved|directly|contains)|"
+        r"targeted searches|searched (?:excerpts|passages)|"
+        r"limited to the (?:cited|retrieved|searched)|not (?:established|found) "
+        r"(?:among|in|by) the (?:retrieved|searched|cited)|"
+        r"no statement expressly denying|no (?:explicit|affirmative) .{0,40}(?:denial|statement)",
+        g,
+        re.I,
+    ) and not re.search(
+        r"(?<!non-)(?<!non )\bmateriality\b|realized|actual|实际|实质|重大影响|"
+        r"尚待确认|remains? unresolved|pending",
+        g,
+        re.I,
+    ):
+        # The deterministic prefetch has scanned every locally indexed passage
+        # of the requested filing. A qualified "not found in the full local
+        # scan" is a methodological note, not a missing requested fact.
+        return True
+    if risk and re.search(
+        r"no quantified|does not quantify|qualitatively|not available as a typed|"
+        r"no typed (?:structured )?(?:financial )?metric|typed numeric|"
+        # The filing disclosed the category but not in the one numeric form the
+        # model expected: "no numeric single-customer revenue concentration".
+        # A concentration risk answered from receivables or geographic disclosure
+        # is answered; the missing number is not a missing requested fact.
+        r"no numeric|not disclosed numerically|no separate numeric|"
+        r"(?:no|not|do(?:es)? not (?:include|disclose|provide))[^.]{0,60}"
+        r"(?:numeric|quantified|quantitative)[^.]{0,60}concentration|"
+        r"未量化|没有量化|概率|金额幅度|无法作为数字|数字.*未|未以数字|没有给出数字",
+        g,
+        re.I,
+    ):
+        return True
+    # A risk question asks what the filing discloses, not for a particular data
+    # form. Matching whole sentences made the status a wording lottery: the same
+    # caveat phrased "not restated as numeric claims" instead of "no typed metric"
+    # flipped an answer from answered to partial between runs.
+    if risk and re.search(
+        r"\btyped\b|\bstructured\b|\bquantified\b|\bquantitative\b|\bnumeric(?:al)?\b|"
+        r"\bverbatim\b|\brestated\b|\bnarrative (?:text|form|disclosure)\b|"
+        r"结构化|量化|叙述形式|文字形式",
+        g,
+        re.I,
+    ) and not re.search(
+        r"could not be (?:found|located)|was not retrieved|no passage|未检索到|未找到",
+        g,
+        re.I,
+    ):
+        return True
+    if risk and scope_note and re.search(
+        r"not exhaustive|other risk categories|selected .* excerpts?|"
+        r"未穷尽|其他风险类别|其他风险因素|未全面复核|未独立复核",
+        g,
+        re.I,
+    ) and not unresolved:
+        return True
+    if cause and re.search(r"optional|minor contributor|mac-specific|specific .* not retrieved|"
+                           r"does not quantify each factor|未单独量化|可选|次要贡献|具体.*未检索", g, re.I):
+        return True
+    # Narrative questions end here by default — but not negation. For a risk or
+    # cause question the model's remaining note states which disclosure it found
+    # and which form it did not; deciding status from that prose made a wording
+    # change flip answered to partial between runs. Retrieval coverage is
+    # measured separately (span and page recall), so the answer status only
+    # guards the two things prose must never do: carry a withheld claim, or
+    # declare a question resolved that the evidence left open. A negation
+    # question is different: "the filing never denied it" is itself an answer,
+    # so an excerpt-scoped search cannot support one and the strict branches
+    # above still decide.
+    if (risk or cause) and not re.search(
+        r"failed evidence checks|断言未|withheld|已停止或移除|"
+        r"remains? unresolved|cannot be determined|无法确定|未能确定|尚待确认|仍有待|"
+        r"time budget|时间预算|research was aborted|模型请求失败|"
+        # "The work is not finished" is a confession about the deliverable and
+        # must block; "the filing does not disclose it" is a fact about the
+        # filing and is a scope note. Confusing the two graded a missing
+        # requested explanation as delivered.
+        r"尚未完成|未完成|not (?:yet )?completed|did not submit|未提交|incomplete",
+        g,
+        re.I,
+    ):
+        return True
+    return False

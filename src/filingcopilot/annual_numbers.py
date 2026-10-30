@@ -66,7 +66,23 @@ def reference_answer(request: ResearchRequest, tools: ResearchTools, domain: Dom
         ]
         scoped_years = years or ([int(filings[0]["period_end"][:4])] if filings else [])
         if not filings:
-            gaps.append(f"{ticker} 在知悉日期前没有可用年度申报。")
+            if request.auto_acquire:
+                gaps.append(f"{ticker} 在知悉日期前没有可用年度申报。")
+                coverage_status = "unavailable"
+            else:
+                gaps.append(
+                    f"{ticker} 尚未获取知悉日期前的年度申报；请先启用来源获取后重试。"
+                )
+                coverage_status = "not_acquired"
+            trace.append(
+                {
+                    "stage": "source_coverage",
+                    "ticker": ticker,
+                    "status": coverage_status,
+                    "filing_count": 0,
+                    "auto_acquire": request.auto_acquire,
+                }
+            )
         observed = {}
         for metric in sorted(needed):
             fetch_years = set(scoped_years)

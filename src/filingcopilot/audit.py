@@ -239,6 +239,30 @@ def audit_package(
                 "包中的指标、比率和币种配置须与指定的本地配置一致。",
             )
         research = package.research
+        review_steps = [
+            step for step in research.trace
+            if step.get("stage") in ("semantic_review", "semantic_review_error")
+        ]
+        if "review_independence" not in payload.get("research", {}):
+            checks.append(
+                {
+                    "code": "review_independence_legacy",
+                    "status": "not_checked",
+                    "detail": "旧研究包没有保存审查独立性字段；不能据此把叙述审查视为独立。",
+                }
+            )
+        else:
+            review_status_valid = (
+                research.review_independence == "not_run" and not review_steps
+            ) or (
+                research.review_independence in {"independent", "not_independent", "unknown"}
+                and bool(review_steps)
+            )
+            check(
+                "review_independence_disclosed",
+                review_status_valid,
+                "研究包须明确说明叙述审查是否独立；该字段不代表独立审查本身正确。",
+            )
         check(
             "answer_status",
             (research.status == "answered" and bool(research.answer) and not research.gaps)
@@ -856,6 +880,15 @@ def audit_package(
         "raw_sources": {"requested": source_cache is not None, **raw},
         "market_sources": market_sources,
         "valuation_sources": valuation_sources,
+        "trust": {
+            "package_integrity": "self_consistent_sha256",
+            "review_independence": (
+                package.research.review_independence
+                if "package" in locals() else "unknown"
+            ),
+            "author_authenticity": "not_verified",
+            "semantic_correctness": "not_certified",
+        },
         "checks": checks,
         "limitations": [
             "consistent 表示已执行的结构、数字和一致性检查通过，不等于所有叙述真实。",

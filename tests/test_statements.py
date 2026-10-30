@@ -90,6 +90,20 @@ def test_statement_and_eight_quarter_surface_preserve_missing_rows(tmp_path):
     assert "zero" in statement["missing"][0] if statement["missing"] else True
 
 
+def test_statement_query_returns_a_small_ranked_table_without_losing_ledger_rows(tmp_path):
+    service = FilingCopilot(Settings(home=tmp_path, embedding_mode="off"))
+    current = filing("query", "2026-06-27")
+    source = facts_for("query", "2026-06-27", 120)
+    service.corpus.ingest(current, extract_facts(source, current), [], extract_statement_facts(source, current))
+    tools = service.tools(date(2026, 10, 8))
+    result = tools.get_statement(
+        "AAPL", "income", period_end="2026-06-27", query="research development", limit=1
+    )
+    assert result["row_count"] >= result["returned_row_count"] == 1
+    assert "ResearchAndDevelopmentExpense" in result["rows"][0]["metric"]
+    assert result["rows"][0]["id"] in tools.ledger
+
+
 def test_industry_profiles_are_separate_from_universal_metrics():
     from filingcopilot.domain import DEFAULT_DOMAIN
 

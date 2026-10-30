@@ -32,6 +32,7 @@ from .fundamentals import (
     STOCK_INSTRUCTIONS,
     basic_stock_submission,
     is_stock_question,
+    narrative_source_context,
     stock_gaps,
     stock_source_context,
     stock_trailing_context,
@@ -41,7 +42,8 @@ from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, ResearchAnswer, ResearchRequest, Submission
 from .quarterly import is_quarterly_question, stock_request_scope
-from .semantic_boundaries import document_scope_conflict
+from .retrieval_query import question_shape
+from .semantic_boundaries import document_scope_conflict, nonblocking_gap, withheld_only
 from .settings import Settings
 from .status import classify_status_reason
 from .tools import ResearchTools, tool_schemas
@@ -78,6 +80,17 @@ For a risk question, address each requested risk category, including customer co
 when concentration is requested. Keep consolidated and segment results distinct. If discussing
 profit margins, identify which margin changed and its own disclosed drivers; do not substitute
 segment commentary for a consolidated explanation. Search the relevant MD&A heading when needed.
+For a general risk question, deliver at most one concise claim per requested category and no
+more than five claims total. Once the supplied narrative_source_overview has a supported
+evidence slot, submit the supported claims and put unresolved categories in gaps; do not keep
+repeating broad searches to make the answer exhaustive. Do not call company-updates tools for
+an annual filing risk question unless the user explicitly asks for recent events.
+Each narrative claim must contain one independently supportable proposition. Split unrelated
+categories, causes or periods into separate claims; do not join them with “and” when the cited
+evidence differs. Keep each claim short enough to preserve every qualification.
+If the question says only “利润率” or “profit margin” without naming gross, operating or net
+margin, use operating margin as the primary scope and do not introduce all three margin types
+unless the question asks for them or the evidence clearly requires the distinction.
 For a proposed negative, answer with explicit support, a matching counterexample, or insufficient
 evidence. A possible future material risk or unquantified adverse effect cannot establish realized
 material harm. Revenue changes do not by themselves prove demand changes, and strong demand in
@@ -117,6 +130,26 @@ investment explanation in multiple narrative claims.
 Use the read-only tools dynamically: first discover available filings, fetch exact financial facts
 for numeric questions, search filing passages for explanations and risks, and calculate with the
 calculate tool. The user's as-of date is a hard information-availability limit, enforced by tools.
+If narrative_source_overview is supplied, treat its passages as the initial candidate set for the
+requested annual filing. Check them against the question, then search again with a narrower term
+when a requested cause, risk category or counterexample is still missing; do not treat the
+prefetch as exhaustive evidence.
+Use its evidence_slots and answerability fields as a feasibility check: a supported_candidate
+means the filing contains candidate evidence to investigate, while insufficient_candidate means
+the answer should state the evidence gap instead of repeatedly searching for an absent fact.
+Search results also carry a deterministic evidence_slot_plan. Treat each required slot as a
+separate checklist item: a passage can support a slot only when its subject, period and
+direction match the question. Search the first unresolved slot with a focused query, then
+submit the supported slots and name only the unresolved ones in gaps. Do not mark a question
+complete merely because one passage matches several generic words.
+For unregistered structured statement rows, call get_statement with a focused query and a small
+limit for the metric or dimension you need. For a narrative question about a requested annual
+filing, pass the filing.id from narrative_source_overview so the row is from the same period.
+Customer-concentration queries should look for major/direct customer, segment revenue and
+receivables terms. A structured row may support a qualitative narrative claim, but it does not
+turn an absent row into zero or justify an unobserved percentage. Do not request an unfiltered
+statement dump when a narrow row query can answer the question; the complete rows remain
+available to the verifier.
 Fiscal years differ from calendar years. get_financial_fact is ANNUAL ONLY. Latest 10-Q facts
 come from get_quarterly_overview/get_quarterly_fact with exact dates and quarter/YTD scope.
 Never substitute YTD for a single quarter, or an annual fact for a quarterly request.
@@ -135,8 +168,8 @@ number has no supported structured metric, state the gap; qualitative explanatio
 the original passage without adding amounts or percentages. Respect the remaining-round budget.
 Submit through submit_answer: fact/calculation statements MUST be empty and have exactly one
 matching evidence ID; code writes these sentences. Submit each claim with only kind, statement
-and evidence_ids; never copy reviewer index/key fields. Narrative statements require passage
-support for every assertion, especially causation. For split source paragraphs, read continuations and
+and evidence_ids; never copy reviewer index/key fields. Narrative statements require passage or
+matching structured-row support for every assertion, especially causation. For split source paragraphs, read continuations and
 cite every context_id provided by search_passages. Preserve expiry, replacements, exceptions and
 renewal uncertainty; historical authorization is not current authorization. Keep financial amounts and ratios in numeric claims.
 Narrative must be qualitative: no currency amounts or percentages, even if the passage contains
@@ -173,18 +206,22 @@ class AgentState(TypedDict):
     round_limit: int
     requested_scope: dict
     focus_ticker: str | None
+    narrative_context: dict | None
     rounds: int
     tool_count: int
     seen: set
+    tool_cache: dict
     repairs: int
     submit_nudges: int
     review_independence_warning: bool
+    review_independence: str
     submission: Submission | None
     verified: list
     review_cache: dict
     review_conflicts: set
     verified_candidate: Submission | None
     retained_gaps: list
+    gap_evidence: dict | None
     numeric_coverage_errors: list[str]
     errors: list
     trace: list
@@ -192,11 +229,30 @@ class AgentState(TypedDict):
     action: str
 
 
-def _research_system_prompt(request: ResearchRequest, *, has_refresh: bool) -> str:
+def _research_system_prompt(
+    request: ResearchRequest, *, has_refresh: bool, full_scan: bool = False
+) -> str:
     """Keep request-specific author instructions together, outside execution policy."""
     stock_question = is_stock_question(request.question)
     return (
         localized_prompt(STOCK_INSTRUCTIONS if stock_question else SYSTEM, request.language)
+        + (
+            # The standing instruction says not to claim a document-wide absence
+            # "from a few excerpts". When the whole filing really was scanned the
+            # model still applied the excerpt rule and hedged, which the judgment
+            # layer then (correctly) treated as an open question. Say which
+            # situation applies instead of leaving the model to guess.
+            "\nA completed full-filing scan is supplied in narrative_source_overview "
+            "(see scan_scope.passages_scanned): every passage of the requested filing "
+            "was examined, not a few excerpts. For a question that asks whether the "
+            "filing states, denies or discloses something, that scan is enough to "
+            "answer negatively — write that the filing contains no such statement, "
+            "cite the passages you rely on, and do not record the question itself as "
+            "unresolved. Keep a gap only for something the filing cannot settle, such "
+            "as whether an event actually occurred outside the document."
+            if full_scan
+            else ""
+        )
         + (
             "\nUse source_refresh to distinguish an attempted refresh from a successful "
             "check. If a refresh is incomplete, describe figures as the latest AVAILABLE "
@@ -345,7 +401,22 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 for t in state["trace"]
             )
             remaining = round_limit - state["rounds"] + 1
-            finalizing = remaining <= 2 or state["tool_count"] >= self.settings.max_tool_calls - 1
+            narrative = state.get("narrative_context") or {}
+            # A full-filing prefetch with at least one supported evidence slot
+            # is enough to draft a bounded answer.  Do not let an open-ended
+            # model search consume every round; after four author rounds the
+            # model must submit what the evidence supports and disclose any
+            # unresolved slot.  The threshold is based on evidence readiness,
+            # never on a question ID, issuer, or benchmark example.
+            narrative_ready = (
+                narrative.get("answerability") == "supported_candidate"
+                and bool(narrative.get("evidence_slots"))
+            )
+            finalizing = (
+                remaining <= 2
+                or state["tool_count"] >= self.settings.max_tool_calls - 1
+                or (narrative_ready and state["rounds"] >= min(4, round_limit))
+            )
             # Retrieval is the first expendable part of a run. As budgets
             # tighten, keep the remaining model calls for synthesis and
             # verification instead of generic searches.
@@ -364,6 +435,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     stock=is_stock_question(state["question"]) or bool(state.get("module")),
                     updates=is_updates_question(state["question"])
                     or state.get("module") == "recent_events",
+                    narrative=narrative.get("category") if narrative_ready else None,
+                    claim_category=question_shape(state["question"]),
                 )
                 if (
                     s["function"]["name"] == "submit_answer"
@@ -450,6 +523,12 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     "action": "end",
                     "errors": ["Model did not submit a tool-based answer"],
                 }
+            if result.get("finish_reason") == "length":
+                # The turn ran into the output cap. Its tool calls are still
+                # valid, so run them, but the next turn must submit compactly
+                # instead of exploring again — otherwise the run ends with no
+                # delivered claim at all.
+                state["truncated_turn"] = True
             return {**state, "action": "tools"}
         except ResearchStopped as exc:
             state["trace"].append(
@@ -523,6 +602,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
         updates_context = None
         trailing_context = None
         source_context = None
+        narrative_context = None
         annual_comparison = None
         comparison_trace = []
         focus = request.ticker
@@ -538,6 +618,26 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             initial_trace.extend(comparison_trace)
             for record in comparison_trace:
                 initial_seen.add(json.dumps([record["tool"], record["arguments"]], sort_keys=True))
+        # Narrative questions used to enter the model loop with only typed
+        # numbers.  Prefetch a few passages from the exact annual filing so
+        # causal, risk and negation questions start from the relevant MD&A or
+        # risk-factor text while keeping the remaining search budget available.
+        narrative_budget = max(0, min(3, self.settings.max_tool_calls - len(initial_trace) - 2))
+        control = current_control()
+        if control and control.remaining is not None and control.remaining <= 2:
+            narrative_budget = 0
+        if focus and not stock_question and not module and narrative_budget:
+            narrative_context, narrative_trace = narrative_source_context(
+                tools, focus, request.question, max_searches=narrative_budget
+            )
+            initial_trace.extend(narrative_trace)
+            if narrative_context:
+                initial_trace.append({"stage": "narrative_source_preparation", "result": narrative_context})
+            for record in narrative_trace:
+                if record.get("result", {}).get("hits"):
+                    initial_seen.add(
+                        json.dumps(["search_passages", record["arguments"]], sort_keys=True)
+                    )
         if focus and (
             is_quarterly_question(request.question)
             or stock_question
@@ -725,7 +825,14 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "messages": [
                     {
                         "role": "system",
-                        "content": _research_system_prompt(request, has_refresh=bool(tools.refresh_status)),
+                        "content": _research_system_prompt(
+                            request,
+                            has_refresh=bool(tools.refresh_status),
+                            full_scan=bool(
+                                narrative_context
+                                and narrative_context.get("full_filing_scan")
+                            ),
+                        ),
                     },
                     {
                         "role": "user",
@@ -744,6 +851,11 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                                 **({"annual_overview": overview} if overview is not None else {}),
                                 **({"annual_comparison": annual_comparison} if annual_comparison else {}),
                                 **({"source_overview": source_context} if source_context else {}),
+                                **(
+                                    {"narrative_source_overview": narrative_context}
+                                    if narrative_context
+                                    else {}
+                                ),
                                 **(
                                     {"trailing_overview": trailing_context}
                                     if trailing_context
@@ -785,18 +897,24 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "round_limit": round_limit,
                 "requested_scope": requested_scope if stock_question else {},
                 "focus_ticker": focus,
+                "narrative_context": narrative_context,
                 "rounds": 0,
                 "tool_count": len(initial_trace),
                 "seen": initial_seen,
+                "tool_cache": {},
+                "context_passage_ids": set(),
                 "repairs": 0,
                 "submit_nudges": 0,
+                "empty_submission_attempts": 0,
                 "review_independence_warning": False,
+                "review_independence": "not_run",
                 "submission": None,
                 "verified": [],
                 "review_cache": {},
                 "review_conflicts": set(),
                 "verified_candidate": None,
                 "retained_gaps": [],
+                "gap_evidence": None,
                 "numeric_coverage_errors": [],
                 "errors": [],
                 "trace": initial_trace,
@@ -862,6 +980,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 if basic_brief:
                     # Deliver this entire reviewed draft, never splice rejected model drafts.
                     state["verified"] = reviewed["verified"]
+                    if reviewed.get("review_independence"):
+                        state["review_independence"] = reviewed["review_independence"]
                     if reviewed.get("review_independence_warning"):
                         state["review_independence_warning"] = True
         gaps = list(
@@ -992,10 +1112,22 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                         "本轮经营与估值判断未完成，公告摘要不能替代股票研究；可用“股票怎么样？结合经营表现和价格分析”继续。"
                     )
         gaps, fallback_complete = self._complete_filing_answer(state, gaps)
+        # Providers occasionally return a literal placeholder in the optional
+        # gap list. It carries no information and must not downgrade an
+        # otherwise verified answer or appear as if evidence were missing.
+        gaps = [
+            gap
+            for gap in gaps
+            if str(gap).strip().casefold() not in {"placeholder", "n/a", "na", "none", "无"}
+        ]
+        quality_notes = []
         if state.get("review_independence_warning"):
-            gaps.append(
+            quality_notes.append(
                 "本轮审查未能确认与作者模型独立；该复核不构成独立核验，叙述性结论请谨慎对待。"
             )
+            # Preserve the established user-facing gap text while keeping it
+            # separate from answer completeness for evaluation and routing.
+            gaps.append(quality_notes[-1])
         if state["errors"] and not stopped() and not fallback_complete:
             if basic_brief:
                 gaps.append(
@@ -1013,7 +1145,29 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 else:
                     gaps = gaps + ["模型未在研究预算内提交完整回答；已保留通过核验的内容，可缩小问题范围后重试。"]
             else:
-                gaps = gaps + ["部分内容未通过证据核验，已停止或移除相关结论。"]
+                if withheld_only(state["errors"]):
+                    # Coverage passed and everything delivered was verified. A
+                    # rejected sentence is a disclosed quality event with a count,
+                    # not a reason to report the whole answer as incomplete.
+                    withheld = [e for e in state["errors"] if str(e).startswith("claim ")]
+                    # Emit the sentence already in the answer's language. A Chinese
+                    # sentence here is run through the UI glossary, which replaces
+                    # short fragments and produced "未 Passed Source checks, 已 Remove".
+                    english = not re.search(r"[\u4e00-\u9fff]", request.question)
+                    note = (
+                        f"{len(withheld)} claim(s) failed evidence checks and were removed; "
+                        "every delivered claim is verified."
+                        if english
+                        else f"有 {len(withheld)} 条断言未通过证据核验，已移除；"
+                        "其余已交付内容均已核验。"
+                    )
+                    quality_notes.append(note)
+                    gaps.append(note)
+                    state["trace"].append(
+                        {"stage": "withheld_claims_recorded", "count": len(withheld)}
+                    )
+                else:
+                    gaps = gaps + ["部分内容未通过证据核验，已停止或移除相关结论。"]
         if cancelled():
             gaps.append(CANCELLED_NOTE)
         elif expired():
@@ -1027,7 +1181,18 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             gaps.append(translate_text(
                 "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。"
             ))
-        status = "partial" if gaps else "answered"
+        full_scan = bool(
+            narrative_context
+            and narrative_context.get("full_filing_scan")
+            and narrative_context.get("full_filing_passage_count", 0) > 0
+        )
+        for gap in gaps:
+            if gap not in quality_notes and nonblocking_gap(
+                request.question, gap, full_scan=full_scan
+            ):
+                quality_notes.append(gap)
+        blocking_gaps = [gap for gap in gaps if gap not in quality_notes]
+        status = "partial" if blocking_gaps else "answered"
         if not state["verified"]:
             status = "abstained"
             if not stopped():
@@ -1076,6 +1241,22 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 if key.endswith("_id") and value in tools.ledger
             )
         evidence = [tools.ledger[i] for i in sorted(evidence_ids)]
+        review_independence = state.get("review_independence", "not_run")
+        review_steps = [
+            item for item in state["trace"]
+            if item.get("stage") in ("semantic_review", "semantic_review_error", "semantic_review_cached")
+        ]
+        # Some legacy graph branches return a state copy after the nested
+        # reviewer callback. Derive a conservative status from the trace so a
+        # failed review can never be serialized as "not_run".
+        if review_independence == "not_run" and review_steps:
+            review_independence = (
+                "unknown"
+                if any(item.get("stage") == "semantic_review_error" for item in review_steps)
+                else "independent"
+            )
+        if any(item.get("review_independence") == "not_independent" for item in review_steps):
+            review_independence = "not_independent"
         result = ResearchAnswer(
             language=request.language,
             id="run-" + uuid.uuid4().hex,
@@ -1090,6 +1271,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             usage=state["usage"],
             elapsed_ms=round((time.perf_counter() - started) * 1000),
             model=self.settings.model,
+            review_independence=review_independence,
+            quality_notes=quality_notes,
             research_type="stock" if stock_question else "filing",
         )
         result.status_reason = classify_status_reason(result)

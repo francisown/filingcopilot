@@ -189,3 +189,178 @@ def test_known_raw_filing_conflict_cannot_be_delivered_as_verified(tools):
     assert not accepted
     assert any("Cached filing bytes differ" in error for error in errors)
     assert path.read_bytes().startswith(b"Different filing bytes"), "Do not repair integrity by rewriting evidence"
+
+
+def test_a_single_reviewer_failure_does_not_withhold_every_claim(tools):
+    """One network hop must not decide that the whole answer is unverifiable."""
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    calls = {"n": 0}
+
+    def flaky_review(question, claims):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("transient reviewer outage")
+        return {
+            "verdicts": [
+                {"index": c["index"], "supported": True, "reason": "Approved on retry"}
+                for c in claims
+            ]
+        }
+
+    accepted, errors = verify_submission(
+        Submission(
+            claims=[
+                Claim(
+                    kind="narrative",
+                    statement="Manufacturing partners can face supply disruptions.",
+                    evidence_ids=["p1"],
+                )
+            ]
+        ),
+        tools,
+        "What are Apple's manufacturing risks?",
+        semantic_review=flaky_review,
+        focus_ticker="AAPL",
+    )
+    assert calls["n"] == 2
+    assert accepted, errors
+    assert not any("verifier failed" in error for error in errors)
+
+
+def test_truncated_turn_asks_for_a_compact_submission():
+    """A turn cut at the output cap must submit next time, not explore again."""
+    from pathlib import Path
+
+    from filingcopilot.agent_execution import ExecutionMixin
+    from filingcopilot.settings import Settings
+
+    class _Agent(ExecutionMixin):
+        def __init__(self):
+            self.settings = Settings(home=Path("unused-test-only"))
+
+    state = {
+        "messages": [{"role": "assistant", "tool_calls": [], "content": "a very long draft"}],
+        "trace": [],
+        "rounds": 1,
+        "truncated_turn": True,
+        "question": "Which risks matter?",
+    }
+    out = _Agent().execute(state)
+    assert out["action"] == "reason"
+    assert "truncated at the output limit" in out["messages"][-1]["content"]
+    assert out.get("truncated_turn") is False
+
+
+def test_empty_submission_is_nudged_before_abstention():
+    """A provider's empty submit call must get a bounded repair turn."""
+    from pathlib import Path
+
+    from filingcopilot.agent_execution import ExecutionMixin
+    from filingcopilot.settings import Settings
+
+    class _Agent(ExecutionMixin):
+        def __init__(self):
+            self.settings = Settings(home=Path("unused-test-only"))
+
+    state = {
+        "messages": [{
+            "role": "assistant",
+            "tool_calls": [{
+                "id": "empty-1",
+                "function": {"name": "submit_answer", "arguments": '{"claims": [], "gaps": []}'},
+            }],
+        }],
+        "trace": [],
+        "question": "Which risks matter?",
+        "rounds": 1,
+        "tool_count": 0,
+        "usage": {},
+        "seen": set(),
+        "tool_cache": {},
+    }
+    out = _Agent().execute(state)
+
+    assert out["action"] == "reason"
+    assert out["submission"] is None
+    assert out["empty_submission_attempts"] == 1
+    assert "Empty submission" in out["trace"][-1]["result"]["error"]
+
+
+@pytest.mark.parametrize(
+    "gap",
+    ["占位", "placeholder", "TBD", "暂无", "待定", "…", "`N/A`"],
+)
+def test_placeholder_only_submission_is_nudged_before_abstention(gap):
+    """A literal placeholder must not be treated as an intentional refusal."""
+    from pathlib import Path
+
+    from filingcopilot.agent_execution import ExecutionMixin
+    from filingcopilot.settings import Settings
+
+    class _Agent(ExecutionMixin):
+        def __init__(self):
+            self.settings = Settings(home=Path("unused-test-only"))
+
+    state = {
+        "messages": [{
+            "role": "assistant",
+            "tool_calls": [{
+                "id": "placeholder-1",
+                "function": {
+                    "name": "submit_answer",
+                    "arguments": json.dumps({"claims": [], "gaps": [gap]}),
+                },
+            }],
+        }],
+        "trace": [],
+        "question": "Which risks matter?",
+        "rounds": 1,
+        "tool_count": 0,
+        "usage": {},
+        "seen": set(),
+        "tool_cache": {},
+    }
+    out = _Agent().execute(state)
+
+    assert out["action"] == "reason"
+    assert out["submission"] is None
+    assert out["empty_submission_attempts"] == 1
+    assert "Empty submission" in out["trace"][-1]["result"]["error"]
+
+
+@pytest.mark.parametrize("gap", ["没有披露该指标", "无法确认是否发生", "无重大影响的直接披露"])
+def test_meaningful_evidence_boundary_is_not_filtered_as_placeholder(gap):
+    """A real limitation must remain a limitation, not trigger empty retry."""
+    from pathlib import Path
+
+    from filingcopilot.agent_execution import ExecutionMixin
+    from filingcopilot.settings import Settings
+
+    class _Agent(ExecutionMixin):
+        def __init__(self):
+            self.settings = Settings(home=Path("unused-test-only"))
+
+    state = {
+        "messages": [{
+            "role": "assistant",
+            "tool_calls": [{
+                "id": "boundary-1",
+                "function": {
+                    "name": "submit_answer",
+                    "arguments": json.dumps({"claims": [], "gaps": [gap]}),
+                },
+            }],
+        }],
+        "trace": [],
+        "question": "Which risks matter?",
+        "rounds": 1,
+        "tool_count": 0,
+        "usage": {},
+        "seen": set(),
+        "tool_cache": {},
+    }
+    out = _Agent().execute(state)
+
+    assert out["action"] == "verify"
+    assert out["submission"].gaps == [gap]
+    assert out.get("empty_submission_attempts", 0) == 0

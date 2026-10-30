@@ -78,6 +78,30 @@ def test_ticker_requires_word_boundary():
     assert DEFAULT_DOMAIN.company_scope("AAPL FY2025") == {"AAPL"}
 
 
+def test_narrative_tool_contract_excludes_unrelated_numeric_overviews():
+    names = {
+        schema["function"]["name"]
+        for schema in tool_schemas(DEFAULT_DOMAIN, narrative="risk")
+    }
+    assert "search_passages" in names
+    assert "get_statement" in names
+    assert "submit_answer" in names
+    assert "get_company_overview" not in names
+    assert "get_stock_market" not in names
+
+
+def test_narrative_claim_contract_is_bounded_before_review():
+    submit = next(
+        schema
+        for schema in tool_schemas(DEFAULT_DOMAIN, claim_category="risk")
+        if schema["function"]["name"] == "submit_answer"
+    )
+    claims = submit["function"]["parameters"]["properties"]["claims"]
+    assert claims["maxItems"] == 5
+    assert claims["items"]["properties"]["statement"]["maxLength"] == 700
+    assert "one independently supportable proposition" in submit["function"]["description"]
+
+
 def test_query_rewrite_normalizes_punctuation_and_domain_aliases(tmp_path):
     path = tmp_path / "domain.json"
     path.write_text(

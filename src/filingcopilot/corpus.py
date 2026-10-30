@@ -4,12 +4,13 @@ import hashlib
 import json
 import re
 import sqlite3
+import threading
 from contextlib import contextmanager
 from datetime import date, timedelta
 from importlib.resources import files
 from pathlib import Path
 
-from .models import ExternalUpdate, Fact, Filing, Passage, StatementFact
+from .models import PARSER_VERSION, ExternalUpdate, Fact, Filing, Passage, StatementFact
 
 
 def stable_id(prefix: str, *parts: object) -> str:
@@ -23,6 +24,10 @@ class Corpus:
     def __init__(self, home: Path, *, readonly: bool = False):
         self.home = home
         self.readonly = readonly
+        # Writes are serialised inside the process. Readers stay lock-free, so a
+        # parallel evaluator can read from many threads while the occasional
+        # refresh or repair takes this lock instead of racing another writer.
+        self._write_lock = threading.RLock()
         self.path = home / "corpus.sqlite3"
         if readonly:
             if not self.path.is_file():
@@ -117,6 +122,16 @@ class Corpus:
         finally:
             db.close()
 
+    @contextmanager
+    def _write_connect(self):
+        """Serialise writers in-process, then take the usual connection.
+
+        Readers never take this lock, so a parallel evaluator keeps reading while
+        a refresh or a repaired filing writes.
+        """
+        with self._write_lock, self.connect() as db:
+            yield db
+
     def ingest(
         self,
         filing: Filing,
@@ -129,7 +144,7 @@ class Corpus:
             raise ValueError("Evidence must belong to its declared filing and company")
         if any(x.filing_id != filing.id or x.ticker != filing.ticker for x in statement_facts):
             raise ValueError("Statement evidence must belong to its declared filing")
-        with self.connect() as db:
+        with self._write_connect() as db:
             # A refresh replaces this accession atomically, including its lexical index.
             prior = db.execute("SELECT id FROM passages WHERE filing_id=?", (filing.id,))
             for row in prior.fetchall():
@@ -144,7 +159,11 @@ class Corpus:
                     filing.id,
                     filing.ticker,
                     filing.filed.isoformat(),
-                    filing.model_dump_json(),
+                    # Record which extractor produced this parse so a stale one
+                    # is detectable and re-extracts on next use.
+                    filing.model_copy(
+                        update={"parser_version": PARSER_VERSION}
+                    ).model_dump_json(),
                     filing.period_end.isoformat(),
                     filing.period_end.year,
                     filing.form,
@@ -208,9 +227,9 @@ class Corpus:
         """Add newly supported source facts without replacing existing accession evidence."""
         if any(f.filing_id != filing.id or f.ticker != filing.ticker for f in facts):
             raise ValueError("Facts must belong to the declared filing")
-        with self.connect() as db:
+        with self._write_connect() as db:
             row = db.execute("SELECT payload FROM filings WHERE id=?", (filing.id,)).fetchone()
-            if not row or Filing.model_validate_json(row["payload"]) != filing:
+            if not row or not Filing.model_validate_json(row["payload"]).source_equals(filing):
                 raise ValueError("Only an unchanged local filing can be enriched")
             added = 0
             for fact in facts:
@@ -237,9 +256,9 @@ class Corpus:
         """Enrich an unchanged filing with wider statement or dimensional rows."""
         if any(row.filing_id != filing.id or row.ticker != filing.ticker for row in rows):
             raise ValueError("Statement evidence must belong to the declared filing")
-        with self.connect() as db:
+        with self._write_connect() as db:
             prior = db.execute("SELECT payload FROM filings WHERE id=?", (filing.id,)).fetchone()
-            if not prior or Filing.model_validate_json(prior["payload"]) != filing:
+            if not prior or not Filing.model_validate_json(prior["payload"]).source_equals(filing):
                 raise ValueError("Only an unchanged local filing can be enriched")
             added = 0
             for row in rows:
@@ -268,7 +287,7 @@ class Corpus:
     def ingest_external_update(self, update: ExternalUpdate) -> dict:
         """Store a transcript/news item outside official SEC filing tables."""
         validated = ExternalUpdate.model_validate(update)
-        with self.connect() as db:
+        with self._write_connect() as db:
             prior = db.execute(
                 "SELECT payload FROM external_updates WHERE id=?", (validated.id,)
             ).fetchone()

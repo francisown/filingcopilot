@@ -74,7 +74,21 @@ class FilingCopilot(PlanningMixin, ResearchMixin, ExecutionMixin, ReferencesMixi
             self.market,
             self.enrich_cached_facts,
             self.discovery.prepare_valuation,
+            self._prepare_filing_scope,
         )
+
+    def _prepare_filing_scope(
+        self,
+        ticker: str,
+        as_of,
+        *,
+        fiscal_years: list[int] | None = None,
+        quarterly: bool = False,
+    ) -> dict:
+        """Acquire the smallest filing scope needed by a passage search."""
+        if quarterly:
+            return self.discovery.prepare_quarterly(ticker, as_of)
+        return self.discovery.prepare_annual_facts(ticker, as_of, fiscal_years)
 
     def _filing_scope(self, ticker: str | None) -> bool | None:
         if not ticker:

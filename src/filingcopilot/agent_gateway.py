@@ -195,6 +195,15 @@ class OpenAIGateway:
             if review
             else self.settings.model_max_tokens,
         }
+        # Send optional sampling controls only when explicitly configured.
+        # This keeps reasoning-model compatibility while allowing reproducible
+        # A/B runs on providers that support these fields.
+        if self.settings.model_temperature is not None:
+            kwargs["temperature"] = self.settings.model_temperature
+        if self.settings.model_top_p is not None:
+            kwargs["top_p"] = self.settings.model_top_p
+        if self.settings.model_seed is not None:
+            kwargs["seed"] = self.settings.model_seed
         if tools:
             kwargs.update(tools=tools)
         required = bool(tools) and model not in self._required_unsupported

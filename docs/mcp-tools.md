@@ -34,10 +34,23 @@ growth and margin calculations. Use `find_company` to choose the company identit
 then `prepare_company` to download and index its supported filings.
 `ask_financial_question` also accepts `company` and `auto_acquire`.
 
+Calculation and disclosure tools return only the evidence IDs bound to that
+result in `observed_evidence`. `observed_evidence_count` and
+`omitted_observed_evidence_ids` make the compact projection explicit; this
+prevents a multi-step client from receiving the entire accumulated ledger on
+every call. Use `search_passages` or an exported package when the omitted
+items are needed.
+
 Initial acquisition and Agent research can take longer than a minute; allow enough
 time in your MCP client. Export and audit calls use a saved research ID and do not
 call a model. For `calculate`, pass observed local fact IDs. Use the dedicated tools
 for nested trailing flows and margins; the server rechecks sources and dates.
+
+The default MCP transport is stdio. Streamable HTTP binds to loopback only unless
+`--allow-non-loopback` is supplied. When `FC_AUTH_TOKEN` is configured, MCP HTTP
+requires it as a Bearer token; this is one shared local credential, not user or
+tenant isolation. Put TLS, identity and rate limits in a reverse proxy for remote
+use.
 
 When adding or removing a tool, update the server registry, the expected set in
 `scripts/smoke_mcp.py` and the list above together. Run the smoke checks for both transports.

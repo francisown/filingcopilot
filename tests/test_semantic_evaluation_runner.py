@@ -114,3 +114,55 @@ def test_runner_error_is_not_mislabeled_budget_timeout():
     assert runner._row(_item(), result, 10)["budget_timeout"] is False
     result.usage = {"budget_status": "expired"}
     assert runner._row(_item(), result, 10)["budget_timeout"] is True
+
+
+def test_provider_failure_is_not_counted_as_a_wrong_refusal():
+    """An infrastructure outage must not be scored as the system refusing."""
+    result = SimpleNamespace(
+        id="r2", status="abstained", evidence=[], answer=[], trace=[],
+        gaps=["Model request failed and research was aborted; verified content is retained."],
+        usage={},
+    )
+    row = runner._row(_item(), result, 10)
+    assert row["wrong_refusal"] is False
+    assert row["budget_timeout"] is False
+
+
+def test_runner_passes_gold_output_language_to_research(monkeypatch, tmp_path):
+    seen = []
+
+    class FakeService:
+        def __init__(self, _settings):
+            pass
+
+        def research(self, request):
+            seen.append(request.language)
+            return SimpleNamespace(
+                id="r-language",
+                status="answered",
+                evidence=[],
+                answer=[],
+                trace=[],
+                gaps=[],
+                usage={},
+            )
+
+    monkeypatch.setattr(runner, "FilingCopilot", FakeService)
+    settings = Settings(
+        home=tmp_path,
+        model="research",
+        review_model="review",
+        api_key="secret-value",
+        api_base="https://private-provider.example",
+    )
+    gold = {
+        "items": [
+            {
+                **_item(),
+                "language": "zh",
+            }
+        ]
+    }
+    rows, _ = runner.run(gold, settings=settings, workers=1)
+    assert rows[0]["status"] == "answered"
+    assert seen == ["zh"]

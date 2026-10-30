@@ -6,6 +6,7 @@ import re
 import threading
 import time
 import uuid
+from collections import Counter
 from datetime import date
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -60,9 +61,16 @@ class SecFetcher:
         self._refresh_failures = {}
         self._failure_lock = threading.Lock()
 
-    def fetch(self, url: str, offline: bool = False, max_age: float | None = None) -> bytes:
+    def fetch(
+        self,
+        url: str,
+        offline: bool = False,
+        max_age: float | None = None,
+        *,
+        force_refresh: bool = False,
+    ) -> bytes:
         try:
-            return self._fetch(url, offline, max_age)
+            return self._fetch(url, offline, max_age, force_refresh=force_refresh)
         except (httpx.RequestError, httpx.HTTPStatusError, RefreshBudgetExceeded) as exc:
             if refresh_remaining() is not None and not isinstance(exc, SecRefreshDeferred):
                 cause = exc.__context__ if isinstance(exc.__context__, httpx.HTTPError) else exc
@@ -77,7 +85,14 @@ class SecFetcher:
                     )
             raise
 
-    def _fetch(self, url: str, offline: bool, max_age: float | None) -> bytes:
+    def _fetch(
+        self,
+        url: str,
+        offline: bool,
+        max_age: float | None,
+        *,
+        force_refresh: bool = False,
+    ) -> bytes:
         checkpoint()
         parsed = urlsplit(url)
         allowed = (
@@ -97,7 +112,7 @@ class SecFetcher:
         if not allowed:
             raise ValueError("Only official SEC data and filing URLs are supported")
         path = self.cache / (hashlib.sha256(url.encode()).hexdigest() + ".cache")
-        if path.exists() and (
+        if not force_refresh and path.exists() and (
             offline or max_age is None or time.time() - path.stat().st_mtime < max_age
         ):
             return path.read_bytes()
@@ -250,6 +265,49 @@ def _foreign_heading(text: str) -> bool:
     )
 
 
+_NAVIGATION_ONLY = re.compile(
+    r"(?i)^(?:table of contents|part\s+[ivx]+|item\s+\d+[a-z]?\.?|signatures?)$"
+)
+_TITLE_LINE = re.compile(r"^[A-Z][^.!?]{20,128}$")
+
+
+def _section_heading(text: str) -> bool:
+    """A short title line that names the blocks below it.
+
+    Amazon's risk factors are titled sentences without a full stop ("We Could Be
+    Harmed by Data Loss or Other Security Breaches", 58 characters). The length
+    floor dropped them, so the paragraphs beneath lost their risk category and a
+    query for that risk could not match a section name.
+    """
+    stripped = text.strip()
+    if not _TITLE_LINE.match(stripped):
+        return False
+    if stripped.isupper() or _NAVIGATION_ONLY.match(stripped):
+        return False
+    return len(stripped.split()) >= 4
+
+
+def _content_sentence(text: str) -> bool:
+    """Keep a short block only when it is a complete sentence.
+
+    The length floor exists to drop cover-page and navigation noise, but filings
+    also state product-level drivers in a single short line — Apple's FY2024
+    10-K says "iPhone net sales were relatively flat during 2024 compared to
+    2023." in 67 characters. Discarding every block under 130 characters removed
+    45 real sentences per annual filing, after which research reported a content
+    gap for something the filing does say.
+    """
+    if len(text) < 40 or len(text) >= 130:
+        return False
+    if not re.search(r"[.!?。！？]\s*$", text):
+        return False
+    if text.isupper() or _NAVIGATION_ONLY.match(text.strip()):
+        return False
+    if re.fullmatch(r"[\d\s.,%$()\-—/]+", text):
+        return False
+    return True
+
+
 def _join_positioned_lines(soup: BeautifulSoup) -> None:
     """Reconstruct adjacent visible lines in paginated foreign annual HTML.
 
@@ -320,7 +378,12 @@ def extract_passages(
     )
 
 
-def _table_passages(soup: BeautifulSoup, filing: Filing, max_chars: int) -> list[Passage]:
+def _table_passages(
+    soup: BeautifulSoup,
+    filing: Filing,
+    max_chars: int,
+    page_numbers: dict[int, int] | None = None,
+) -> list[Passage]:
     """Make table rows retrievable only when their header context is present.
 
     The table row remains a passage, never a typed ``Fact``. Numeric tools can
@@ -360,6 +423,7 @@ def _table_passages(soup: BeautifulSoup, filing: Filing, max_chars: int) -> list
                     text=text,
                     source_url=filing.source_url + ("#" + anchor if anchor else ""),
                     locator=f"table {table_index + 1} row {row_index}; header bound; exact text retained",
+                    page=(page_numbers or {}).get(id(table)),
                     table_context={
                         "table_index": table_index,
                         "row_index": row_index,
@@ -370,6 +434,65 @@ def _table_passages(soup: BeautifulSoup, filing: Filing, max_chars: int) -> list
                 )
             )
     return result
+
+
+def _merge_blocks(blocks: list, max_chars: int) -> list:
+    """Join consecutive same-section blocks before chunking.
+
+    Each leaf ``<p>``/``<div>`` became its own passage, so the median passage was
+    232 characters — a single paragraph with no surrounding context. Ranking
+    fragments at that size loses the surrounding sentences a question is phrased
+    against; the page-level path in this repository uses 3,000-character chunks
+    with a 4,000-character parent and reaches page@5 0.850.
+    """
+    merged: list = []
+    for text, section, anchor, page in blocks:
+        if merged and merged[-1][1] == section and len(merged[-1][0]) + 1 + len(text) <= max_chars:
+            previous = merged[-1]
+            merged[-1] = (previous[0] + " " + text, section, previous[2] or anchor, previous[3])
+        else:
+            merged.append((text, section, anchor, page))
+    return merged
+
+
+_FOOTER_PAGE = re.compile(r"(?:Form\s+10-K|Form\s+20-F|Annual Report)[^|]{0,20}\|\s*(\d{1,3})\s*$", re.I)
+
+
+def _page_numbers(soup: BeautifulSoup) -> dict[int, int]:
+    """Map each element to the printed page it sits on.
+
+    Page breaks give a running count, but the count includes the cover and the
+    table of contents: Apple's FY2024 10-K numbers 59 break-delimited pages while
+    its footers print 1..57, a constant offset of two. Whenever a filing prints
+    its own page numbers, the modal offset between the running count and the
+    printed number is applied, so ``Passage.page`` is the number a reader sees.
+    """
+    pages: dict[int, int] = {}
+    page = 1
+    for element in soup.find_all(True):
+        pages[id(element)] = page
+        style = str(element.get("style") or "").lower()
+        if "page-break-after" in style or element.name == "hr":
+            page += 1
+    offsets: Counter = Counter()
+    for element in soup.find_all(["p", "div"]):
+        if element.find(["p", "div"]):
+            continue
+        text = re.sub(r"\s+", " ", element.get_text(" ", strip=True)).strip()
+        if len(text) > 90:
+            continue
+        match = _FOOTER_PAGE.search(text)
+        if not match:
+            continue
+        running = pages.get(id(element))
+        if running:
+            offsets[running - int(match.group(1))] += 1
+    if not offsets:
+        return pages
+    offset, support = offsets.most_common(1)[0]
+    if support < 3 or support < sum(offsets.values()) * 0.8:
+        return pages
+    return {key: max(1, value - offset) for key, value in pages.items()}
 
 
 def _extract_passages(
@@ -396,6 +519,7 @@ def _extract_passages(
         if filing.form.startswith("10-Q")
         else "Annual report"
     )
+    page_numbers = _page_numbers(soup)
     seen = set()
     for node in soup.find_all(["p", "div"]):
         if (
@@ -412,18 +536,24 @@ def _extract_passages(
             _foreign_heading(text)
             if filing.form in ("20-F", "20-F/A")
             else (
-                len(text) < 180
-                and re.search(r"\bItem\s+\d|Risk Factors|Management.s Discussion", text, re.I)
+                (
+                    len(text) < 180
+                    and re.search(r"\bItem\s+\d|Risk Factors|Management.s Discussion", text, re.I)
+                )
+                or _section_heading(text)
             )
         )
         if heading:
             section = text[:160]
-        if len(text) < 130:
+        if len(text) < 130 and not _content_sentence(text):
             continue
         anchor = node.get("id") or (node.find_parent(id=True) or {}).get("id", "")
-        blocks.append((text, section, anchor))
-    result = _table_passages(soup, filing, max_chars) if include_tables else []
-    for offset, (text, section, anchor) in enumerate(blocks):
+        blocks.append((text, section, anchor, page_numbers.get(id(node))))
+    blocks = _merge_blocks(blocks, max_chars)
+    result = (
+        _table_passages(soup, filing, max_chars, page_numbers) if include_tables else []
+    )
+    for offset, (text, section, anchor, page) in enumerate(blocks):
         sentences = re.split(r"(?<=[.!?])\s+", text)
         chunks, current = [], ""
         for sentence in sentences:
@@ -455,6 +585,7 @@ def _extract_passages(
                     locator=f"narrative block {offset}, chunk {index}/{len(chunks)}; exact text retained"
                     if filing.form in ("20-F", "20-F/A")
                     else f"narrative block {offset}, chunk {index}; exact text retained",
+                    page=page,
                 )
             )
     return list({p.id: p for p in result}.values())
@@ -468,10 +599,19 @@ def acquire_company(
     domain: Domain = DEFAULT_DOMAIN,
     as_of: date | None = None,
     progress=None,
-    forms: tuple[str, str] = ("10-K", "10-K/A"),
+    forms: tuple[str, str] | None = None,
     on_entry=None,
     fiscal_years: tuple[int, ...] | None = None,
+    force_refresh: bool = False,
 ) -> list[dict]:
+    # Resolve the annual form from the company registry. Defaulting to 10-K made
+    # every 20-F issuer (TSMC, Alibaba, PDD) return zero filings, so those
+    # companies could never be refreshed and never picked up parser fixes.
+    ticker = ticker.upper()
+    if ticker not in domain.companies:
+        raise ValueError("Company is not registered; configure FC_DOMAIN_CONFIG first")
+    if forms is None:
+        forms = tuple(domain.annual_forms(ticker))
     allowed_years = (1, 2, 3) if forms != ("10-Q", "10-Q/A") else tuple(range(1, 13))
     if forms not in (("10-K", "10-K/A"), ("10-Q", "10-Q/A"), ("20-F", "20-F/A")) or years not in allowed_years:
         raise ValueError("Unsupported SEC reporting scope")
@@ -481,9 +621,6 @@ def acquire_company(
         or any(type(y) is not int or not 1990 <= y <= 2100 for y in fiscal_years)
     ):
         raise ValueError("Annual targets require one to three fiscal period-end years")
-    ticker = ticker.upper()
-    if ticker not in domain.companies:
-        raise ValueError("Company is not registered; configure FC_DOMAIN_CONFIG first")
     spec = domain.companies[ticker]
     cik, company = spec.cik, spec.name
     submissions = json.loads(
@@ -585,7 +722,11 @@ def acquire_company(
             f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/"
             f"{accession.replace('-', '')}/{document}"
         )
-        html = fetcher.fetch(url, offline)
+        html = fetcher.fetch(
+            url,
+            offline,
+            **({"force_refresh": True} if force_refresh else {}),
+        )
         filing = Filing(
             id=ticker + ":" + accession,
             ticker=ticker,

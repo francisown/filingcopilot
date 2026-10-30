@@ -279,6 +279,37 @@ def test_status_reason_distinguishes_budget_and_evidence_gaps():
     assert classify_status_reason(
         {"status": "partial", "answer": [{"kind": "analysis"}], "gaps": ["资料尚有缺口"], "trace": [], "usage": {}}
     ) == "evidence_gap"
+    assert classify_status_reason(
+        {
+            "status": "answered",
+            "review_independence": "not_independent",
+            "answer": [{"kind": "analysis"}],
+            "gaps": [],
+            "trace": [],
+            "usage": {},
+        }
+    ) == "review_incomplete"
+
+
+def test_status_reason_distinguishes_source_coverage_states():
+    assert classify_status_reason(
+        {
+            "status": "abstained",
+            "answer": [],
+            "gaps": [],
+            "trace": [{"stage": "source_coverage", "status": "not_acquired"}],
+            "usage": {},
+        }
+    ) == "source_not_acquired"
+    assert classify_status_reason(
+        {
+            "status": "abstained",
+            "answer": [],
+            "gaps": [],
+            "trace": [{"stage": "source_coverage", "status": "unavailable"}],
+            "usage": {},
+        }
+    ) == "source_unavailable"
 
 
 def test_numeric_modules_prepare_typed_context_before_model_draft(tmp_path, monkeypatch):

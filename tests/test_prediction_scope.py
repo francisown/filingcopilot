@@ -94,8 +94,15 @@ def test_hypothetical_failure_policy_does_not_fetch_live_quotes(tmp_path, monkey
     payload = ResearchRequest(question=question, ticker="AAPL", language=language).model_dump(mode="json")
     plan = client.post("/api/research/plan", json=payload).json()
     assert not plan["ready"] and not plan["uses_model"]
-    assert ("如果" if language == "zh" else "If") in plan["message"]
-    assert ("未实际" if language == "zh" else "not an observed") in plan["message"]
+    assert ("行情源" if language == "zh" else "market source") in plan["message"]
     response = client.post("/api/research", json=payload)
-    assert response.status_code == 422
-    assert ("保留" if language == "zh" else "retain") in response.json()["detail"]
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "partial"
+    assert body["status_reason"] == "source_unavailable"
+    assert ("重新计算" if language == "zh" else "refreshed") in " ".join(body["gaps"])
+    delivered = " ".join(item.get("text", "") for item in body["answer"])
+    assert ("使用" if language == "zh" else "usable") in delivered
+    assert len(body["answer"]) == 1
+    assert body["answer"][0]["evidence_ids"] == ["policy-market-source-unavailable"]
+    assert body["evidence"][0]["kind"] == "system_policy"

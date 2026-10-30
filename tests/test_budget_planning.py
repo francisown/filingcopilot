@@ -63,6 +63,22 @@ def test_research_plan_estimates_agent_and_configured_cost(tmp_path):
     )
 
 
+def test_research_plan_does_not_price_a_half_configured_provider(tmp_path):
+    service = FilingCopilot(
+        Settings(
+            home=tmp_path,
+            embedding_mode="off",
+            model_input_price_per_million=1.0,
+            model_output_price_per_million=None,
+        )
+    )
+    budget = service.research_plan(
+        ResearchRequest(question="苹果股票怎么样？", ticker="AAPL", mode="agent")
+    )["budget"]
+    assert budget["estimated_cost_usd"] is None
+    assert "成本显示未知" in budget["cost_basis"]
+
+
 def test_research_receipt_records_actual_budget_usage(tmp_path, monkeypatch):
     service = FilingCopilot(Settings(home=tmp_path, embedding_mode="off"))
     captured = {}

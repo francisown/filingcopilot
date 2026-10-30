@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from filingcopilot.agent import ResearchAgent
 from filingcopilot.api import create_app
-from filingcopilot.models import Claim, ResearchRequest, Submission
+from filingcopilot.models import Claim, Filing, ResearchRequest, StatementFact, Submission
 from filingcopilot.service import FilingCopilot
 from filingcopilot.settings import Settings
 from filingcopilot.verification import verify_submission
@@ -84,6 +84,74 @@ def test_numeric_statement_is_rendered_from_bound_fields(tools):
     )
     assert not errors
     assert "AAPL FY2025 营业收入" in accepted[0]["text"]
+
+
+def test_qualitative_narrative_can_bind_a_structured_statement_row(tools):
+    filing = Filing.model_validate(tools.corpus.catalog(date(2026, 10, 8), "AAPL")[0])
+    row = StatementFact(
+        id="customer-row",
+        filing_id=filing.id,
+        ticker="AAPL",
+        statement="other",
+        metric="customer_revenue_concentration",
+        label="Major customer revenue",
+        concept="custom:MajorCustomerRevenue",
+        value="10",
+        unit="percent",
+        fiscal_year=2025,
+        end=filing.period_end,
+        source_url=filing.source_url,
+        locator="customer concentration row",
+        dimensions={"customer": "major"},
+        dimension_labels={"customer": "Major customer"},
+    )
+    tools.corpus.add_statement_facts(filing, [row])
+    evidence = tools.get_statement(
+        "AAPL", filing_id=filing.id, query="customer concentration", limit=5
+    )["evidence"][0]
+    accepted, errors = verify_submission(
+        Submission(
+            claims=[
+                Claim(
+                    kind="narrative",
+                    statement="年报披露了主要客户集中度风险。",
+                    evidence_ids=[evidence["id"]],
+                )
+            ]
+        ),
+        tools,
+        "苹果 FY2025 客户集中度风险",
+        semantic_review=lambda _question, claims: {
+            "verdicts": [
+                {"index": item["index"], "supported": True, "reason": "structured row"}
+                for item in claims
+            ]
+        },
+        focus_ticker="AAPL",
+    )
+    assert not errors
+    assert accepted[0]["evidence_ids"] == [evidence["id"]]
+    accepted, errors = verify_submission(
+        Submission(
+            claims=[
+                Claim(
+                    kind="narrative",
+                    statement="主要客户占收入10%。",
+                    evidence_ids=[evidence["id"]],
+                )
+            ]
+        ),
+        tools,
+        "苹果 FY2025 客户集中度风险",
+        semantic_review=lambda _question, claims: {
+            "verdicts": [
+                {"index": item["index"], "supported": True, "reason": "not reached"}
+                for item in claims
+            ]
+        },
+        focus_ticker="AAPL",
+    )
+    assert not accepted and any("typed fact" in error for error in errors)
 
 
 def test_requested_metric_is_enforced(tools):

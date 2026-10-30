@@ -76,10 +76,23 @@ def ensure_case_sources(home, bundle):
     corpus = Corpus(case_home, readonly=True)
     expected = {'filings': [bundle['filing']], 'facts': bundle['facts'],
                 'passages': bundle['passages']}
+
+    def comparable(row: dict) -> dict:
+        # A newly added optional field must not read as "the frozen source
+        # changed": absence and an explicit null describe the same record. The
+        # parser stamp is runtime metadata, not part of the source identity.
+        return {
+            key: value
+            for key, value in row.items()
+            if value is not None and key != "parser_version"
+        }
+
     with corpus.connect() as db:
         for table, rows in expected.items():
             actual = [json.loads(row['payload']) for row in db.execute(f'SELECT payload FROM {table}')]
-            if sorted(actual, key=lambda row: row['id']) != sorted(rows, key=lambda row: row['id']):
+            if sorted(map(comparable, actual), key=lambda row: row['id']) != sorted(
+                map(comparable, rows), key=lambda row: row['id']
+            ):
                 raise ValueError('Frozen case sources changed: '+bundle['id']+'/'+table)
 
 

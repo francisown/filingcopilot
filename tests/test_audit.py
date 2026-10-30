@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import os
@@ -182,6 +183,8 @@ def test_api_export_audit_and_versions(service):
     assert health.headers["x-content-type-options"] == "nosniff"
     assert health.headers["x-frame-options"] == "DENY"
     assert health.headers["referrer-policy"] == "no-referrer"
+    assert "default-src 'self'" in health.headers["content-security-policy"]
+    assert health.headers["permissions-policy"] == "camera=(), geolocation=(), microphone=()"
     assert client.get(f"/api/runs/{run_id}/package").json() == package
     assert client.get(f"/api/runs/{run_id}/audit").json()["status"] == "consistent"
     assert client.get("/api/runs/missing/package").status_code == 404
@@ -195,6 +198,22 @@ def test_api_export_audit_and_versions(service):
         client.get("/api/facts/versions?ticker=AAPL&metric=invalid&fiscal_year=2024").status_code
         == 422
     )
+
+
+def test_optional_single_user_auth_accepts_bearer_and_basic(tmp_path):
+    service = FilingCopilot(Settings(home=tmp_path, embedding_mode="off", auth_token="test-token"))
+    with TestClient(create_app(service)) as client:
+        denied = client.get("/api/health")
+        assert denied.status_code == 401
+        assert "Bearer" in denied.headers["www-authenticate"]
+        assert client.get("/api/health", headers={"Authorization": "Bearer wrong"}).status_code == 401
+        assert client.get(
+            "/api/health", headers={"Authorization": "Bearer test-token"}
+        ).status_code == 200
+        basic = base64.b64encode(b"filingcopilot:test-token").decode()
+        assert client.get(
+            "/api/health", headers={"Authorization": f"Basic {basic}"}
+        ).status_code == 200
 
 
 def test_cli_offline_audit_needs_no_home_or_model(service, tmp_path):

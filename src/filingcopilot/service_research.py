@@ -10,6 +10,7 @@ from .execution import ResearchControl, ResearchStopped, progress, research_scop
 from .fundamentals import is_stock_question
 from .localization import prepare_answer, request_language
 from .models import Claim, FollowupRequest, ResearchAnswer, ResearchRequest, Submission
+from .retrieval_query import question_shape
 from .status import classify_status_reason
 from .verification import verify_submission
 
@@ -147,11 +148,36 @@ class ResearchMixin:
             ticker,
         )
 
+    def _research_budget(self, request: ResearchRequest) -> float | None:
+        """Scale the whole-research deadline by how much work the question needs.
+
+        A question that asks one typed figure produces one claim; a question that
+        asks for drivers, risks or a denial produces a set of independently
+        checked claims (median 5+ for risk). The 2026-10-28 fault attribution over
+        60 narrative questions found 16 of 18 non-answers were deadline
+        truncation concentrated in narrative shapes, with zero retrieval misses
+        and zero model failures. Doubling the budget for those shapes is a
+        general property of claim count, not a per-question patch.
+        """
+        base = self.settings.research_timeout
+        if base is None:
+            return None
+        return base if question_shape(request.question) == "other" else base * 2
+
     @request_language
     def research(self, request: ResearchRequest, control=None) -> ResearchAnswer:
         started = time.perf_counter()
         control = control or ResearchControl()
-        control.start_budget(self.settings.research_timeout)
+        # API jobs normally construct this with the same values, but direct
+        # callers may supply their own control. Apply the service policy there
+        # too so a custom cancellation handle cannot silently bypass cost caps.
+        if control.max_cost_usd is None:
+            control.max_cost_usd = self.settings.max_cost_usd
+        if control.input_price_per_million is None:
+            control.input_price_per_million = self.settings.model_input_price_per_million
+        if control.output_price_per_million is None:
+            control.output_price_per_million = self.settings.model_output_price_per_million
+        control.start_budget(self._research_budget(request))
         with research_scope(control):
             try:
                 self._publish_cached_preview(request)
@@ -211,6 +237,10 @@ class ResearchMixin:
             for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
                 usage[key] = max(int(usage.get(key) or 0), int(control.usage.get(key) or 0))
             usage["elapsed_ms"] = answer.elapsed_ms
+            usage["cost_estimate_status"] = (
+                "configured" if self.settings.pricing_configured else "not_configured"
+            )
+            usage["cost_budget_usd"] = self.settings.max_cost_usd
             usage["model_latency_ms"] = sum(
                 int(item.get("duration_ms") or 0)
                 for item in answer.trace
@@ -220,13 +250,17 @@ class ResearchMixin:
                 int(item.get("duration_ms") or 0) for item in answer.trace if item.get("tool")
             )
             usage["time_budget_seconds"] = control.time_budget
-            usage["remaining_seconds"] = round(control.remaining or 0.0, 3)
+            usage["remaining_seconds"] = (
+                None if control.remaining is None else round(control.remaining, 3)
+            )
             usage["budget_status"] = (
                 "cancelled" if control.cancelled else "expired" if control.expired else "completed"
             )
+            if control.cost_exceeded:
+                usage["budget_status"] = "cost_exceeded"
             input_price = self.settings.model_input_price_per_million
             output_price = self.settings.model_output_price_per_million
-            if input_price is not None or output_price is not None:
+            if self.settings.pricing_configured:
                 usage["actual_cost_usd"] = round(
                     (usage["prompt_tokens"] / 1_000_000) * (input_price or 0)
                     + (usage["completion_tokens"] / 1_000_000) * (output_price or 0),
@@ -382,6 +416,7 @@ class ResearchMixin:
             },
             elapsed_ms=0,
             research_type=prior.research_type,
+            review_independence=prior.review_independence,
             followup={
                 "research_id": request.research_id,
                 "prior_question": prior.question,

@@ -24,6 +24,19 @@ class Filing(StrictModel):
     period_end: date
     source_url: str
     content_sha256: str
+    # Set by the corpus at ingest time. A stored parse whose version predates
+    # the current PARSER_VERSION is re-extracted on next use, so parser fixes
+    # reach old filings without anyone remembering to re-ingest.
+    parser_version: str | None = None
+
+    def source_equals(self, other: "Filing") -> bool:
+        """Identity comparison that ignores the runtime parser stamp."""
+        if not isinstance(other, Filing):
+            return False
+        strip = {"parser_version"}
+        mine = self.model_dump(exclude=strip)
+        theirs = other.model_dump(exclude=strip)
+        return mine == theirs
 
 
 class Fact(StrictModel):
@@ -69,6 +82,11 @@ class StatementFact(StrictModel):
     dimension_labels: dict[str, str] = Field(default_factory=dict)
 
 
+# Bump whenever extraction changes (chunking, filters, tables). Stored on every
+# filing record so a stale parse is detectable and self-heals on next use.
+PARSER_VERSION = "2026-10-28.1"
+
+
 class Passage(StrictModel):
     id: str
     filing_id: str
@@ -77,6 +95,9 @@ class Passage(StrictModel):
     text: str
     source_url: str
     locator: str
+    # Printed page number when the filing HTML carries page-break markers.
+    # Optional so records created before page tracking still validate.
+    page: int | None = None
     table_context: dict | None = None
 
 
@@ -239,13 +260,20 @@ class ResearchAnswer(StrictModel):
     status_reason: Literal[
         "complete",
         "budget_expired",
+        "cost_budget_exceeded",
         "cancelled",
         "source_or_model_error",
         "review_incomplete",
         "evidence_gap",
         "no_supported_evidence",
+        "source_not_acquired",
+        "source_unavailable",
         "reused_evidence",
     ] = "complete"
+    # Deterministic numeric checks and narrative review have different trust
+    # boundaries. Keep the review relationship explicit in every saved run.
+    review_independence: Literal["independent", "not_independent", "unknown", "not_run"] = "not_run"
+    quality_notes: list[str] = Field(default_factory=list)
     answer: list[dict]
     gaps: list[str]
     evidence: list[dict]

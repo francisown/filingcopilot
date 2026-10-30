@@ -10,278 +10,124 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10 or later"></a>
 </p>
 
-**Evidence-grounded research for company filings. Retained numbers carry a source, period, unit and locator; answers are exportable and verifiable offline.**
+**A local-first research workspace for company filings.** FilingCopilot prepares the relevant SEC sources, retrieves evidence, computes financial figures, and returns answers whose claims can be inspected and exported.
 
-FilingCopilot is a local-first workspace for SEC filings, financial calculations, and cited
-research. Ask a question in English or Chinese, open the passage behind a number, or export
-the facts, calculations, and citations as a frozen package that a reviewer can re-check
-without the model.
+![FilingCopilot workspace](docs/images/workspace.png)
 
-![English workspace with a stock chart and financial research controls](docs/images/workspace.png)
+The project is built around three rules:
 
-*Interface example using bundled filing data and illustrative prices. The chart is not a live quote.*
+- **Source before answer.** A question is scoped to a company and knowledge date. If the required filing is not in the local corpus, the preparation layer can fetch supported public filings before retrieval.
+- **Evidence before prose.** Facts, calculations, passages, periods, units, source URLs and locators are kept in an evidence ledger. Missing support is reported as a gap instead of being silently filled.
+- **Re-checkable output.** A research package contains the inputs, claims, citations, calculations and source hashes. The standalone verifier checks the package offline without the research model or network.
 
-Three things a chat-only RAG demo usually does not do:
+## Latest recorded results
 
-- **Trace every number** to a filing, reporting period, currency, unit, and line locator.
-- **Freeze the evidence** into a package with a SHA256 manifest, then verify it offline.
-- **Answer deterministic questions without an LLM** — annual numbers, growth, margins, and trends run on the local corpus.
+The latest 140-question run used DeepSeek for research and Mimo for review on a frozen 62-filing snapshot. The 100 answerable questions and 40 designed boundary/policy questions are reported separately.
 
-## Verified on the recorded evaluation
+| Check | Result |
+|---|---:|
+| Answerable research coverage | **91 / 100** |
+| Expected insufficient-evidence refusals | **20 / 20** |
+| Market-source policy cases | **20 / 20** |
+| Unsupported claims / numeric errors | **0 / 0** |
+| Citation binding on delivered rows | **1.000** |
+| Model-backed latency | **90.6 s P50 / 174.9 s P95** |
+| Reported model tokens | **3,753,566** |
+| Internal retrieval span/page/nugget recall@5 | **0.615 / 0.635 / 0.710** |
+| Internal retrieval latency | **66 ms P50 / 168 ms P95** |
+| Numeric oracle | **116 exact matches, 0 mismatches**; 34 claims outside its scope |
+| Regression suite | **1,840 passed** |
 
-| Signal | Result |
-|---|---|
-| Bilingual evaluation | 140 questions; 100 research questions: **81 complete, 18 partial, 1 no answer**; 40 boundary questions answered with explicit limits |
-| Numeric oracle | **116 exact SEC CompanyFacts or arithmetic matches, 0 mismatches**; 34 claims outside the checker's scope |
-| FinanceBench full-filing | 61 parsed PDFs, 113 questions, BGE ONNX rerank: **page hit@5 0.850, page@1 0.540, snippet hit@5 0.858, snippet hit@1 0.531, MRR 0.664**; rerank P95 1.84s; new-document held-out page@1 0.545 / page@5 0.773 |
-| FinanceBench evidence-page (diagnostic) | 150 questions, company+year, section 3,000 + parent 4,000: **page hit@5 0.920, page@1 0.687, snippet hit@5 0.920, answer full/partial/unsupported top1 0.207/0.133/0.660 raw; page-level 0.213/0.147/0.640; 42 full-evaluable: 0.738 top1 / 0.929 at5, MRR 0.784** |
-| FinDER answer-support | 1,085 reasoning questions, company-scoped reference corpus with category fallback, BM25 + FlashRank: **full/partial/unsupported top1 0.098/0.666/0.236; at5 0.160/0.700/0.140**; 259 full-evaluable rows: **0.409 / 0.637**; ref hit@5 0.598, P95 271ms |
-| Tests | **1,656 passed** at the recorded evaluation source; **1,757 passed** on the current branch |
-| Surfaces | Browser, CLI, REST API, and **30 MCP tools** on the same research service |
-| Codebase | ~23k lines of Python across 77 source modules |
+These are engineering and workflow measurements, not an independent human accuracy study. External answer-support scores use strict `full / partial / unsupported` labels; their denominators and limitations are in [the evaluation record](docs/evaluation.md). The latest machine-readable records are limited to the [full report](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json), [failure summary](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/failures.json), and [retrieval snapshot](docs/validation/retrieval-diversity-2026-10-29.json).
 
-Answer support now reports **full / partial / unsupported**. Full requires every key number, unit and period; calculation results may be supported by verified inputs even when the result is not copied verbatim. The earlier any-one-number figures (FinDER 0.823/0.893 and FinanceBench 0.427/0.913) are retired. The strict classification did **not** improve the FinanceBench full-filing page/snippet metrics; those remain recorded retrieval measurements, not a quality claim. A 20-question live check on `f2f12f4` (4 each numeric/causality/risk/negation/cross-period) measured **11 answered / 9 partial**, P50/P95 **47.8s / 152.1s**, numeric mismatch **0**, and citation binding **1.0**. The same 20 IDs historically had **17 answered / 3 partial**, so latency passed but the complete-rate acceptance failed; the 140-question run remains paused. A controlled DeepSeek-vs-Mimo trace showed DeepSeek used **more** tool calls (7.85/8.55 vs 6.55), with **0 direct-text rounds**, so the tool-call failure hypotheses are not supported. Two runs each produced DeepSeek **11/9 → 13/7** and Mimo **11/9 → 15/5**; the variance is too large to select a model from one run. **Read the caveats before the numbers:** the evaluation is self-reviewed, there is no independent human gold standard, and model-using questions had a median latency of 92.8 seconds and a P95 of 417.1 seconds. The FinanceBench evidence-page result is 150 public rows scoped to company+year; it is not full-filing retrieval. The full-filing result is 61 parsed PDFs and 113 questions with BGE ONNX reranking (page@1 0.540, page@5 0.850, rerank P95 1.84s); the 22-question new-document check was 0.773 page@5 under the earlier FlashRank baseline. Neither number is human relevance or production accuracy. The 95% Wilson intervals are wide: full-filing page@1 0.448–0.629 and page@5 0.772–0.904; the 22-question extension page@5 is 0.566–0.899. These are engineering measurements, not a production claim. The historical 417.1s run used `mimo-v2.6-flash` and predates the current 300s hard budget with a 30s final-review reserve. A `deepseek-v4.1-flash` swap was tested: full-run P95 fell to 139.0s, but answered fell from 81/140 to 64/140 and negation from 16/20 to 4/20. It was rejected; `mimo-v2.6-flash` remains the default. The full method, denominators and intervals are in [Evaluation](docs/evaluation.md) and [latency notes](docs/latency-budget.md).
+## How a request is handled
 
-## How it works
-
-![Architecture: interfaces, research service, hybrid retrieval, evidence ledger, deterministic gates, frozen package, offline verifier](docs/images/architecture.svg)
-
-1. A question arrives through the browser, CLI, REST API, or MCP.
-2. The research service builds a capability plan and a budget.
-3. A LangGraph tool-using agent retrieves passages and calls financial tools.
-4. The evidence ledger stores facts, calculations, sources, and line locators.
-5. Deterministic numeric and narrative gates accept, repair, or reject claims; a semantic reviewer checks subject, direction, period, materiality, and scope.
-6. The answer and its explicit gaps are frozen into a package. The standalone verifier re-checks the package without the agent, the model, or the network.
-
-See [Architecture](docs/architecture.md) and the [Independent verifier](docs/independent-verifier.md) for the contracts.
-
-## Fast path (60 seconds, no API key)
-
-```powershell
-.\setup.ps1
-$env:FC_EMBEDDING_MODE = "off"
-.\start.ps1 -Port 8159
+```text
+Browser / CLI / REST / MCP
+            |
+     capability and date scope
+            |
+ source preparation and filing ingestion
+            |
+   hybrid retrieval and reranking
+            |
+ facts, passages and calculations in the evidence ledger
+            |
+ deterministic checks + independent review
+            |
+ answer, citations, explicit gaps and optional frozen package
 ```
 
-Open <http://127.0.0.1:8159/>, choose **Apple / AAPL**, select **Data only**, ask
-**“What were Apple's FY2025 revenue and net income?”**, open a citation, then export the
-research package. To verify the bundled example without the app:
-
-```powershell
-.\.venv\Scripts\python.exe -m filingcopilot verify-package examples/annual-facts.json
-```
-
-The same evidence layer runs on a synthetic credit-risk corpus:
-
-```powershell
-python examples/credit-risk/demo.py demo
-```
-
-A click-by-click walkthrough is in [demo.md](docs/demo.md); the credit-risk vertical is documented in [examples/credit-risk/README.md](examples/credit-risk/README.md).
-
-## Start with the evidence
-
-- [Case study (English)](docs/case-study.md) · [案例研究（中文）](docs/case-study.zh-CN.md) — the problem, architecture, evaluation, failure taxonomy, and limitations.
-- [Evaluation](docs/evaluation.md) — 140-question run, retrieval gold set, negative results, and exact denominators.
-- [External evaluation datasets](evaluation/external/README.md) — FinanceBench, DocFinQA, and FiQA: licenses, sizes, and how to fetch them.
-- [Reproducing the evaluation](docs/reproducing-evaluation.md) — exact commands, model checksum, expected metrics, and known skips.
-- [Security and threat model](docs/security-threat-model.md) — local-only deployment boundary and residual risks.
-- [Data and model licenses](docs/data-licenses.md) — code MIT versus non-commercial benchmark data.
-- [Independent review protocol](docs/independent-review-protocol.md) — the review that has **not** been completed yet.
-- [Core scope](docs/core-scope.md) and [latency budget](docs/latency-budget.md) — what is core, what is optional, and why 417s P95 remains unresolved.
-- [FinanceBench check](docs/financebench-scoped-2026-10-23.md) — 150 evidence-page questions (page hit@5 0.920, snippet hit@5 0.920) and 113 full-filing questions (0.850/0.858), with the 22-question new-document check and failure cases.
-- [Research package protocol](docs/research-package-protocol.md) — what a frozen package contains and how it is replayed.
-- [Project overview](docs/showcase.md) — try the offline example and follow one request through the code.
-- [MCP tools](docs/mcp-tools.md) · [Contributing](CONTRIBUTING.md) · [Full quick start](#quick-start)
-
-## Features
-
-| Feature | What it does |
-|---|---|
-| Company and stock search | Search by name or ticker, choose the correct listing, and download supported SEC filings. |
-| Long-term price charts | Switch between one year, five years, full history and other intervals. Hover to inspect dates and prices; view currency, timestamps and adjustment basis. |
-| Financial data | Query annual, quarterly, year-to-date and trailing-twelve-month data. Calculate growth, margins and clearly defined cash-flow measures. |
-| Financial trends | Explore three- or five-year revenue, earnings and cash-flow charts. Missing years remain missing; click a figure to inspect its source. |
-| Company research | Read business and risk disclosures, financial statements, available segment data, and filing revisions. |
-| Official updates | Read supported companies' recent official disclosures, dates and source excerpts. Configured models can produce cited summaries. |
-| Company comparison | Compare financial figures and price returns over shared dates, with an optional ETF benchmark and current provider TTM valuation. |
-| Valuation scenarios | Compare annual and provider TTM P/E, inspect supported historical annual P/E data, and explore editable earnings and cash-flow assumptions. |
-| Research agent | Ask focused questions or run a six-part company review. Track progress, ask follow-up questions, cancel a task, or reconnect after refreshing the page. |
-| Saved research | Maintain a watchlist, reopen results, export research packages and inspect changes between research versions. |
-| Offline verification | Recompute saved calculations and check a research package. Provide the matching source files to check their contents against the saved evidence. |
-| Integrations | Use the browser, CLI, REST API or 30 MCP tools. |
-
-**Stock charts do not require downloading annual reports first.** Explicit annual numbers,
-growth rates, margins and financial trends can run without an LLM. Explanations, generated
-announcement summaries and company reviews require model configuration. Incomplete
-evidence can lead to a partial answer; the interface shows what is still missing.
+Deterministic routes handle annual figures, growth, margins and trends without a model. Research routes use a tool-calling agent for questions that need narrative evidence or multi-step calculations. The service is available through the browser workspace, CLI, REST API and 30 MCP tools.
 
 ## Quick start
 
-Requires Python 3.10 or later. Download the source and run these commands in the project
-directory. You can start with the bundled filing data **without a model API key or GPU**.
-Live prices and new filings require internet access.
+Python 3.10 or later is required. The bundled filing example works without an API key or GPU.
 
 ### Windows PowerShell
 
 ```powershell
 .\setup.ps1
-if (-not (Test-Path -LiteralPath .env)) {
-    Copy-Item .env.example .env
-}
+if (-not (Test-Path -LiteralPath .env)) { Copy-Item .env.example .env }
 $env:FC_EMBEDDING_MODE = "off"
-```
-
-Start the workspace with keyword search:
-
-```powershell
 .\start.ps1 -Port 8159
 ```
 
-The installer selects a supported Python version, reuses a compatible `.venv`
-and installs core dependencies from PyPI. Interpreter selection, optional profiles
-and installation troubleshooting are covered in the [installation guide](docs/installation.md).
+Open <http://127.0.0.1:8159/> and select **Apple / AAPL** with **Data only**. Try the bundled package verifier:
 
-Open [the local workspace](http://127.0.0.1:8159/). Keep the service terminal running;
-press `Ctrl+C` in that terminal to stop it. Existing installations can use the start
-command directly. The conditional copy preserves an existing `.env`. The embedding
-setting above applies to this terminal session; local embeddings are optional.
+```powershell
+.\.venv\Scripts\python.exe -m filingcopilot verify-package examples/annual-facts.json
+```
 
 ### macOS / Linux
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -e "."
-if [ ! -f .env ]; then
-    cp .env.example .env
-fi
-```
-
-If a configured mirror cannot provide the build dependencies, retry with
-`--index-url https://pypi.org/simple`.
-
-Start with keyword search:
-
-```bash
+cp .env.example .env
 FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 ```
 
-Open `http://127.0.0.1:8159/`.
+The complete setup and troubleshooting steps are in [docs/installation.md](docs/installation.md).
 
-### Try it before configuring a model
+## Enable live filings and research
 
-1. Choose **Apple / AAPL** and **Data only**.
-2. Ask **“What were Apple's FY2025 revenue and net income?”**
-3. Open a citation to inspect the reporting period and source.
-4. Export the research package, or verify the bundled example:
-
-```powershell
-.\.venv\Scripts\python.exe -m filingcopilot verify-package examples/annual-facts.json
-```
-
-The bundled example can be checked without network access. On macOS/Linux, replace the
-Python path with `.venv/bin/python`. Live stock charts load separately from this filing demo.
-
-### Enable live filings and AI research
-
-Configure `.env` to download new filings or use a research model.
+Copy `.env.example` to `.env` and set values locally. Never commit `.env`.
 
 | Variable | Purpose |
 |---|---|
-| `FC_SEC_USER_AGENT` | Your real contact name and email, required for online SEC requests. |
-| `FC_API_BASE` | An OpenAI-compatible model endpoint supporting tool calls. |
-| `FC_API_KEY` | The model provider's access key. |
-| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-required request headers; keep real values private. |
-| `FC_MODEL` | The research model. |
-| `FC_REVIEW_MODEL` | The analysis-review model; use a different model where possible. |
-| `FC_EMBEDDING_MODE` | `off` for keyword search; `local` for optional local embeddings. |
-| `FC_TWELVE_DATA_API_KEY` | Optional independent daily-price fallback, subject to provider access. |
+| `FC_SEC_USER_AGENT` | Contact name and email required by SEC requests |
+| `FC_API_BASE` / `FC_API_KEY` | OpenAI-compatible provider endpoint and private key |
+| `FC_MODEL` | Research model; the checked-in example uses DeepSeek |
+| `FC_REVIEW_MODEL` | Separate review model; the checked-in example uses Mimo |
+| `FC_RESEARCH_TIMEOUT` | Cooperative research ceiling; the public example is 3,000 seconds |
+| `FC_EMBEDDING_MODE` | `off` for keyword retrieval or `local` for optional local embeddings |
+| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata |
+| `FC_MAX_COST_USD` | Optional ceiling when token prices are configured |
 
-Set the model endpoint, key, and model names to enable **AI research**. This mode sends
-the question and selected evidence to your configured provider and may incur model usage
-charges. The app does not place trades.
+Model requests may incur provider charges. The application does not place trades. New filing preparation requires network access and a compliant SEC user agent; existing local data can be queried offline.
 
-For optional vector search, install `.[semantic]` in the same virtual environment and set
-`FC_EMBEDDING_MODE=local`. If you used the Windows quick start, also change that terminal's
-`$env:FC_EMBEDDING_MODE` to `"local"` or start a new terminal. First use downloads model files;
-keyword search does not need them.
+## Documentation
 
-## Using the workspace
-
-1. **Choose your language.** The interface starts in English, including on a Chinese-language browser.
-   Choose 中文 in the header to use Chinese; your explicit choice is saved locally.
-2. **Find a listing.** Search for a company or ticker such as `AMZN` and choose its market.
-   Explore the price chart before preparing financial reports.
-3. **Browse company sources.** Open Company Research to read available material or check
-   newer disclosures. Inspect statements, quarters, filing versions and source passages.
-4. **Ask a focused question.** Select a company and an **As of date**, choose Data only or
-   AI research, then start. The date controls which publicly available filings can be used.
-   Try “FY2025 revenue and net income” or
-   “What are the main businesses and risks disclosed in the latest annual report?”
-5. **Compare and explore assumptions.** Select companies, a price interval and an optional
-   benchmark. Edit valuation assumptions and inspect their inputs and formulas.
-6. **Inspect and save.** Open citations, add a listing to the watchlist, reopen research
-   history and export a package for offline checks.
-
-New research uses the selected interface language. Original filing excerpts remain in their
-source language, and saved answers keep the language in which they were generated.
-Changing the interface does not rewrite an old answer or its exported package. For an
-English saved answer, the result header's **中文** action opens an on-demand Chinese
-translation overlay; it does not change the global language or replace the English
-answer and source excerpts.
-
-CLI and MCP research default to English. Select Chinese with `--language zh` in the CLI
-or `language: "zh"` in REST/MCP requests. For example:
-
-```powershell
-.\.venv\Scripts\python.exe -m filingcopilot ask "FY2025 revenue and net income" --ticker AAPL --mode reference
-```
-
-REST research accepts `language: "en"` or `"zh"`. If omitted, a supported
-`Accept-Language` header can select the language; callers without either receive English. The MCP `ask_financial_question` tool also accepts `language`.
-
-## Installation and distribution
-
-This project can be installed directly from its source folder using the commands above.
-Publishing the project to PyPI is optional; it is not required to run the workspace or
-share the source on GitHub. PyPI distributes installable packages; it does not host the
-running web application. The installation commands use the source folder rather than
-assuming an uploaded `filingcopilot` package exists. See the
-[official local-install guide](https://pip.pypa.io/en/stable/topics/local-project-installs/).
-
-## Sources and calculations
-
-Financial numbers come from observed facts and formulas. References retain company,
-filing, public date, reporting period, currency and units. Display rounding usually keeps
-at most two decimal places; saved inputs and exports keep their original precision.
-English amount displays use thousands, millions and billions; Chinese displays use 万 and 亿.
-
-Filing coverage primarily follows SEC public disclosures. US domestic issuers can be
-discovered dynamically; foreign-issuer financial extraction uses registered configurations.
-Market-data coverage and filing coverage are separate. Historical research respects public
-availability, and unavailable quarters, segments or valuation inputs remain explicit gaps.
-Full earnings-call material and some cross-currency ADS bridges still need additional sources.
-
-## Technology and documentation
-
-Python and FastAPI serve the application. SQLite FTS5 and optional local embeddings support
-retrieval; LangGraph orchestrates research tools. Browser, CLI, REST and MCP share the same
-evidence and calculation rules.
-
-- [MCP tools](docs/mcp-tools.md)
 - [Architecture](docs/architecture.md)
+- [Evaluation and denominators](docs/evaluation.md)
+- [Case study](docs/case-study.md) · [案例研究](docs/case-study.zh-CN.md)
+- [Installation](docs/installation.md)
+- [User guide](docs/user-guide.md)
 - [Research package protocol](docs/research-package-protocol.md)
 - [Independent verifier](docs/independent-verifier.md)
-- [Project showcase](docs/showcase.md)
-- [Development and evaluation](docs/evaluation.md)
-- [Roadmap](ROADMAP.md)
-- [Chinese user guide](docs/user-guide.md)
+- [Security and threat model](docs/security-threat-model.md)
+- [External evaluation datasets](evaluation/external/README.md)
+- [Contributing](CONTRIBUTING.md)
 
-## Feedback and contributions
+## Development
 
-Maintained by [francisown](https://github.com/francisown). Bug reports, clearer examples,
-data-source improvements, and documentation contributions are welcome. Use the repository's
-Issues tab for feedback and include the ticker, date, and steps needed to reproduce a problem.
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup and relevant checks.
+```powershell
+python -m pytest -q
+python -m ruff check src tests scripts
+python -m compileall -q src scripts
+```
 
-Project code is available under the [MIT license](LICENSE).
+The external benchmark data and local filing cache are not committed. Review the licenses in [evaluation/external/README.md](evaluation/external/README.md) before fetching non-commercial datasets.
+
+FilingCopilot is an independent engineering project. It is not investment advice, a production credit-decision system, or a certified model.
