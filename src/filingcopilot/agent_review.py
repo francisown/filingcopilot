@@ -34,6 +34,16 @@ if TYPE_CHECKING:
 
 class ReviewMixin:
     @staticmethod
+    def _narrative_synthesis_needed(state: AgentState, verified: list[dict]) -> bool:
+        """Return true when a supported narrative run has no accepted synthesis."""
+        context = state.get("narrative_context") or {}
+        return bool(
+            state.get("submission")
+            and context.get("answerability") == "supported_candidate"
+            and not any(claim.get("kind") in {"analysis", "narrative"} for claim in verified)
+        )
+
+    @staticmethod
     def _narrative_requirement_context(state: AgentState) -> dict | None:
         """Expose the deterministic narrative coverage register to the reviewer.
 
@@ -455,6 +465,19 @@ class ReviewMixin:
             semantic_review,
             state["focus_ticker"],
         )
+        narrative_synthesis_needed = self._narrative_synthesis_needed(state, verified)
+        if narrative_synthesis_needed:
+            errors.append(
+                "The filing scan found candidate evidence for the requested narrative, but no "
+                "narrative claim passed review. Submit one to three concise qualitative claims "
+                "from the observed passages, or state the specific unresolved evidence gap."
+            )
+            state["trace"].append(
+                {
+                    "stage": "narrative_synthesis_missing",
+                    "reason": "no accepted analysis or narrative claim remained after review",
+                }
+            )
         errors.extend(
             f"gap {index}: {conflict} Rewrite the limitation within the retrieved evidence scope."
             for index, gap in enumerate(state["submission"].gaps)
@@ -576,7 +599,14 @@ class ReviewMixin:
                             "them and disclose the specific gap. The leading assessment must address "
                             "the requested scope. Submit a complete coherent draft with approved and "
                             "repaired claims together; do not add claim IDs or other fields outside the "
-                            "submit_answer schema. All claims will still be verified.",
+                            "submit_answer schema. All claims will still be verified."
+                            + (
+                                " For this narrative question, submit one to three short qualitative "
+                                "claims directly answering the question; do not copy tables or introduce "
+                                "unverified causal strength, figures or ratios."
+                                if narrative_synthesis_needed
+                                else ""
+                            ),
                             **(
                                 {"gap_evidence": state["gap_evidence"]}
                                 if state.get("gap_evidence")

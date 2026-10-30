@@ -233,6 +233,18 @@ def test_reviewer_receives_compact_narrative_requirement_register(sources):
     assert "evidence" not in register
 
 
+def test_narrative_review_requests_repair_when_all_narrative_claims_fail(sources):
+    context = {"answerability": "supported_candidate"}
+    assert ReviewMixin._narrative_synthesis_needed(
+        {"narrative_context": context, "submission": object()},
+        [{"kind": "fact", "evidence_ids": ["f1"]}],
+    )
+    assert not ReviewMixin._narrative_synthesis_needed(
+        {"narrative_context": context, "submission": object()},
+        [{"kind": "analysis", "evidence_ids": ["p1"]}],
+    )
+
+
 def test_narrative_scan_prioritizes_a_question_named_segment_acronym(tools):
     """Question anchors must beat unrelated table prose without issuer rules."""
     filing = add_source(tools, "AMZN:annual", ticker="AMZN", end="2025-09-27")
