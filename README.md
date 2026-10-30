@@ -26,21 +26,21 @@ The latest 140-question run used DeepSeek for research and Mimo for review on a 
 
 | Check | Result |
 |---|---:|
-| Answerable research coverage | **91 / 100** |
+| Answerable research coverage | **90 / 100** |
 | Expected insufficient-evidence refusals | **20 / 20** |
 | Market-source policy cases | **20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Citation binding on delivered rows | **1.000** |
-| Model-backed latency | **90.6 s P50 / 174.9 s P95** |
-| Reported model tokens | **3,753,566** |
+| Model-backed latency | **85.5 s P50 / 218.3 s P95** |
+| Reported model tokens | **3,647,712** |
 | Internal retrieval span/page/nugget recall@5 | **0.615 / 0.635 / 0.710** |
 | Internal retrieval latency | **66 ms P50 / 168 ms P95** |
 | Numeric oracle | **116 exact matches, 0 mismatches**; 34 claims outside its scope |
-| Regression suite | **1,847 passed in the prior full run; 195 targeted tests passed after the latest changes** |
+| Regression suite | **1,845 passed after the rollback; 42 placeholder-gap tests passed after the final fix** |
 
 These are engineering and workflow measurements, not an independent human accuracy study. External answer-support scores use strict `full / partial / unsupported` labels; their denominators and limitations are in [the evaluation record](docs/evaluation.md). The latest machine-readable records are limited to the [full report](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json), [failure summary](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/failures.json), and [retrieval snapshot](docs/validation/retrieval-diversity-2026-10-29.json).
 
-The latest targeted weak-case check covered nine previously difficult narrative questions: **4 answered / 5 partial**, with zero unsupported claims, numeric errors, runner errors or deadline timeouts. It is recorded with its limits in [the evaluation record](docs/evaluation.md) and is not a replacement for the full 91/100 result.
+The latest complete run is the current one-worker population record at **90/100**. An earlier two-worker run measured 91/100; that difference is within the observed stochastic variation and is retained as historical context. A separate placeholder-gap fix was verified on one risk question (1/1 answered) and is not mixed into the 140-question score.
 
 ## How a request is handled
 

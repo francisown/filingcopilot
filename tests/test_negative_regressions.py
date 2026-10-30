@@ -288,7 +288,7 @@ def test_empty_submission_is_nudged_before_abstention():
 
 @pytest.mark.parametrize(
     "gap",
-    ["占位", "placeholder", "TBD", "暂无", "待定", "…", "`N/A`"],
+    ["占位", "placeholder", "TBD", "暂无", "待定", "test", "测试", "…", "`N/A`"],
 )
 def test_placeholder_only_submission_is_nudged_before_abstention(gap):
     """A literal placeholder must not be treated as an intentional refusal."""

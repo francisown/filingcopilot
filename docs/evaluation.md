@@ -9,25 +9,26 @@ retrieval snapshot are kept as public validation records.
 The [machine-readable report](validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json)
 contains the configuration fingerprint, denominators and run metadata. It used
 the 140-question bilingual set, a 2026-10-08 knowledge date, DeepSeek for
-research, Mimo for review, the diversity reranker, two workers and a 3,000-second
+research, Mimo for review, the diversity reranker, one worker and a 3,000-second
 cooperative research ceiling.
 
 | Metric | Result |
 |---|---:|
 | Captured / eligible rows | 140 / 140 |
-| Answerable coverage | **91 / 100** |
+| Answerable coverage | **90 / 100** |
 | Expected insufficient-evidence refusals | **20 / 20** |
 | Market-source policy cases | **20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Citation binding on delivered rows | **1.000** |
-| Model-backed P50 / P95 | **90.6 s / 174.9 s** |
-| Reported tokens | **3,753,566** |
+| Model-backed P50 / P95 | **85.5 s / 218.3 s** |
+| Reported tokens | **3,647,712** |
 | Runner errors / deadline timeouts | **0 / 0** |
 
-The run predates the latest placeholder-token retry expansion. That fix was
-verified with targeted API and regression tests, but it is not counted as a new
-full-run score. The measured 91/100 must therefore remain the public population
-result until another complete run is deliberately made.
+The previous public run recorded 91/100 with two workers. This complete one-worker
+run records 90/100 on the same frozen questions, date and model pairing; the
+difference is within the observed stochastic variation. A separate placeholder-gap
+fix was verified on `semantic-risk-014` (1/1 answered, zero unsupported or numeric
+errors) after the full run and is deliberately not mixed into this population score.
 
 The 100 answerable rows cover numeric, cross-period, causality, negation and risk
 questions. The remaining 40 rows are designed refusals or market-source policy
