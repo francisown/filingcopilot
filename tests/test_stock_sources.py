@@ -207,6 +207,18 @@ def test_required_slot_register_does_not_treat_one_slot_as_complete():
     assert unresolved == ["period"]
 
 
+def test_optional_slot_does_not_block_narrative_completeness():
+    status, unresolved = _required_slot_status(
+        [("cause", "", []), ("segment", "", [])],
+        {"cause": 2},
+        optional_slots={"segment"},
+    )
+    assert status["cause"]["status"] == "covered"
+    assert status["segment"]["required"] is False
+    assert status["segment"]["status"] == "not_applicable"
+    assert unresolved == []
+
+
 def test_reviewer_receives_compact_narrative_requirement_register(sources):
     tools, _, _ = sources
     context, _ = narrative_source_context(

@@ -230,19 +230,31 @@ def _required_slot_status(
     slots: list[tuple[str, str, list[str]]],
     counts: dict[str, int],
     evidence_ids: dict[str, list[str]] | None = None,
+    optional_slots: set[str] | None = None,
 ) -> tuple[dict, list[str]]:
     """Return deterministic coverage state for the narrative requirement register."""
     evidence_ids = evidence_ids or {}
+    optional_slots = optional_slots or set()
     status = {
         slot: {
-            "required": True,
+            "required": slot not in optional_slots,
             "hits": int(counts.get(slot, 0)),
             "evidence_ids": list(dict.fromkeys(evidence_ids.get(slot, []))),
-            "status": "covered" if counts.get(slot, 0) else "unresolved",
+            "status": (
+                "covered"
+                if counts.get(slot, 0)
+                else "unresolved"
+                if slot not in optional_slots
+                else "not_applicable"
+            ),
         }
         for slot, _, _ in slots
     }
-    return status, [slot for slot, item in status.items() if item["status"] != "covered"]
+    return status, [
+        slot
+        for slot, item in status.items()
+        if item["required"] and item["status"] != "covered"
+    ]
 
 
 def _segment_labels(text: str) -> set[str]:
@@ -488,6 +500,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
     # from the complete local passage set.  This is local retrieval, not an
     # extra model call or an unscoped web search.
     all_passages = tools.corpus.passages(tools.as_of, ticker, filing_id=filing["id"])
+    optional_slots: set[str] = set()
     if category == "causality":
         margin = bool(re.search(r"利润率|\bmargin\b|gross margin|operating margin", folded, re.I))
         topic_terms = (
@@ -514,6 +527,17 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                 ["mainly", "primarily", "driven", "due", "reflecting", "attributed", "came from", "主要", "由于", "驱动", "归因"],
             ),
         ]
+        # Segment drivers are supporting context unless the question names a
+        # segment, product/service line, platform or business unit explicitly.
+        # Requiring them for every generic margin/revenue question can turn a
+        # useful consolidated explanation into an avoidable refusal.
+        if not re.search(
+            r"分部|部门|业务线|产品|服务|平台|segment|business unit|product mix|service mix|"
+            r"products?|services?|platforms?",
+            folded,
+            re.I,
+        ):
+            optional_slots.add("分部")
     elif category == "risk":
         slots = [
             ("监管", r"regulat|export control|tariff|antitrust|competition|监管|出口管制|关税|反垄断|竞争", ["risk", "adverse", "compliance"]),
@@ -729,7 +753,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                 }
             )
     slot_status, unresolved_slots = _required_slot_status(
-        slots, slot_counts, slot_evidence_ids
+        slots, slot_counts, slot_evidence_ids, optional_slots
     )
     # A candidate for one required part is useful evidence, but it is not a
     # feasible complete answer when another required part was never observed.
@@ -754,6 +778,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
         },
         "slot_status": slot_status,
         "unresolved_slots": unresolved_slots,
+        "optional_slots": sorted(optional_slots),
         # The model cannot otherwise tell a completed full-document scan from a
         # few retrieved excerpts, so it hedges with "selected passages only" and
         # that hedge becomes a blocking gap. State the scope in plain words, and
