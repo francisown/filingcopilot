@@ -247,17 +247,28 @@ class CompanyDiscovery:
             source_refresh_needed = any(
                 not self._cached_filing_is_valid(filing) for filing in local_annual
             )
+            # The bundled snapshot is intentionally usable without a SEC contact
+            # address or a raw HTML cache. In that offline mode, keep the local
+            # evidence available instead of turning a read-only request into a
+            # failed network refresh. A configured SEC contact still requires the
+            # immutable raw bytes and current parser stamp to pass validation.
+            offline_local = source_refresh_needed and not self.service.settings.sec_user_agent.strip()
             if (
                 local_annual
                 and ticker in domain.companies
                 and not state_path.exists()
-                and not source_refresh_needed
+                and (not source_refresh_needed or offline_local)
             ):
                 if ticker in domain.financial_profiles:
                     emit("extracting", "正在从已有原件核对登记的原币年度数字…")
                     self.service.enrich_cached_facts(ticker)
                 emit("ready", "使用知悉日期前已缓存的年报。")
-                return self._prepared(ticker, local, [], "local", None)
+                warning = (
+                    "SEC 联系信息未配置；本次使用本地快照，未刷新原始文件。"
+                    if offline_local
+                    else None
+                )
+                return self._prepared(ticker, local, [], "local", warning)
             emit("resolving", "正在核对 SEC 公司身份…")
             if ticker not in domain.companies:
                 lookup = self.search(ticker, translate=False)
