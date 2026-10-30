@@ -64,6 +64,8 @@ jobs:
       - run: node scripts/check_market_outage_ui.cjs
       - name: Validate local container
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.10'
+        env:
+          FC_AUTH_TOKEN: ci-validation-token
         run: |
           docker compose config --quiet
           docker build --tag filingcopilot-ci .
