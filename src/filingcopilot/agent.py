@@ -902,7 +902,16 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "tool_count": len(initial_trace),
                 "seen": initial_seen,
                 "tool_cache": {},
-                "context_passage_ids": set(),
+                # The initial narrative overview is already present in the
+                # first user message. Seed the model-context deduper with
+                # those passage IDs so a later search result can reuse the
+                # IDs without sending the same long filing paragraphs again.
+                # The full objects remain in the ledger for verification.
+                "context_passage_ids": {
+                    str(item["id"])
+                    for item in (narrative_context or {}).get("evidence", [])
+                    if isinstance(item, dict) and item.get("id")
+                },
                 "repairs": 0,
                 "submit_nudges": 0,
                 "empty_submission_attempts": 0,
