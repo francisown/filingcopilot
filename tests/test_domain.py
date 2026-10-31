@@ -167,7 +167,8 @@ def test_excerpt_is_verified_against_original_and_cannot_bypass_agent_review(too
     accepted, errors = verify_submission(
         Submission(claims=[claim]), tools, "苹果风险", allow_excerpts=True
     )
-    assert accepted and not errors
+    assert accepted and accepted[0]["verification"] == "exact_source_excerpt"
+    assert errors and all("narrative conclusion is missing" in error for error in errors)
     assert verify_submission(Submission(claims=[claim]), tools, "苹果风险")[1]
     claim.statement += " A fabricated conclusion."
     assert not verify_submission(

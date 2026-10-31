@@ -28,6 +28,7 @@ from .semantic_boundaries import (
     counterevidence_conflict,
     document_scope_conflict,
     narrative_completeness_errors,
+    unresolved_proposition_gaps,
 )
 from .tools import ResearchTools, format_amount
 from .ttm import is_ttm_question, trailing_window
@@ -625,6 +626,7 @@ class _SubmissionVerifier:
                 self.accepted, self.tools, self.question, self.focus_ticker,
             ))
             self.errors.extend(narrative_completeness_errors(self.accepted, self.question))
+            self.errors.extend(unresolved_proposition_gaps(self.accepted, self.question))
         return sorted(self.accepted, key=lambda claim: claim["index"]), self.errors
 
     def _verify_claim(self, index: int, claim: Claim) -> None:
@@ -1317,5 +1319,42 @@ the verdict tool promptly. Be conservative."""
 
 
 def parse_review(content: str) -> dict:
+    """Decode provider array encoding without altering verdicts or completing JSON.
+
+    A complete JSON object tail sometimes arrives inside ``verdicts``, just as
+    with author submissions. Recover only an unambiguous complete envelope;
+    the caller still validates strict booleans, indexes and all verdict fields.
+    """
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate review field")
+            result[key] = value
+        return result
+
+    def decode(value):
+        if len(value) > 60000:
+            raise ValueError("Encoded review exceeds the size limit")
+        return json.loads(value, object_pairs_hook=unique_object)
+
     content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
-    return json.loads(content)
+    payload = decode(content)
+    if not isinstance(payload, dict):
+        raise ValueError("Review requires an object")
+    value = payload.get("verdicts")
+    if isinstance(value, str):
+        try:
+            payload["verdicts"] = decode(value)
+        except json.JSONDecodeError:
+            if set(payload) != {"verdicts"} or not value.lstrip().startswith("["):
+                raise ValueError("Review verdicts must be a complete array") from None
+            payload = decode('{"verdicts":' + value)
+    if isinstance(payload.get("gap_verdicts"), str):
+        try:
+            payload["gap_verdicts"] = decode(payload["gap_verdicts"])
+        except ValueError:
+            # Invalid optional scope advice stays invalid, without erasing the
+            # independently validated claim verdicts. The caller keeps gaps.
+            pass
+    return payload

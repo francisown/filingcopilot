@@ -111,7 +111,11 @@ def test_numeric_question_and_disclosed_partial_remain_valid(tools):
         assert accepted and not errors
 
 
-def test_numeric_only_delivery_keeps_an_explicit_explanation_gap(tools):
+@pytest.mark.parametrize("question", [
+    "What risks does Apple disclose?",
+    "Does Apple's FY2025 filing deny a demand decline?",
+])
+def test_numeric_only_delivery_keeps_an_explicit_explanation_gap(tools, question):
     from filingcopilot.agent import ResearchAgent
     from filingcopilot.models import ResearchRequest
     from filingcopilot.settings import Settings
@@ -129,7 +133,7 @@ def test_numeric_only_delivery_keeps_an_explicit_explanation_gap(tools):
 
     settings = Settings(home=tools.corpus.home, embedding_mode="off", max_rounds=1, min_model_interval=0)
     answer = ResearchAgent(settings, Gateway()).run(ResearchRequest(
-        question="What risks does Apple disclose?", ticker="AAPL", as_of=tools.as_of, language="en",
+        question=question, ticker="AAPL", as_of=tools.as_of, language="en",
     ), tools)
     assert answer.answer and answer.status == "partial"
     assert any("explanation is still missing" in gap for gap in answer.gaps)
@@ -159,6 +163,12 @@ def test_source_excerpt_or_fact_alone_cannot_complete_narrative_questions(questi
 
 
 @pytest.mark.parametrize("question,statement,source", [
+    ("Does the filing deny a demand decline?",
+     "The capacity risk is inconsistent with a denial of any demand decline.",
+     "If demand for added capacity does not materialize, costs may hurt financial performance."),
+    ("公司是否披露没有重大供应链影响？",
+     "未来中断风险与没有重大供应链影响的说法不一致。",
+     "Supply chain disruptions could have a material adverse effect on operations."),
     ("Does the filing deny a demand decline?",
      "The warning that demand could decline is the opposite of a denial.",
      "A decline in demand could materially affect our results."),
@@ -223,3 +233,40 @@ def test_gap_notes_cannot_bypass_document_scope_checks(tools):
     assert unsafe not in answer.gaps
     assert any("document-wide absence" in gap for gap in answer.gaps)
     assert any(t["stage"] == "gap_scope_limited" for t in answer.trace)
+
+
+@pytest.mark.parametrize("statement,unresolved", [
+    ("The cited passages describe future risks; the proposition is left unresolved by this evidence.", True),
+    ("所引摘录仅描述未来风险；是否明确否认需求下降仍无法确定。", True),
+    ("The company explicitly denied a demand decline in the cited passage.", False),
+    ("The company disclosed a demand decline. The severity of future risks remains unresolved.", False),
+])
+def test_unresolved_requested_proposition_cannot_be_marked_complete(tools, statement, unresolved):
+    from filingcopilot.agent import ResearchAgent
+    from filingcopilot.models import ResearchRequest
+    from filingcopilot.settings import Settings
+
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    tools.ledger["p1"]["text"] = statement
+
+    class Gateway:
+        def complete(self, messages, schemas, review=False):
+            if review:
+                return {"message": {"content": json.dumps({"verdicts": [
+                    {"index": 0, "supported": True, "reason": "Matches source"},
+                ]})}, "model": "reviewer"}
+            return {"message": {"tool_calls": [{"id": "submit", "type": "function", "function": {
+                "name": "submit_answer", "arguments": json.dumps({"claims": [{
+                    "kind": "narrative", "evidence_ids": ["p1"], "statement": statement,
+                }], "gaps": []}),
+            }}]}, "model": "author"}
+
+    answer = ResearchAgent(Settings(home=tools.corpus.home, embedding_mode="off", max_rounds=1,
+                                    min_model_interval=0), Gateway()).run(ResearchRequest(
+        question="Does the filing deny a demand decline?", ticker="AAPL", as_of=tools.as_of,
+        language="en",
+    ), tools)
+    assert answer.answer, "Retain correctly qualified observations"
+    assert answer.status == ("partial" if unresolved else "answered")
+    if unresolved:
+        assert any("unresolved" in gap for gap in answer.gaps)

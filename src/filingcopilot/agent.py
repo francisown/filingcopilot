@@ -237,19 +237,13 @@ def _research_system_prompt(
     return (
         localized_prompt(STOCK_INSTRUCTIONS if stock_question else SYSTEM, request.language)
         + (
-            # The standing instruction says not to claim a document-wide absence
-            # "from a few excerpts". When the whole filing really was scanned the
-            # model still applied the excerpt rule and hedged, which the judgment
-            # layer then (correctly) treated as an open question. Say which
-            # situation applies instead of leaving the model to guess.
-            "\nA completed full-filing scan is supplied in narrative_source_overview "
-            "(see scan_scope.passages_scanned): every passage of the requested filing "
-            "was examined, not a few excerpts. For a question that asks whether the "
-            "filing states, denies or discloses something, that scan is enough to "
-            "answer negatively — write that the filing contains no such statement, "
-            "cite the passages you rely on, and do not record the question itself as "
-            "unresolved. Keep a gap only for something the filing cannot settle, such "
-            "as whether an event actually occurred outside the document."
+            "\nThe full-filing scan in narrative_source_overview is a local keyword/pattern "
+            "search over indexed passages, not a semantic review of every sentence. "
+            "Its hit counts identify candidates; zero matches do not prove document-wide absence. "
+            "For a proposed negative, distinguish an explicit denial, a realized matching "
+            "counterexample, and an unresolved proposition. A possible future risk is compatible "
+            "with a denial of past harm. State only what the cited passages establish; if no "
+            "direct evidence settles the proposition, retain that limitation."
             if full_scan
             else ""
         )

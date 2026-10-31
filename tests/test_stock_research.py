@@ -703,7 +703,7 @@ def test_failed_review_batch_preserves_other_approved_claims_and_withholds_unrev
         def complete(self, messages, schemas, review=False):
             if review:
                 self.review_count += 1
-                if self.review_count == 2:
+                if self.review_count >= 2:
                     if failure == "connection_error":
                         raise RuntimeError("Reviewer connection unavailable")
                     content = "{" if failure == "malformed_json" else '{"verdicts":[]}'
@@ -927,7 +927,8 @@ def test_changed_review_input_cannot_inherit_approval(tools, change):
     else:
         next_state["question"] = "苹果股票经营表现怎么样？"
     final = agent.verify(next_state)
-    assert reviewer.calls == 2
+    assert reviewer.calls == 3  # Initial approval, failed new review, one format retry.
+    assert sum(t["stage"] == "semantic_review_format_retry" for t in final["trace"]) == 1
     assert not any(c["text"] == changed_text for c in final["verified"])
     if change != "statement":
         assert not any(c["kind"] == "analysis" for c in final["verified"])

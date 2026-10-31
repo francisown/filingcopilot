@@ -15,7 +15,7 @@ from .localization import current_language, state_language
 from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, Submission
-from .semantic_boundaries import narrative_completeness_errors
+from .semantic_boundaries import narrative_completeness_errors, unresolved_proposition_gaps
 from .submission_protocol import parse_submission
 from .tools import ResearchTools
 from .updates import is_stock_updates_question, wants_update_summary
@@ -282,6 +282,10 @@ class ExecutionMixin:
                 "explanation_present": bool(excerpts),
                 "reason": "Verified figures alone do not answer the requested explanation",
             })
+        unresolved = unresolved_proposition_gaps(state["verified"], question)
+        if unresolved:
+            gaps.extend(gap for gap in unresolved if gap not in gaps)
+            state["trace"].append({"stage": "answer_coverage", "unresolved_proposition": True})
         return gaps, fallback_complete
 
     @staticmethod

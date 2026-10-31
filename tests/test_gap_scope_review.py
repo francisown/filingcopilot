@@ -27,7 +27,7 @@ def test_methodological_caveats_stay_visible_without_downgrading_answer_status()
         "What regulatory, demand and concentration risks did Apple disclose?",
         "No customer concentration disclosure was located, so the requested concentration risk remains unresolved.",
     )
-    assert nonblocking_gap(
+    assert not nonblocking_gap(
         "Does Apple's FY2024 filing explicitly deny a demand decline?",
         "A document-wide absence was not established in the searched passages.",
         full_scan=True,
@@ -61,10 +61,10 @@ def test_methodological_caveats_stay_visible_without_downgrading_answer_status()
         ),
     ],
 )
-def test_scope_caveat_is_retired_only_after_a_real_full_filing_scan(question, gap):
-    """The same sentence is blocking without a scan and a caveat after one."""
+def test_keyword_scan_cannot_retire_unresolved_document_absence(question, gap):
+    """Searching every passage does not establish semantic absence."""
     assert not nonblocking_gap(question, gap, full_scan=False)
-    assert nonblocking_gap(question, gap, full_scan=True)
+    assert not nonblocking_gap(question, gap, full_scan=True)
 
 
 def test_unresolved_content_still_blocks_after_a_full_filing_scan():

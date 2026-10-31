@@ -65,10 +65,14 @@ def counterevidence_conflict(question: str, statement: str, sources: list[str]) 
     demand = bool(re.search(r"demand.{0,25}declin|需求.{0,10}下降", question, re.I))
     if not re.search(negative, question, re.I) or not (material_supply or demand):
         return None
-    counter = r"refut\w*|contradict\w*|opposite of (?:a |an |the )?denial|point.{0,12}other way|相矛盾|反驳|证伪"
+    counter = (
+        r"refut\w*|contradict\w*|inconsistent with|incompatible with|"
+        r"opposite of (?:a |an |the )?denial|point.{0,12}other way|相矛盾|反驳|证伪|不一致|不相容"
+    )
     assertions = [s for s in sentences(statement) if re.search(counter, s, re.I) and not re.search(
-        r"(?:cannot|can't|does not|do not|insufficient to).{0,35}(?:refut|contradict)"
-        r"|(?:不能|无法|不足以).{0,12}(?:反驳|否定|证明|相矛盾)", s, re.I,
+        r"(?:cannot|can't|does not|do not|insufficient to).{0,35}(?:refut|contradict|inconsistent|incompatible)"
+        r"|\bnot\s+(?:inconsistent|incompatible)\b"
+        r"|(?:不能|无法|不足以).{0,12}(?:反驳|否定|证明|相矛盾|不一致|不相容)", s, re.I,
     )]
     if not assertions:
         return None
@@ -183,6 +187,36 @@ def narrative_completeness_errors(accepted: list[dict], question: str) -> list[s
     return []
 
 
+def unresolved_proposition_gaps(accepted: list[dict], question: str) -> list[str]:
+    """A supported statement of uncertainty does not settle a requested denial.
+
+    Check explicit admissions about the asked proposition, not ordinary future
+    risk uncertainty. This is a conservative status guard, not an entailment
+    checker: a passing answer still needs independent evidence review.
+    """
+    if not re.search(
+        r"\b(?:deny|denies|denied|no material|without material|did not state|does not state)\b"
+        r"|否认|没有重大|无重大|是否(?:明确)?(?:披露|说明)", question, re.I,
+    ):
+        return []
+    unresolved = (
+        r"\b(?:proposition|denial|requested conclusion|asked question)\b.{0,70}"
+        r"\b(?:unresolved|undetermined|unconfirmed|not established|not determined|not settled)\b"
+        r"|(?:是否|所问(?:的)?(?:主张|问题)|该命题).{0,60}"
+        r"(?:无法确定|不能确定|尚未确定|尚未解决|仍未解决|未能证实)"
+    )
+    for claim in accepted:
+        if claim.get("kind") not in {"narrative", "analysis"}:
+            continue
+        if any(re.search(unresolved, sentence, re.I) for sentence in sentences(claim.get("text", ""))):
+            return [
+                "所问命题仍未解决；已引用的证据支持局部观察，但不足以确认或反驳所问主张。"
+                if re.search(r"[\u4e00-\u9fff]", question)
+                else "The requested proposition remains unresolved: the cited evidence supports scoped observations but does not settle the requested claim."
+            ]
+    return []
+
+
 def withheld_only(errors) -> bool:
     """True when every verifier message is a rejected claim and none is a coverage gap.
 
@@ -219,7 +253,7 @@ def nonblocking_gap(question: str, gap: str, *, full_scan: bool = False) -> bool
         )
     )
     unresolved = bool(
-        re.search(r"remains? unresolved|cannot be determined|not resolved|仍未解决|尚未解决|"
+        re.search(r"remains? unresolved|cannot be determined|not resolved|not settled|not established|not been established|do not prove|仍未解决|尚未解决|"
                   r"无法确定|未能确定|仍未有结论|尚未有结论|"
                   r"没有.*披露|未找到.*明确|no passage|no explicit|not located|not retrieved|未检索到", g, re.I)
     )
@@ -250,42 +284,8 @@ def nonblocking_gap(question: str, gap: str, *, full_scan: bool = False) -> bool
         return True
     if negation and scope_note and not unresolved:
         return True
-    if negation and full_scan and not re.search(
-        r"failed evidence checks|断言未|withheld|已停止或移除|"
-        r"remains? unresolved|cannot be determined|无法确定|未能确定|尚待确认|仍有待|"
-        r"time budget|时间预算|research was aborted|模型请求失败",
-        g,
-        re.I,
-    ):
-        # A completed full-filing scan is the backing a negative finding needs:
-        # "the filing does not deny X" is then an evidence-backed result, not an
-        # unfinished search. Earlier phrasing lists kept losing to the model's
-        # own words ("no passage examined", "the searched excerpts"), so the
-        # default is now the scan itself, with only the three hard blocks above.
-        return True
-    if negation and full_scan and re.search(
-        r"document-wide|entire filing|whole filing|anywhere in the filing|"
-        r"exhaustive review|full filing|整份文件|整份年报|全文|穷尽扫描|全篇|"
-        # The model reports the scan result in its own words: "no passage
-        # examined/expressly denying…", "the searched excerpts …", "limited to
-        # the cited passages". These are the same scope statement.
-        r"no passage (?:examined|expressly|retrieved|directly|contains)|"
-        r"targeted searches|searched (?:excerpts|passages)|"
-        r"limited to the (?:cited|retrieved|searched)|not (?:established|found) "
-        r"(?:among|in|by) the (?:retrieved|searched|cited)|"
-        r"no statement expressly denying|no (?:explicit|affirmative) .{0,40}(?:denial|statement)",
-        g,
-        re.I,
-    ) and not re.search(
-        r"(?<!non-)(?<!non )\bmateriality\b|realized|actual|实际|实质|重大影响|"
-        r"尚待确认|remains? unresolved|pending",
-        g,
-        re.I,
-    ):
-        # The deterministic prefetch has scanned every locally indexed passage
-        # of the requested filing. A qualified "not found in the full local
-        # scan" is a methodological note, not a missing requested fact.
-        return True
+    # A keyword scan covers indexed text, not every possible paraphrase.
+    # It cannot waive an unresolved proposition or certify document-wide absence.
     if risk and re.search(
         r"no quantified|does not quantify|qualitatively|not available as a typed|"
         r"no typed (?:structured )?(?:financial )?metric|typed numeric|"
