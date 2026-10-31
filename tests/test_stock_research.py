@@ -841,7 +841,7 @@ def test_repair_feedback_preserves_exact_approved_claims_and_question(tools):
     assert feedback["findings"]
 
 
-def test_graph_repair_can_copy_approved_claim_without_second_review(tools):
+def test_graph_repair_copies_approved_claim_but_rechecks_changed_coverage(tools):
     class Gateway:
         reviews = 0
         drafts = 0
@@ -903,7 +903,7 @@ def test_graph_repair_can_copy_approved_claim_without_second_review(tools):
     answer = ResearchAgent(Settings(home=tools.corpus.home, max_rounds=3), gateway).run(
         ResearchRequest(question="苹果股票怎么样？", ticker="AAPL"), tools
     )
-    assert gateway.drafts == 2 and gateway.reviews == 1
+    assert gateway.drafts == 2 and gateway.reviews == 2
     assert answer.answer[0]["text"] == "年度营收同比增加；持续性仍需后续披露验证。"
     assert any(t["stage"] == "semantic_review_cached" for t in answer.trace)
 

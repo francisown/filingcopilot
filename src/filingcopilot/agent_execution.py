@@ -283,6 +283,13 @@ class ExecutionMixin:
                 "reason": "Verified figures alone do not answer the requested explanation",
             })
         unresolved = unresolved_proposition_gaps(state["verified"], question)
+        resolution = state.get("answer_resolution_review")
+        if resolution and resolution.get("outcome") == "unresolved":
+            unresolved.append(
+                "所问命题仍未解决；审核未找到足以确认或反驳该主张的直接证据。"
+                if re.search(r"[\u4e00-\u9fff]", question)
+                else "The requested proposition remains unresolved: review found no direct evidence settling the requested claim."
+            )
         if unresolved:
             gaps.extend(gap for gap in unresolved if gap not in gaps)
             state["trace"].append({"stage": "answer_coverage", "unresolved_proposition": True})

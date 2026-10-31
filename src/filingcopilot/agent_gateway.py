@@ -31,6 +31,8 @@ class OpenAIGateway:
         # Models that rejected tool_choice="required" (for example thinking-mode
         # providers). Detected once per model, then served with "auto".
         self._required_unsupported: set[str] = set()
+        self._json_mode_unsupported: set[str] = set()
+        self._json_schema_unsupported: set[str] = set()
         # Provider headers are optional; ignore malformed JSON configuration.
         extra_headers = {}
         raw_headers = os.getenv("FC_EXTRA_HEADERS", "").strip()
@@ -188,6 +190,22 @@ class OpenAIGateway:
     def _complete_once(
         self, model: str, messages: list, tools: list | None, review: bool
     ) -> dict:
+        # Reviews return data, not executable actions. Some provider tool
+        # adapters corrupt nested arguments or leak tool markup into content.
+        # Request the scalar review schema as ordinary JSON instead.
+        json_review = bool(
+            review and tools and len(tools) == 1
+            and tools[0].get("function", {}).get("name") == "submit_review"
+            and any(key.endswith("_source_supported") for key in
+                    tools[0]["function"]["parameters"].get("properties", {}))
+        )
+        review_schema = tools[0]["function"]["parameters"] if json_review else None
+        if json_review:
+            messages = [*messages, {"role": "user", "content":
+                "Transport instruction: return one JSON object only. Do not call or describe a tool; "
+                "do not output XML, code fences or encoded JSON strings. Preserve the review standards. "
+                "Use exactly these scalar fields: " + json.dumps(tools[0]["function"]["parameters"], ensure_ascii=False)}]
+            tools = None
         kwargs = {
             "model": model,
             "messages": messages,
@@ -207,6 +225,10 @@ class OpenAIGateway:
         if tools:
             kwargs.update(tools=tools)
         required = bool(tools) and model not in self._required_unsupported
+        json_mode = (
+            "json_schema" if model not in self._json_schema_unsupported
+            else "json_object" if model not in self._json_mode_unsupported else None
+        ) if json_review else None
         started = time.perf_counter()
         retries = []
         # A capability downgrade is allowed once in addition to the bounded
@@ -225,6 +247,12 @@ class OpenAIGateway:
                 call_kwargs = dict(kwargs)
                 if tools:
                     call_kwargs["tool_choice"] = "required" if required else "auto"
+                if json_mode:
+                    call_kwargs["response_format"] = {"type": json_mode}
+                    if json_mode == "json_schema":
+                        call_kwargs["response_format"]["json_schema"] = {
+                            "name": "filing_review", "strict": True, "schema": review_schema,
+                        }
                 response = self.client.chat.completions.create(
                     **call_kwargs,
                     timeout=bounded_timeout(self.settings.model_timeout),
@@ -232,6 +260,17 @@ class OpenAIGateway:
                 break
             except (APIConnectionError, APIStatusError) as exc:
                 status = exc.status_code if isinstance(exc, APIStatusError) else None
+                if json_mode and status == 400 and "response_format" in str(exc).lower():
+                    if json_mode == "json_schema":
+                        self._json_schema_unsupported.add(model)
+                        json_mode = "json_object"
+                    else:
+                        self._json_mode_unsupported.add(model)
+                        json_mode = None
+                    retries.append({"attempt": attempt, "error_type": type(exc).__name__,
+                                    "status": status, "fallback": json_mode or "prompted_json"})
+                    exc.gateway_retries = retries
+                    continue
                 # Some providers reject tool_choice="required" (thinking-mode
                 # models). Fall back to "auto" for this model instead of failing
                 # the whole run; the prompt still asks for a tool call.

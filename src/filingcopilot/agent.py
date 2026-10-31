@@ -218,6 +218,8 @@ class AgentState(TypedDict):
     submission: Submission | None
     verified: list
     review_cache: dict
+    review_scope_cache: dict
+    answer_resolution_review: dict | None
     review_conflicts: set
     verified_candidate: Submission | None
     retained_gaps: list
@@ -936,6 +938,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "submission": None,
                 "verified": [],
                 "review_cache": {},
+                "review_scope_cache": {},
+                "answer_resolution_review": None,
                 "review_conflicts": set(),
                 "verified_candidate": None,
                 "retained_gaps": [],

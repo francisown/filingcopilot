@@ -9,7 +9,7 @@ from filingcopilot.models import ResearchRequest
 from filingcopilot.settings import Settings
 
 
-@pytest.mark.parametrize("encoding", ["array", "envelope_tail", "retry_truncated", "always_truncated"])
+@pytest.mark.parametrize("encoding", ["array", "envelope_tail", "retry_truncated", "always_truncated", "flat"])
 @pytest.mark.parametrize("supported", [True, False])
 def test_encoded_review_preserves_verdict_and_gap_through_agent(tools, encoding, supported):
     tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
@@ -24,6 +24,14 @@ def test_encoded_review_preserves_verdict_and_gap_through_agent(tools, encoding,
                 verdicts = [{"index": 0, "supported": supported, "reason": "source verdict"}]
                 gaps = [{"index": 0, "required_missing": False, "reason": "unrequested amount"}]
                 payload = {"verdicts": json.dumps(verdicts), "gap_verdicts": json.dumps(gaps)}
+                if encoding == "flat":
+                    properties = schemas[0]["function"]["parameters"]["properties"]
+                    assert all(p["type"] in {"boolean", "string"} for p in properties.values())
+                    payload = {"claim_0_source_supported": True,
+                               "claim_0_inference_supported": supported,
+                               "claim_0_document_absence": False,
+                               "claim_0_reason": "source verdict",
+                               "gap_0_required_missing": False, "gap_0_reason": "unrequested amount"}
                 if encoding == "envelope_tail":
                     payload = {"verdicts": json.dumps(verdicts) + ', "gap_verdicts": ' + json.dumps(gaps) + '}'}
                 name = "submit_review"
@@ -71,3 +79,13 @@ def test_ambiguous_incomplete_or_coerced_reviews_are_rejected(content):
 
     with pytest.raises(ValueError):
         ReviewBatch.model_validate(parse_review(content))
+
+
+@pytest.mark.parametrize("document_absence", [True, False])
+def test_review_scope_classification_cannot_be_overridden_by_approval(document_absence):
+    from filingcopilot.review_protocol import decode_review
+
+    payload = {"claim_7_source_supported": True, "claim_7_inference_supported": True,
+               "claim_7_document_absence": document_absence, "claim_7_reason": "Binary approvals may be inconsistent"}
+    result, _ = decode_review(payload, [7], [])
+    assert result["verdicts"][0]["supported"] is not document_absence

@@ -77,7 +77,9 @@ def test_default_allowance_prevents_reasoning_only_stock_result(tools, budget_st
 
     def handler(request):
         body = json.loads(request.read())
-        review = body["tools"][0]["function"]["name"] == "submit_review"
+        review = body.get("response_format", {}).get("type") in {"json_object", "json_schema"} or (
+            body.get("tools", [{}])[0].get("function", {}).get("name") == "submit_review"
+        )
         if review == (budget_stage == "review"):
             budgets.append(body["max_tokens"])
             if body["max_tokens"] < 8192:

@@ -1313,9 +1313,10 @@ risk rather than its realization. A planned/scheduled dividend or payment (will 
 does not prove completed payment even when its scheduled date precedes the research date.
 Keep the plan qualifier. Share reclamation/cancellation is not a repurchase or buyback unless
 the cited source explicitly says shares were purchased. Return false if a claim combines supported and unsupported parts.
-Call submit_review with {"verdicts":[{"index":0,"supported":true,"reason":"brief reason"}]}.
-Return every supplied index exactly once. Keep reasoning brief and each reason short; output
-the verdict tool promptly. Be conservative."""
+Return the review using exactly the schema supplied with this request. For each claim independently
+judge its source premises and its logical inference: both must pass. Return every supplied index.
+Keep reasoning brief and each reason short; output
+the verdict promptly. Be conservative."""
 
 
 def parse_review(content: str) -> dict:

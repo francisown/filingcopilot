@@ -461,8 +461,10 @@ class SummaryGateway:
             payload = json.loads(messages[1]["content"])
             claims = payload["claims"]
             assert payload["required_indexes"] == [c["index"] for c in claims]
-            schema = tools[0]["function"]["parameters"]["properties"]["verdicts"]
-            assert schema["items"]["properties"]["index"]["enum"] == payload["required_indexes"]
+            schema = tools[0]["function"]["parameters"]["properties"]
+            assert {key for key in schema if key.endswith("_source_supported")} == {
+                f"claim_{index}_source_supported" for index in payload["required_indexes"]
+            }
             return {
                 "message": {
                     "content": json.dumps(
