@@ -461,6 +461,26 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 for schema in schemas:
                     if schema["function"]["name"] == "submit_answer":
                         schema["function"]["parameters"]["properties"]["gaps"]["maxItems"] = 0
+            finalization_guidance = ""
+            if finalizing and narrative_ready:
+                shape = question_shape(state["question"])
+                if shape == "causality":
+                    finalization_guidance = (
+                        " For this cause question, lead with one concise synthesis of the disclosed "
+                        "drivers, then add only the distinct supported drivers needed to answer it. "
+                        "Do not paste full filing paragraphs or submit a numeric table as the explanation."
+                    )
+                elif shape == "negation":
+                    finalization_guidance = (
+                        " For this negation question, state the direct conclusion first—whether the "
+                        "filing denied the proposition, contradicted it, or left it unresolved—then "
+                        "cite the matching evidence. Do not submit only a financial fact."
+                    )
+                elif shape == "risk":
+                    finalization_guidance = (
+                        " For this risk question, give one short synthesized claim per requested risk "
+                        "category. Do not paste full filing paragraphs; use the observed passages as support."
+                    )
             state["messages"].append(
                 {
                     "role": "user",
@@ -477,6 +497,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     ),
                 }
             )
+            if finalization_guidance:
+                state["messages"][-1]["content"] += finalization_guidance
             progress("reason", "Agent 正在选择研究步骤。", round=state["rounds"])
             messages = [dict(message) for message in state["messages"]]
             if messages and messages[0]["role"] == "system":
