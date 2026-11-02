@@ -300,7 +300,14 @@ def _concentration_bonus(slot: str, text: str) -> int:
     return 0
 
 
-def _negative_evidence(ticker: str, filing: dict, question: str, all_passages, slot_counts: dict) -> dict:
+def _negative_evidence(
+    ticker: str,
+    filing: dict,
+    question: str,
+    all_passages,
+    slot_counts: dict,
+    matching_passages=(),
+) -> dict:
     """Build the deterministic full-filing scan record for a negation question."""
     negative_hits = int(slot_counts.get("否定", 0))
     digest = hashlib.sha256(f"{filing['id']}|{question}".encode()).hexdigest()[:16]
@@ -325,6 +332,7 @@ def _negative_evidence(ticker: str, filing: dict, question: str, all_passages, s
         "scope": "full_filing_keyword_scan",
         "passages_scanned": len(all_passages),
         "slot_hits": dict(slot_counts),
+        "matching_passages": list(matching_passages),
         "proposition": question,
         "support_limit": (
             "Exact keyword pattern only; paraphrases and semantic absence are not assessed."
@@ -589,6 +597,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             ("反证", "|".join(re.escape(term) for term in subjects) or r"(?!)", subjects),
         ]
     slot_counts = {name: 0 for name, _, _ in slots}
+    slot_passages = {name: [] for name, _, _ in slots}
     # Anchor the scan to entities the question actually names.  The filing can
     # contain many capitalized labels ("Other", "Fixed", table headers, and
     # accounting concepts) that look like segments to a surface matcher.  A
@@ -723,6 +732,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             if purpose not in entry["purposes"]:
                 entry["purposes"].append(purpose)
             slot_counts[slot] = slot_counts.get(slot, 0) + 1
+            slot_passages[slot].append(passage.id)
             if slot != "分部" and slot_counts[slot] >= 2:
                 break
             if slot == "分部" and slot_counts[slot] >= 8:
@@ -730,7 +740,14 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
         if len(observed) >= 8 and all(slot_counts.get(name, 0) for name, _, _ in slots):
             break
     if category == "negation" and all_passages:
-        negative = _negative_evidence(ticker, filing, question, all_passages, slot_counts)
+        negative = _negative_evidence(
+            ticker,
+            filing,
+            question,
+            all_passages,
+            slot_counts,
+            slot_passages.get("否定", []),
+        )
         tools.ledger[negative["id"]] = negative
         observed[negative["id"]] = negative
     structured_evidence = []

@@ -50,7 +50,13 @@ def _review_evidence(item: dict) -> dict:
     if "statement_row" in item:
         result["statement_row"] = item["statement_row"]
     if item.get("kind") == "negative_evidence":
-        for key in ("scan_scope", "passages_scanned", "slot_hits", "support_limit"):
+        for key in (
+            "scan_scope",
+            "passages_scanned",
+            "slot_hits",
+            "matching_passages",
+            "support_limit",
+        ):
             result[key] = item.get(key)
     return result
 

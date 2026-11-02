@@ -690,16 +690,46 @@ class _SubmissionVerifier:
         else:
             self._verify_prose(index, claim, evidence)
 
+    @staticmethod
+    def _negative_review_evidence(item: dict) -> dict:
+        return {
+            "kind": "negative_evidence",
+            "section": item.get("section"),
+            "ticker": item["ticker"],
+            "text": item["text"],
+            "comparison_periods": [],
+            "filings": item.get("filings")
+            or [
+                {
+                    "ticker": item["ticker"],
+                    "form": item.get("form"),
+                    "filed": item.get("filed"),
+                    "period_end": item.get("period_end"),
+                }
+            ],
+            "scan_scope": item["scope"],
+            "passages_scanned": item["passages_scanned"],
+            "slot_hits": item["slot_hits"],
+            "matching_passages": list(item.get("matching_passages") or []),
+            "support_limit": item.get("support_limit"),
+        }
+
     def _verify_negative(self, index: int, claim: Claim, evidence: list[dict]) -> None:
-        """Accept only a bounded result from a complete indexed full-filing scan."""
-        if claim.kind not in ("narrative", "analysis") or len(evidence) != 1:
+        """Accept a bounded zero-hit conclusion or a reviewed subject-mismatch conclusion."""
+        if claim.kind not in ("narrative", "analysis"):
             self.errors.append(
-                f"claim {index}: a negative scan conclusion needs one narrative/analysis claim "
-                "bound to exactly one negative_evidence record"
+                f"claim {index}: a negative scan conclusion needs a narrative/analysis claim"
             )
             return
-        item = evidence[0]
-        if item.get("kind") != "negative_evidence" or item.get("scope") != NEGATIVE_SCAN_SCOPE:
+        negative_items = [item for item in evidence if item.get("kind") == "negative_evidence"]
+        if len(negative_items) != 1:
+            self.errors.append(
+                f"claim {index}: a negative scan conclusion needs exactly one "
+                "negative_evidence record"
+            )
+            return
+        item = negative_items[0]
+        if item.get("scope") != NEGATIVE_SCAN_SCOPE:
             self.errors.append(
                 f"claim {index}: negative conclusion requires a full_filing_keyword_scan record"
             )
@@ -709,22 +739,11 @@ class _SubmissionVerifier:
                 f"claim {index}: negative scan did not cover enough indexed passages"
             )
             return
-        if int((item.get("slot_hits") or {}).get("否定", -1)) != 0:
-            self.errors.append(
-                f"claim {index}: negative conclusion requires a zero explicit-negative slot; "
-                "the scan found matching wording"
-            )
-            return
         statement = claim.statement.strip()
-        if (
-            not statement
-            or _NEGATIVE_ABSOLUTE.search(statement)
-            or not _NEGATIVE_MARKER.search(statement)
-            or not _NEGATIVE_SCOPE_MARKER.search(statement)
-        ):
+        if not statement or _NEGATIVE_ABSOLUTE.search(statement):
             self.errors.append(
-                f"claim {index}: negative conclusion must stay bounded to the indexed explicit "
-                "pattern; do not claim the entire filing never discusses the topic"
+                f"claim {index}: negative conclusion must stay bounded to the indexed "
+                "explicit pattern; do not claim the entire filing never discusses the topic"
             )
             return
         if _financial_number_tokens(statement) or re.search(
@@ -745,53 +764,99 @@ class _SubmissionVerifier:
                     f"claim {index}: negative evidence does not match the requested fiscal year"
                 )
                 return
-        # The full-scan record is a deterministic observation. It is accepted
-        # here and deliberately not sent to the semantic reviewer: the reviewer
-        # cannot inspect the scan and would otherwise reject the bounded result
-        # as a selected-excerpt document-absence claim. It remains in the
-        # narrative context so the completeness/gap review can see that the
-        # bounded question is already answered.
-        self.accepted.append(
-            {
-                "index": index,
-                "kind": claim.kind,
-                "text": statement,
-                "evidence_ids": claim.evidence_ids,
-                "verification": "deterministic_full_scan",
-                "scan_scope": NEGATIVE_SCAN_SCOPE,
-            }
-        )
-        review_evidence = {
-            "kind": "negative_evidence",
-            "section": item.get("section"),
-            "ticker": item["ticker"],
-            "text": item["text"],
-            "comparison_periods": [],
-            "filings": item.get("filings")
-            or [
+        hits = int((item.get("slot_hits") or {}).get("否定", -1))
+        if hits == 0:
+            if len(evidence) != 1:
+                self.errors.append(
+                    f"claim {index}: a zero-hit negative conclusion must bind exactly one "
+                    "negative_evidence record"
+                )
+                return
+            if not _NEGATIVE_MARKER.search(statement) or not _NEGATIVE_SCOPE_MARKER.search(statement):
+                self.errors.append(
+                    f"claim {index}: negative conclusion must stay bounded to the indexed "
+                    "explicit pattern"
+                )
+                return
+            # A zero-hit full-scan result is deterministic. It is accepted here
+            # and kept as context for the completeness/gap review, not sent to
+            # the semantic reviewer as a selected-excerpt absence claim.
+            self.accepted.append(
                 {
-                    "ticker": item["ticker"],
-                    "form": item.get("form"),
-                    "filed": item.get("filed"),
-                    "period_end": item.get("period_end"),
+                    "index": index,
+                    "kind": claim.kind,
+                    "text": statement,
+                    "evidence_ids": claim.evidence_ids,
+                    "verification": "deterministic_full_scan",
+                    "scan_scope": NEGATIVE_SCAN_SCOPE,
                 }
-            ],
-            "scan_scope": item["scope"],
-            "passages_scanned": item["passages_scanned"],
-            "slot_hits": item["slot_hits"],
-            "support_limit": item.get("support_limit"),
-        }
-        self.narratives.append(
-            {
-                "index": index,
-                "kind": claim.kind,
-                "statement": statement,
-                "evidence": [review_evidence],
-                "evidence_ids": claim.evidence_ids,
-                "source_quarter_labels": [],
-                "scan_scope": NEGATIVE_SCAN_SCOPE,
-                "deterministic": True,
-            }
+            )
+            self.narratives.append(
+                {
+                    "index": index,
+                    "kind": claim.kind,
+                    "statement": statement,
+                    "evidence": [self._negative_review_evidence(item)],
+                    "evidence_ids": claim.evidence_ids,
+                    "source_quarter_labels": [],
+                    "scan_scope": NEGATIVE_SCAN_SCOPE,
+                    "deterministic": True,
+                }
+            )
+            return
+        if hits > 0:
+            matching = set(item.get("matching_passages") or [])
+            cited = [
+                source
+                for source in evidence
+                if source is not item and source.get("id") in matching
+            ]
+            if not matching or not cited:
+                self.errors.append(
+                    f"claim {index}: nonzero explicit-negative hits require at least one cited "
+                    "matching passage and a bounded subject/period mismatch conclusion"
+                )
+                return
+            mismatch = re.compile(
+                r"matching|none of|does not match|do not match|concern|refer to|subject|period|"
+                r"与.*无关|并非|不匹配|不涉及|不属于",
+                re.I,
+            )
+            if not mismatch.search(statement) or not _NEGATIVE_MARKER.search(statement):
+                self.errors.append(
+                    f"claim {index}: nonzero explicit-negative hits must be described as a "
+                    "bounded subject/period mismatch, not as support for the proposition"
+                )
+                return
+            # The mismatch is a semantic judgment; keep it reviewable. The
+            # verifier has checked that the cited passages are the scan's actual
+            # explicit-negative hits; the reviewer checks whether they concern a
+            # different subject/period.
+            review_evidence = [self._negative_review_evidence(item), *cited]
+            self.accepted.append(
+                {
+                    "index": index,
+                    "kind": claim.kind,
+                    "text": statement,
+                    "evidence_ids": claim.evidence_ids,
+                    "verification": "negative_scan_mismatch",
+                    "scan_scope": NEGATIVE_SCAN_SCOPE,
+                }
+            )
+            self.narratives.append(
+                {
+                    "index": index,
+                    "kind": claim.kind,
+                    "statement": statement,
+                    "evidence": review_evidence,
+                    "evidence_ids": claim.evidence_ids,
+                    "source_quarter_labels": [],
+                    "scan_scope": NEGATIVE_SCAN_SCOPE,
+                }
+            )
+            return
+        self.errors.append(
+            f"claim {index}: negative scan record has an invalid explicit-negative slot count"
         )
 
     def _verify_external(self, index: int, claim: Claim, evidence: list[dict]) -> None:
@@ -1453,7 +1518,9 @@ A negative_evidence record with scope=full_filing_keyword_scan is a deterministi
 indexed filing, not a selected excerpt: a claim that no indexed passage matched the explicit
 negative pattern, limited to that scan, may be supported; set document_absence=false and do not
 require a positive passage. Reject it if it says the filing never discusses the topic or
-generalizes to paraphrases.
+generalizes to paraphrases. A nonzero explicit-negative slot with cited matching_passages may
+support a bounded subject/period mismatch observation; review those passages and set
+document_absence=false only when the claim stays limited to that mismatch.
 "Against a blanket denial", "inconsistent with" and "与否认并不一致" add a refutation, not just
 an observation. A historical or product-specific decline cannot refute a different-period or
 company-wide proposition. Reject that added inference while allowing a separately stated,

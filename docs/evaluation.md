@@ -15,24 +15,23 @@ research ceiling, a 300-second review timeout and a 16,384-token review budget.
 | Metric | Result |
 |---|---:|
 | Captured / eligible rows | 140 / 140 |
-| Answerable coverage | **95 / 100** |
+| Answerable coverage | **97 / 100** |
 | Expected insufficient-evidence refusals | **20 / 20** |
 | Market-source policy cases | **20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Citation binding on delivered rows | **1.000** |
 | Citation binding across all rows | **0.857** |
-| Model-backed P50 / P95 | **226.4 s / 1,051.1 s** |
-| Reported tokens | **4,044,735** |
+| Model-backed P50 / P95 | **237.7 s / 842.1 s** |
+| Reported tokens | **4,868,227** |
 | Runner errors / deadline timeouts | **0 / 0** |
-| Raw SEC numeric | **104 matched / 0 mismatched / 27 unassessed** |
-| Regression suite | **2,305 passed** |
+| Raw SEC numeric | **100 matched / 0 mismatched / 27 unassessed** |
+| Regression suite | **2,307 passed** |
 
-Five answerable rows delivered partial answers: `semantic-causality-002`,
-`semantic-causality-008`, `semantic-causality-019`, `semantic-negation-001` and
-`semantic-negation-006`. They retain explicit gaps rather than unverified
-completion. The two negation rows contain explicit-negative wording that does
-not match the requested subject/period; the causality rows are coverage-review
-outcomes in this run.
+Three answerable rows delivered partial answers: `semantic-causality-015`,
+`semantic-causality-019` and `semantic-risk-018`. They retain explicit gaps
+rather than unverified completion; all three are coverage-review outcomes in
+this run. The negation rows are answered, including the explicit-negative
+subject/period mismatch case.
 
 The 100 answerable rows cover numeric, cross-period, causality, negation and risk
 questions. The remaining 40 rows are designed refusals or market-source policy

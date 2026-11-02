@@ -316,10 +316,14 @@ def _research_system_prompt(
                 "matched the explicit negative pattern. For a 'did the filing state/deny X' question, "
                 "you may answer 'No' when that bounded scan result is present: state that no indexed "
                 "passage contains the explicit statement, cite the negative_evidence ID, and describe "
-                "the filing's actual conditional risk language. Do not generalize to paraphrases or "
-                "claim the filing never discusses the topic. For a proposed negative, distinguish an "
-                "explicit denial, a realized matching counterexample, and an unresolved proposition. "
-                "A possible future risk is compatible with a denial of past harm."
+                "the filing's actual conditional risk language. If the '否定' slot has hits, inspect "
+                "its matching_passages; if none matches the question's subject/period, you may answer "
+                "'No matching explicit statement' and cite the negative_evidence plus the non-matching "
+                "passage IDs. Do not treat the hit count as support for the proposition. Do not "
+                "generalize to paraphrases or claim the filing never discusses the topic. For a "
+                "proposed negative, distinguish an explicit denial, a realized matching counterexample, "
+                "and an unresolved proposition. A possible future risk is compatible with a denial of "
+                "past harm."
                 if question_shape(request.question) == "negation"
                 else "\nThe full-filing scan in narrative_source_overview is a local keyword/pattern "
                 "search over indexed passages, not a semantic review of every sentence. "
@@ -556,7 +560,10 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                         "statement of it. If negative_evidence covers the full filing and its "
                         "explicit-negative slot is zero, answer 'No' to 'did the filing state/deny X' "
                         "with that bounded scan result, cite the negative_evidence ID, and do not add "
-                        "an unresolved-document gap. Do not submit only a financial fact."
+                        "an unresolved-document gap. If the slot has hits but none of its "
+                        "matching_passages matches the requested subject/period, state 'No matching "
+                        "explicit statement' and cite both the negative_evidence and those passage IDs. "
+                        "Do not submit only a financial fact."
                     )
                 elif shape == "risk":
                     finalization_guidance = (
@@ -1317,7 +1324,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
         ]
         quality_notes = []
         negative_resolved = any(
-            claim.get("verification") == "deterministic_full_scan"
+            claim.get("verification") in {"deterministic_full_scan", "negative_scan_mismatch"}
             for claim in state["verified"]
         )
         coverage_supported = bool(

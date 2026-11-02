@@ -2,15 +2,9 @@
   "scope": "Raw SEC typed source/value check only; not narrative accuracy",
   "counts": {
     "unassessed": 27,
-    "matched": 104
+    "matched": 100
   },
   "rows": [
-    {
-      "question": "semantic-causality-001",
-      "evidence_id": "ifrs-fact-0cff6225ad63e7423734",
-      "status": "unassessed",
-      "reason": "raw companyfacts unavailable"
-    },
     {
       "question": "semantic-causality-001",
       "evidence_id": "calc-52774170313e9fed95ff",
@@ -25,19 +19,13 @@
     },
     {
       "question": "semantic-causality-003",
-      "evidence_id": "calc-44f86be4236060442696",
-      "status": "matched",
-      "reason": "raw inputs and recomputed arithmetic"
-    },
-    {
-      "question": "semantic-causality-003",
       "evidence_id": "calc-ab9890ff59b2d84aea26",
       "status": "matched",
       "reason": "raw inputs and recomputed arithmetic"
     },
     {
-      "question": "semantic-causality-004",
-      "evidence_id": "calc-f932624984af13daab9e",
+      "question": "semantic-causality-003",
+      "evidence_id": "calc-44f86be4236060442696",
       "status": "matched",
       "reason": "raw inputs and recomputed arithmetic"
     },
@@ -66,22 +54,10 @@
       "reason": "raw inputs and recomputed arithmetic"
     },
     {
-      "question": "semantic-causality-007",
-      "evidence_id": "calc-2213d9f32e2d294d5d27",
-      "status": "matched",
-      "reason": "raw inputs and recomputed arithmetic"
-    },
-    {
       "question": "semantic-causality-008",
       "evidence_id": "calc-c7e59c054cdcf61ee5bc",
       "status": "matched",
       "reason": "raw inputs and recomputed arithmetic"
-    },
-    {
-      "question": "semantic-causality-009",
-      "evidence_id": "fact-61f054fc5a812a72670e",
-      "status": "matched",
-      "reason": "exact SEC row"
     },
     {
       "question": "semantic-causality-009",
@@ -91,15 +67,15 @@
     },
     {
       "question": "semantic-causality-010",
-      "evidence_id": "fact-db5985e0dcd5e259a2e3",
-      "status": "matched",
-      "reason": "exact SEC row"
-    },
-    {
-      "question": "semantic-causality-010",
       "evidence_id": "calc-714789cb49e23be755af",
       "status": "matched",
       "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-011",
+      "evidence_id": "calc-705d69980b68017b768d",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
     },
     {
       "question": "semantic-causality-011",
@@ -130,6 +106,12 @@
       "evidence_id": "calc-28f0150cc5e96701c6cc",
       "status": "matched",
       "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-014",
+      "evidence_id": "fact-0e384ff84f18d3f33e00",
+      "status": "matched",
+      "reason": "exact SEC row"
     },
     {
       "question": "semantic-causality-014",
@@ -182,12 +164,6 @@
     {
       "question": "semantic-causality-019",
       "evidence_id": "calc-e9a1f8eb1b79a9f67679",
-      "status": "matched",
-      "reason": "raw inputs and recomputed arithmetic"
-    },
-    {
-      "question": "semantic-causality-020",
-      "evidence_id": "calc-59c11fe77af9e1d03432",
       "status": "matched",
       "reason": "raw inputs and recomputed arithmetic"
     },

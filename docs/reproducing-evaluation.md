@@ -94,7 +94,7 @@ Support records: [FinDER](validation/finder-support-2026-10-26.json) and
   they are not an untouched final test.
 - BGE adds about 1.84s P95 on CPU; evidence-page keeps title rerank.
 - The live 140-question model run is **not** reproduced by these commands; it
-  needs provider credentials and the latest retained record reports P95 1,051.1s /
-  4.04M tokens.
+  needs provider credentials and the latest retained record reports P95 842.1s /
+  4.87M tokens.
 - Self-review and independent review status are described in
   [evaluation.md](evaluation.md). Do not label these numbers as human accuracy.

@@ -24,6 +24,7 @@ def negative_record(**overrides):
         "scope": "full_filing_keyword_scan",
         "passages_scanned": 500,
         "slot_hits": {"否定": 0, "反证": 2},
+        "matching_passages": ["p1"],
         "proposition": "苹果 FY2025 是否披露没有重大供应链影响？",
         "support_limit": "Exact keyword pattern only; paraphrases are not assessed.",
         "filings": [
@@ -109,7 +110,60 @@ def test_nonzero_explicit_negative_slot_is_rejected(tools):
     )
 
     assert not accepted
-    assert any("zero explicit-negative" in error for error in errors)
+    assert any("matching passage" in error or "nonzero explicit-negative" in error for error in errors)
+
+
+def test_nonzero_negative_hits_with_a_cited_matching_passage_are_reviewable(tools):
+    tools.ledger["negative-test"] = negative_record(slot_hits={"否定": 2, "反证": 2})
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    claim = Claim(
+        kind="narrative",
+        evidence_ids=["negative-test", "p1"],
+        statement=(
+            "The explicit-negative passages concern COVID-19 and cybersecurity, not the "
+            "requested supply-chain proposition; no matching statement appears in the scan."
+        ),
+    )
+
+    def reviewer(question, narratives):
+        return {
+            "verdicts": [
+                {"index": claim["index"], "supported": True, "reason": "mismatch verified"}
+                for claim in narratives
+            ]
+        }
+
+    accepted, errors = verify_submission(
+        Submission(claims=[claim]),
+        tools,
+        "Did the filing state that there was no material supply-chain impact?",
+        semantic_review=reviewer,
+        focus_ticker="AAPL",
+    )
+
+    assert not errors
+    assert accepted and accepted[0]["verification"] == "negative_scan_mismatch"
+
+
+def test_nonzero_negative_hits_without_a_matching_passage_are_rejected(tools):
+    tools.ledger["negative-test"] = negative_record(slot_hits={"否定": 2, "反证": 2})
+    claim = Claim(
+        kind="narrative",
+        evidence_ids=["negative-test"],
+        statement=(
+            "The explicit-negative passages concern a different subject; no matching statement."
+        ),
+    )
+
+    accepted, errors = verify_submission(
+        Submission(claims=[claim]),
+        tools,
+        "Did the filing state that there was no material supply-chain impact?",
+        focus_ticker="AAPL",
+    )
+
+    assert not accepted
+    assert any("matching passage" in error for error in errors)
 
 
 def test_negative_claim_must_stay_qualitative(tools):

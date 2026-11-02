@@ -21,7 +21,7 @@ def review_tool(indexes: list[int], gap_indexes: list[int], *, resolution: bool 
         }
         properties[f"claim_{index}_document_absence"] = {
             "type": "boolean",
-            "description": "True if ANY sentence asserts that a statement is absent across an entire filing based only on selected passages, even if another sentence limits scope. False for a directly reported negative financial fact, an observation limited to the cited passages, or a bounded negative_evidence full-filing keyword-scan result stating that no indexed passage matched the explicit pattern without generalizing beyond it.",
+            "description": "True if ANY sentence asserts that a statement is absent across an entire filing based only on selected passages, even if another sentence limits scope. False for a directly reported negative financial fact, an observation limited to the cited passages, or a bounded negative_evidence scan result stating that no indexed passage matched the explicit pattern, including a reviewed subject/period mismatch in the scan's matching passages, without generalizing beyond it.",
         }
         properties[f"claim_{index}_reason"] = {"type": "string", "maxLength": 800}
         if index == coverage_index:
