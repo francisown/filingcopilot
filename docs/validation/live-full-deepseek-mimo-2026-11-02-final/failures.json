@@ -1,169 +1,106 @@
 [
   {
-    "id": "semantic-causality-005",
-    "category": "causality",
-    "ticker": "NVDA",
-    "question": "英伟达 FY2023 收入变化的披露原因是什么？",
-    "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
-    "status": "partial",
-    "answer": "NVDA FY2023 营业收入：269.74 亿美元（26,974,000,000.00 USD）。报告期间：2022-01-31 至 2023-01-29。\nNVDA FY2023 营业收入同比增长率：0.22%。\nGraphics - The gross margin of our Graphics segment decreased during fiscal year 2023 when compared to fiscal year 2022, primarily due to inventory and related provisions and lower margins of GeForce GPUs. Year Ended January 29, 2023 January 30, 2022 $ Change % Change ($ in millions) Research and development expenses $ 7,339 $ 5,268 $ 2,071 39 % % of revenue 27.2 % 19.6 % Sales, general and administrative expenses 2,440 2,166 274 13 % % of revenue 9.1 % 8.0 % Acquisition termination cost 1,353 — 1,353 100 % % of revenue 5.0 % — % Total operating expenses $ 11,132 $ 7,434 $ 3,698 50 % % of revenue 41.3 % 27.6 % The increase in research and development expense for fiscal year 2023 was primarily driven by increased compensation, employee growth, engineering development costs, and data center infrastructure. The increase in sales, general and administrative expense for fiscal year 2023 was primarily driven by increased compensation and employee growth. We recorded an acquisition termination cost related to the Arm transaction of $1.35 billion in fiscal year 2023 reflecting the write-off of the prepayment provided at signing.\nGross profit consists of total revenue, net of allowances, less cost of revenue. Cost of revenue consists primarily of the cost of semiconductors, including wafer fabrication, assembly, testing and packaging, board and device costs, manufacturing support costs, including labor and overhead associated with such purchases, final test yield fallout, inventory and warranty provisions, memory and component costs, tariffs, and shipping costs. Cost of revenue also includes acquisition-related costs, development costs for license and service arrangements, IP-related costs, and stock-based compensation related to personnel associated with manufacturing operations. Gross margin was 56.9% and 64.9% for fiscal years 2023 and 2022, respectively. The decrease in fiscal year 2023 was primarily due to $2.17 billion of inventory provisions in fiscal year 2023, which consists of approximately $1.04 billion for inventory on hand and approximately $1.13 billion for inventory purchase obligations in excess of our current demand projections. Inventory provisions totaled $2.17 billion and $354 million for fiscal years 2023 and 2022, respectively. Sales of inventory that was previously written-off totaled $137 million and $111 million for fiscal years 2023 and 2022, respectively. As a result, the overall net effect on our gross margin was an unfavorable impact of 7.5% and 0.9% in fiscal years 2023 and 2022, respectively. Compute & Networking - The gross margin of our Compute & Networking segment decreased during fiscal year 2023 when compared to fiscal year 2022, primarily due to inventory provisions.\nYear Ended January 29, 2023 January 30, 2022 Change ($ in millions, except per share data) Revenue $ 26,974 $ 26,914 — % Gross margin 56.9 % 64.9 % Down 8.0 pts Operating expenses $ 11,132 $ 7,434 Up 50% Income from operations $ 4,224 $ 10,041 Down 58% Net income $ 4,368 $ 9,752 Down 55% Net income per diluted share $ 1.74 $ 3.85 Down 55% We specialize in markets where our computing platforms can provide tremendous acceleration for applications. These platforms incorporate processors, interconnects, software, algorithms, systems, and services to deliver unique value. Our platforms address four large markets where our expertise is critical: Data Center, Gaming, Professional Visualization, and Automotive. Revenue for fiscal year 2023 revenue was $26.97 billion, flat compared with a year ago. Data Center revenue was up 41% from a year ago led by strong growth from hyperscale customers and also reflects purchases made by several CSP partners to support multi-year cloud service agreements for our new NVIDIA AI cloud service offerings and our research and development activities. Gaming revenue was down 27% from a year ago reflecting lower sell-in to partners to help reduce channel inventory levels as global macro-economic conditions and COVID-19 related disruptions in China weighed on gaming demand. Professional Visualization revenue was down 27% from a year ago reflecting a lower sell-in to partners to help reduce channel inventory levels. Automotive revenue was up 60% from a year ago reflecting growth in sales of self-driving solutions, computing solutions for electric vehicle makers and strength in sales of AI cockpit solutions. The increase also included growth in automotive development arrangements.",
-    "evidence_ids": [
-      "calc-f69bd71c99843caf8964",
-      "fact-60242daf8f76de3d60cf",
-      "passage-11ce327cb9c5dd2d9e1a",
-      "passage-c5713dab312acf244679",
-      "passage-f8ae3cad85eb5055b801"
-    ],
-    "answer_claims": 5,
-    "has_citation": true,
-    "citation_supported": true,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "verification_findings": 9,
-    "budget_timeout": false,
-    "reasonable_refusal": false,
-    "wrong_refusal": false,
-    "gaps": [
-      "专业可视化与汽车业务收入变动仅有定性描述（减少渠道出货、自动驾驶与AI座舱方案销售增长），未见更细化的归因披露。",
-      "模型未完成原因或风险归纳；已保留同一申报中的逐字摘录，摘录不等同于综合结论。",
-      "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。",
-      "有 3 条断言未通过证据核验，已移除；其余已交付内容均已核验。"
-    ],
-    "latency_ms": 122735,
-    "cost_usd": null,
-    "run_id": "run-364ebef5777f4a6bae58dcf2fd3b4aae",
-    "model_calls": 7,
-    "reported_tokens": 64450,
-    "prompt_tokens": 58049,
-    "completion_tokens": 6401,
-    "review_model": "mimo-v2.6-flash",
-    "trace_summary": {
-      "tool_calls": 10,
-      "tool_names": [
-        "calculate",
-        "get_financial_fact",
-        "search_passages",
-        "submit_answer"
-      ],
-      "model_steps": 7,
-      "direct_text_rounds": 0,
-      "author_ms": 30397.0,
-      "review_ms": 91044.0,
-      "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
-      ]
-    },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-causality-007",
+    "id": "semantic-causality-002",
     "category": "causality",
     "ticker": "AAPL",
-    "question": "苹果 的 FY2025 利润率变化由哪些已披露因素解释？",
+    "question": "Why did Apple's revenue change in FY2024, based on filed evidence?",
     "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
     "status": "partial",
-    "answer": "AAPL FY2025 营业利润率：31.97%。\nAAPL FY2024 营业利润率：31.51%。\n2025 Change 2024 Change 2023 Americas $ 178,353 7 % $ 167,045 3 % $ 162,560 Europe 111,032 10 % 101,328 7 % 94,294 Greater China 64,377 (4) % 66,952 (8) % 72,559 Japan 28,703 15 % 25,052 3 % 24,257 Rest of Asia Pacific 33,696 10 % 30,658 4 % 29,615 Total net sales $ 416,161 6 % $ 391,035 2 % $ 383,285 Americas net sales increased during 2025 compared to 2024 primarily due to higher net sales of iPhone and Services. The weakness in foreign currencies relative to the U.S. dollar had an unfavorable year-over-year impact on Americas net sales during 2025. Europe net sales increased during 2025 compared to 2024 primarily due to higher net sales of Services, iPhone and Mac. Greater China net sales decreased during 2025 compared to 2024 primarily due to lower net sales of iPhone, partially offset by higher net sales of Mac. Japan net sales increased during 2025 compared to 2024 primarily due to higher net sales of iPhone, Services and iPad. Rest of Asia Pacific net sales increased during 2025 compared to 2024 primarily due to higher net sales of iPhone, Services and Mac.\n(1) Services net sales include amortization of the deferred value of services bundled in the sales price of certain products. iPhone net sales increased during 2025 compared to 2024 due to higher net sales of Pro models. Mac net sales increased during 2025 compared to 2024 primarily due to higher net sales of laptops and desktops. iPad net sales increased during 2025 compared to 2024 primarily due to higher net sales of iPad Air, iPad mini and iPad, partially offset by lower net sales of iPad Pro. Wearables, Home and Accessories net sales decreased during 2025 compared to 2024 primarily due to lower net sales of Accessories and Wearables. Services net sales increased during 2025 compared to 2024 primarily due to higher net sales from advertising, the App Store and cloud services.\n2025 2024 2023 Gross margin: Products $ 112,887 $ 109,633 $ 108,803 Services 82,314 71,050 60,345 Total gross margin $ 195,201 $ 180,683 $ 169,148 Gross margin percentage: Products 36.8 % 37.2 % 36.5 % Services 75.4 % 73.9 % 70.8 % Total gross margin percentage 46.9 % 46.2 % 44.1 % Products gross margin increased during 2025 compared to 2024 primarily due to favorable costs and a different mix of products, partially offset by tariff costs. Products gross margin percentage decreased during 2025 compared to 2024 primarily due to a different mix of products and tariff costs, partially offset by other favorable costs. Services gross margin increased during 2025 compared to 2024 primarily due to higher Services net sales and a different mix of services. Services gross margin percentage increased during 2025 compared to 2024 primarily due to a different mix of services, partially offset by higher costs. The Company’s future gross margins can be impacted by a variety of factors, as discussed in Part I, Item 1A of this Form 10-K under the heading “Risk Factors.” As a result, the Company believes, in general, gross margins will be subject to volatility and downward pressure.",
+    "answer": "AAPL FY2024 Revenue year-over-year growth: 2.02%.\nWithin the consolidated total, Services net sales rose to $96,169 million in FY2024 from $85,200 million in FY2023, while Products net sales fell to $294,866 million from $298,085 million, so the increase came from Services outweighing the Products decline.\nAt product level the filing attributes the Mac net sales increase in FY2024 to higher net sales of laptops, and the iPad net sales decrease primarily to lower net sales of iPad Pro and the entry-level iPad models, partially offset by higher net sales of iPad Air.\nGeographically, the filing attributes higher FY2024 net sales in the Americas to Services, in Europe to Services and iPhone, in Japan to iPhone, and in Rest of Asia Pacific to Services, while Greater China net sales decreased primarily on lower iPhone and iPad net sales, with renminbi weakness against the U.S. dollar an unfavorable year-over-year factor.",
     "evidence_ids": [
-      "calc-2213d9f32e2d294d5d27",
-      "calc-4944c7c1eab8fcd26260",
-      "passage-5ca9297ec0c4f73dc075",
-      "passage-87f0b60d2de90e785934",
-      "passage-d447a70d543e3803f345"
+      "calc-78f68cc7dacf62aca56f",
+      "passage-42f15bd2c8b8b9827fb5",
+      "passage-69e289b5b6484e75944b",
+      "passage-757f4be2d61d4dbb3497",
+      "passage-7917b84d0950fe265769",
+      "passage-95d4373ecf5d719fe709",
+      "passage-9dab7a665873dc20e2c1",
+      "passage-b3f45cebea28f9b67ee9",
+      "passage-e56d26a12f17e48bbdf6"
     ],
-    "answer_claims": 5,
+    "answer_claims": 4,
     "has_citation": true,
     "citation_supported": true,
     "unsupported_claims": 0,
     "numeric_errors": 0,
-    "verification_findings": 7,
+    "verification_findings": 1,
     "budget_timeout": false,
     "reasonable_refusal": false,
     "wrong_refusal": false,
     "gaps": [
-      "申报未单列段落直接解释合并营业利润率变化，上文营业利润率由工具按营业利润除以净销售额计算；服务与产品结构对合并毛利率的量化拆分未披露。",
-      "模型未完成原因或风险归纳；已保留同一申报中的逐字摘录，摘录不等同于综合结论。",
-      "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。",
-      "本轮审查未能确认与作者模型独立；该复核不构成独立核验，叙述性结论请谨慎对待。",
-      "有 3 条断言未通过证据核验，已移除；其余已交付内容均已核验。"
+      "The retrieved excerpts do not include the consolidated MD&A paragraph quantifying the iPhone, iPad, Wearables or Services year-over-year dollar changes; product-level amounts beyond the income statement totals were not part of the observed evidence.",
+      "No single disclosed figure isolates the currency (foreign exchange) effect on total consolidated FY2024 net sales; only segment-level currency commentary was retrieved.",
+      "Model request failed and research was aborted; verified content is retained and unverified content is not concluded."
     ],
-    "latency_ms": 264572,
+    "latency_ms": 175095,
     "cost_usd": null,
-    "run_id": "run-0ea01e279ec444dea7e3139fccbbe658",
-    "model_calls": 9,
-    "reported_tokens": 80516,
-    "prompt_tokens": 73979,
-    "completion_tokens": 6537,
+    "run_id": "run-f8856c21f0af4a12b94cf3a0e00fd24a",
+    "model_calls": 6,
+    "reported_tokens": 103524,
+    "prompt_tokens": 99642,
+    "completion_tokens": 3882,
     "review_model": "mimo-v2.6-flash",
     "trace_summary": {
-      "tool_calls": 15,
+      "tool_calls": 12,
       "tool_names": [
         "calculate",
         "get_financial_fact",
+        "get_statement",
+        "list_filings",
         "search_passages",
         "submit_answer"
       ],
-      "model_steps": 9,
-      "direct_text_rounds": 0,
-      "author_ms": 29730.0,
-      "review_ms": 234014.0,
+      "model_steps": 6,
+      "direct_text_rounds": 2,
+      "author_ms": 49902.0,
+      "review_ms": 27444.0,
       "finish_reasons": [
         "tool_calls",
         "tool_calls",
         "tool_calls",
         "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
+        "stop",
+        "stop"
       ]
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
-    "id": "semantic-causality-019",
+    "id": "semantic-causality-008",
     "category": "causality",
-    "ticker": "MSFT",
-    "question": "微软 的 FY2025 利润率变化由哪些已披露因素解释？",
+    "ticker": "AMZN",
+    "question": "Which disclosed drivers explain Amazon's FY2022 growth?",
     "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
     "status": "partial",
-    "answer": "MSFT FY2025 营业利润率：45.62%。\nMSFT FY2024 营业利润率：44.64%。\nCost of revenue increased $10.6 billion or 36% driven by growth in Azure. Gross margin increased $8.2 billion or 14% driven by growth in Azure. Gross margin percentage decreased driven by the impact of scaling our AI infrastructure, offset in part by efficiency gains in Azure. Operating expenses increased $1.5 billion or 7% driven by investments in cloud and AI engineering. Windows and Devices revenue increased $288 million or 2%. Windows OEM and Devices revenue increased 3% driven by growth in Windows OEM, offset in part by a decline in Devices. Gaming revenue increased $2.0 billion or 9% driven by growth in Xbox content and services, offset in part by a decline in Xbox hardware. Xbox content and services revenue increased 16% driven by the impact of the Activision Blizzard acquisition and Xbox Game Pass. Xbox hardware revenue decreased 25% driven by lower volume of consoles sold. Search and news advertising revenue increased $1.6 billion or 13%. Search and news advertising revenue excluding traffic acquisition costs increased 20% driven by higher search volume and higher revenue per search. Operating income increased $2.2 billion or 18%. Cost of revenue increased $346 million or 1% driven by growth in Search and news advertising. Gross margin increased $3.5 billion or 13% with growth across all businesses. Gross margin percentage increased with improvement across all businesses. Operating expenses increased $1.3 billion or 9% driven by Gaming, including the impact of the Activision Blizzard acquisition.\nMicrosoft 365 Consumer products and cloud services revenue increased $756 million or 11%. Microsoft 365 Consumer cloud revenue grew 11% driven by Microsoft 365 Consumer subscriber growth of 8% to 89.0 million, as well as growth in revenue per user from the price increase announced in January 2025. LinkedIn revenue increased $1.4 billion or 9% with growth across all lines of business. Dynamics products and cloud services revenue increased $996 million or 15% driven by growth in Dynamics 365, offset in part by a decline in Dynamics on-premises products. Dynamics 365 revenue grew 19% with growth across all workloads. Operating income increased $10.1 billion or 17%. Cost of revenue increased $2.8 billion or 14% driven by growth in Microsoft 365 Commercial cloud. Gross margin increased $11.2 billion or 13% driven by growth in Microsoft 365 Commercial cloud. Gross margin percentage decreased slightly primarily driven by the impact of scaling our AI infrastructure, offset in part by efficiency gains in Microsoft 365 Commercial cloud. Operating expenses increased $1.1 billion or 4% driven by investments in cloud and AI engineering and commercial sales. Server products and cloud services revenue increased $18.6 billion or 23% driven by Azure and other cloud services. Azure and other cloud services revenue grew 34% driven by demand for our portfolio of services. Server products revenue decreased 3% driven by a decrease in transactional purchasing with continued customer shift to cloud offerings. Enterprise and partner services revenue increased $166 million or 2% driven by growth in Enterprise Support Services, offset in part by a decline in Industry Solutions. Operating income increased $6.8 billion or 18%.\nRevenue increased $36.6 billion or 15% with growth across each of our segments. Intelligent Cloud revenue increased driven by Azure. Productivity and Business Processes revenue increased driven by Microsoft 365 Commercial cloud. More Personal Computing revenue increased driven by Gaming and Search and news advertising. Cost of revenue increased $13.7 billion or 19% driven by growth in Microsoft Cloud. Gross margin increased $22.9 billion or 13% with growth across each of our segments. Gross margin percentage decreased slightly driven by Intelligent Cloud, offset in part by More Personal Computing. Microsoft Cloud gross margin percentage decreased to 69% driven by the impact of scaling our AI infrastructure, offset in part by efficiency gains in Azure. Operating expenses increased $3.8 billion or 6% driven by investments in cloud and AI engineering and Gaming, including the impact of the Activision Blizzard acquisition. Operating income increased $19.1 billion or 17% with growth across each of our segments. Microsoft 365 Commercial products and cloud services revenue increased $10.8 billion or 14%. Microsoft 365 Commercial cloud revenue grew 15% with Microsoft 365 Commercial seat growth of 6% driven by small and medium businesses and frontline worker offerings, as well as growth in revenue per user. Microsoft 365 Commercial products revenue grew 7% driven by the Windows Commercial on-premises components of Microsoft 365 suite sales and an increase in Office transactional purchasing with the launch of Office 2024.",
+    "answer": "AMZN FY2022 Revenue year-over-year growth: 9.40%.\nNet sales include product and service sales. Product sales represent revenue from the sale of products and related shipping fees and digital media content where we record revenue gross. Service sales primarily represent third-party seller fees, which includes commissions and any related fulfillment and shipping fees, AWS sales, advertising services, Amazon Prime membership fees, and certain digital content subscriptions. Net sales information is as follows (in millions): Sales increased 9% in 2022, compared to the prior year. Changes in foreign currency exchange rates reduced net sales by $15.5 billion in 2022. For a discussion of the effect of foreign exchange rates on sales growth, see “Effect of Foreign Exchange Rates” below. North America sales increased 13% in 2022, compared to the prior year. The sales growth primarily reflects increased unit sales, including sales by third-party sellers, advertising sales, and subscription services. Increased unit sales were driven largely by our continued focus on price, selection, and convenience for our customers, including from our shipping offers. International sales decreased 8% in 2022, compared to the prior year, primarily due to the impact of changes in foreign currency exchange rates, partially offset by increased unit sales, including sales by third-party sellers, advertising sales, and subscription services. Increased unit sales were driven largely by our continued focus on price, selection, and convenience for our customers, including from our shipping offers. Changes in foreign currency exchange rates reduced International net sales by $15.0 billion in 2022.\nYear Ended December 31, 2021 2022 Operating Income (Loss) North America $ 7,271 $ (2,847) International (924) (7,746) AWS 18,532 22,841 Consolidated $ 24,879 $ 12,248 Operating income was $24.9 billion and $12.2 billion for 2021 and 2022. We believe that operating income is a more meaningful measure than gross profit and gross margin due to the diversity of our product categories and services. The North America operating loss in 2022, as compared to the operating income in the prior year, is primarily due to increased fulfillment and shipping costs, due in part to increases in investments in our fulfillment network, transportation costs, and wage rates and incentives, increased technology and content costs, and growth in certain operating expenses, partially offset by increased unit sales, including sales by third-party sellers, and advertising sales. Changes in foreign currency exchange rates positively impacted operating loss by $274 million in 2022. The increase in International operating loss in absolute dollars in 2022, compared to the prior year, is primarily due to increased fulfillment and shipping costs, due in part to increases in investments in our fulfillment network, transportation costs, and wage rates and incentives, increased technology and content costs, and growth in certain operating expenses, partially offset by increased advertising sales and increased unit sales, including sales by third-party sellers. Changes in foreign currency exchange rates negatively impacted operating loss by $857 million in 2022.\nFulfillment costs primarily consist of those costs incurred in operating and staffing our North America and International fulfillment centers, physical stores, and customer service centers and payment processing costs. While AWS payment processing and related transaction costs are included in “Fulfillment,” AWS costs are primarily classified as “Technology and content.” Fulfillment costs as a percentage of net sales may vary due to several factors, such as payment processing and related transaction costs, our level of productivity and accuracy, changes in volume, size, and weight of units received and fulfilled, the extent to which third-party sellers utilize Fulfillment by Amazon services, timing of fulfillment network and physical store expansion, the extent we utilize fulfillment services provided by third parties, mix of products and services sold, and our ability to affect customer service contacts per unit by implementing improvements in our operations and enhancements to our customer self-service features. Additionally, sales by our sellers have higher payment processing and related transaction costs as a percentage of net sales compared to our retail sales because payment processing costs are based on the gross purchase price of underlying transactions. The increase in fulfillment costs in absolute dollars in 2022, compared to the prior year, is primarily due to increased investments in our fulfillment network and variable costs corresponding with increased product and service sales volume and inventory levels, and increased wage rates and incentives. Changes in foreign exchange rates reduced fulfillment costs by $2.5 billion in 2022.",
     "evidence_ids": [
-      "calc-b5130d69b0566ba163cf",
-      "calc-e9a1f8eb1b79a9f67679",
-      "passage-98b027a4a47584f115b9",
-      "passage-d4391ae969307b473031",
-      "passage-ecad176e214a4f8c1e51"
+      "calc-c7e59c054cdcf61ee5bc",
+      "passage-2a8912fc9b673b7af870",
+      "passage-65dd42ee25d7227ccd9f",
+      "passage-7acafec6f18cea511158"
     ],
-    "answer_claims": 5,
+    "answer_claims": 4,
     "has_citation": true,
     "citation_supported": true,
     "unsupported_claims": 0,
     "numeric_errors": 0,
-    "verification_findings": 8,
+    "verification_findings": 5,
     "budget_timeout": false,
     "reasonable_refusal": false,
     "wrong_refusal": false,
     "gaps": [
-      "申报未直接解释或量化合并层面“营业利润率”的变化幅度，也未直接陈述营业利润率上升的原因；上述利润率水平由本项目按营业利润除以营业收入计算。",
-      "申报未将合并毛利率百分比下降直接归因于AI基础设施扩容，该归因仅在Microsoft Cloud与Intelligent Cloud分部语境中披露。",
-      "模型未完成原因或风险归纳；已保留同一申报中的逐字摘录，摘录不等同于综合结论。",
-      "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。",
-      "有 3 条断言未通过证据核验，已移除；其余已交付内容均已核验。"
+      "The AWS driver (sales up 29% reflecting increased customer usage, partially offset by pricing changes primarily driven by long-term customer contracts) is disclosed in the filing but is omitted from the submitted claims due to the five-claim limit.",
+      "Quantified growth rates for individual product/service lines such as advertising and subscription services were not part of the retrieved excerpts; only their directional contribution to segment growth is established.",
+      "The model did not complete the causal or risk synthesis; exact excerpts from the same filing are retained, but excerpts are not a synthesized conclusion.",
+      "The requested cause or risk explanation is still missing. The verified figures are supporting information, not a substitute for that explanation."
     ],
-    "latency_ms": 194223,
+    "latency_ms": 120899,
     "cost_usd": null,
-    "run_id": "run-2748ce82284448ffb0750e82c820ce19",
-    "model_calls": 9,
-    "reported_tokens": 88546,
-    "prompt_tokens": 82024,
-    "completion_tokens": 6522,
+    "run_id": "run-20cf77f55171464c85001d7bcfac9b10",
+    "model_calls": 4,
+    "reported_tokens": 56324,
+    "prompt_tokens": 53445,
+    "completion_tokens": 2879,
     "review_model": "mimo-v2.6-flash",
     "trace_summary": {
       "tool_calls": 14,
@@ -173,23 +110,77 @@
         "search_passages",
         "submit_answer"
       ],
-      "model_steps": 9,
+      "model_steps": 4,
       "direct_text_rounds": 0,
-      "author_ms": 25945.0,
-      "review_ms": 167509.0,
+      "author_ms": 117834.0,
+      "review_ms": 0,
       "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
         "tool_calls",
         "tool_calls",
         "tool_calls",
         "tool_calls"
       ]
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
+  },
+  {
+    "id": "semantic-causality-019",
+    "category": "causality",
+    "ticker": "MSFT",
+    "question": "微软 的 FY2025 利润率变化由哪些已披露因素解释？",
+    "expected_behavior": "cite_narrative_evidence_and_avoid_unproven_cause",
+    "status": "partial",
+    "answer": "MSFT FY2025 营业利润率：45.62%。\nMSFT FY2024 营业利润率：44.64%。\n合并层面 FY2025 毛利率百分比小幅下降，由智能云拖累、部分被个人计算业务抵消；其中 Microsoft Cloud 毛利率百分比降至 69%，原因是 AI 基础设施规模化带来的影响，部分被 Azure 的效率提升抵消。\n按申报披露，合并营业费用的增加主要由云与 AI 工程投入以及游戏业务（包括动视暴雪收购的影响）推动。\n从算术关系看，营业利润率上升与毛利率百分比小幅下降同时出现，因此营业利润率的改善来自毛利率与营业利润率之间差额的收窄，即营业利润增速快于收入增速；该残差本身并不指明具体费用科目的构成。",
+    "evidence_ids": [
+      "calc-161f217f9457ee399d01",
+      "calc-2f42293332443a7443c7",
+      "calc-b5130d69b0566ba163cf",
+      "calc-c5b2c473e1f11048407b",
+      "calc-d927823b544f544eea8e",
+      "calc-e9a1f8eb1b79a9f67679",
+      "passage-e352ac19a2f734fdeb6c"
+    ],
+    "answer_claims": 5,
+    "has_citation": true,
+    "citation_supported": true,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "verification_findings": 3,
+    "budget_timeout": false,
+    "reasonable_refusal": false,
+    "wrong_refusal": false,
+    "gaps": [
+      "在已检索的 MD&A 段落范围内，未见将 AI 基础设施规模化、Azure 效率提升及各营业费用投入量化到合并营业利润率变动的归因桥；利润率变动解释仅限于所引段落。"
+    ],
+    "latency_ms": 446633,
+    "cost_usd": null,
+    "run_id": "run-37aea02142bb4dbe82ba7059f59a7d30",
+    "model_calls": 5,
+    "reported_tokens": 58887,
+    "prompt_tokens": 51842,
+    "completion_tokens": 7045,
+    "review_model": "mimo-v2.6-flash",
+    "trace_summary": {
+      "tool_calls": 17,
+      "tool_names": [
+        "calculate",
+        "get_financial_fact",
+        "search_passages",
+        "submit_answer"
+      ],
+      "model_steps": 5,
+      "direct_text_rounds": 3,
+      "author_ms": 30732.0,
+      "review_ms": 143660.0,
+      "finish_reasons": [
+        "tool_calls",
+        "stop",
+        "stop",
+        "tool_calls",
+        "stop"
+      ]
+    },
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-001",
@@ -218,7 +209,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-002",
@@ -247,7 +238,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-003",
@@ -269,14 +260,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 28,
+    "latency_ms": 23,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-004",
@@ -298,14 +289,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 34,
+    "latency_ms": 29,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-005",
@@ -334,7 +325,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-006",
@@ -363,7 +354,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-007",
@@ -385,14 +376,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 34,
+    "latency_ms": 28,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-008",
@@ -414,14 +405,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 30,
+    "latency_ms": 19,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-009",
@@ -450,7 +441,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-010",
@@ -479,7 +470,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-011",
@@ -501,14 +492,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 29,
+    "latency_ms": 22,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-012",
@@ -530,14 +521,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 32,
+    "latency_ms": 28,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-013",
@@ -566,7 +557,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-014",
@@ -595,7 +586,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-015",
@@ -617,14 +608,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 30,
+    "latency_ms": 22,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-016",
@@ -646,14 +637,14 @@
     "gaps": [
       "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
     ],
-    "latency_ms": 30,
+    "latency_ms": 23,
     "cost_usd": null,
     "model_calls": 0,
     "review_model": "mimo-v2.6-flash",
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-017",
@@ -682,7 +673,7 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-018",
@@ -711,42 +702,13 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "年报披露经营事实和风险，不能单独确定未来股价。缺口是未来经营结果、市场预期和估值假设；历史报价或已披露季度数字不能代替预测。本系统不提供确定股价预测或保证涨跌，可先研究历史表现和披露风险。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-insufficient_evidence-019",
     "category": "insufficient_evidence",
     "ticker": "TSM",
     "question": "台积电 是否一定会跑赢同行？如果证据不足应如何回答？",
-    "expected_behavior": "reasonable_refusal_with_actionable_gap",
-    "status": "abstained",
-    "answer": "",
-    "evidence_ids": [],
-    "answer_claims": 0,
-    "has_citation": false,
-    "citation_supported": false,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "budget_timeout": false,
-    "reasonable_refusal": true,
-    "wrong_refusal": false,
-    "gaps": [
-      "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
-    ],
-    "latency_ms": 37,
-    "cost_usd": null,
-    "model_calls": 0,
-    "review_model": "mimo-v2.6-flash",
-    "run_id": null,
-    "error_phase": "capability_gate",
-    "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-insufficient_evidence-020",
-    "category": "insufficient_evidence",
-    "ticker": "AAPL",
-    "question": "Is it proven that Apple will outperform peers, or should the answer abstain?",
     "expected_behavior": "reasonable_refusal_with_actionable_gap",
     "status": "abstained",
     "answer": "",
@@ -769,7 +731,36 @@
     "run_id": null,
     "error_phase": "capability_gate",
     "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
+  },
+  {
+    "id": "semantic-insufficient_evidence-020",
+    "category": "insufficient_evidence",
+    "ticker": "AAPL",
+    "question": "Is it proven that Apple will outperform peers, or should the answer abstain?",
+    "expected_behavior": "reasonable_refusal_with_actionable_gap",
+    "status": "abstained",
+    "answer": "",
+    "evidence_ids": [],
+    "answer_claims": 0,
+    "has_citation": false,
+    "citation_supported": false,
+    "unsupported_claims": 0,
+    "numeric_errors": 0,
+    "budget_timeout": false,
+    "reasonable_refusal": true,
+    "wrong_refusal": false,
+    "gaps": [
+      "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？"
+    ],
+    "latency_ms": 24,
+    "cost_usd": null,
+    "model_calls": 0,
+    "review_model": "mimo-v2.6-flash",
+    "run_id": null,
+    "error_phase": "capability_gate",
+    "error_message": "不能根据已披露财报保证未来跑赢或跑输同行。缺口是未来经营结果、市场预期与可比期间的收益证据；历史表现和估值倍数不能证明确定的未来回报。应保留不确定性，可先研究已披露风险或比较历史表现。 可选问题：过去五年股价涨跌和最大回撤是多少？ / 年报披露了哪些主要风险？",
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-001",
@@ -796,7 +787,7 @@
     ],
     "latency_ms": 38,
     "cost_usd": null,
-    "run_id": "run-846807c94c4945cb8cae2baa609e83c4",
+    "run_id": "run-f9a824c90c55410380c8dedea85c3a1d",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -811,7 +802,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-002",
@@ -836,9 +827,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 42,
+    "latency_ms": 48,
     "cost_usd": null,
-    "run_id": "run-2a729e77e9094042bae506c7e8afb1c5",
+    "run_id": "run-c06a21fb17b64d24babf79cb04a7b8ac",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -853,7 +844,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-003",
@@ -878,9 +869,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 34,
+    "latency_ms": 38,
     "cost_usd": null,
-    "run_id": "run-baff76c5944449279d9812ffc7f44b62",
+    "run_id": "run-4af041209e1345aa9a100c02fd79c4dc",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -895,7 +886,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-004",
@@ -920,9 +911,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 35,
+    "latency_ms": 40,
     "cost_usd": null,
-    "run_id": "run-31a17fa2f15d4f2faf1c6329db0ecaed",
+    "run_id": "run-6a9c052a8efb479ebfcdc0357a16ff16",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -937,7 +928,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-005",
@@ -962,9 +953,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 41,
+    "latency_ms": 39,
     "cost_usd": null,
-    "run_id": "run-0f12dc13181a41d78f7b8894ef1b24ae",
+    "run_id": "run-ab1a1b8be8ac4002a820cac5a3263485",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -979,7 +970,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-006",
@@ -1004,9 +995,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 33,
+    "latency_ms": 31,
     "cost_usd": null,
-    "run_id": "run-f28e042d8cf84b61be04157c1103e1d3",
+    "run_id": "run-b54cafe1a69841c988edabcc0a5928db",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1021,7 +1012,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-007",
@@ -1046,9 +1037,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 39,
+    "latency_ms": 36,
     "cost_usd": null,
-    "run_id": "run-0d9c07aef42842adadec3736af08b0e0",
+    "run_id": "run-79cb52116cbc496e9e9c10619d8119be",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1063,7 +1054,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-008",
@@ -1088,9 +1079,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 101,
+    "latency_ms": 33,
     "cost_usd": null,
-    "run_id": "run-91d5aa42c86f46588dd1bdad092ffe56",
+    "run_id": "run-3b8005d1845242049486e8aa7b5ed37d",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1105,7 +1096,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-009",
@@ -1132,7 +1123,7 @@
     ],
     "latency_ms": 33,
     "cost_usd": null,
-    "run_id": "run-83e746e8252e491a8d2df5707cb63ff7",
+    "run_id": "run-3d034aed901349e18b390156595b0119",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1147,7 +1138,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-010",
@@ -1172,9 +1163,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 40,
+    "latency_ms": 44,
     "cost_usd": null,
-    "run_id": "run-3ccf326d357247608687650f8d6e904d",
+    "run_id": "run-f47f3bba1bcf4363bd888739235f2af8",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1189,7 +1180,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-011",
@@ -1214,9 +1205,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 35,
+    "latency_ms": 37,
     "cost_usd": null,
-    "run_id": "run-fc1246bec74c443c903b8b2380a26320",
+    "run_id": "run-7bbc142f52bb4ca1ad20314c8eaf95bd",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1231,7 +1222,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-012",
@@ -1256,9 +1247,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 41,
+    "latency_ms": 37,
     "cost_usd": null,
-    "run_id": "run-0670fcac9e014f0b86b5a622066bdc2a",
+    "run_id": "run-bd38690752e24edd8999274af23c1281",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1273,7 +1264,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-013",
@@ -1298,9 +1289,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 38,
+    "latency_ms": 32,
     "cost_usd": null,
-    "run_id": "run-b6a1c8949063409dafa4e88857cedb39",
+    "run_id": "run-4f428ab8f0f443ebad35b7e78f724272",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1315,7 +1306,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-014",
@@ -1340,9 +1331,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 38,
+    "latency_ms": 35,
     "cost_usd": null,
-    "run_id": "run-4c25472bbde14a29a1e6b3388df0f942",
+    "run_id": "run-c882dd4ba19d4a7abb867138d3e9e17f",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1357,7 +1348,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-015",
@@ -1382,9 +1373,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 35,
+    "latency_ms": 42,
     "cost_usd": null,
-    "run_id": "run-44ceee7d61894a62bedaf6008ea84de6",
+    "run_id": "run-729a43a62de84de59c8640640ec1cce0",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1399,7 +1390,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-016",
@@ -1426,7 +1417,7 @@
     ],
     "latency_ms": 34,
     "cost_usd": null,
-    "run_id": "run-3f878874eda14d1594e36dae6f6d3de7",
+    "run_id": "run-4b8dd038a40b4e3f86154f43a02a909b",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1441,7 +1432,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-017",
@@ -1466,9 +1457,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 43,
+    "latency_ms": 35,
     "cost_usd": null,
-    "run_id": "run-5436f37ab46847de96b556792f213be3",
+    "run_id": "run-880ece73eca3444886f324ad28daed20",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1483,7 +1474,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-018",
@@ -1508,9 +1499,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 33,
+    "latency_ms": 28,
     "cost_usd": null,
-    "run_id": "run-6a156809a7274e499ff51abf8d549faf",
+    "run_id": "run-6082b901fb084a5fb2c194e36e3b27bc",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1525,7 +1516,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-019",
@@ -1550,9 +1541,9 @@
     "gaps": [
       "行情源未取得；依赖报价的估值和价格结论需刷新行情后重新计算。"
     ],
-    "latency_ms": 31,
+    "latency_ms": 34,
     "cost_usd": null,
-    "run_id": "run-3d231017eb7646c9863e893b16f29042",
+    "run_id": "run-40a66e93113c4d3daaeffe530b97eeb5",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1567,7 +1558,7 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
     "id": "semantic-market_outage-020",
@@ -1592,9 +1583,9 @@
     "gaps": [
       "Quote source unavailable; quote-dependent valuation and price conclusions require a refreshed quote."
     ],
-    "latency_ms": 36,
+    "latency_ms": 39,
     "cost_usd": null,
-    "run_id": "run-14f89fb46fef490ea1493240b513b19d",
+    "run_id": "run-656649a26e3f41feb8960a2480a08ba5",
     "model_calls": 0,
     "reported_tokens": 0,
     "prompt_tokens": 0,
@@ -1609,410 +1600,117 @@
       "review_ms": 0,
       "finish_reasons": []
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
-    "id": "semantic-negation-012",
+    "id": "semantic-negation-001",
     "category": "negation",
-    "ticker": "TSM",
-    "question": "Does the FY2025 filing deny a demand decline for TSMC?",
+    "ticker": "NVDA",
+    "question": "英伟达 FY2022 是否披露没有重大供应链影响？请核对原文。",
     "expected_behavior": "preserve_negation_and_require_exact_support",
     "status": "partial",
-    "answer": "In the cited risk-factor passages, the filing presents demand-decrease scenarios as risks rather than denying that demand for TSMC can decline.\nThe filing states that if the economic or financial conditions of TSMC's customers deteriorate, demand for its products and services may decrease.\nThe filing also warns that decreases in demand and average selling prices for products containing semiconductors may adversely affect demand for TSMC's products and reduce its revenue and earnings.\nThe filing further warns that a slowdown in the growth of TSMC's end markets could substantially decrease demand for its products and services.\nThese are conditional, forward-looking risk warnings: they do not deny that demand could decline, and they do not establish that a demand decline actually occurred in FY2025.",
+    "answer": "COVID-19 has impacted, and continues to impact, our workforce and operations and those of our customers, partners, vendors and suppliers. As the COVID-19 pandemic continues to evolve, the increased duration and impact of economic and demand uncertainty, and the limited availability of our supply chain and logistical services, may have a material net negative impact on our business and financial results. While COVID-19 has driven an increase in sales for certain of our products, the demand may not be sustainable if conditions change. COVID-19 containment around the world has put restrictions on, among other areas, manufacturing facilities, commerce, and support operations could limit our capacity to meet customer demand. Stronger demand globally has limited the availability of capacity and components in our supply chain, which could increase our costs, limit our ability to obtain supply at necessary levels or at all, or cause us to hold excess inventory if demand changes. COVID-19’s effect on the global economy and our business is difficult to assess or predict. It has resulted in, and may continue to result in, disruption of global financial markets, which could negatively affect our stock price and liquidity. Volatility in the financial markets could impact overall technology spending, adversely affecting demand for our products, our business and the value of our common stock.\nGPUs have use cases in addition to their designed and marketed use case, such as for digital currency mining, including blockchain-based platforms such as Ethereum. It is difficult for us to estimate with any reasonable degree of precision the past or current impact of cryptocurrency mining, or forecast the future impact of cryptocurrency mining, on demand for our products. Volatility in the cryptocurrency market, including new compute technologies, price changes in cryptocurrencies, government cryptocurrency policies and regulations, new cryptocurrency standards, and changes in the method of verifying blockchain transactions, have impacted and can in the future impact cryptocurrency mining and demand for our products, and can further impact our ability to estimate demand for our products. Changes to cryptocurrency standards and processes including, but not limited to, the pending Ethereum 2.0 standard may decrease the usage of GPUs for Ethereum mining as well as create increased aftermarket resales of our GPUs, impact retail prices for our GPUs, increase returns of our products in the distribution channel, and may reduce demand for our new GPUs. We have introduced Lite Hash Rate, or LHR, GeForce GPUs with limited Ethereum mining capability and increased the supply of CMP in an effort to address demand from gamers and direct miners to CMP. However, if attempts in the aftermarket to improve the hash rate capabilities of our LHR cards are successful, our gaming cards may become more attractive to miners, increasing demand for our gaming GPUs and limiting our ability to supply our gaming cards to non-mining customers. We cannot predict whether our strategy of using LHR cards and CMP will achieve our desired outcome.",
     "evidence_ids": [
-      "passage-3124c80d70c5e6cd4bcd",
-      "passage-91220ee8817627ad1386",
-      "passage-e1876fc7dae7f51f68b9",
-      "passage-e304f922f1977d15eb02"
-    ],
-    "answer_claims": 5,
-    "has_citation": true,
-    "citation_supported": true,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "verification_findings": 4,
-    "budget_timeout": false,
-    "reasonable_refusal": false,
-    "wrong_refusal": false,
-    "gaps": [
-      "The cited excerpts show risk warnings rather than a direct denial; they do not show whether any other part of the filing denies a demand decline, nor whether TSMC's demand actually declined in FY2025.",
-      "Some claims failed evidence checks and were withheld or removed."
-    ],
-    "latency_ms": 84552,
-    "cost_usd": null,
-    "run_id": "run-7e953019e47b4c16b8b5b43fa58f684b",
-    "model_calls": 7,
-    "reported_tokens": 54173,
-    "prompt_tokens": 47797,
-    "completion_tokens": 6376,
-    "review_model": "mimo-v2.6-flash",
-    "trace_summary": {
-      "tool_calls": 7,
-      "tool_names": [
-        "search_passages",
-        "submit_answer"
-      ],
-      "model_steps": 7,
-      "direct_text_rounds": 0,
-      "author_ms": 32543.0,
-      "review_ms": 50315.0,
-      "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
-      ]
-    },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-negation-014",
-    "category": "negation",
-    "ticker": "AMZN",
-    "question": "Did Amazon state that there was no material supply-chain impact in FY2023?",
-    "expected_behavior": "preserve_negation_and_require_exact_support",
-    "status": "partial",
-    "answer": "In Item 7, Amazon says it expects variability in inventory turnover partly because turnover is affected by supply chain disruptions and resulting vendor lead times, alongside its focus on in-stock availability and selection.\nThe risk factors present inventory and fulfillment constraints as contingencies that could adversely affect operating results, rather than as a statement about whether a material impact already occurred.",
-    "evidence_ids": [
-      "passage-460c05fb9378933b284b",
-      "passage-600729e379d5a16b527a",
-      "passage-76795e49882ee27b816b"
+      "passage-19d663c61062ef180a5b",
+      "passage-6c1874daa6511636e5d3"
     ],
     "answer_claims": 2,
     "has_citation": true,
     "citation_supported": true,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "verification_findings": 9,
-    "budget_timeout": false,
-    "reasonable_refusal": false,
-    "wrong_refusal": false,
-    "gaps": [
-      "The cited passages contain no direct denial of a material supply-chain impact for FY2023 and do not quantify or conclude on such an impact's materiality, so whether Amazon stated or experienced no material supply-chain impact in FY2023 is not resolved by this evidence.",
-      "Some claims failed evidence checks and were withheld or removed."
-    ],
-    "latency_ms": 124269,
-    "cost_usd": null,
-    "run_id": "run-11c5a823ca194a9eb1e2a22aaadac17a",
-    "model_calls": 10,
-    "reported_tokens": 103358,
-    "prompt_tokens": 97436,
-    "completion_tokens": 5922,
-    "review_model": "mimo-v2.6-flash",
-    "trace_summary": {
-      "tool_calls": 11,
-      "tool_names": [
-        "get_statement",
-        "list_filings",
-        "search_passages",
-        "submit_answer"
-      ],
-      "model_steps": 10,
-      "direct_text_rounds": 0,
-      "author_ms": 29007.0,
-      "review_ms": 93963.0,
-      "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
-      ]
-    },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-negation-018",
-    "category": "negation",
-    "ticker": "AAPL",
-    "question": "Did Apple state that there was no material supply-chain impact in FY2023?",
-    "expected_behavior": "preserve_negation_and_require_exact_support",
-    "status": "partial",
-    "answer": "The Company’s operations and performance depend significantly on global and regional economic conditions and adverse economic conditions can materially adversely affect the Company’s business, results of operations and financial condition. The Company has international operations with sales outside the U.S. representing a majority of the Company’s total net sales. In addition, the Company’s global supply chain is large and complex and a majority of the Company’s supplier facilities, including manufacturing and assembly sites, are located outside the U.S. As a result, the Company’s operations and performance depend significantly on global and regional economic conditions. Adverse macroeconomic conditions, including slow growth or recession, high unemployment, inflation, tighter credit, higher interest rates, and currency fluctuations, can adversely impact consumer confidence and spending and materially adversely affect demand for the Company’s products and services. In addition, consumer confidence and spending can be materially adversely affected in response to changes in fiscal and monetary policy, financial market volatility, declines in income or asset values, and other economic factors. In addition to an adverse impact on demand for the Company’s products and services, uncertainty about, or a decline in, global or regional economic conditions can have a significant impact on the Company’s suppliers, contract manufacturers, logistics providers, distributors, cellular network carriers and other channel partners, and developers. Potential outcomes include financial instability; inability to obtain credit to finance business operations; and insolvency.\nThe Company has a large, global business with sales outside the U.S. representing a majority of the Company’s total net sales, and the Company believes that it generally benefits from growth in international trade. Substantially all of the Company’s manufacturing is performed in whole or in part by outsourcing partners located primarily in China mainland, India, Japan, South Korea, Taiwan and Vietnam. Restrictions on international trade, such as tariffs and other controls on imports or exports of goods, technology or data, can materially adversely affect the Company’s operations and supply chain and limit the Company’s ability to offer and distribute its products and services to customers. The impact can be particularly significant if these restrictive measures apply to countries and regions where the Company derives a significant portion of its revenues and/or has significant supply chain operations. Restrictive measures can require the Company to take various actions, including changing suppliers, restructuring business relationships, and ceasing to offer third-party applications on its platforms. Changing the Company’s operations in accordance with new or changed restrictions on international trade can be expensive, time-consuming and disruptive to the Company’s operations. Such restrictions can be announced with little or no advance notice and the Company may not be able to effectively mitigate all adverse impacts from such measures. For example, tensions between governments, including the U.S. and China, have in the past led to tariffs and other restrictions being imposed on the Company’s business.",
-    "evidence_ids": [
-      "passage-014fd00bd525855dd59d",
-      "passage-f4955217373c1fb19176"
-    ],
-    "answer_claims": 2,
-    "has_citation": true,
-    "citation_supported": true,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "verification_findings": 13,
-    "budget_timeout": false,
-    "reasonable_refusal": false,
-    "wrong_refusal": false,
-    "gaps": [
-      "The filing does not quantify the magnitude of any fiscal 2023 supply-chain impact, so whether that impact was material in size for the year cannot be determined from the cited disclosures.",
-      "The model request did not complete; directly relevant filing excerpts are retained, and no unverified synthesis is presented.",
-      "5 claim(s) failed evidence checks and were removed; every delivered claim is verified."
-    ],
-    "latency_ms": 165986,
-    "cost_usd": null,
-    "run_id": "run-625338b6321e4f978c07338ad7b7e63e",
-    "model_calls": 8,
-    "reported_tokens": 76751,
-    "prompt_tokens": 71754,
-    "completion_tokens": 4997,
-    "review_model": "mimo-v2.6-flash",
-    "trace_summary": {
-      "tool_calls": 9,
-      "tool_names": [
-        "get_statement",
-        "list_filings",
-        "search_passages",
-        "submit_answer"
-      ],
-      "model_steps": 8,
-      "direct_text_rounds": 0,
-      "author_ms": 19445.0,
-      "review_ms": 144468.0,
-      "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
-      ]
-    },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-risk-013",
-    "category": "risk",
-    "ticker": "AMZN",
-    "question": "亚马逊 FY2022 的监管、需求和集中度风险有哪些？",
-    "expected_behavior": "cite_risk_evidence_and_keep_scope",
-    "status": "partial",
-    "answer": "AMZN FY2022 营业收入：5139.83 亿美元（513,983,000,000.00 USD）。报告期间：2022-01-01 至 2022-12-31。\nWe are regularly subject to formal and informal reviews, investigations, and other proceedings by governments and regulatory authorities under existing laws, regulations, or interpretations or pursuing new and novel approaches to regulate our operations. For example, we face a number of open investigations based on claims that aspects of our operations violate competition rules, including aspects of Amazon’s U.S. and European marketplace for sellers, particularly with respect to use of data, fulfillment services, and featured offers, and legislative and regulatory initiatives in Europe and elsewhere allow authorities to restrict or prohibit certain operations or actions pre-emptively without the need to assess specific competitive effects. Unfavorable regulations, laws, decisions, or interpretations by government or regulatory authorities applying those laws and regulations, or inquiries, investigations, or enforcement actions threatened or initiated by them, could cause us to incur substantial costs, expose us to unanticipated civil and criminal liability or penalties (including substantial monetary fines), diminish the demand for, or availability of, our products and services, increase our cost of doing business, require us to change our business practices in a manner materially adverse to our business, damage our reputation, impede our growth, or otherwise have a material effect on our operations. The media, political, and regulatory scrutiny we face, which may continue to increase, amplifies these risks.\nPlease carefully consider the following discussion of significant factors, events, and uncertainties that make an investment in our securities risky. The events and consequences discussed in these risk factors could, in circumstances we may or may not be able to accurately predict, recognize, or control, have a material adverse effect on our business, growth, reputation, prospects, financial condition, operating results (including components of our financial results), cash flows, liquidity, and stock price. These risk factors do not identify all risks that we face; our operations could also be affected by factors, events, or uncertainties that are not presently known to us or that we currently do not consider to present significant risks to our operations. In addition to the factors discussed in Item 7 of Part II, “Management’s Discussion and Analysis of Financial Condition and Results of Operations—Overview,” and in the risk factors below, global economic and geopolitical conditions and additional or unforeseen circumstances, developments, or events may give rise to or amplify many of the risks discussed below. Many of the risks discussed below also impact our customers, including third-party sellers, which could indirectly have a material adverse effect on us.\nActual results and outcomes could differ materially for a variety of reasons, including, among others, fluctuations in foreign exchange rates, changes in global economic conditions and customer demand and spending, inflation, interest rates, regional labor market and global supply chain constraints, world events, the rate of growth of the Internet, online commerce, and cloud services, the amount that Amazon.com invests in new business opportunities and the timing of those investments, the mix of products and services sold to customers, the mix of net sales derived from products as compared with services, the extent to which we owe income or other taxes, competition, management of growth, potential fluctuations in operating results, international growth and expansion, the outcomes of claims, litigation, government investigations, and other proceedings, fulfillment, sortation, delivery, and data center optimization, risks of inventory management, variability in demand, the degree to which we enter into, maintain, and develop commercial agreements, proposed and completed acquisitions and strategic transactions, payments risks, and risks of fulfillment throughput and productivity. In addition, global economic and geopolitical conditions and additional or unforeseen circumstances, developments, or events may give rise to or amplify many of these risks. These risks and uncertainties, as well as other risks and uncertainties that could cause our actual results or outcomes to differ significantly from management’s expectations, are described in greater detail in Item 1A of Part I, “Risk Factors.”",
-    "evidence_ids": [
-      "fact-f0c2699abcf88999dfde",
-      "passage-19a361412a37ab173523",
-      "passage-680bb5e04a218dabe693",
-      "passage-c20729f08780a1b98fd6"
-    ],
-    "answer_claims": 4,
-    "has_citation": true,
-    "citation_supported": true,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "verification_findings": 12,
-    "budget_timeout": false,
-    "reasonable_refusal": false,
-    "wrong_refusal": false,
-    "gaps": [
-      "集中度风险：在本轮检索的 FY2022 10-K 片段与结构化数据中未找到单一客户或少数客户占净销售额显著比例的客户集中度披露，因此无法就已实现的客户集中风险作出结论。",
-      "模型未在预算内提交完整回答；已保留已在本地核验的财务数字，未核验的解释不作结论。",
-      "模型未完成原因或风险归纳；已保留同一申报中的逐字摘录，摘录不等同于综合结论。",
-      "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。",
-      "有 4 条断言未通过证据核验，已移除；其余已交付内容均已核验。"
-    ],
-    "latency_ms": 141880,
-    "cost_usd": null,
-    "run_id": "run-713e3ffa8325421cb50a594efc005be9",
-    "model_calls": 9,
-    "reported_tokens": 183771,
-    "prompt_tokens": 176762,
-    "completion_tokens": 7009,
-    "review_model": "mimo-v2.6-flash",
-    "trace_summary": {
-      "tool_calls": 12,
-      "tool_names": [
-        "get_financial_fact",
-        "get_statement",
-        "list_filings",
-        "search_passages",
-        "submit_answer"
-      ],
-      "model_steps": 9,
-      "direct_text_rounds": 0,
-      "author_ms": 35228.0,
-      "review_ms": 99501.0,
-      "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
-      ]
-    },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-risk-014",
-    "category": "risk",
-    "ticker": "MSFT",
-    "question": "What regulatory, demand, and concentration risks did Microsoft disclose for FY2023?",
-    "expected_behavior": "cite_risk_evidence_and_keep_scope",
-    "status": "abstained",
-    "answer": "",
-    "evidence_ids": [],
-    "answer_claims": 0,
-    "has_citation": false,
-    "citation_supported": false,
     "unsupported_claims": 0,
     "numeric_errors": 0,
     "verification_findings": 0,
     "budget_timeout": false,
     "reasonable_refusal": false,
-    "wrong_refusal": true,
+    "wrong_refusal": false,
     "gaps": [
-      "test"
+      "retry",
+      "模型请求未完成；已保留与问题直接相关的原文摘录，未生成未经核验的综合判断。",
+      "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。"
     ],
-    "latency_ms": 9215,
+    "latency_ms": 21808,
     "cost_usd": null,
-    "run_id": "run-8ae4e38086924af4932b19f067d3f09d",
-    "model_calls": 1,
-    "reported_tokens": 16181,
-    "prompt_tokens": 15789,
-    "completion_tokens": 392,
+    "run_id": "run-a51156fbdfef447281471c973291eb71",
+    "model_calls": 3,
+    "reported_tokens": 41853,
+    "prompt_tokens": 40362,
+    "completion_tokens": 1491,
     "review_model": "mimo-v2.6-flash",
     "trace_summary": {
-      "tool_calls": 6,
+      "tool_calls": 8,
       "tool_names": [
         "get_statement",
         "list_filings",
         "search_passages",
         "submit_answer"
       ],
-      "model_steps": 1,
+      "model_steps": 3,
       "direct_text_rounds": 0,
-      "author_ms": 5318.0,
+      "author_ms": 16461.0,
       "review_ms": 0,
       "finish_reasons": [
+        "tool_calls",
+        "tool_calls",
         "tool_calls"
       ]
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   },
   {
-    "id": "semantic-risk-017",
-    "category": "risk",
-    "ticker": "AAPL",
-    "question": "苹果 FY2022 的监管、需求和集中度风险有哪些？",
-    "expected_behavior": "cite_risk_evidence_and_keep_scope",
+    "id": "semantic-negation-006",
+    "category": "negation",
+    "ticker": "NVDA",
+    "question": "Did NVIDIA state that there was no material supply-chain impact in FY2023?",
+    "expected_behavior": "preserve_negation_and_require_exact_support",
     "status": "partial",
-    "answer": "Compliance with these laws and regulations is onerous and expensive. New and changing laws and regulations can adversely affect the Company’s business by increasing the Company’s costs, limiting the Company’s ability to offer a product, service or feature to customers, impacting customer demand for the Company’s products and services, and requiring changes to the Company’s supply chain and its business. New and changing laws and regulations can also create uncertainty about how such laws and regulations will be interpreted and applied. These risks and costs may increase as the Company’s products and services are introduced into specialized applications, including health and financial services. The Company has implemented policies and procedures designed to ensure compliance with applicable laws and regulations, but there can be no assurance the Company’s employees, contractors or agents will not violate such laws and regulations or the Company’s policies and procedures. If the Company is found to have violated laws and regulations, it could materially adversely affect the Company’s business, reputation, results of operations and financial condition. Regulatory changes and other actions that materially adversely affect the Company’s business may be announced with little or no advance notice and the Company may not be able to effectively mitigate all adverse impacts from such measures. For example, the Company is subject to changing regulations relating to the export and import of its products. Although the Company has programs, policies and procedures in place that are designed to satisfy regulatory requirements, there can be no assurance that such policies and procedures will be effective in preventing a violation or a claim of a violation.\nThe Company has a large, global business with sales outside the U.S. representing a majority of the Company’s total net sales, and the Company believes that it generally benefits from growth in international trade. Substantially all of the Company’s manufacturing is performed in whole or in part by outsourcing partners located primarily in Asia, including China mainland, India, Japan, South Korea, Taiwan and Vietnam. Trade policies and disputes and other international conflicts can result in tariffs, sanctions and other measures that restrict international trade, and can materially adversely affect the Company’s business, particularly if these measures occur in regions where the Company derives a significant portion of its revenues and/or has significant supply chain operations. For example, tensions between the U.S. and China have led to a series of tariffs being imposed by the U.S. on imports from China mainland, as well as other business restrictions. Tariffs increase the cost of the Company’s products and the components and raw materials that go into making them. These increased costs can adversely impact the gross margin that the Company earns on its products. Tariffs can also make the Company’s products more expensive for customers, which could make the Company’s products less competitive and reduce consumer demand. Countries may also adopt other measures, such as controls on imports or exports of goods, technology or data, that could adversely impact the Company’s operations and supply chain and limit the Company’s ability to offer its products and services as designed. These measures can require the Company to take various actions, including changing suppliers, restructuring business relationships, and ceasing to offer third-party applications on its platforms.\nThe Company has considerable trade receivables outstanding with its third-party cellular network carriers, wholesalers, retailers, resellers, small and mid-sized businesses and education, enterprise and government customers. The Company generally does not require collateral from its customers; however, the Company will require collateral or third-party credit support in certain instances to limit credit risk. In addition, when possible, the Company attempts to limit credit risk on trade receivables with credit insurance for certain customers or by requiring third-party financing, loans or leases to support credit exposure. These credit-financing arrangements are directly between the third-party financing company and the end customer. As such, the Company generally does not assume any recourse or credit risk sharing related to any of these arrangements. As of September 24, 2022, the Company had one customer that represented 10% or more of total trade receivables, which accounted for 10 %. The Company’s cellular network carriers accounted for 44 % and 42 % of total trade receivables as of September 24, 2022 and September 25, 2021, respectively. The Company has non-trade receivables from certain of its manufacturing vendors resulting from the sale of components to these vendors who manufacture subassemblies or assemble final products for the Company. The Company purchases these components directly from suppliers. As of September 24, 2022, the Company had two vendors that individually represented 10% or more of total vendor non-trade receivables, which accounted for 54 % and 13 %. As of September 25, 2021, the Company had three vendors that individually represented 10% or more of total vendor non-trade receivables, which accounted for 52 %, 11 % and 11 %.",
+    "answer": "Failure to estimate customer demand properly has led and could lead to mismatches between supply and demand. We use third parties to manufacture and assemble our products, and we have had and may in the future have long manufacturing lead times. We are not provided guaranteed wafer, component and capacity supply, and our supply deliveries and production may be non-linear within a quarter or year. If our estimates of customer demand are ultimately inaccurate, as we have experienced from time to time, there could be a significant mismatch between supply and demand. This mismatch has resulted in both product shortages and excess inventory, has varied across our market platforms, and has significantly harmed our financial results. We build finished products and maintain inventory in advance of anticipated demand. While we have in the past entered and may in the future enter into long-term supply and capacity commitments, we may not be able to secure sufficient commitments for capacity to address our business needs or our long-term demand expectations may change. Additionally, our ability to sell certain products has been and could be impeded if components from third parties that are necessary for the finished product are not available. In periods of shortages impacting the semiconductor industry and/or limited supply or capacity in our supply chain, the lead times on our orders may be extended. We have previously experienced extended lead times of more than 12 months. We have paid premiums and provided deposits to secure future supply and capacity, which have increased our product costs and may continue to do so. We may not have the ability to reduce our supply commitments at the same rate or at all if our revenue declines.\nThe COVID-19 pandemic has affected and could continue to have a material adverse impact on our financial condition and results of operations. The COVID-19 pandemic has impacted and may continue to impact our workforce and operations and those of our customers, partners, vendors and suppliers. COVID-19-related disruptions have created and may continue to create supply chain and logistics constraints, and COVID-19 containment around the world has put restrictions on, among other areas, manufacturing facilities, commerce, and support operations. Restrictions may be imposed or reinstated as the pandemic resurfaces, such as lockdown measures due to COVID-19 containment efforts in China. End customer sales for our products in China have been negatively impacted by lockdowns and this impact may continue if lockdowns return. COVID-19 has also resulted in, and may continue to result in, disruption of and volatility in global financial markets, which could impact overall technology spending or negatively affect our stock price and liquidity. All of these factors have had or could in the future have a material negative impact on our business. We modified our business and workforce practices in response to COVID-19, including with respect to flexible work and social distancing measures, and we may take further actions as required by government regulations or in the best interests of our employees, customers, partners and suppliers. These and other measures have caused and may in the future cause us to incur incremental expenses and costs.",
     "evidence_ids": [
-      "passage-02d19ba8f098ac889138",
-      "passage-3cf573934f5e039cf9f3",
-      "passage-5fe1a381b402c1e6172b"
+      "passage-ca13e3dc70a8b07a751f",
+      "passage-f7443e8de5c1eefe34a3"
     ],
-    "answer_claims": 3,
+    "answer_claims": 2,
     "has_citation": true,
     "citation_supported": true,
     "unsupported_claims": 0,
     "numeric_errors": 0,
-    "verification_findings": 15,
+    "verification_findings": 5,
     "budget_timeout": false,
     "reasonable_refusal": false,
     "wrong_refusal": false,
     "gaps": [
-      "所引段落以“某客户”“某供应商”指代集中度对象，未指明具体公司名称；本次引用的证据只能说明上述已引用内容，不能据此断言整份申报未作其他相关披露。",
-      "模型请求未完成；已保留与问题直接相关的原文摘录，未生成未经核验的综合判断。",
-      "有 5 条断言未通过证据核验，已移除；其余已交付内容均已核验。"
+      "The full-filing record reports 2 indexed passages matching the explicit-negative pattern but does not identify them individually, so it cannot be verified whether either passage constitutes a denial of a material FY2023 supply-chain impact.",
+      "The scan covers exact keyword patterns only; whether the filing states the same proposition in different wording is not assessed by the supplied evidence.",
+      "The model request did not complete; directly relevant filing excerpts are retained, and no unverified synthesis is presented.",
+      "The requested cause or risk explanation is still missing. The verified figures are supporting information, not a substitute for that explanation."
     ],
-    "latency_ms": 126240,
+    "latency_ms": 1072513,
     "cost_usd": null,
-    "run_id": "run-96609def0d7d40fc91167a21952aaac3",
-    "model_calls": 7,
-    "reported_tokens": 131388,
-    "prompt_tokens": 125057,
-    "completion_tokens": 6331,
+    "run_id": "run-0aa1d7113d8e4a71ac0a30c9336d29b2",
+    "model_calls": 4,
+    "reported_tokens": 63552,
+    "prompt_tokens": 60210,
+    "completion_tokens": 3342,
     "review_model": "mimo-v2.6-flash",
     "trace_summary": {
-      "tool_calls": 9,
+      "tool_calls": 10,
       "tool_names": [
         "get_statement",
         "list_filings",
+        "read_recall",
         "search_passages",
         "submit_answer"
       ],
-      "model_steps": 7,
+      "model_steps": 4,
       "direct_text_rounds": 0,
-      "author_ms": 60530.0,
-      "review_ms": 63194.0,
+      "author_ms": 144475.0,
+      "review_ms": 0,
       "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
         "tool_calls",
         "tool_calls",
         "tool_calls",
         "tool_calls"
       ]
     },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
-  },
-  {
-    "id": "semantic-risk-019",
-    "category": "risk",
-    "ticker": "MSFT",
-    "question": "微软 FY2024 年报有哪些需要持续跟踪的风险？",
-    "expected_behavior": "cite_risk_evidence_and_keep_scope",
-    "status": "partial",
-    "answer": "We are subject to a wide range of laws, regulations, and legal requirements in the U.S. and globally, including those that may apply to our products and online services offerings, and those that impose requirements related to user privacy, telecommunications, data storage and protection, advertising, and online content. How these laws and regulations apply to our business is often unclear, subject to change over time, and sometimes may be inconsistent from jurisdiction to jurisdiction. To comply with the accelerating global regulatory obligations, we established a regulatory governance framework and to create a repeatable system-focused approach to regulatory governance with an initial focus on four domains: Responsible AI, Privacy, Digital Safety, and Cybersecurity. The framework is designed to help us maintain customer trust and confidence in our products, remain in compliance with regulators around the globe, and effectively scale our capability to address the growing number of complex regulations. Through the framework, our legal and regulatory subject matter experts ingest regulations, develop standards and implementation guidance, and, when appropriate, work with our engineers to develop and implement products to monitor compliance. Our business teams, with legal support, manage the compliance programs and prepare external regulatory and commercial reporting, and our internal audit teams conduct reviews of our programs and processes.\nAbrupt political change, terrorist activity, and armed conflict, such as the ongoing conflict in Ukraine, pose economic and other risks, which may negatively impact our ability to sell to and collect from customers, increase our operating costs, or otherwise disrupt our operations in markets both directly and indirectly impacted by such events. These conditions also may add uncertainty to the timing and budget for technology investment decisions by our customers and may cause supply chain disruptions for hardware manufacturers. Geopolitical change may result in changing regulatory systems and requirements and market interventions that could impact our operating strategies, access to national, regional, and global markets, hiring, and profitability. Geopolitical instability may lead to sanctions and impact our ability to do business in some markets or with some public-sector customers. Any of these changes may negatively affect our results of operations. The occurrence of regional epidemics or a global pandemic, such as COVID-19, may adversely affect our business, operations, financial condition, and results of operations. The extent to which global pandemics impact our business going forward will depend on factors such as the duration and scope of the pandemic; governmental, business, and individuals' actions in response to the pandemic; and the impact on economic activity, including the possibility of recession or financial market instability. Measures to contain a global pandemic may intensify other risks described in these Risk Factors.\nLaws and regulations relating to anti-corruption and trade could result in increased costs, fines, criminal penalties, or reputational damage. The Foreign Corrupt Practices Act (“FCPA”) and other anti-corruption laws and regulations (“Anti-Corruption Laws”) prohibit corrupt payments by our employees, vendors, or agents, and the accounting provisions of the FCPA require us to maintain accurate books and records and adequate internal controls. From time to time, we receive inquiries from authorities in the U.S. and elsewhere which may be based on reports from employees and others about our business activities outside the U.S. and our compliance with Anti-Corruption Laws. Periodically, we receive such reports directly and investigate them, and also cooperate with investigations by U.S. and foreign law enforcement authorities. An example of increasing international regulatory complexity is the EU Whistleblower Directive, initiated in 2021, which presents compliance challenges as it is implemented in different forms by EU member states. Most countries in which we operate also have competition laws that prohibit competitors from colluding or otherwise attempting to reduce competition between themselves. While we devote substantial resources to our U.S. and international compliance programs and have implemented policies, training, and internal controls designed to reduce the risk of corrupt payments and collusive activity, our employees, partners, vendors, or agents may violate our policies.",
-    "evidence_ids": [
-      "passage-943e2de014c038787bc2",
-      "passage-95a6124ee261274fd8a8",
-      "passage-c1416922b041ab26422a"
-    ],
-    "answer_claims": 3,
-    "has_citation": true,
-    "citation_supported": true,
-    "unsupported_claims": 0,
-    "numeric_errors": 0,
-    "verification_findings": 15,
-    "budget_timeout": false,
-    "reasonable_refusal": false,
-    "wrong_refusal": false,
-    "gaps": [
-      "这些风险在 FY2024 之后的实际发展（是否已产生重大不利影响）不属于该年报时点的披露内容，需以后续期报跟踪。",
-      "模型请求未完成；已保留与问题直接相关的原文摘录，未生成未经核验的综合判断。",
-      "有 5 条断言未通过证据核验，已移除；其余已交付内容均已核验。"
-    ],
-    "latency_ms": 90970,
-    "cost_usd": null,
-    "run_id": "run-7fffd88833c944b7aa7a0bebe93cd289",
-    "model_calls": 6,
-    "reported_tokens": 44484,
-    "prompt_tokens": 39354,
-    "completion_tokens": 5130,
-    "review_model": "mimo-v2.6-flash",
-    "trace_summary": {
-      "tool_calls": 5,
-      "tool_names": [
-        "search_passages",
-        "submit_answer"
-      ],
-      "model_steps": 6,
-      "direct_text_rounds": 0,
-      "author_ms": 22069.0,
-      "review_ms": 68128.0,
-      "finish_reasons": [
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls",
-        "tool_calls"
-      ]
-    },
-    "evaluation_fingerprint": "4ab457d1e6544564db2e6213c7f35a41bac4f6bf13372648de06e9170f703ccc"
+    "evaluation_fingerprint": "98d15a5c8fe74f2f6d0f80db0b05c477678b4e5de363aac338ac9432f887886d"
   }
 ]

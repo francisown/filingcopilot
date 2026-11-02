@@ -45,7 +45,7 @@ class FilingCopilot(PlanningMixin, ResearchMixin, ExecutionMixin, ReferencesMixi
         )
         self.refresh_domain()
         self.enriched: set[str] = set()
-        self.watchlist = Watchlist(self.corpus, self.find_stock, self.capabilities)
+        self.watchlist = Watchlist(self.corpus, self.find_stock, self.capabilities, self.settings)
 
     def refresh_domain(self):
         with self.domain_lock:

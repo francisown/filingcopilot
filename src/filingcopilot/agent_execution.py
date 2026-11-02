@@ -15,14 +15,48 @@ from .localization import current_language, state_language
 from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, Submission
+from .profitability import profitability_context
 from .semantic_boundaries import narrative_completeness_errors, unresolved_proposition_gaps
-from .submission_protocol import parse_submission
+from .submission_protocol import bind_observed_submission, parse_submission
 from .tools import ResearchTools
 from .updates import is_stock_updates_question, wants_update_summary
 from .verification import numeric_completeness_errors, verify_submission
 
 if TYPE_CHECKING:
     from .agent import AgentState
+
+
+def _read_recall(state, arguments):
+    """Return an already observed object without acquiring new evidence."""
+    ref = str(arguments.get("id") or "").strip()
+    if not ref:
+        raise ValueError("read_recall requires a previously observed evidence ID")
+    recall = state.get("recall")
+    entry = recall.entry(ref) if recall is not None else None
+    if entry is not None:
+        return {"evidence": entry["payload"]}
+    ledger = getattr(state.get("tools"), "ledger", {}) or {}
+    evidence = ledger.get(ref)
+    if evidence is None:
+        raise ValueError(
+            "No previously observed object has this ID; use a research tool to observe it first"
+        )
+    return {"evidence": evidence}
+
+
+def _model_tool_content(state, result, *, full=False):
+    """Serialize one tool result and index exactly what the model observes."""
+    content = model_context_json(
+        result,
+        seen_passage_ids=None if full else state.setdefault("context_passage_ids", set()),
+    )
+    recall = state.get("recall")
+    if recall is not None:
+        try:
+            recall.index(json.loads(content), pin=full)
+        except (TypeError, ValueError):
+            pass
+    return content
 
 
 _PLACEHOLDER_GAPS = {
@@ -284,7 +318,9 @@ class ExecutionMixin:
             })
         unresolved = unresolved_proposition_gaps(state["verified"], question)
         resolution = state.get("answer_resolution_review")
-        if resolution and resolution.get("outcome") == "unresolved":
+        if resolution and resolution.get("outcome") == "unresolved" and not unresolved:
+            # The deterministic guard may already describe the same unresolved
+            # proposition. Two near-identical notes add no information.
             unresolved.append(
                 "所问命题仍未解决；审核未找到足以确认或反驳该主张的直接证据。"
                 if re.search(r"[\u4e00-\u9fff]", question)
@@ -487,7 +523,12 @@ class ExecutionMixin:
             focus_ticker=focus,
             allow_excerpts=True,
         )
-        return claims
+        existing = {
+            (tuple(claim.get("evidence_ids", [])), claim.get("text"))
+            for claim in state.get("verified", []) if claim.get("kind") == "excerpt"
+        }
+        return [claim for claim in claims
+                if (tuple(claim["evidence_ids"]), claim["text"]) not in existing]
 
     @staticmethod
     def _observed_module_excerpt_fallback(state: AgentState) -> list[dict]:
@@ -594,14 +635,31 @@ class ExecutionMixin:
     def _prepare_annual_comparison(tools, question, focus, max_calls):
         """Read local typed premises before causal drafting, within the tool budget."""
         years = explicit_years(question)
-        metrics, _ = tools.domain.requests(question)
-        if len(years) != 1 or not metrics or not compares_prior_year(question):
+        metrics, ratios = tools.domain.requests(question)
+        # An unspecified margin is a request for profitability context, not a
+        # reason to skip numeric preparation. Supply a clearly labeled basis;
+        # this does not restrict the author from researching other margins.
+        if not metrics and not ratios and re.search(r"利润率|\bmargins?\b", question, re.I):
+            ratios = {"operating_margin"}
+        if len(years) != 1 or not (metrics or ratios) or not compares_prior_year(question):
             return None, []
+        metrics = set(metrics)
+        ratios = set(ratios)
+        for ratio in ratios:
+            metrics.update((tools.domain.ratios[ratio].numerator, tools.domain.ratios[ratio].denominator))
+        # Operating-margin explanations need the gross-margin component too.
+        # Use the same public calculation tool; never ask the model to infer a
+        # precise bridge from rounded percentages in a presentation table.
+        growth_metrics = set(metrics)
+        if "operating_margin" in ratios and 3 * len(metrics | {"gross_profit"}) + 2 * len(ratios | {"gross_margin"}) + 5 <= max_calls:
+            metrics.add("gross_profit")
+            ratios.add("gross_margin")
         # Leave room for source retrieval and a submission. Never start a
         # comparison whose necessary inputs do not fit in the available budget.
-        if 3 * len(metrics) + 2 > max_calls:
+        if 3 * len(metrics) + 2 * len(ratios) + (5 if ratios else 2) > max_calls:
             return None, []
         evidence, trace, missing = [], [], []
+        observed = {}
 
         def call(name, arguments):
             control = current_control()
@@ -625,15 +683,28 @@ class ExecutionMixin:
                 if result["found"]:
                     pair.append(result["evidence"])
                     evidence.append(result["evidence"])
+                    observed[metric, source_year] = result["evidence"]
                 else:
                     missing.append({"metric": metric, "fiscal_year": source_year})
-            if len(pair) == 2 and comparable_annual_periods(*pair) and not stopped():
+            if metric in growth_metrics and len(pair) == 2 and comparable_annual_periods(*pair) and not stopped():
                 try:
                     result = call("calculate", {"operation": "growth", "left_id": pair[0]["id"], "right_id": pair[1]["id"]})
                     evidence.append(result["evidence"])
                 except ValueError as exc:
                     missing.append({"metric": metric, "operation": "growth", "reason": str(exc)})
-        return {"evidence": evidence, "missing": missing}, trace
+        for ratio in sorted(ratios):
+            spec = tools.domain.ratios[ratio]
+            for source_year in (year, year - 1):
+                left, right = observed.get((spec.numerator, source_year)), observed.get((spec.denominator, source_year))
+                if not left or not right or stopped():
+                    continue
+                try:
+                    result = call("calculate", {"operation": "ratio", "left_id": left["id"], "right_id": right["id"]})
+                    evidence.append(result["evidence"])
+                except ValueError as exc:
+                    missing.append({"ratio": ratio, "fiscal_year": source_year, "reason": str(exc)})
+        return {"evidence": evidence, "missing": missing,
+                "profitability_reconciliation": profitability_context(evidence)}, trace
 
     @state_language
     def execute(self, state: AgentState) -> dict:
@@ -665,14 +736,7 @@ class ExecutionMixin:
             arguments = {}
             fingerprint = None
             try:
-                state["tool_count"] += 1
-                if state["tool_count"] > self.settings.max_tool_calls:
-                    raise ValueError("Reached tool-call limit")
                 arguments = json.loads(call["function"]["arguments"])
-                state["usage"]["tool_calls"] = state["usage"].get("tool_calls", 0) + 1
-                control = current_control()
-                if control:
-                    control.record_tool(name)
                 fingerprint = json.dumps([name, arguments], sort_keys=True)
                 if name != "submit_answer" and fingerprint in state["seen"]:
                     cached = state.get("tool_cache", {}).get(fingerprint)
@@ -693,20 +757,48 @@ class ExecutionMixin:
                         {
                             "role": "tool",
                             "tool_call_id": call["id"],
-                            "content": model_context_json(
-                                result,
-                                seen_passage_ids=state.setdefault("context_passage_ids", set()),
+                            "content": _model_tool_content(
+                                state, result, full=name == "read_recall"
                             ),
                         }
                     )
                     continue
+                # A submission consumes no new evidence IO. Once the research
+                # allowance is exhausted, still accept a draft or a bounded
+                # review repair; the model round/repair limits remain in force.
+                # Read/cache lookup precedes this gate so a cached result does
+                # not consume scarce acquisition budget or lose its arguments.
+                if name not in {"submit_answer", "read_recall"} and state["tool_count"] >= self.settings.max_tool_calls:
+                    raise ValueError("Reached tool-call limit; submit using the observed evidence")
+                if name != "read_recall":
+                    # Recall is a transport read of already observed evidence.
+                    # It must not consume acquisition budget or delay synthesis.
+                    state["tool_count"] = min(state["tool_count"] + 1, self.settings.max_tool_calls)
+                    state["usage"]["tool_calls"] = state["usage"].get("tool_calls", 0) + 1
+                    control = current_control()
+                    if control:
+                        control.record_tool(name)
                 state["seen"].add(fingerprint)
-                if wants_update_summary(state["question"]) and name != "submit_answer":
+                if wants_update_summary(state["question"]) and name not in {"submit_answer", "read_recall"}:
                     raise ValueError(
                         "Notice summary may only submit claims from supplied notice excerpts"
                     )
-                if name == "submit_answer":
-                    candidate = parse_submission(arguments)
+                if name == "read_recall":
+                    result = _read_recall(state, arguments)
+                elif name == "submit_answer":
+                    submitted = parse_submission(arguments)
+                    candidate = (
+                        bind_observed_submission(submitted, getattr(state.get("tools"), "ledger", {}))
+                        if submitted.claims else submitted
+                    )
+                    bindings = [
+                        {"index": i, "submitted_kind": before.kind, "bound_kind": after.kind,
+                         "added_evidence_ids": [eid for eid in after.evidence_ids if eid not in before.evidence_ids]}
+                        for i, (before, after) in enumerate(zip(submitted.claims, candidate.claims, strict=True))
+                        if before != after
+                    ]
+                    if bindings:
+                        state["trace"].append({"stage": "submission_source_binding", "claims": bindings})
                     # Models sometimes use a literal placeholder as the only
                     # gap while they are still deciding what to submit. It is
                     # not a meaningful disclosure and must follow the same
@@ -792,6 +884,20 @@ class ExecutionMixin:
                 return {**state, "action": "end"}
             except (ValueError, TypeError, KeyError) as exc:
                 result = {"error": str(exc)[:300], "recoverable": True}
+                if name == "submit_answer" and isinstance(exc, json.JSONDecodeError):
+                    # Do not seed the next draft with the same truncated JSON.
+                    # Keep the call ID/tool response pair and the parse failure,
+                    # but replace the unusable arguments in model history.
+                    result["malformed_argument_chars"] = len(call["function"]["arguments"])
+                    call["function"]["arguments"] = "{}"
+                    result["repair_instruction"] = (
+                        'The arguments were invalid JSON and were removed from model history. '
+                        'Generate a fresh complete object with keys "claims" and "gaps". '
+                        'Each claim has only "kind", "statement", "evidence_ids". '
+                        'Use observed IDs, keep statements short, and do not continue the broken prefix. '
+                        'Example shape: {"claims":[{"kind":"narrative","statement":"...",'
+                        '"evidence_ids":["observed-id"]}],"gaps":[]}.'
+                    )
             except Exception as exc:
                 result = {
                     "error": "Tool unavailable",
@@ -814,9 +920,8 @@ class ExecutionMixin:
                 {
                     "role": "tool",
                     "tool_call_id": call["id"],
-                    "content": model_context_json(
-                        result,
-                        seen_passage_ids=state.setdefault("context_passage_ids", set()),
+                    "content": _model_tool_content(
+                        state, result, full=name == "read_recall"
                     ),
                 }
             )

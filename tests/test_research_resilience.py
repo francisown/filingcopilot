@@ -214,7 +214,10 @@ def test_partial_submission_still_delivers_requested_observed_math(tools, operat
     assert calculations[0]["input_ids"] == [left, right]
     assert Decimal(calculations[0]["value"]) == (100 if operation == "growth" else 40)
     assert sum(c["kind"] == "calculation" for c in answer.answer) == 1
-    assert sum(t.get("stage") == "fallback_calculation" for t in answer.trace) == (0 if already_calculated else 1)
+    prepared = any(t.get("stage") == "tool" and t.get("tool") == "calculate"
+                   and t.get("arguments", {}).get("operation") == operation
+                   and t.get("arguments", {}).get("left_id") == left for t in answer.trace)
+    assert sum(t.get("stage") == "fallback_calculation" for t in answer.trace) == (0 if already_calculated or prepared else 1)
 
 
 def test_fallback_does_not_fetch_missing_comparison_input(tools):

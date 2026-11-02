@@ -49,9 +49,13 @@ def test_retiring_unrequested_gap_rechecks_requested_numeric_coverage(tools, que
                         "model": "author"}
             # All supplied claims are supported, and the segment breakdown is
             # genuinely unrequested. Neither decision establishes completeness.
-            payload = {"verdicts": [{"index": 1, "supported": True, "reason": "Source supports the risk."}],
+            context = json.loads(messages[-1]["content"])
+            payload = {"verdicts": [{"index": c["index"], "supported": True, "reason": "Source supports the risk."}
+                                    for c in context["claims"]],
                        "gap_verdicts": [{"index": 0, "required_missing": False,
                                          "reason": "The user did not request segment detail."}]}
+            if not context.get("gap_candidates"):
+                payload.pop("gap_verdicts")
             return {"message": {"content": json.dumps(payload)}, "model": "judge"}
 
     gateway = Gateway()
@@ -63,7 +67,7 @@ def test_retiring_unrequested_gap_rechecks_requested_numeric_coverage(tools, que
     assert any(missing in finding for finding in answer.gaps)
     assert any(missing in finding for step in answer.trace if step["stage"] == "verify"
                for finding in step["findings"])
-    assert gateway.calls == 2, "Coverage checks must not repeat paid semantic review"
+    assert gateway.calls == 3, "One source/gap review and one isolated coverage review, without an author retry"
 
 
 @pytest.mark.parametrize("include_growth,missing_income", [(True, False), (False, False), (False, True)])
@@ -79,11 +83,13 @@ def test_complete_draft_can_drop_an_unrequested_gap_without_repeating_review(too
         def complete(self, messages, schemas, review=False):
             self.calls += 1
             if review:
+                context = json.loads(messages[-1]["content"])
                 return {"model": "judge", "message": {"content": json.dumps({
-                    "verdicts": [{"index": 2 if include_growth else 1, "supported": True,
-                                  "reason": "Source supports the risk."}],
-                    "gap_verdicts": [{"index": 0, "required_missing": False,
-                                      "reason": "Segment detail is outside the question."}],
+                    "verdicts": [{"index": c["index"], "supported": True,
+                                  "reason": "Source supports the risk."} for c in context["claims"]],
+                    **({"gap_verdicts": [{"index": 0, "required_missing": False,
+                                      "reason": "Segment detail is outside the question."}]}
+                       if context.get("gap_candidates") else {}),
                 })}}
             return {"model": "author", "message": {"tool_calls": [{"id": "submit", "type": "function",
                     "function": {"name": "submit_answer", "arguments": json.dumps({"claims": [
@@ -105,4 +111,4 @@ def test_complete_draft_can_drop_an_unrequested_gap_without_repeating_review(too
     else:
         assert answer.status == "answered" and not answer.gaps
     assert not any("revenue" in gap and "requires a calculate" in gap for gap in answer.gaps)
-    assert len(answer.answer) == 3 and gateway.calls == 2
+    assert len(answer.answer) == 3 and gateway.calls == 3

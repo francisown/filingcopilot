@@ -42,8 +42,14 @@ from .localization import text as translate_text
 from .model_context import model_context_json
 from .models import Claim, ResearchAnswer, ResearchRequest, Submission
 from .quarterly import is_quarterly_question, stock_request_scope
+from .recall import RecallIndex
 from .retrieval_query import question_shape
-from .semantic_boundaries import document_scope_conflict, nonblocking_gap, withheld_only
+from .semantic_boundaries import (
+    gap_scope_conflict,
+    nonblocking_gap,
+    scope_gap_present,
+    withheld_only,
+)
 from .settings import Settings
 from .status import classify_status_reason
 from .tools import ResearchTools, tool_schemas
@@ -76,8 +82,11 @@ def module_round_limit(module: str | None, max_rounds: int) -> int:
 
 SYSTEM = """You are FilingCopilot, a careful financial filing researcher. Answer in Chinese.
 For an explanation, lead with the disclosed cause; figures alone do not answer why.
-For a risk question, address each requested risk category, including customer concentration
-when concentration is requested. Keep consolidated and segment results distinct. If discussing
+For a risk question, address each requested risk category. Generic concentration includes
+disclosed customer, supplier, product or geographic dependencies; do not silently narrow it to
+single-customer percentages. An explicitly requested customer dimension cannot be replaced by
+another dimension. Do not rank risks as primary without a supported ranking. Keep consolidated
+and segment results distinct. If discussing
 profit margins, identify which margin changed and its own disclosed drivers; do not substitute
 segment commentary for a consolidated explanation. Search the relevant MD&A heading when needed.
 For a general risk question, deliver at most one concise claim per requested category and no
@@ -91,14 +100,30 @@ evidence differs. Keep each claim short enough to preserve every qualification.
 If the question says only “利润率” or “profit margin” without naming gross, operating or net
 margin, use operating margin as the primary scope and do not introduce all three margin types
 unless the question asks for them or the evidence clearly requires the distinction.
-For a proposed negative, answer with explicit support, a matching counterexample, or insufficient
-evidence. A possible future material risk or unquantified adverse effect cannot establish realized
-material harm. Revenue changes do not by themselves prove demand changes, and strong demand in
+For a proposed negative, answer with explicit support, a matching counterexample, or a bounded
+full-scan result when negative_evidence is supplied. A possible future material risk or unquantified adverse effect cannot establish realized
+material harm. A nonzero effect or percentage change does not establish materiality: a favorable
+or adverse line-item impact can coexist with no material impact. Preserve any explicitly disclosed
+materiality assessment and do not infer a different assessment from an amount alone.
+Revenue changes do not by themselves prove demand changes, and strong demand in
 one segment cannot rule out declines elsewhere. If only selected excerpts were searched, say
 what those excerpts establish; do not say the entire filing never or only makes a statement.
+If a full-filing negative_evidence record is supplied and its explicit-negative slot is zero,
+you may answer a "did the filing state/deny X" question directly as "No", limited to the
+indexed wording, and cite that evidence ID.
+Lead unresolved propositions with the precise limit. Omit unrelated uses of "not material";
+preserve the actual event, subject and period instead of padding the answer with other notes.
 Look for counterevidence to a proposed interpretation before submitting. Preserve the exact
 subject of comparisons: foreign currency weakness against USD is USD strength, not USD weakness.
 If annual_comparison is supplied, its facts and growth calculations are already observed.
+Its margin calculations and profitability_reconciliation use statement amounts before display
+rounding. Cite the relevant calculation IDs when explaining changes or relative growth.
+Equal rounded percentages do not prove an unchanged expense ratio. Explain net margin movement
+from both gross margin and the gross-to-operating spread, distinguishing arithmetic synthesis
+from disclosed business drivers. Rate comparisons cannot establish absolute amount increments.
+The arithmetic residual does not identify its line-item composition; label it operating expenses
+or other operating items only with a cited reconciliation. Do not add unrequested claims that the whole filing
+lacks a bridge or quantified attribution. Split a useful analysis from any scoped limitation.
 Use their exact IDs without fetching or calculating them again. Include the available current
 amount and growth alongside the requested explanation. A requested prior fiscal year is in scope.
 Do not report these supplied numbers/calculations as missing. Seek causes in the requested year's
@@ -150,7 +175,10 @@ receivables terms. A structured row may support a qualitative narrative claim, b
 turn an absent row into zero or justify an unobserved percentage. Do not request an unfiltered
 statement dump when a narrow row query can answer the question; the complete rows remain
 available to the verifier.
-Fiscal years differ from calendar years. get_financial_fact is ANNUAL ONLY. Latest 10-Q facts
+Fiscal years differ from calendar years. A filing can disclose events AFTER its reporting
+period. Compare an event's stated date with filing.period_end before calling it a reporting-period
+event; say the annual report discloses a subsequent event when appropriate. The filing year or
+publication date does not establish the event's fiscal year. get_financial_fact is ANNUAL ONLY. Latest 10-Q facts
 come from get_quarterly_overview/get_quarterly_fact with exact dates and quarter/YTD scope.
 Never substitute YTD for a single quarter, or an annual fact for a quarterly request.
 For a TTM margin use get_ttm_margin, which divides source-aligned trailing profit and revenue.
@@ -164,32 +192,67 @@ search queries even for Chinese questions. Search again if the first evidence do
 For a question about a particular FY, pass fiscal_year to search_passages. Usually one or two
 focused searches suffice. Once you have relevant passages and required calculations, submit.
 Do not search repeatedly for extra figures the question did not request. If a requested segment
-number has no supported structured metric, state the gap; qualitative explanation can still cite
-the original passage without adding amounts or percentages. Respect the remaining-round budget.
+number has no supported structured metric, state the gap unless the exact requested figure and
+its scope are explicitly disclosed in a cited passage. Do not calculate it from table cells.
+Respect the remaining-round budget.
+Do not label settlement, severance or impairment charges one-time/nonrecurring unless the
+cited filing explicitly classifies them that way. Their occurrence alone does not prove recurrence.
+Keep charges bound to their disclosed accounting lines. A list of charges affecting operating
+income does not mean they all belong to Other operating expense. If their allocations differ,
+describe them separately or state only the supported aggregate operating-income impact.
 Submit through submit_answer: fact/calculation statements MUST be empty and have exactly one
 matching evidence ID; code writes these sentences. Submit each claim with only kind, statement
 and evidence_ids; never copy reviewer index/key fields. Narrative statements require passage or
-matching structured-row support for every assertion, especially causation. For split source paragraphs, read continuations and
+matching structured-row support for every assertion, especially causation. Preserve the source
+relationship: two observations joined by 'and' do not justify 'therefore', 'because', 因此 or 因而.
+Attribute a cause only when the source supports that relation. For split paragraphs, read continuations and
 cite every context_id provided by search_passages. Preserve expiry, replacements, exceptions and
-renewal uncertainty; historical authorization is not current authorization. Keep financial amounts and ratios in numeric claims.
-Narrative must be qualitative: no currency amounts or percentages, even if the passage contains
-them. Do not derive growth rankings or financial comparisons from a raw numeric table yourself;
+renewal uncertainty; historical authorization is not current authorization. Use typed numeric claims
+for observed financial facts and calculated ratios. A narrative may quote an amount or percentage
+explicitly present in its cited passage; preserve the exact value, unit, denominator, fiscal period
+and comparison boundary. Do not calculate, round or convert it yourself. In particular, "10% or more"
+does not mean "more than 10%", and exactly 10% does not exceed 10%. Keep disclosed boundaries
+instead of replacing them with vague dominance or diversification conclusions. An accounts-receivable
+balance is an amount owed at a date, not cash collected, payments received or revenue.
+Geographic revenue, product lines and receivable categories do not establish that customers are
+diversified or that no customer dominates. Describe the disclosed concentration dimension; only
+make customer-concentration conclusions from individual-customer evidence or explicit disclosure.
+If the question asks generically about concentration, explain the dimension actually disclosed;
+do not silently narrow it to individual customers or invent a missing customer-breakdown requirement.
+In constant-currency tables, an adjustment converting reported results to prior-year rates is
+not the currency effect on reported results; the signs can be opposite. Use explicit source prose
+or typed calculations with bound columns. Omit optional currency drivers supported only by an
+unbound table adjustment, while retaining the other supported explanations.
+Do not derive growth rankings or financial comparisons from a raw numeric table yourself;
 use observed code calculations or an explicit source statement. Omit optional segment rankings
 when no supported calculation exists. Do not add gaps for extra segment metrics or details the user did not ask for. Only disclose
 missing evidence needed to answer the actual question.
 For a question testing a proposed statement, distinguish a contrary disclosure from an
 unsuccessful search: directly cited contrary evidence can refute the proposed statement.
-The absence of that exact proposed wording is not itself an additional evidence gap.
-Do not claim a document-wide absence from a few excerpts; describe what the cited evidence
-actually supports. A gap must identify a requested part that remains unresolved, not an
+The absence of that exact proposed wording is not itself an additional evidence gap when a
+full-filing negative_evidence record covers the exact pattern. Do not claim a document-wide
+absence from a few excerpts; describe what the cited evidence actually supports. If the full
+scan is present, state its bounded result and cite the negative evidence ID. A gap must identify a requested part that remains unresolved, not an
 unrequested segment figure, optional source, or hypothetical event that never occurred.
+Revenue growth does not establish that underlying demand did not decline, even as a
+"consistent with" inference. Actual adverse effects do not refute a claim of immateriality.
+A historical or product-specific observation does not contradict a company-wide statement about
+a different period. Do not introduce it as "against a blanket denial", "inconsistent with",
+"contradicts", "相反", "相矛盾" or "与否认并不一致" unless the period, subject and proposition all match.
+State the narrower observation and leave the broader proposition unresolved when appropriate.
+Keep the same evidence-scope limits in gap explanations as in the answer itself.
 Write short, separate narrative claims directly answering the question; avoid unrelated business
 overviews. Finish every sentence, keeping statements well below the tool's character limit.
+Describe findings rather than internal retrieval, prefetch or repair steps. Preserve the fiscal
+quarter/year and measurement dimension with quantitative descriptions, including verbal ranges.
 Summarize in your own concise wording; never cut a source paragraph at the length limit.
 In US filings "gross margin" followed by a currency amount means 毛利金额/毛利润,
 whereas "gross margin percentage" means 毛利率. They can move in opposite directions; never
 translate an increase in gross profit dollars as an increase in 毛利率.
-Do not equate a possible risk with something that actually happened. Be concise, disclose missing
+Do not equate a possible risk with something that actually happened. A possible risk also does
+not prove the event has not happened: preserve uncertainty
+about occurrence unless the cited source explicitly establishes it. Do not label conditional risks
+as events that have not occurred merely because the source uses "if", "may" or "could". Be concise, disclose missing
 evidence, and abstain when necessary. Your answer will be independently checked and you may receive
 repair feedback. Evidence-based business/investment assessment is allowed. Distinguish known
 facts from reasoned analysis and conditional scenarios; never fabricate market data, forecasts,
@@ -200,6 +263,7 @@ and must contain no numeric amounts or ratios; narrative claims still require pa
 class AgentState(TypedDict):
     output_language: str
     messages: list
+    recall: RecallIndex
     tools: ResearchTools
     question: str
     module: str | None
@@ -219,12 +283,17 @@ class AgentState(TypedDict):
     verified: list
     review_cache: dict
     review_scope_cache: dict
+    review_source_ids: list[str]
     answer_resolution_review: dict | None
+    review_failed: bool
     review_conflicts: set
     verified_candidate: Submission | None
     retained_gaps: list
     gap_evidence: dict | None
     numeric_coverage_errors: list[str]
+    answer_coverage_review: dict | None
+    answer_coverage_key: str | None
+    coverage_review_cache: dict
     errors: list
     trace: list
     usage: dict
@@ -239,13 +308,27 @@ def _research_system_prompt(
     return (
         localized_prompt(STOCK_INSTRUCTIONS if stock_question else SYSTEM, request.language)
         + (
-            "\nThe full-filing scan in narrative_source_overview is a local keyword/pattern "
-            "search over indexed passages, not a semantic review of every sentence. "
-            "Its hit counts identify candidates; zero matches do not prove document-wide absence. "
-            "For a proposed negative, distinguish an explicit denial, a realized matching "
-            "counterexample, and an unresolved proposition. A possible future risk is compatible "
-            "with a denial of past harm. State only what the cited passages establish; if no "
-            "direct evidence settles the proposition, retain that limitation."
+            (
+                "\nThe full-filing scan in narrative_source_overview is a local keyword/pattern "
+                "search over indexed passages, not a semantic review of every sentence. "
+                "Its hit counts identify candidates. A negative_evidence record with "
+                "scope=full_filing_keyword_scan and a zero '否定' slot means no indexed passage "
+                "matched the explicit negative pattern. For a 'did the filing state/deny X' question, "
+                "you may answer 'No' when that bounded scan result is present: state that no indexed "
+                "passage contains the explicit statement, cite the negative_evidence ID, and describe "
+                "the filing's actual conditional risk language. Do not generalize to paraphrases or "
+                "claim the filing never discusses the topic. For a proposed negative, distinguish an "
+                "explicit denial, a realized matching counterexample, and an unresolved proposition. "
+                "A possible future risk is compatible with a denial of past harm."
+                if question_shape(request.question) == "negation"
+                else "\nThe full-filing scan in narrative_source_overview is a local keyword/pattern "
+                "search over indexed passages, not a semantic review of every sentence. "
+                "Its hit counts identify candidates; zero matches do not prove document-wide absence. "
+                "For a proposed negative, distinguish an explicit denial, a realized matching "
+                "counterexample, and an unresolved proposition. A possible future risk is compatible "
+                "with a denial of past harm. State only what the cited passages establish; if no "
+                "direct evidence settles the proposition, retain that limitation."
+            )
             if full_scan
             else ""
         )
@@ -460,7 +543,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             finalization_guidance = ""
             if finalizing and narrative_ready:
                 shape = question_shape(state["question"])
-                if shape == "causality":
+                if shape == "cause":
                     finalization_guidance = (
                         " For this cause question, lead with one concise synthesis of the disclosed "
                         "drivers, then add only the distinct supported drivers needed to answer it. "
@@ -469,8 +552,11 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 elif shape == "negation":
                     finalization_guidance = (
                         " For this negation question, state the direct conclusion first—whether the "
-                        "filing denied the proposition, contradicted it, or left it unresolved—then "
-                        "cite the matching evidence. Do not submit only a financial fact."
+                        "filing denied the proposition, contradicted it, or contains no explicit "
+                        "statement of it. If negative_evidence covers the full filing and its "
+                        "explicit-negative slot is zero, answer 'No' to 'did the filing state/deny X' "
+                        "with that bounded scan result, cite the negative_evidence ID, and do not add "
+                        "an unresolved-document gap. Do not submit only a financial fact."
                     )
                 elif shape == "risk":
                     finalization_guidance = (
@@ -487,7 +573,10 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     )
                     + f"Research budget: {remaining} model rounds remain; {searches} passage searches used. "
                     + (
-                        "Submit now using observed evidence. Disclose any missing parts in gaps."
+                        "Submit now using observed evidence. Disclose any missing parts in gaps. "
+                        "Tools are restricted for final synthesis; this does not mean research tools "
+                        "were unavailable earlier. Describe the unresolved evidence without inventing "
+                        "an operational reason for the limitation."
                         if finalizing
                         else "When evidence is sufficient, submit_answer now."
                     ),
@@ -497,6 +586,11 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 state["messages"][-1]["content"] += finalization_guidance
             progress("reason", "Agent 正在选择研究步骤。", round=state["rounds"])
             messages = [dict(message) for message in state["messages"]]
+            recall = state.get("recall")
+            if recall is not None:
+                # Only the model-facing copy is compacted. The trace, ledger
+                # and verification inputs keep the complete tool results.
+                messages = recall.compact(messages)
             if messages and messages[0]["role"] == "system":
                 messages[0]["content"] = localized_prompt(messages[0]["content"], current_language())
             result = self.gateway.complete(messages, schemas)
@@ -581,6 +675,68 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 return self._run(request, tools)
         return self._run(request, tools)
 
+    @staticmethod
+    def _add_negative_scan_fallback(state, request, narrative_context):
+        """Supply a bounded negative answer when the author submitted no synthesis.
+
+        A zero-hit full-filing scan already answers the negation question. If the
+        model exhausted its budget or returned only excerpts, do not turn that
+        deterministic result into a model-dependent partial answer.
+        """
+        if question_shape(request.question) != "negation" or not narrative_context:
+            return
+        if not narrative_context.get("full_filing_scan"):
+            return
+        if any(c.get("verification") == "deterministic_full_scan" for c in state["verified"]):
+            return
+        if any(c.get("kind") in ("narrative", "analysis") for c in state["verified"]):
+            return
+        negative = next(
+            (
+                item
+                for item in narrative_context.get("evidence", [])
+                if item.get("kind") == "negative_evidence"
+            ),
+            None,
+        )
+        if not negative or int((negative.get("slot_hits") or {}).get("否定", -1)) != 0:
+            return
+        english = current_language() == "en"
+        text = (
+            "The full-filing indexed keyword scan found no explicit statement matching "
+            "the requested negative proposition; this result is limited to the indexed "
+            "wording and is not a semantic proof about paraphrases."
+            if english
+            else "整份索引全文的关键词扫描未发现与所问否定命题匹配的明确表述；该结论仅限索引措辞，"
+            "不构成对同义改写的语义证明。"
+        )
+        state["verified"].append(
+            {
+                "index": max((c["index"] for c in state["verified"]), default=-1) + 1,
+                "kind": "narrative",
+                "text": text,
+                "evidence_ids": [negative["id"]],
+                "verification": "deterministic_full_scan",
+                "scan_scope": "full_filing_keyword_scan",
+            }
+        )
+        state["trace"].append(
+            {
+                "stage": "negative_scan_fallback",
+                "evidence_id": negative["id"],
+                "reason": "author submitted no narrative synthesis after a zero-hit full-filing negation scan",
+            }
+        )
+        # The fallback satisfies the narrative-completeness requirement computed
+        # before finalization. Drop only that stale error; all other verifier
+        # findings remain in force.
+        state["errors"] = [
+            error
+            for error in state.get("errors", [])
+            if "requested explanation/narrative conclusion is missing" not in str(error)
+            and "requested cause or risk explanation is still missing" not in str(error)
+        ]
+
     def _run(self, request: ResearchRequest, tools: ResearchTools) -> ResearchAnswer:
         started = time.perf_counter()
         checkpoint()
@@ -629,7 +785,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             focus = next(iter(companies))
         if (focus and not stock_question and not module and not is_quarterly_question(request.question)
                 and not is_ttm_question(request.question)
-                and re.search(r"原因|为什么|为何|驱动|\bwhy\b|\bdrivers?\b|\bcauses?\b", request.question, re.I)):
+                and question_shape(request.question) == "cause"):
             annual_comparison, comparison_trace = self._prepare_annual_comparison(
                 tools, request.question, focus, self.settings.max_tool_calls,
             )
@@ -838,6 +994,61 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     "reason": "factual restatement section uses a bounded drafting/repair budget",
                 }
             )
+        initial_context = {
+            "question": request.question,
+            **({"requested_scope": requested_scope} if stock_question else {}),
+            "focus_ticker": request.ticker,
+            "as_of": request.as_of.isoformat(),
+            **(
+                {"source_refresh": tools.refresh_status}
+                if tools.refresh_status
+                else {}
+            ),
+            **({"company_updates": updates_context} if updates_context else {}),
+            **({"annual_overview": overview} if overview is not None else {}),
+            **({"annual_comparison": annual_comparison} if annual_comparison else {}),
+            **({"source_overview": source_context} if source_context else {}),
+            **(
+                {"narrative_source_overview": narrative_context}
+                if narrative_context
+                else {}
+            ),
+            **(
+                {"trailing_overview": trailing_context}
+                if trailing_context
+                else {}
+            ),
+            **(
+                {"cashflow_overview": cashflow_context}
+                if cashflow_context
+                else {}
+            ),
+            **(
+                {"quarterly_overview": quarterly_context}
+                if quarterly_context and quarterly_context.get("found")
+                else {}
+            ),
+            **(
+                {"market_overview": market_context}
+                if market_context is not None
+                else {}
+            ),
+            **(
+                {"annual_valuation": valuation_context}
+                if valuation_context is not None
+                else {}
+            ),
+            **(
+                {"supplier_ttm_valuation": supplier_valuation_context}
+                if supplier_valuation_context is not None
+                else {}
+            ),
+        }
+        initial_content = model_context_json(initial_context)
+        recall = RecallIndex()
+        # Index exactly what the first model message contains. Later rounds can
+        # point at these IDs instead of repeating the same filing paragraphs.
+        recall.index(json.loads(initial_content), pin=True)
         state = self.graph.invoke(
             {
                 "messages": [
@@ -854,60 +1065,10 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     },
                     {
                         "role": "user",
-                        "content": model_context_json(
-                            {
-                                "question": request.question,
-                                **({"requested_scope": requested_scope} if stock_question else {}),
-                                "focus_ticker": request.ticker,
-                                "as_of": request.as_of.isoformat(),
-                                **(
-                                    {"source_refresh": tools.refresh_status}
-                                    if tools.refresh_status
-                                    else {}
-                                ),
-                                **({"company_updates": updates_context} if updates_context else {}),
-                                **({"annual_overview": overview} if overview is not None else {}),
-                                **({"annual_comparison": annual_comparison} if annual_comparison else {}),
-                                **({"source_overview": source_context} if source_context else {}),
-                                **(
-                                    {"narrative_source_overview": narrative_context}
-                                    if narrative_context
-                                    else {}
-                                ),
-                                **(
-                                    {"trailing_overview": trailing_context}
-                                    if trailing_context
-                                    else {}
-                                ),
-                                **(
-                                    {"cashflow_overview": cashflow_context}
-                                    if cashflow_context
-                                    else {}
-                                ),
-                                **(
-                                    {"quarterly_overview": quarterly_context}
-                                    if quarterly_context and quarterly_context.get("found")
-                                    else {}
-                                ),
-                                **(
-                                    {"market_overview": market_context}
-                                    if market_context is not None
-                                    else {}
-                                ),
-                                **(
-                                    {"annual_valuation": valuation_context}
-                                    if valuation_context is not None
-                                    else {}
-                                ),
-                                **(
-                                    {"supplier_ttm_valuation": supplier_valuation_context}
-                                    if supplier_valuation_context is not None
-                                    else {}
-                                ),
-                            },
-                        ),
+                        "content": initial_content,
                     },
                 ],
+                "recall": recall,
                 "tools": tools,
                 "output_language": request.language,
                 "question": request.question,
@@ -917,9 +1078,13 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "focus_ticker": focus,
                 "narrative_context": narrative_context,
                 "rounds": 0,
-                "tool_count": len(initial_trace),
+                "tool_count": sum(t.get("stage") == "tool" for t in initial_trace),
                 "seen": initial_seen,
-                "tool_cache": {},
+                "tool_cache": {
+                    json.dumps([t["tool"], t["arguments"]], sort_keys=True): t["result"]
+                    for t in initial_trace if t.get("stage") == "tool" and t.get("result")
+                    and not t["result"].get("error") and "arguments" in t
+                },
                 # The initial narrative overview is already present in the
                 # first user message. Seed the model-context deduper with
                 # those passage IDs so a later search result can reuse the
@@ -938,8 +1103,10 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "submission": None,
                 "verified": [],
                 "review_cache": {},
+                "review_source_ids": [],
                 "review_scope_cache": {},
                 "answer_resolution_review": None,
+                "review_failed": False,
                 "review_conflicts": set(),
                 "verified_candidate": None,
                 "retained_gaps": [],
@@ -959,6 +1126,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             {"recursion_limit": 60},
         )
         state["verified"] = self._retain_verified_partial(state, state["verified"])
+        self._add_negative_scan_fallback(state, request, narrative_context)
         if annual_comparison:
             state["trace"].append({"stage": "annual_comparison_preparation", "result": annual_comparison})
         basic_brief = False
@@ -1021,11 +1189,9 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 ]
             )
         )
-        if not stopped() and (
-            state.get("retained_gaps")
-            or any(t["stage"] == "retained_verified_partial" for t in state["trace"])
-        ):
-            gaps.append("后续修复未产生有效分析，已保留本轮先前通过核验的部分判断。")
+        # A retained partial draft already contributes its own gaps above. The
+        # trace keeps the repair event; a process narrative in the user-facing
+        # gap list would duplicate it without describing missing evidence.
         if stock_question:
             observed = [e for e in tools.ledger.values() if e.get("ticker") == focus]
             annual_pe = next(
@@ -1150,6 +1316,13 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
             if str(gap).strip().casefold() not in {"placeholder", "n/a", "na", "none", "无"}
         ]
         quality_notes = []
+        negative_resolved = any(
+            claim.get("verification") == "deterministic_full_scan"
+            for claim in state["verified"]
+        )
+        coverage_supported = bool(
+            (state.get("answer_coverage_review") or {}).get("supported")
+        ) and not state.get("review_failed") and not state.get("review_independence_warning")
         if state.get("review_independence_warning"):
             quality_notes.append(
                 "本轮审查未能确认与作者模型独立；该复核不构成独立核验，叙述性结论请谨慎对待。"
@@ -1174,50 +1347,94 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 else:
                     gaps = gaps + ["模型未在研究预算内提交完整回答；已保留通过核验的内容，可缩小问题范围后重试。"]
             else:
-                if withheld_only(state["errors"]):
+                coverage_confirmed = (
+                    (question_shape(request.question) in {"cause", "risk"} and coverage_supported)
+                    or (question_shape(request.question) == "negation" and negative_resolved)
+                )
+                # Emit the sentence already in the answer's language. A Chinese
+                # sentence here is run through the UI glossary, which replaces
+                # short fragments and produced "未 Passed Source checks, 已 Remove".
+                english = current_language() == "en"
+                withheld = [e for e in state["errors"] if str(e).startswith("claim ")]
+                withheld_note = (
+                    f"{len(withheld)} claim(s) failed evidence checks and were removed; "
+                    "every delivered claim is verified."
+                    if english
+                    else f"有 {len(withheld)} 条断言未通过证据核验，已移除；"
+                    "其余已交付内容均已核验。"
+                )
+                coverage_note = (
+                    "Some claims failed evidence checks and were withheld; the remaining "
+                    "answer has not been confirmed to cover the whole question."
+                    if english
+                    else "部分内容未通过证据核验，已停止或移除相关结论；剩余内容尚未确认完整覆盖所问问题。"
+                )
+                if (withheld_only(state["errors"])
+                        and (question_shape(request.question) not in {"cause", "risk", "negation"}
+                             or coverage_confirmed)
+                        and not request.module):
                     # Coverage passed and everything delivered was verified. A
                     # rejected sentence is a disclosed quality event with a count,
                     # not a reason to report the whole answer as incomplete.
-                    withheld = [e for e in state["errors"] if str(e).startswith("claim ")]
-                    # Emit the sentence already in the answer's language. A Chinese
-                    # sentence here is run through the UI glossary, which replaces
-                    # short fragments and produced "未 Passed Source checks, 已 Remove".
-                    english = not re.search(r"[\u4e00-\u9fff]", request.question)
-                    note = (
-                        f"{len(withheld)} claim(s) failed evidence checks and were removed; "
-                        "every delivered claim is verified."
-                        if english
-                        else f"有 {len(withheld)} 条断言未通过证据核验，已移除；"
-                        "其余已交付内容均已核验。"
-                    )
-                    quality_notes.append(note)
-                    gaps.append(note)
+                    quality_notes.append(withheld_note)
+                    gaps.append(withheld_note)
                     state["trace"].append(
                         {"stage": "withheld_claims_recorded", "count": len(withheld)}
                     )
+                elif [gap for gap in gaps if gap not in quality_notes]:
+                    # The answer already discloses a blocking scope or coverage
+                    # gap. A second repair-process note repeats it without adding
+                    # missing-evidence information. Non-blocking quality notes do
+                    # not count: an independence warning must not absorb a real
+                    # coverage failure.
+                    quality_notes.append(
+                        withheld_note if withheld_only(state["errors"]) else coverage_note
+                    )
                 else:
-                    gaps = gaps + ["部分内容未通过证据核验，已停止或移除相关结论。"]
+                    gaps.append(coverage_note)
         if cancelled():
             gaps.append(CANCELLED_NOTE)
         elif expired():
             gaps.append(DEADLINE_NOTE)
-        unsafe_gaps = [gap for gap in gaps if document_scope_conflict(gap)]
+        unsafe_gaps = [gap for gap in gaps if gap_scope_conflict(request.question, gap)]
         if unsafe_gaps:
             # Gap notes are author prose too. An exhausted repair budget cannot
             # turn an unverified document-wide absence into a delivered fact.
             state["trace"].append({"stage": "gap_scope_limited", "original_gaps": unsafe_gaps})
             gaps = [gap for gap in gaps if gap not in unsafe_gaps]
-            gaps.append(translate_text(
-                "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。"
-            ))
+            if not scope_gap_present(gaps):
+                gaps.append(translate_text(
+                    "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。"
+                ))
         full_scan = bool(
             narrative_context
             and narrative_context.get("full_filing_scan")
             and narrative_context.get("full_filing_passage_count", 0) > 0
         )
+        if negative_resolved:
+            # The bounded scan already answered the "did the filing state/deny
+            # X" question. A generic unresolved-proposition note now contradicts
+            # the delivered direct answer; keep only specific scope caveats.
+            unresolved = re.compile(
+                r"(?:requested proposition|proposition|requested conclusion|asked question).{0,70}"
+                r"(?:unresolved|not established|not settled)|"
+                r"(?:所问|该命题).{0,60}(?:仍未解决|尚未解决|无法确定|未能确定)|"
+                r"部分问题仍未解决",
+                re.I,
+            )
+            removed = [gap for gap in gaps if unresolved.search(str(gap))]
+            if removed:
+                gaps = [gap for gap in gaps if gap not in removed]
+                state["trace"].append(
+                    {"stage": "negative_resolved_gap_removed", "gaps": removed}
+                )
         for gap in gaps:
             if gap not in quality_notes and nonblocking_gap(
-                request.question, gap, full_scan=full_scan
+                request.question,
+                gap,
+                full_scan=full_scan,
+                negative_resolved=negative_resolved,
+                coverage_supported=coverage_supported,
             ):
                 quality_notes.append(gap)
         blocking_gaps = [gap for gap in gaps if gap not in quality_notes]

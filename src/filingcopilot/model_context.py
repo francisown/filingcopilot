@@ -57,7 +57,7 @@ def _project_search_result(
     projected = {
         key: _project(item, seen_passage_ids)
         for key, item in value.items()
-        if key not in {"hits", "continuations"}
+        if key not in {"hits", "continuations", "adjacent_passages"}
     }
     hits = []
     for hit in value.get("hits", []):
@@ -69,15 +69,18 @@ def _project_search_result(
             item["score"] = hit["score"]
         if "context_ids" in hit:
             item["context_ids"] = list(hit["context_ids"])
+        if "adjacent_ids" in hit:
+            item["adjacent_ids"] = list(hit["adjacent_ids"])
         hits.append(item)
     projected["hits"] = hits
-    if "continuations" in value:
-        projected["continuations"] = [
-            _project_passage(item, seen_passage_ids)
-            if isinstance(item, dict)
-            else _project(item, seen_passage_ids)
-            for item in value.get("continuations", [])
-        ]
+    for key in ("continuations", "adjacent_passages"):
+        if key in value:
+            projected[key] = [
+                _project_passage(item, seen_passage_ids)
+                if isinstance(item, dict)
+                else _project(item, seen_passage_ids)
+                for item in value.get(key, [])
+            ]
     return projected
 
 

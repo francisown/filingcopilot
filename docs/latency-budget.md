@@ -8,13 +8,13 @@ unlimited local run.
 ## Latest measured workflow
 
 The latest full record used DeepSeek for research and Mimo for review. Its
-model-backed latency was **90.6 seconds P50 / 174.9 seconds P95** across the
+model-backed latency was **226.4 seconds P50 / 1,051.1 seconds P95** across the
 model-using questions. The overall median is much lower because deterministic
 numeric, cross-period, refusal and policy rows do not call the model.
 
 The run had no runner errors or deadline timeouts. This does not mean that every
 question is fast: model sampling can change the tail between runs. The complete
-measured values are in the [latest workflow report](validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json).
+measured values are in the [latest workflow report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json).
 
 ## Retrieval versus generation
 

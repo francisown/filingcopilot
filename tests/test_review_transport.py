@@ -37,3 +37,27 @@ def test_review_json_transport_and_bounded_capability_fallback(tmp_path, support
         assert json.loads(result["message"]["content"])["claim_3_inference_supported"] is False
     assert len(requests) == {"json_schema": 2, "json_object": 3, None: 4}[supported_mode]
     assert messages == [{"role": "user", "content": "Review this claim."}], "Do not mutate a cached prompt"
+
+
+def test_review_request_has_its_own_timeout_and_keeps_the_global_deadline(tmp_path):
+    from filingcopilot.execution import ResearchControl, research_scope
+
+    observed = []
+
+    def handler(request):
+        observed.append(request.extensions["timeout"]["read"])
+        return httpx.Response(200, json={"id": "reply", "object": "chat.completion", "created": 0,
+            "model": json.loads(request.read())["model"], "choices": [{"index": 0, "finish_reason": "stop",
+                "message": {"role": "assistant", "content": "{}"}}]})
+
+    gateway = OpenAIGateway(Settings(home=tmp_path, api_key="test", model="author", review_model="reviewer",
+        model_timeout=17, review_timeout=95, min_model_interval=0),
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+    gateway.complete([], None)
+    gateway.complete([], None, review=True)
+    control = ResearchControl()
+    control.start_budget(12)
+    with research_scope(control):
+        gateway.complete([], None, review=True)
+    assert observed[:2] == [17, 95]
+    assert 0 < observed[2] <= 12

@@ -38,7 +38,7 @@ def test_encoded_submission_reaches_ordinary_review_once(tools, encoding):
                         as_of=tools.as_of, language="en"), tools,
     )
     assert answer.status == "answered", answer.gaps
-    assert calls == [False, True]
+    assert calls == [False, True, True]
     assert answer.answer[0]["text"] == claims[0]["statement"]
 
 

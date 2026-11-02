@@ -22,25 +22,24 @@
 
 ## 最新记录结果
 
-最近一次 140 题运行使用 DeepSeek 研究、Mimo 审查，输入是冻结的 62 份文件快照。100 道应回答研究题和 40 道设计性边界/策略题分开统计。
+最新完整验证记录是 2026-11-02 的 140 题运行：DeepSeek 研究、Mimo 审查，输入是冻结的 62 份文件快照，四个 worker，知悉日期 2026-10-08，研究预算 3,000 秒，审查超时 300 秒，审查 token 16,384。100 道应回答研究题和 40 道设计性边界/策略题分开统计。
 
 | 检查项 | 结果 |
 |---|---:|
-| 应回答研究题覆盖率 | **90 / 100** |
+| 应回答研究题覆盖率 | **95 / 100** |
 | 预期的证据不足拒答 | **20 / 20** |
 | 行情源策略题 | **20 / 20** |
 | 不支持声明 / 数值错误 | **0 / 0** |
 | 已交付答案的引用绑定率 | **1.000** |
-| 使用模型题延迟 | **P50 85.5 秒 / P95 218.3 秒** |
-| 记录的模型 token | **3,647,712** |
-| 内部检索 span/page/nugget Recall@5 | **0.615 / 0.635 / 0.710** |
-| 内部检索延迟 | **P50 66 毫秒 / P95 168 毫秒** |
-| 数值 oracle | **116 个精确匹配，0 个不匹配**；34 条超出检查范围 |
-| 回归测试 | **回退后完整回归 1,845 个通过；最后占位 gap 修复的 42 个针对性测试通过** |
+| 全行引用绑定率 | **0.857** |
+| 使用模型题延迟 | **P50 226.4 秒 / P95 1,051.1 秒** |
+| 记录的模型 token | **4,044,735** |
+| 数值 oracle | **104 个精确匹配，0 个不匹配**；27 条超出检查范围 |
+| 回归测试 | **当前工作树 2,305 个通过** |
 
-这些是工程和工作流测量，不是独立人工准确率研究。外部答案支持使用严格的 `full / partial / unsupported` 分类，分母和限制见[评测记录](docs/evaluation.md)。最新机器可读记录只保留[全量报告](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json)、[失败摘要](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/failures.json)和[检索快照](docs/validation/retrieval-diversity-2026-10-29.json)。
+五道应回答题目交付了部分回答：`semantic-causality-002`、`semantic-causality-008`、`semantic-causality-019`、`semantic-negation-001` 和 `semantic-negation-006`；它们都带有明确缺口，而不是未经核验的完整结论。
 
-最新完整跑次是当前单 worker 的总体记录：**90/100**。此前双 worker 跑次为 91/100；这个差异处于已观察到的随机波动范围内，保留为历史对照。另一个占位 gap 过滤修复已用一道风险题单独验证（1/1 完成），没有混入这次 140 题分数。
+这些是工程和工作流测量，不是独立人工准确率研究。外部答案支持使用严格的 `full / partial / unsupported` 分类，分母和限制见[评测记录](docs/evaluation.md)。机器可读记录见[全量报告](docs/validation/live-full-deepseek-mimo-2026-11-02-final/report.json)、[结果](docs/validation/live-full-deepseek-mimo-2026-11-02-final/results.json)和[失败摘要](docs/validation/live-full-deepseek-mimo-2026-11-02-final/failures.json)。
 
 ## 请求如何处理
 
@@ -103,6 +102,7 @@ FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 | `FC_MODEL` | 研究模型；仓库示例使用 DeepSeek |
 | `FC_REVIEW_MODEL` | 独立审查模型；仓库示例使用 Mimo |
 | `FC_RESEARCH_TIMEOUT` | 协作式研究上限；公开示例为 3,000 秒 |
+| `FC_WATCHLIST_TRIGGERS_ENABLED` | 自选列表触发需显式开启；关闭时只报告候选，不创建任务 |
 | `FC_EMBEDDING_MODE` | `off` 使用关键词检索，`local` 使用可选本地向量 |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 可选的供应商请求元数据 |
 | `FC_MAX_COST_USD` | 单次费用上限；必须同时配置两项 token 单价，否则启动时拒绝 |

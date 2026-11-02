@@ -145,6 +145,22 @@ def test_narrative_excerpt_fallback_requires_supported_scan(tools):
     assert ExecutionMixin._observed_narrative_excerpt_fallback(state) == []
 
 
+def test_failed_review_fallback_does_not_append_the_same_passage_twice(tools):
+    passage = tools.corpus.evidence("p1", tools.as_of)
+    state = {
+        "tools": tools, "question": "What risks does AAPL disclose?", "focus_ticker": None,
+        "verified": [], "errors": ["review unavailable"], "module": None,
+        "narrative_context": {"answerability": "supported_candidate", "category": "risk",
+                              "filing": {"id": "AAPL:old"}, "evidence": [passage]},
+        "trace": [{"tool": "search_passages", "result": {"hits": [{"passage": passage, "score": 1.0}]}},
+                  {"stage": "semantic_review_error", "error_type": "TimeoutError"}],
+    }
+    gaps, complete = ExecutionMixin()._complete_filing_answer(state, [])
+    assert len(state["verified"]) == 1
+    assert state["verified"][0]["evidence_ids"] == ["p1"]
+    assert gaps and not complete
+
+
 def test_numeric_only_narrative_keeps_exact_filing_context(tools):
     """A reviewed numeric draft must not erase the passages found for its explanation."""
     passage = tools.corpus.evidence("p1", tools.as_of)

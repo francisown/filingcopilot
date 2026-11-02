@@ -15,6 +15,172 @@ def approve(question, claims):
     }
 
 
+@pytest.mark.parametrize("statement", [
+    "Services gross margin increased. Consolidated operating margin increased.",
+    "服务毛利率上升。合并营业利润率上升。",
+])
+def test_component_without_repeated_period_can_reach_review_of_annual_source(tools, statement):
+    tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text":
+        "Services gross margin increased. Consolidated operating margin increased."}
+    reviewed = []
+    def review(question, claims):
+        reviewed.extend(claims)
+        return approve(question, claims)
+    accepted, errors = verify_submission(Submission(claims=[Claim(kind="analysis", statement=statement,
+        evidence_ids=["p1"])]), tools, "Explain FY2025 margin changes.", review)
+    assert accepted and reviewed, errors
+
+
+@pytest.mark.parametrize("statement", [
+    "FY2025营业费用占收入比重下降。",
+    "FY2025研发费用占收入比例低于上年。",
+    "FY2025 expenses as a proportion of revenue declined.",
+])
+def test_expense_denominator_is_not_an_absolute_revenue_direction(tools, statement):
+    from filingcopilot.claim_periods import _assertions
+    assert all("revenue" not in keys for keys, _, _, _ in _assertions(statement, tools.domain))
+
+
+def test_missing_comparison_identifies_metric_needed_for_repair(tools):
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    accepted, errors = verify_submission(Submission(claims=[Claim(
+        kind="analysis", evidence_ids=["p1"], statement="FY2025毛利率上升。",
+    )]), tools, "Explain the margin change.", approve)
+    assert not accepted
+    assert any("gross_margin" in error for error in errors), errors
+
+
+@pytest.mark.parametrize("statement", [
+    "毛利率百分比小幅下降、而运营费用增速低于收入增速。",
+    "毛利率下降，但运营费用增速明显慢于收入增速，费用杠杆抵消了毛利率下滑。",
+])
+def test_relative_comparison_cannot_borrow_an_unrelated_metric(tools, statement):
+    from filingcopilot.claim_periods import _growth_relations
+    from filingcopilot.polarity import directions
+    assert not list(_growth_relations(statement, tools.domain)), "The left operand is operating expenses, not gross margin"
+    assert -1 not in directions(statement, tools.domain, set()).get("revenue", set()), "Slower expense growth does not mean revenue declined"
+
+
+def test_unregistered_expense_comparison_still_gets_source_review(tools):
+    source = "Gross margin percentage decreased slightly. Operating expenses increased 6%. Revenue increased 15%."
+    tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": source}
+    claim = Claim(kind="analysis", evidence_ids=["p1"], statement=(
+        "毛利率百分比小幅下降、而运营费用增速低于收入增速；这与费用占收入比下降相一致。"
+    ))
+    reviewed = []
+    def review(question, claims):
+        reviewed.extend(claims)
+        return approve(question, claims)
+    accepted, errors = verify_submission(Submission(claims=[claim]), tools, "Explain the operating change.", review)
+    assert accepted and reviewed, errors
+
+
+@pytest.mark.parametrize("source,form,statement,expected", [
+    ("Gross margin percentage decreased slightly.", "10-K", "FY2025毛利率百分比小幅下降。", True),
+    ("Gross margin percentage decreased slightly.", "10-Q", "FY2025毛利率百分比小幅下降。", False),
+    ("Quarterly gross margin percentage decreased slightly.", "10-K", "FY2025毛利率百分比小幅下降。", False),
+    ("TTM gross margin percentage decreased slightly.", "10-K", "FY2025毛利率百分比小幅下降。", False),
+    ("Gross margin percentage decreased slightly.", "10-K", "最新季度毛利率百分比小幅下降。", False),
+    ("Gross margin percentage decreased slightly.", "10-K", "FY2025毛利率百分比上升。", False),
+])
+def test_unlabeled_annual_source_direction_keeps_its_filing_scope(tools, source, form, statement, expected):
+    item = tools.corpus.evidence("p1", tools.as_of)
+    tools.ledger["p1"] = {**item, "text": source, "filing": {**item["filing"], "form": form}}
+    reviewed = []
+    def review(question, claims):
+        reviewed.extend(claims)
+        return approve(question, claims)
+    accepted, errors = verify_submission(Submission(claims=[Claim(kind="analysis", statement=statement,
+                                                                evidence_ids=["p1"])]), tools,
+                                        "Explain the margin change.", review)
+    assert bool(accepted) is expected, errors
+    if expected:
+        assert reviewed, "Filing scope is permission for source review, not semantic approval"
+
+
+@pytest.mark.parametrize("statement,expected", [
+    ("FY2025毛利金额增长，而非毛利率提升。", True),
+    ("FY2025毛利金额下降。", False),
+    ("FY2025毛利率上升。", False),
+])
+def test_gross_margin_dollars_and_negative_contrast_do_not_reverse_the_claim(tools, statement, expected):
+    tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": (
+        "Gross margin increased $22.9 billion or 13%. Gross margin percentage decreased slightly."
+    )}
+    accepted, errors = verify_submission(Submission(claims=[Claim(kind="analysis", statement=statement,
+                                                                evidence_ids=["p1"])]), tools,
+                                        "Explain the operating change.", approve)
+    assert bool(accepted) is expected, errors
+
+
+@pytest.mark.parametrize("statement,source,review_accepts,expected", [
+    ("FY2025 total revenue grew, while product revenue declined and service revenue grew.", True, True, True),
+    ("FY2025总收入增长，产品收入下降，服务收入增长。", True, True, True),
+    ("FY2025 total revenue declined, while product revenue declined.", True, True, False),
+    ("FY2025 product revenue declined.", False, True, False),
+    ("FY2025 product revenue grew.", True, False, False),
+    ("Latest quarter product revenue declined.", True, True, False),
+])
+def test_component_direction_does_not_inherit_consolidated_comparison(
+    tools, statement, source, review_accepts, expected,
+):
+    """A source table needs scope review; total growth cannot decide its rows."""
+    tools.get_financial_fact("AAPL", "revenue", 2025)
+    tools.get_financial_fact("AAPL", "revenue", 2024)
+    growth = tools.calculate("growth", "rev25", "rev24")["evidence"]
+    evidence_ids = [growth["id"]]
+    if source:
+        tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": (
+            "Fiscal year | 2025 | 2024\nNet sales:\nProducts | 50 | 60\n"
+            "Services | 70 | 40\nTotal | 120 | 100"
+        )}
+        evidence_ids.append("p1")
+    called = []
+    def review(question, claims):
+        called.extend(claims)
+        return {"verdicts": [{"index": c["index"], "supported": review_accepts,
+                               "reason": "Check the product row separately from total revenue."}
+                              for c in claims]}
+    accepted, errors = verify_submission(
+        Submission(claims=[Claim(kind="analysis", statement=statement, evidence_ids=evidence_ids)]),
+        tools, "Explain the change in revenue.", review, "AAPL",
+    )
+    assert bool(accepted) is expected, errors
+    if expected or not review_accepts:
+        assert called, "Dimension-specific direction still requires semantic source review"
+
+
+@pytest.mark.parametrize("source,expected", [
+    ("FY2025 product revenue grew.", False),
+    ("FY2025 total revenue grew.", True),
+])
+def test_component_prose_cannot_prove_consolidated_direction(tools, source, expected):
+    tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": source}
+    accepted, errors = verify_submission(
+        Submission(claims=[Claim(kind="analysis", statement="FY2025 total revenue grew.", evidence_ids=["p1"])]),
+        tools, "Explain revenue.", approve, "AAPL",
+    )
+    assert bool(accepted) is expected, errors
+
+
+@pytest.mark.parametrize("statement,expected", [
+    ("FY2025营业收入增长。", True),
+    ("最新季度营业收入增长。", False),
+])
+def test_unrelated_quarter_charge_does_not_change_following_annual_explanation(tools, statement, expected):
+    tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": (
+        "A restructuring charge was recorded in Q3 2025. "
+        "The increase in revenue in 2025, compared to the prior year, "
+        "was driven by increased volume."
+    )}
+    accepted, errors = verify_submission(
+        Submission(claims=[Claim(kind="analysis", statement=statement, evidence_ids=["p1"])]),
+        tools, "苹果经营情况", approve, "AAPL",
+    )
+    assert bool(accepted) is expected, errors
+    assert bool(errors) is not expected
+
+
 @pytest.mark.parametrize(
     "statement,ids,expected",
     [

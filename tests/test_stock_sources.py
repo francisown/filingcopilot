@@ -53,7 +53,7 @@ def add_source(tools, id, ticker="AAPL", form="10-K", filed="2025-11-01", end="2
             filing_id=id,
             ticker=ticker,
             section="Risk Factors",
-            text="Risk Factors: competition, demand, regulatory and economic risks could affect operations.",
+            text="Risk Factors: competition, demand, supply chain, regulatory and economic risks could affect operations.",
             source_url=filing.source_url,
             locator="original risk paragraph",
         ),
@@ -121,6 +121,36 @@ def test_broad_risk_question_does_not_require_unrequested_concentration(sources)
     assert "集中度" not in context["evidence_slots"]
     assert not any(record["purpose"] == "客户集中风险" for record in records)
     assert all(record["arguments"]["filing_id"] == annual.id for record in records)
+
+
+@pytest.mark.parametrize("subject", ["cybersecurity", "litigation", "pension"])
+def test_negative_statement_scan_follows_the_asked_subject(sources, subject):
+    tools, annual, _ = sources
+    rows = [Passage(id=f"{annual.id}:noise-{i}", filing_id=annual.id, ticker="AAPL",
+                    section="Risk factors", source_url=annual.source_url, locator=f"noise {i}",
+                    text="Foreign exchange did not have a material impact. No material tax losses. "
+                         "We did not have material defaults and have not incurred material losses.")
+            for i in range(4)]
+    target = Passage(id=f"{annual.id}:target", filing_id=annual.id, ticker="AAPL",
+                     section="Other disclosures", source_url=annual.source_url, locator="target",
+                     text=f"We have not experienced any material {subject} impact during the fiscal year.")
+    tools.corpus.ingest(annual, [], [*rows, target])
+    question = f"Did Apple state that it had no material {subject} impact in FY2025?"
+    context, _ = narrative_source_context(tools, "AAPL", question, max_searches=0)
+    assert target.id in {e["id"] for e in context["evidence"]}
+    _, records = narrative_source_context(tools, "AAPL", question)
+    assert all(subject in r["arguments"]["query"].lower() for r in records)
+    assert all("supply chain" not in r["arguments"]["query"].lower() for r in records)
+
+
+def test_unrealized_demand_is_not_an_immateriality_disclosure(sources):
+    tools, annual, _ = sources
+    passage = Passage(id=annual.id + ":conditional", filing_id=annual.id, ticker="AAPL",
+                      section="Risk factors", source_url=annual.source_url, locator="conditional",
+                      text="If market demand does not materialize, our financial performance may suffer.")
+    tools.corpus.ingest(annual, [], [passage])
+    context, _ = narrative_source_context(tools, "AAPL", "Does Apple's FY2025 filing deny a demand decline?", max_searches=0)
+    assert context["evidence_slots"].get("否定", 0) == 0
 
 
 def test_concentration_prefetch_includes_filing_bound_structured_rows(sources):
@@ -209,6 +239,47 @@ def test_narrative_scan_prioritizes_a_question_named_segment_acronym(tools):
     assert any("AWS sales increased" in item["text"] for item in context["evidence"])
 
 
+@pytest.mark.parametrize("duplicates", [10, 30])
+def test_causal_scan_keeps_a_short_distinct_business_driver(tools, duplicates):
+    """Long repeated retail disclosures must not crowd out another business."""
+    filing = add_source(tools, "AAPL:diverse")
+    repeated = (
+        "Retail sales increased primarily due to customer demand, volume and price. "
+        "Retail revenue growth mainly reflects products and business mix. "
+        "Retail segment income increased due to net sales and demand. "
+        "Cloud segment is included in our accounting policy."
+    )
+    passages = [Passage(id=f"retail-{i:02d}", filing_id=filing.id, ticker="AAPL", section="Operating results",
+                        text=repeated + f" The disclosure includes reference {i}.",
+                        source_url=filing.source_url, locator=f"retail discussion {i}") for i in range(duplicates)]
+    passages.append(Passage(id="cloud-driver", filing_id=filing.id, ticker="AAPL", section="Operating results",
+                            text="Cloud sales increased mainly due to usage, offset by pricing changes.",
+                            source_url=filing.source_url, locator="distinct business discussion"))
+    tools.corpus.ingest(filing, [], passages)
+    context, records = narrative_source_context(tools, "AAPL", "Why did FY2025 revenue grow?", max_searches=0)
+    assert not records
+    assert "cloud-driver" in {p["id"] for p in context["evidence"]}
+    assert len(context["evidence"]) <= 10, "Diversity should not require a larger context dump"
+
+
+def test_negative_prefetch_excludes_unrelated_materiality_discussions(tools, monkeypatch):
+    filing = add_source(tools, "AAPL:materiality")
+    unrelated = Passage(id="charge-materiality", filing_id=filing.id, ticker="AAPL", section="Other expenses",
+                        text="Impairment charges and severance expenses were not material in the reported year.",
+                        source_url=filing.source_url, locator="unrelated accounting note")
+    relevant = unrelated.model_copy(update={"id": "supply-risk", "section": "Supply chain",
+                                           "text": "Supply chain disruptions could reduce production and revenue."})
+    tools.corpus.ingest(filing, [], [unrelated, relevant])
+    def search(**kwargs):
+        tools.ledger[unrelated.id] = tools.corpus.evidence(unrelated.id, tools.as_of)
+        return {"hits": [{"passage": unrelated.model_dump(mode="json")}]}
+    monkeypatch.setattr(tools, "search_passages", search)
+    context, _ = narrative_source_context(tools, "AAPL", "Did Apple report no material supply-chain impact in FY2025?", max_searches=1)
+    ids = {p["id"] for p in context["evidence"]}
+    assert relevant.id in ids
+    assert unrelated.id not in ids, "Not-material wording alone is not evidence about the requested event"
+
+
 def test_narrative_source_context_is_bounded_and_does_not_fabricate_missing_filings(sources):
     tools, _, _ = sources
     context, records = narrative_source_context(
@@ -241,6 +312,55 @@ def test_required_gap_triggers_one_exact_filing_followup_search(sources):
     assert result["evidence"]
     assert state["usage"]["tool_calls"] == 1
     assert state["trace"][-1]["stage"] == "gap_evidence_retrieval"
+
+
+def test_followup_query_preserves_missing_topic_when_question_is_long(sources, monkeypatch):
+    tools, annual, _ = sources
+    queries = []
+    monkeypatch.setattr(tools, "search_passages", lambda **kwargs: queries.append(kwargs) or {"hits": []})
+    state = {"focus_ticker": "AAPL", "question": (
+        "Explain revenue growth in FY2025, separating pricing, unit volumes, acquisitions, "
+        "advertising, foreign exchange movements, geographic demand, product mix, seasonality, "
+        "distribution changes, direct channels, customer expansion, and the effects of incentives."
+    ),
+             "trace": [{"stage": "narrative_source_preparation", "result": {"filing": {"id": annual.id}}}],
+             "tools": tools, "tool_count": 0, "usage": {}}
+    ReviewMixin._retrieve_gap_evidence(state, ["The enterprise subscription segment's renewal drivers remain unresolved."])
+    assert "enterprise subscription" in queries[0]["query"]
+    assert "renewal" in queries[0]["query"]
+    assert queries[0]["filing_id"] == annual.id
+
+
+def test_search_and_prefetch_keep_adjacent_segment_explanation(sources, monkeypatch):
+    from filingcopilot.model_context import model_context_json
+
+    tools, annual, _ = sources
+    main = Passage(id="sales-main", filing_id=annual.id, ticker="AAPL", section="Net sales",
+                   text="Net sales increased primarily because of retail unit sales and advertising growth.",
+                   source_url=annual.source_url, locator="narrative block 8, chunk 0; exact text retained", page=20)
+    neighbor = main.model_copy(update={"id": "sales-next", "text": "Cloud sales increased through customer usage, offset by contract pricing changes.",
+                                      "locator": "narrative block 9, chunk 0; exact text retained", "page": 21})
+    other = main.model_copy(update={"id": "next-section", "section": "Income taxes", "text": "Tax expense reflects a separate reporting topic.",
+                                   "locator": "narrative block 10, chunk 0; exact text retained"})
+    tools.corpus.replace_passages(annual, [main, neighbor, other])
+    monkeypatch.setattr(tools.retriever, "search", lambda *a, **kw: {"hits": [{"passage": main.model_dump(mode="json"), "score": 1.0}]})
+    result = tools.search_passages("sales growth", ticker="AAPL", filing_id=annual.id)
+    assert [p["id"] for p in result.get("adjacent_passages", [])] == [neighbor.id]
+    assert tools.ledger[neighbor.id]["text"] == neighbor.text
+    projected = json.loads(model_context_json(result))
+    assert projected["adjacent_passages"][0]["text"] == neighbor.text
+    context, _ = narrative_source_context(tools, "AAPL", "Why did revenue grow in FY2025?", max_searches=1)
+    assert neighbor.id in {e["id"] for e in context["evidence"]}
+    assert "next-section" not in result["hits"][0].get("adjacent_ids", [])
+
+
+def test_adjacency_does_not_cross_filing_section_or_missing_blocks():
+    from filingcopilot.passage_context import adjacent_members
+    main = {"id": "main", "filing_id": "f1", "section": "Sales", "locator": "narrative block 8, chunk 0; exact text retained"}
+    foreign = {**main, "id": "foreign", "filing_id": "f2", "locator": "narrative block 9, chunk 0; exact text retained"}
+    gap = {**main, "id": "gap", "locator": "narrative block 10, chunk 0; exact text retained"}
+    section = {**main, "id": "section", "section": "Tax", "locator": "narrative block 9, chunk 0; exact text retained"}
+    assert adjacent_members(main, [main, foreign, gap, section]) == []
 
 
 @pytest.mark.parametrize("quarter_id", ["MSFT:quarter", "not-observed"])

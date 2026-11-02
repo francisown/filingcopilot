@@ -11,7 +11,7 @@ from .fundamentals import company_overview
 from .localization import current_language
 from .market import MarketEvidence, market_evidence, render_market, statistics, symbol
 from .models import Calculation, Fact
-from .passage_context import context_members, context_part
+from .passage_context import adjacent_members, context_members, context_part
 from .periods import comparable_quarters, evidence_period
 from .retrieval import Retriever
 
@@ -599,6 +599,35 @@ class ResearchTools:
             result["continuations"] = list(continuations.values())
             result["context_requirement"] = (
                 "Narrative/analysis claims citing a split paragraph must cite every context_id. Read continuations for expiry, replacements, exceptions and conditions. Split claims into separate points if needed; do not treat a former authorization as current."
+            )
+        adjacent, remaining = {}, 6000
+        known = hit_ids | set(continuations)
+        for hit in result["hits"]:
+            passage = hit["passage"]
+            source = passage["filing_id"]
+            if source not in by_filing:
+                by_filing[source] = [p.model_dump(mode="json") for p in self.corpus.passages(
+                    self.as_of, passage["ticker"], filing_id=source,
+                )]
+            neighbors = []
+            for member in adjacent_members(passage, by_filing[source]):
+                key = member["id"]
+                if key not in known and key not in adjacent:
+                    size = len(member["text"])
+                    if size > remaining:
+                        continue
+                    remaining -= size
+                    adjacent[key] = member
+                    self.ledger.setdefault(key, self.corpus.evidence(key, self.as_of))
+                neighbors.append(key)
+            if neighbors:
+                hit["adjacent_ids"] = neighbors
+        if adjacent:
+            result["adjacent_passages"] = list(adjacent.values())
+            result["adjacent_guidance"] = (
+                "These are bounded neighboring paragraphs from the same filing and section. "
+                "Read them for omitted drivers or qualifications; cite each paragraph's own ID "
+                "when relying on it. They are additional context, not additional ranked hits."
             )
         return result
 
@@ -1349,6 +1378,17 @@ TOOL_SCHEMAS.append(
 )
 
 
+READ_RECALL_SCHEMA = tool_schema(
+    "read_recall",
+    "Return the full previously observed passage, fact, calculation, market or "
+    "statement object by its exact ID. Read-only: it does not search for new "
+    "evidence or consume the acquisition tool budget. Use it when earlier tool "
+    "output was compacted or when you need the exact wording again.",
+    {"id": {"type": "string"}},
+    ["id"],
+)
+
+
 def tool_schemas(
     domain: Domain,
     stock: bool = False,
@@ -1428,4 +1468,8 @@ def tool_schemas(
                     "readable official notices, using their exact supplied IDs. Keep at most three "
                     "analysis claims; do not substitute notices for the financial assessment."
                 )
+    if not any(schema["function"]["name"] == "read_recall" for schema in schemas):
+        # Recall is a transport read, not a research acquisition. It stays
+        # available even when final synthesis restricts the other tools.
+        schemas.append(deepcopy(READ_RECALL_SCHEMA))
     return schemas

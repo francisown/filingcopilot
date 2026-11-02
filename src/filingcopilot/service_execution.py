@@ -8,6 +8,7 @@ from datetime import date
 
 from .agent import ResearchAgent
 from .annual_numbers import annual_years
+from .annual_scope import annual_filing_years
 from .cashflow import cashflow_explanation, cashflow_scope, is_cashflow_question
 from .comparison import ComparisonRequest, question_benchmark
 from .execution import (
@@ -58,7 +59,7 @@ class ExecutionMixin:
         ]
         if not filings:
             return True
-        years = tuple(annual_years(request.question))
+        years = tuple(sorted(annual_filing_years(request.question)))
         if years:
             observed_years = {
                 int(row["period_end"][:4])
@@ -84,7 +85,7 @@ class ExecutionMixin:
     def _prepare_research_sources(self, request, plan):
         """Acquire missing annual sources while preserving the existing cache."""
         ticker = (request.ticker or "").strip().upper()
-        years = tuple(annual_years(request.question))
+        years = tuple(sorted(annual_filing_years(request.question)))
         if (
             plan.get("kind") == "filing"
             and years
@@ -834,6 +835,18 @@ class ExecutionMixin:
             answer = ResearchAgent(self.settings, self.gateway).run(request, tools)
             for entry in preparation_trace:
                 if entry["stage"] == "company_preparation" and entry["result"].get("warning"):
+                    years = annual_years(request.question)
+                    historical_scope = (
+                        bool(years) and max(years) < request.as_of.year
+                        and not re.search(r"最新|最近|当前|\b(?:latest|current|most recent)\b", request.question, re.I)
+                    )
+                    if historical_scope and not self._source_needs_preparation(request, plan):
+                        # Preparation can time out after the requested immutable
+                        # filing has been repaired. Retain the operational warning,
+                        # but it is no longer a missing source for this question.
+                        answer.quality_notes.append(entry["result"]["warning"])
+                        entry["required_source_scope_ready"] = True
+                        continue
                     answer.gaps.append(entry["result"]["warning"])
                     if answer.answer:
                         answer.status = "partial"

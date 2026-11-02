@@ -22,25 +22,24 @@ The project is built around three rules:
 
 ## Latest recorded results
 
-The latest 140-question run used DeepSeek for research and Mimo for review on a frozen 62-filing snapshot. The 100 answerable questions and 40 designed boundary/policy questions are reported separately.
+The latest full validation record is the 2026-11-02 140-question run: DeepSeek for research and Mimo for review on the frozen 62-filing snapshot, four workers, as-of 2026-10-08, 3,000s research ceiling, 300s review timeout and 16,384 review tokens. The 100 answerable questions and 40 designed boundary/policy questions are reported separately.
 
 | Check | Result |
 |---|---:|
-| Answerable research coverage | **90 / 100** |
+| Answerable research coverage | **95 / 100** |
 | Expected insufficient-evidence refusals | **20 / 20** |
 | Market-source policy cases | **20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Citation binding on delivered rows | **1.000** |
-| Model-backed latency | **85.5 s P50 / 218.3 s P95** |
-| Reported model tokens | **3,647,712** |
-| Internal retrieval span/page/nugget recall@5 | **0.615 / 0.635 / 0.710** |
-| Internal retrieval latency | **66 ms P50 / 168 ms P95** |
-| Numeric oracle | **116 exact matches, 0 mismatches**; 34 claims outside its scope |
-| Regression suite | **1,845 passed after the rollback; 42 placeholder-gap tests passed after the final fix** |
+| Citation binding across all rows | **0.857** |
+| Model-backed latency | **226.4 s P50 / 1,051.1 s P95** |
+| Reported model tokens | **4,044,735** |
+| Numeric oracle | **104 exact matches, 0 mismatches**; 27 claims outside its scope |
+| Regression suite | **2,305 passed on the current working tree** |
 
-These are engineering and workflow measurements, not an independent human accuracy study. External answer-support scores use strict `full / partial / unsupported` labels; their denominators and limitations are in [the evaluation record](docs/evaluation.md). The latest machine-readable records are limited to the [full report](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json), [failure summary](docs/validation/live-full-deepseek-mimo-2026-10-30-rerun/failures.json), and [retrieval snapshot](docs/validation/retrieval-diversity-2026-10-29.json).
+Five answerable rows delivered partial answers: `semantic-causality-002`, `semantic-causality-008`, `semantic-causality-019`, `semantic-negation-001` and `semantic-negation-006`. Each carries explicit gaps rather than an unverified completion.
 
-The latest complete run is the current one-worker population record at **90/100**. An earlier two-worker run measured 91/100; that difference is within the observed stochastic variation and is retained as historical context. A separate placeholder-gap fix was verified on one risk question (1/1 answered) and is not mixed into the 140-question score.
+These are engineering and workflow measurements, not an independent human accuracy study. External answer-support scores use strict `full / partial / unsupported` labels; their denominators and limitations are in [the evaluation record](docs/evaluation.md). The machine-readable record is the [full report](docs/validation/live-full-deepseek-mimo-2026-11-02-final/report.json), [results](docs/validation/live-full-deepseek-mimo-2026-11-02-final/results.json) and [failure summary](docs/validation/live-full-deepseek-mimo-2026-11-02-final/failures.json).
 
 ## How a request is handled
 
@@ -103,6 +102,7 @@ Copy `.env.example` to `.env` and set values locally. Never commit `.env`.
 | `FC_MODEL` | Research model; the checked-in example uses DeepSeek |
 | `FC_REVIEW_MODEL` | Separate review model; the checked-in example uses Mimo |
 | `FC_RESEARCH_TIMEOUT` | Cooperative research ceiling; the public example is 3,000 seconds |
+| `FC_WATCHLIST_TRIGGERS_ENABLED` | Opt-in local watchlist scans; false reports candidates without starting jobs |
 | `FC_EMBEDDING_MODE` | `off` for keyword retrieval or `local` for optional local embeddings |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata |
 | `FC_MAX_COST_USD` | Optional ceiling; requires both token prices and is rejected otherwise |

@@ -18,6 +18,17 @@ from filingcopilot.settings import Settings
 # Integration scope; included in full runs.
 pytestmark = pytest.mark.slow
 
+
+def test_configured_review_budget_is_not_silently_clamped_to_author_limit(monkeypatch):
+    monkeypatch.setattr("filingcopilot.settings.load_dotenv", lambda **_kwargs: None)
+    monkeypatch.setenv("FC_REVIEW_MAX_TOKENS", "16384")
+    monkeypatch.setenv("FC_MODEL_MAX_TOKENS", "8192")
+    settings = Settings.from_env()
+    review_limit, author_limit = settings.review_max_tokens, settings.model_max_tokens
+    assert review_limit == 16384
+    assert author_limit == 8192
+
+
 TOOLS = [
     {
         "type": "function",
@@ -173,7 +184,9 @@ def test_review_prefers_a_model_that_did_not_produce_the_answer(tmp_path):
     assert "review_independence" not in review
 
 
-def test_review_discloses_when_no_independent_model_remains(tmp_path):
+def test_review_stops_when_no_independent_model_remains(tmp_path):
+    from filingcopilot.agent_gateway import IndependentReviewUnavailable
+
     def handler(request):
         body = json.loads(request.read())
         return response(model=body["model"])
@@ -183,10 +196,8 @@ def test_review_discloses_when_no_independent_model_remains(tmp_path):
     control = ResearchControl()
     control.record_author("test")
     control.record_author("judge")
-    with research_scope(control):
-        review = client.complete([], TOOLS, review=True)
-    assert review["model"] == "judge"
-    assert review["review_independence"] == "not_independent"
+    with research_scope(control), pytest.raises(IndependentReviewUnavailable):
+        client.complete([], TOOLS, review=True)
 
 
 def test_malformed_extra_headers_do_not_take_the_gateway_down(tmp_path, monkeypatch):

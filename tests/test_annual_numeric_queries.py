@@ -138,13 +138,73 @@ def test_cached_typed_numbers_need_neither_sources_nor_model(tmp_path, question)
 
 
 @pytest.mark.parametrize("question", [
+    "Which disclosed drivers explain Apple's FY2025 growth?",
+    "苹果 FY2025 营收增长的原因是什么？",
+])
+def test_growth_explanation_does_not_require_a_prior_year_narrative_report(tmp_path, monkeypatch, question):
+    service = service_at(tmp_path)
+    monkeypatch.setattr(service.discovery, "_cached_filing_is_valid", lambda row: row["period_end"].startswith("2025"))
+    request = ResearchRequest(question=question, ticker="AAPL", as_of="2026-10-08")
+    assert service.corpus.catalog(request.as_of, "AAPL")
+    assert not service._source_needs_preparation(request, service.research_plan(request))
+    targets = []
+    service.discovery.prepare_annual_facts = lambda ticker, as_of, years: targets.append(years) or {}
+    service._prepare_research_sources(request, {"kind": "filing"})
+    assert targets == [(2025,)]
+
+
+@pytest.mark.parametrize("question", [
+    "Compare Apple's FY2024 and FY2025 disclosures.",
+    "Compare Apple's FY2025 risks with the previous year.",
+    "比较苹果 FY2025 与上一年的风险披露。",
+])
+def test_explicit_report_comparison_still_requires_both_sources(tmp_path, monkeypatch, question):
+    service = service_at(tmp_path)
+    monkeypatch.setattr(service.discovery, "_cached_filing_is_valid", lambda row: row["period_end"].startswith("2025"))
+    request = ResearchRequest(question=question, ticker="AAPL", as_of="2026-10-08")
+    assert service._source_needs_preparation(request, service.research_plan(request))
+
+
+@pytest.mark.parametrize("question", [
     "Why did Apple's revenue increase?", "苹果营收增长是否可持续？",
     "Forecast Apple's FY2027 revenue", "苹果营收的来源和竞争优势是什么？",
+    "Did Apple disclose that exchange fluctuations had no material impact on revenue in FY2025?",
+    "苹果 FY2025 是否明确否认净利润下降？",
+    "Does Apple's FY2025 filing deny a decline in operating cash flow?",
+    "Did Apple state exchange fluctuations did not materially affect revenue in FY2025?",
+    "Did Apple disclose in FY2025 that it denied a fall in operating cash flow?",
 ])
 def test_explanatory_or_forecast_questions_keep_the_analysis_route(tmp_path, question):
     service = service_at(tmp_path)
     plan = service.research_plan(ResearchRequest(language="zh", question=question, ticker="AAPL", as_of="2026-10-08"))
     assert not plan["annual_numeric_direct"]
+
+
+@pytest.mark.parametrize("question,scope_ready,expected_status", [
+    ("Why did Apple's revenue increase in FY2025?", True, "answered"),
+    ("Why did Apple's revenue increase in FY2025?", False, "partial"),
+    ("Why did Apple's revenue increase according to its latest FY2025 filing?", True, "partial"),
+    ("Why did Apple's revenue increase?", True, "partial"),
+])
+def test_resolved_historical_source_warning_is_not_a_missing_answer(tmp_path, monkeypatch, question, scope_ready, expected_status):
+    from filingcopilot.models import ResearchAnswer
+
+    service = service_at(tmp_path)
+    warning = "Latest filing check could not complete."
+    monkeypatch.setattr(service, "_prepare_research_sources", lambda *args: {"checked": False, "warning": warning})
+    monkeypatch.setattr(service, "_source_needs_preparation", lambda *args: not scope_ready)
+
+    def reviewed(agent, request, tools):
+        return ResearchAnswer(id="scoped-answer", question=request.question, as_of=request.as_of, mode="agent",
+            status="answered", answer=[{"kind": "narrative", "text": "The requested historical source supports this explanation."}],
+            gaps=[], evidence=[], trace=[], usage={}, elapsed_ms=1, model="reviewed")
+
+    monkeypatch.setattr("filingcopilot.service_execution.ResearchAgent.run", reviewed)
+    result = service.research(ResearchRequest(question=question, ticker="AAPL", language="en",
+        as_of="2026-10-08", auto_acquire=True))
+    assert result.status == expected_status
+    assert any(t.get("stage") == "company_preparation" and t["result"]["warning"] == warning for t in result.trace)
+    assert (warning in result.quality_notes) == (expected_status == "answered")
 
 
 def test_explicit_year_targets_are_bounded_and_not_supported_for_quarter_forms(tmp_path):

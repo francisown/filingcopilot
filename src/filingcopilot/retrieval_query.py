@@ -44,12 +44,13 @@ def lexical_terms(query: str) -> list[str]:
 
 
 _CAUSE_Q = re.compile(
-    r"原因|为什么|为何|驱动|因素|解释|变化|\bwhy\b|\bdrivers?\b|\bcauses?\b|\bexplain\b|\bgrowth\b|\bmargin\b",
+    r"原因|为什么|为何|驱动|因素|解释|变化|\bwhy\b|\bdrivers?\b|\bcauses?\b|\bexplain(?:s|ed)?\b|\bgrowth\b|\bmargins?\b",
     re.I,
 )
 _RISK_Q = re.compile(r"风险|\brisks?\b|监管|\bregulat|集中度|\bconcentrat", re.I)
 _NEG_Q = re.compile(
-    r"否认|没有重大|无重大|是否明确|是否披露没有|\bdeny\w*\b|\bno material\b", re.I
+    r"否认|没有重大|无重大|是否明确|是否披露没有|\b(?:deny|denies|denied|denying|denial)\b|"
+    r"\bno material\b|\bnot material(?:ly)?\b", re.I
 )
 
 _DECOMPOSITIONS = {
@@ -63,12 +64,47 @@ _DECOMPOSITIONS = {
         "customer concentration major customers revenue",
         "supply chain suppliers operations interruption",
     ],
-    "negation": [
-        "no material impact not materially did not affect",
-        "supply chain disruption demand decline affected results",
-        "management discussion demand supply chain impact",
-    ],
 }
+
+_PROPOSITION_NOISE = _PROMPT_WORDS | frozenset(
+    "state stated states that there had has have been no not without material materially "
+    "impact impacts effect effects affect affected deny denies denied denial explicitly "
+    "significant significantly fiscal year during whether decline declined decrease decreased "
+    "statement confirm confirmed did experienced experience".split()
+)
+
+
+def proposition_topics(question: str, domain: Domain | None = None,
+                       ticker: str | None = None, fiscal_year: int | None = None,
+                       *, company_name: str | None = None) -> list[str]:
+    """Keep the requested subject, not a benchmark's assumed subject vocabulary."""
+    value = str(question)
+    identities = [ticker] if ticker else []
+    if company_name:
+        words = re.findall(r"[A-Za-z]+", company_name)
+        core = [w for w in words if w.casefold() not in {"limited", "ltd", "inc", "incorporated", "corp", "corporation", "plc"}]
+        initials = "".join(w[0] for w in core)
+        identities.append(company_name)
+        if len(initials) >= 2:
+            identities.append(initials)
+    for identity in identities:
+        value = re.sub(r"(?<![A-Za-z0-9])" + re.escape(identity) + r"(?![A-Za-z0-9])", " ", value, flags=re.I)
+    if domain is not None:
+        value += " " + " ".join(v for k, v in domain.query_expansions.items()
+                                 if k.casefold() in question.casefold())
+        value = retrieval_text(value, domain, ticker, fiscal_year)
+    value = re.sub(r"\b(?:FY\s*)?20\d{2}\b", " ", value, flags=re.I)
+    terms = list(dict.fromkeys(t.casefold() for t in lexical_terms(value)
+                             if t.casefold() not in _PROPOSITION_NOISE))
+    # English expansions anchor the SEC corpus; retain native terms if none exist.
+    return [t for t in terms if t.isascii()] or terms
+
+
+def negation_queries(topics: list[str]) -> list[str]:
+    subject = " ".join(topics)
+    return [f"{subject} no material not materially did not have not",
+            f"{subject} affected experienced increased decreased disruption",
+            f"{subject} management discussion results of operations"]
 
 
 def question_shape(question: str) -> str:
@@ -146,7 +182,7 @@ def decomposition(question: str) -> list[str]:
     """
     text = str(question)
     if _NEG_Q.search(text):
-        return _DECOMPOSITIONS["negation"]
+        return negation_queries(proposition_topics(text))
     if _RISK_Q.search(text):
         return _DECOMPOSITIONS["risk"]
     if _CAUSE_Q.search(text):

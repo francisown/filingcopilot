@@ -27,7 +27,7 @@ from .execution import (
 from .execution import progress as report_progress
 from .external_updates import PublicExternalFetcher
 from .hkex import HKEXFetcher, HKEXSource, acquire_hkex_updates, hkex_scope
-from .ingestion import SecFetcher, SecRefreshDeferred, acquire_company
+from .ingestion import SecFetcher, SecRefreshDeferred, acquire_company, extract_passages
 from .models import PARSER_VERSION, Fact, Filing, Passage, ResearchRequest, StatementFact
 from .preview import cached_financial_preview
 
@@ -61,7 +61,8 @@ def normalise_name(text: str) -> str:
 
 
 class CompanyDiscovery:
-    _source_refresh_lock = threading.RLock()
+    _source_refresh_guard = threading.Lock()
+    _source_refresh_locks: dict[tuple[str, str], threading.RLock] = {}
 
     def __init__(self, service, fetcher=None):
         self.service = service
@@ -79,6 +80,11 @@ class CompanyDiscovery:
         self.cninfo_fetcher = CNInfoFetcher(service.settings.home / "external-cache")
 
     def _cached_filing_is_valid(self, filing: dict) -> bool:
+        if not isinstance(self.fetcher, SecFetcher):
+            return True
+        return self._cached_filing_bytes_are_valid(filing) and _parse_is_current(filing)
+
+    def _cached_filing_bytes_are_valid(self, filing: dict) -> bool:
         """Check that the immutable local bytes still match a filing record."""
         # Test and offline adapters may intentionally provide synthetic bytes
         # without exposing the production SEC cache. Their own fetch contract
@@ -98,10 +104,25 @@ class CompanyDiscovery:
                 return False
         except OSError:
             return False
-        # The raw bytes are intact but the parse may predate an extractor fix
-        # (chunking, filters, page tracking). A stale parse self-heals here: the
-        # cached bytes are re-extracted with the current code on next use.
-        return _parse_is_current(filing)
+        return True
+
+    def _upgrade_cached_parses(self, filings: list[dict]) -> None:
+        """Use verified local originals before a metadata refresh can time out."""
+        if not isinstance(self.fetcher, SecFetcher):
+            return
+        for row in filings:
+            if _parse_is_current(row) or not self._cached_filing_bytes_are_valid(row):
+                continue
+            checkpoint()
+            filing = Filing.model_validate(row)
+            raw = self.fetcher.fetch(filing.source_url, offline=True)
+            # Validate again after reading; never trust a cache file that changed
+            # between the existence check and parsing.
+            if hashlib.sha256(raw).hexdigest() != filing.content_sha256:
+                raise ValueError("Cached filing bytes differ from the recorded source")
+            passages = extract_passages(raw, filing, include_tables=True)
+            self.service.corpus.replace_passages(filing, passages)
+            self.service.enriched.discard(filing.ticker)
 
     def search(self, query: str, translate: bool = True) -> dict:
         query = query.strip()
@@ -782,7 +803,13 @@ class CompanyDiscovery:
         # Multiple evaluation workers can share the same corpus home. Serialize
         # the fetch-and-replace transaction so an older response cannot overwrite
         # a newer raw source after another worker has repaired it.
-        with self._source_refresh_lock:
+        # Separate issuers have separate immutable sources. Keep writes for one
+        # issuer serialized across service instances without making unrelated
+        # downloads consume each other's short refresh budgets.
+        key = (str(self.service.settings.home.resolve()).casefold(), ticker.strip().upper())
+        with self._source_refresh_guard:
+            source_lock = self._source_refresh_locks.setdefault(key, threading.RLock())
+        with cancellable_lock(source_lock):
             return self._check_disclosures_locked(
                 ticker, as_of, forms, years, label, cache_scope, fiscal_years
             )
@@ -799,13 +826,23 @@ class CompanyDiscovery:
             company_lock = self.company_locks.setdefault(ticker, threading.Lock())
         with cancellable_lock(company_lock):
             key = self._disclosure_key(ticker, as_of, forms, cache_scope)
+            local = [f for f in self.service.corpus.catalog(as_of, ticker) if f["form"] in forms]
+            targets = (
+                [f for f in local if int(f["period_end"][:4]) in set(fiscal_years)]
+                if fiscal_years is not None else
+                sorted(local, key=lambda f: (f["period_end"], f["filed"]), reverse=True)[:years]
+            )
+            self._upgrade_cached_parses(targets)
+            local = [f for f in self.service.corpus.catalog(as_of, ticker) if f["form"] in forms]
             checks = getattr(self, "quarter_checks", {})
             previous = checks.get(key)
             if previous and time.monotonic() - previous[0] < 3600:
-                return deepcopy(previous[1]), True
-            local = [f for f in self.service.corpus.catalog(as_of, ticker) if f["form"] in forms]
+                reused = deepcopy(previous[1])
+                if "filings" in reused:
+                    reused["filings"] = local
+                return reused, True
             source_refresh_needed = any(
-                not self._cached_filing_is_valid(filing)
+                not self._cached_filing_bytes_are_valid(filing)
                 for filing in local
                 if filing["form"] in forms
                 and (
@@ -829,7 +866,8 @@ class CompanyDiscovery:
                     filing = Filing.model_validate(entry["filing"])
                     # An accession is immutable. Preserve its original local locators.
                     existing = next((f for f in local if f["id"] == filing.id), None)
-                    if existing and existing.get("content_sha256") == filing.content_sha256:
+                    if (existing and existing.get("content_sha256") == filing.content_sha256
+                            and _parse_is_current(existing)):
                         self.service.corpus.add_facts(
                             filing, [Fact.model_validate(f) for f in entry.get('facts', [])]
                         )

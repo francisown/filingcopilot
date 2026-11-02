@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from .domain import Domain
 from .periods import comparable_quarters, evidence_period, fact_inputs
-from .polarity import DOWN, UP
+from .polarity import DOWN, UP, margin_amount, metric_share
 from .ttm import trailing_window
 
 SCOPE = re.compile(
@@ -15,7 +15,7 @@ SCOPE = re.compile(
     r"|(?P<ytd>(?<![A-Za-z0-9_])YTD(?![A-Za-z0-9_])|年内累计|上半年|前[六九]个月|半年累计)"
     r"|(?P<quarter>(?<![A-Za-z0-9])Q[1-4]\s+(?:FY\s*)?20\d{2}"
     r"|(?<![A-Za-z0-9])(?:FY\s*)?20\d{2}年?第?[1-4一二三四](?:季度|财季)"
-    r"|季度|财季|单季|本季|\bquarter\b|(?<![A-Za-z0-9])(?:FY)?(?:20\d{2})?Q[1-4])"
+    r"|季度|财季|单季|本季|\bquarter(?:ly)?\b|(?<![A-Za-z0-9])(?:FY)?(?:20\d{2})?Q[1-4])"
     r"|(?P<annual>年度|全年|\bannual\b|fiscal year|(?<![A-Za-z0-9])FY20\d{2}(?!Q|H|上半年|年?H1))",
     re.I,
 )
@@ -146,6 +146,14 @@ def _growth_relations(text, domain):
             if not left or not right:
                 continue
             last = left[-1]
+            # The immediately preceding metric must own this growth phrase.
+            # An unregistered subject between them (e.g. operating expenses)
+            # must not borrow a previous gross-margin/revenue anchor.
+            if not re.fullmatch(
+                r"\s*(?:(?:的|同比|环比|annual|quarterly|year.over.year|'s)\s*)*",
+                fragment[last[1]:match.start()], re.I,
+            ):
+                continue
             if LIMIT.search(fragment[max(0, last[0] - 16) : last[0]]):
                 continue
             selected = [last]
@@ -210,9 +218,34 @@ def _growth_order_conflict(statement, evidence, domain):
     return None
 
 
-def _assertions(text: str, domain: Domain) -> Iterator[tuple[set[str], set[str], int]]:
+def _component_metric(prefix: str) -> bool:
+    """Recognize explicit business dimensions, not issuer-specific row names.
+
+    A typed consolidated comparison cannot decide a product/segment direction.
+    Matching that dimension to source rows remains a semantic-review task.
+    """
+    return bool(re.search(
+        r"\b(?:products?|services?|segments?|divisions?|regions?|business units?)(?:['’]s)?\s*$"
+        r"|(?:产品|服务|分部|部门|地区|区域|业务)(?:的)?(?:净)?\s*$", prefix, re.I,
+    ))
+
+
+def _assertions(text: str, domain: Domain) -> Iterator[tuple[set[str], set[str], int, bool]]:
+    # Annual MD&A commonly says "in 2025, compared to the prior year".
+    # Normalize that explicit comparison, not every bare year (which could
+    # belong to a quarterly disclosure). This only changes parser input.
+    text = re.sub(
+        r"\b(in|during)\s+(20\d{2})(?=,\s*compared\s+(?:to|with)\s+(?:the\s+)?(?:prior|previous)\s+year)",
+        r"\1 FY\2", text, flags=re.I,
+    )
+    text = re.sub(r"\bU\.S\.", "US", text, flags=re.I)
     inherited = set()
-    for fragment in re.split(r"[，,；;。!?]", text):
+    for fragment in re.split(r"([。!?]|\.(?=\s|$))|[，,；;]", text):
+        if fragment is None:
+            continue
+        if fragment in {".", "。", "!", "?"}:
+            inherited = set()
+            continue
         mentions = list(SCOPE.finditer(fragment))
         anchors = _anchors(fragment, _terms(domain))
         for i, (start, end, keys) in enumerate(anchors):
@@ -234,18 +267,32 @@ def _assertions(text: str, domain: Domain) -> Iterator[tuple[set[str], set[str],
                 if after:
                     scopes = {after[0].lastgroup}
             segment = fragment[end:stop]
+            if not keys & domain.ratios.keys() and metric_share(fragment[max(0, start - 40):start], segment):
+                continue
+            if len(keys) == 1 and (ratio_key := next(iter(keys))) in domain.ratios and margin_amount(fragment[start:end], segment):
+                keys = {domain.ratios[ratio_key].numerator}
             if i + 1 < len(anchors) and re.fullmatch(r"[\s与和及、]*(?:同比)?", segment):
                 segment = fragment[end:]
             prefix = fragment[max(0, start - 16) : start]
+            component = _component_metric(prefix)
             limit = LIMIT.search(prefix) or re.search(
                 r"(?:需观察|需核验|需跟踪|需证明|需|须).{0,4}$", prefix
-            )
+            ) or re.search(r"(?:而非|并非|不是|rather than|not)\s*$", prefix, re.I)
             if (limit and not re.search(r"已经|已|实际|确实", segment)) or LIMIT.search(segment):
                 continue
             up = re.search(UP + r"|跳升|扩张|走强", segment, re.I)
             down = re.search(DOWN + r"|走弱", segment, re.I)
+            # "The increase in revenue in FY2025" states direction before
+            # the metric; the following comma need not repeat that assertion.
+            leading_direction = re.search(
+                r"\b(increase|growth|decrease|decline)\s+in\s+(?:the\s+)?$", prefix, re.I,
+            )
+            if leading_direction:
+                direction = leading_direction[1].casefold()
+                up = up or direction in {"increase", "growth"}
+                down = down or direction in {"decrease", "decline"}
             if bool(up) != bool(down):
-                yield keys, scopes, 1 if up else -1
+                yield keys, scopes, 1 if up else -1, component
             elif (
                 re.search(r"支撑|支持|提供证据", segment)
                 and "ttm" in scopes
@@ -254,7 +301,7 @@ def _assertions(text: str, domain: Domain) -> Iterator[tuple[set[str], set[str],
                     fragment,
                 )
             ):
-                yield keys, scopes, 0
+                yield keys, scopes, 0, component
         if mentions:
             inherited = {mentions[-1].lastgroup}
 
@@ -262,11 +309,26 @@ def _assertions(text: str, domain: Domain) -> Iterator[tuple[set[str], set[str],
 def period_comparison_conflict(statement: str, evidence: list[dict], domain: Domain) -> str | None:
     if conflict := _growth_order_conflict(statement, evidence, domain):
         return conflict
-    for keys, scopes, sign in _assertions(statement, domain):
+    for keys, scopes, sign, component in _assertions(statement, domain):
         margin = bool(keys & domain.ratios.keys())
         if not scopes and not margin:
             continue
         for scope in scopes or {None}:
+            if component:
+                # Require a source in the requested reporting scope, then let
+                # independent review bind each business dimension to its rows.
+                # This is not approval: an unrelated passage or reversed row
+                # direction must still fail the semantic scope verdict.
+                source_forms = {"annual": {"10-K", "10-K/A", "20-F", "20-F/A"},
+                                "quarter": {"10-Q", "10-Q/A"}}
+                if any(
+                    e["kind"] in {"passage", "statement_fact"}
+                    and (scope is None or scope in source_forms
+                         and (e.get("filing") or {}).get("form") in source_forms[scope])
+                    for e in evidence
+                ):
+                    continue
+                return "A business-dimension period change needs its own source in that reporting scope; a consolidated calculation cannot establish a product or segment direction"
             relevant = [
                 e
                 for e in evidence
@@ -275,8 +337,14 @@ def period_comparison_conflict(statement: str, evidence: list[dict], domain: Dom
             if any(
                 e["kind"] == "passage"
                 and any(
-                    src_keys & keys and (scope is None or scope in src_scopes) and src_sign == sign
-                    for src_keys, src_scopes, src_sign in _assertions(e["text"], domain)
+                    not src_component and src_keys & keys and (
+                        scope is None or scope in src_scopes or (
+                            scope == "annual" and not src_scopes
+                            and (e.get("filing") or {}).get("form") in {"10-K", "10-K/A", "20-F", "20-F/A"}
+                            and not any(m.lastgroup in {"quarter", "ytd", "ttm"} for m in SCOPE.finditer(e["text"]))
+                        )
+                    ) and src_sign == sign
+                    for src_keys, src_scopes, src_sign, src_component in _assertions(e["text"], domain)
                 )
                 for e in evidence
             ):
@@ -296,7 +364,12 @@ def period_comparison_conflict(statement: str, evidence: list[dict], domain: Dom
                     ):
                         comparisons.append(Decimal(a["value"]) - Decimal(b["value"]))
             if not comparisons:
-                return f"Claimed {scope or 'unspecified'} period change/support needs its own observed comparison; both comparable period margins are required for margin changes"
+                return (
+                    f"Claimed {scope or 'unspecified'} period change/support for {', '.join(sorted(keys))} "
+                    "needs its own observed comparison; both comparable period margins are required for margin changes. "
+                    "Cite the passage that explicitly states this metric's direction, or bind both matching "
+                    "period calculations to this analysis. Other metrics' comparisons do not establish it."
+                )
             if sign and not any(value * sign > 0 for value in comparisons):
                 return f"Claimed {scope or 'unspecified'} period direction contradicts the cited comparison"
     return None

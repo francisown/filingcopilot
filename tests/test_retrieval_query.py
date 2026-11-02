@@ -78,3 +78,11 @@ def test_retrieval_keeps_period_in_evidence_slot_plan_after_scoping(tmp_path):
     assert result["evidence_slot_plan"][0] == {
         "id": "period", "required": True, "terms": ["2024"]
     }
+
+def test_proposition_subject_uses_corpus_company_identity():
+    from filingcopilot.domain import DEFAULT_DOMAIN
+    from filingcopilot.retrieval_query import proposition_topics
+
+    topics = proposition_topics("Did ESMC state it had no material cybersecurity impact in FY2025?",
+        DEFAULT_DOMAIN, "ESM", 2025, company_name="Example Semiconductor Manufacturing Company Limited")
+    assert topics == ["cybersecurity"]

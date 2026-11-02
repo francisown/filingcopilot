@@ -175,7 +175,7 @@ def test_default_allowance_prevents_reasoning_only_stock_result(tools, budget_st
         ResearchRequest(question="苹果股票怎么样？", ticker="AAPL"), tools
     )
     assert any(c["kind"] == "analysis" for c in answer.answer), answer.trace
-    assert budgets == [8192]
+    assert budgets == [16384 if budget_stage == "review" else 8192]
 
 
 @pytest.mark.parametrize("failure", ["timeout", "connection", 502])

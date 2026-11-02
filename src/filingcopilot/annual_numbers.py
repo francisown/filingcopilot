@@ -8,6 +8,7 @@ from .annual_details import comparable_annual_periods
 from .annual_scope import annual_fact_years, compares_prior_year, wants_growth
 from .domain import Domain
 from .models import Claim, ResearchAnswer, ResearchRequest, Submission
+from .retrieval_query import question_shape
 from .tools import ResearchTools
 from .verification import verify_submission
 
@@ -22,6 +23,8 @@ def numeric_annual_question(question: str, domain: Domain) -> bool:
     This routes requests, not source verification. Existing claim gates remain
     authoritative. Acquisition can bind at most three annual end-years.
     """
+    if question_shape(question) == "negation":
+        return False
     # Only the exact metadata/arithmetic clauses are removed. Business sources,
     # causes, policy comparisons and forecasts still require interpretation.
     routed = re.sub(r"(?:期间|报告期间|年度期间)是否一致|(?:同比)?是否(?:可|可以|能够)计算", "", question)

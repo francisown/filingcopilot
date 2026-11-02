@@ -22,6 +22,10 @@ from .execution import (
 from .settings import Settings
 
 
+class IndependentReviewUnavailable(RuntimeError):
+    """Every configured reviewer participated in writing this answer."""
+
+
 class OpenAIGateway:
     def __init__(self, settings: Settings, http_client: httpx.Client | None = None):
         self.settings = settings
@@ -111,10 +115,8 @@ class OpenAIGateway:
         other configured model is tried once so a transient provider problem
         does not discard the whole run.
 
-        A review never silently uses a model that produced the answer: such a
-        reviewer is only chosen when nothing independent is reachable, and the
-        result then carries ``review_independence = "not_independent"`` so the
-        caller can disclose it instead of implying an independent check.
+        Reviewer failures cannot silently turn the author into its own judge.
+        Explicit single-model configurations retain their disclosed limitation.
         """
         started = time.perf_counter()
         prior_retries = []
@@ -127,11 +129,14 @@ class OpenAIGateway:
         if other and other != primary:
             candidates.append(other)
         control = current_control()
-        produced_answer = control.research_models if control else frozenset()
+        produced_answer = control.research_models if control else frozenset({self.settings.model})
         if review:
-            models = [m for m in candidates if m not in produced_answer] + [
-                m for m in candidates if m in produced_answer
-            ]
+            models = [m for m in candidates if m not in produced_answer]
+            if not models:
+                if not self.settings.review_model or self.settings.review_model == self.settings.model:
+                    models = [primary]  # Explicit single-model mode, still disclosed below.
+                else:
+                    raise IndependentReviewUnavailable("No configured independent reviewer remains")
         else:
             models = candidates
         last_exc: Exception | None = None
@@ -171,7 +176,8 @@ class OpenAIGateway:
                 # the remaining research budget cannot absorb it: exhausting the
                 # budget would lose more than the failed call did.
                 remaining = control.remaining if control else None
-                if remaining is not None and remaining <= max(60.0, self.settings.model_timeout):
+                request_timeout = self.settings.review_timeout if review else self.settings.model_timeout
+                if remaining is not None and remaining <= max(60.0, request_timeout):
                     raise
                 progress(
                     "model_failover",
@@ -255,7 +261,7 @@ class OpenAIGateway:
                         }
                 response = self.client.chat.completions.create(
                     **call_kwargs,
-                    timeout=bounded_timeout(self.settings.model_timeout),
+                    timeout=bounded_timeout(self.settings.review_timeout if review else self.settings.model_timeout),
                 )
                 break
             except (APIConnectionError, APIStatusError) as exc:

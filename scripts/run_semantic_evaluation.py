@@ -46,8 +46,9 @@ def _manifest(gold: dict, settings: Settings, workers: int, limit: int | None, a
     configuration = {
         name: getattr(settings, name)
         for name in (
-            "model", "review_model", "research_timeout", "model_timeout", "min_model_interval",
+            "model", "review_model", "research_timeout", "model_timeout", "review_timeout", "min_model_interval",
             "max_rounds", "max_tool_calls", "model_max_tokens", "review_max_tokens",
+            "model_temperature", "model_top_p", "model_seed",
             "model_attempts", "retry_base_delay", "retry_max_delay", "refresh_timeout",
             "embedding_mode", "embedding_model", "rerank_mode",
             "model_input_price_per_million", "model_output_price_per_million",
@@ -417,6 +418,7 @@ def main() -> None:
         "run_configuration": {
             "research_timeout_seconds": settings.research_timeout,
             "model_timeout_seconds": settings.model_timeout,
+            "review_timeout_seconds": settings.review_timeout,
             "min_model_interval_seconds": settings.min_model_interval,
             "max_rounds": settings.max_rounds,
             "max_tool_calls": settings.max_tool_calls,

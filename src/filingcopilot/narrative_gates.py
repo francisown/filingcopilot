@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass
 
 from .claim_periods import period_comparison_conflict
+from .financial_text import financial_number_tokens
 from .polarity import causal_period_conflict, contradiction, investment_cash_conflict
 from .semantic_boundaries import document_scope_conflict
 
@@ -22,14 +23,6 @@ class GateResult:
     reasons: tuple[str, ...] = ()
 
 
-_FINANCIAL_NUMBER = re.compile(
-    r"(?:\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)|"
-    r"[零〇一二两三四五六七八九十百千万亿兆壹贰叁肆伍陆柒捌玖拾佰仟萬億半]+\s*"
-    r"(?:美元|港元|澳元|欧元|日元|加元|新加坡元|人民币|英镑|元|倍|成|%|％|百分点|基点))",
-    re.I,
-)
-
-
 def gate_narrative_claim(claim: dict, evidence: list[dict], domain, requested_years: set[int] | None = None) -> GateResult:
     """Return deterministic gate results for a narrative/analysis claim."""
     statement = str(claim.get("statement", ""))
@@ -37,8 +30,9 @@ def gate_narrative_claim(claim: dict, evidence: list[dict], domain, requested_ye
     reasons: list[str] = []
     if not statement:
         reasons.append("叙述断言必须有文字。")
-    qualitative = statement.replace("单一倍数", "").replace("一成不变", "")
-    if kind == "analysis" and _FINANCIAL_NUMBER.search(qualitative):
+    if kind == "analysis" and (financial_number_tokens(statement) or re.search(
+        r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", statement, re.I,
+    )):
         reasons.append("analysis 只能定性；金额和百分比必须绑定 typed fact/calculation。")
     passages = [item.get("text", "") for item in evidence if item.get("kind") == "passage"]
     for conflict in (

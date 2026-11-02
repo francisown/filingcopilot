@@ -10,9 +10,10 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field
 
 from .annual_details import annual_detail_v1
-from .annual_scope import annual_fact_years, wants_growth
+from .annual_scope import annual_fact_years, requests_growth_calculation
 from .cashflow import is_cashflow_question
 from .claim_periods import comparison_context
+from .financial_text import financial_number_tokens as _financial_number_tokens
 from .fundamentals import is_stock_question
 from .localization import current_language, language_scope
 from .localization import legacy_numeric_text as translate_text
@@ -22,18 +23,42 @@ from .narrative_gates import gate_narrative_claim
 from .passage_context import context_members, context_part
 from .periods import evidence_period, fact_inputs, period_label
 from .polarity import causal_period_conflict, contradiction, investment_cash_conflict
+from .profitability import arithmetic_scope_conflict, profitability_context
 from .quarter_labels import quarter_label_conflict, source_quarter_labels
 from .quarterly import is_quarterly_question
 from .semantic_boundaries import (
+    causal_attribution_conflict,
     counterevidence_conflict,
+    currency_bridge_conflict,
+    customer_diversification_conflict,
     document_scope_conflict,
+    expense_classification_conflict,
     narrative_completeness_errors,
+    nonoccurrence_conflict,
+    ratio_precision_conflict,
     unresolved_proposition_gaps,
 )
 from .tools import ResearchTools, format_amount
 from .ttm import is_ttm_question, trailing_window
 from .updates import is_stock_updates_question
 from .valuation import ValuationEvidence, render_valuation
+
+NEGATIVE_SCAN_SCOPE = "full_filing_keyword_scan"
+MIN_NEGATIVE_SCAN_PASSAGES = 50
+_NEGATIVE_ABSOLUTE = re.compile(
+    r"(?:entire|whole|full)\s+filing\s+(?:does not|did not|never)|"
+    r"nowhere\s+in\s+the\s+filing|"
+    r"整份(?:文件|申报|财报)(?:都|完全)?(?:没有|未|从不)|"
+    r"全篇(?:都|完全)?(?:没有|未|从不)|"
+    r"从未(?:提及|披露|说明|否认)",
+    re.I,
+)
+_NEGATIVE_MARKER = re.compile(
+    r"\b(?:no|not|without|did not|does not|never)\b|没有|未|无|否认", re.I
+)
+_NEGATIVE_SCOPE_MARKER = re.compile(
+    r"explicit|明确|indexed|扫描|全文|full[- ]filing|full[- ]text|keyword", re.I
+)
 
 
 class ReviewVerdict(BaseModel):
@@ -52,6 +77,8 @@ class GapVerdict(BaseModel):
     model_config = ConfigDict(extra="forbid")
     index: int = Field(strict=True, ge=0)
     required_missing: bool = Field(strict=True)
+    description_supported: bool | None = Field(default=None, strict=True)
+    search_query: str | None = Field(default=None, max_length=180)
     reason: str = Field(min_length=1, max_length=500)
 
 
@@ -291,17 +318,29 @@ def notice_payment_conflict(statement: str, evidence: list[dict]) -> str:
     return ""
 
 
-def _financial_number_tokens(text: str) -> list[str]:
-    """Recognize amounts and ratios without converting model text into facts."""
-    text = text.replace("单一倍数", "").replace("一成不变", "")
-    digits = r"[零〇一二两三四五六七八九十百千万亿兆壹贰叁肆伍陆柒捌玖拾佰仟萬億半]+"
-    number = rf"{digits}(?:[点點]{digits})?"
-    units = (
-        r"美元|港元|澳元|欧元|日元|加元|新加坡元|人民币|英镑|元|"
-        r"倍|成|%|％|(?:个)?百分点|基点"
+def _without_source_identifiers(text: str, evidence: list[dict]) -> str:
+    """Bound report forms and named identifiers are labels, not financial values."""
+    labels = set()
+    for item in evidence:
+        form = (item.get("filing") or {}).get("form")
+        if form:
+            labels.update((form, form.removesuffix("/A")))
+        for label in re.findall(r"\b[A-Z]{2,}[A-Z-]*-\d+[A-Z0-9]*\b", item.get("text", "")):
+            if label.split("-", 1)[0] not in {"USD", "EUR", "TWD", "JPY", "CNY", "GBP", "HKD", "CAD", "AUD"}:
+                labels.add(label)
+    for label in sorted(labels, key=len, reverse=True):
+        text = re.sub(r"(?<![A-Za-z0-9])" + re.escape(label)
+                      + r"(?![A-Za-z0-9/.]|\s*(?:倍|%|％|美元|元|USD|dollars))", "", text, flags=re.I)
+    return text
+
+
+def _quoted_financial_tokens(text: str) -> list[str]:
+    """Recognize complete quote tokens, without computing or inferring table units."""
+    arabic = re.findall(
+        r"[+\-−]?\s*\d[\d,]*(?:\.\d+)?\s*(?:%|％|[万亿]?美元|USD\b|dollars\b|百分)",
+        text, re.I,
     )
-    pattern = rf"{number}\s*(?:{units})|(?:百分之|千分之|万分之){number}|翻(?:番|倍|{number}番)"
-    return list(dict.fromkeys(m[0] for m in re.finditer(pattern, text)))
+    return list(dict.fromkeys([*_financial_number_tokens(text), *arabic]))
 
 
 def _numeric_analysis_error(residual: str, evidence: list[dict]) -> str:
@@ -642,12 +681,118 @@ class _SubmissionVerifier:
                 and not re.search(r"[.!?。！？][\"'”’）)]*$", claim.statement.rstrip())):
             self.errors.append(f"claim {index}: incomplete sentence near the statement length limit; rewrite as shorter complete sentences, preserving all necessary qualifications")
             return
-        if any(item["kind"] == "external_update" for item in evidence):
+        if any(item.get("kind") == "negative_evidence" for item in evidence):
+            self._verify_negative(index, claim, evidence)
+        elif any(item["kind"] == "external_update" for item in evidence):
             self._verify_external(index, claim, evidence)
         elif claim.kind in ("fact", "calculation", "market", "valuation"):
             self._verify_numeric(index, claim, evidence)
         else:
             self._verify_prose(index, claim, evidence)
+
+    def _verify_negative(self, index: int, claim: Claim, evidence: list[dict]) -> None:
+        """Accept only a bounded result from a complete indexed full-filing scan."""
+        if claim.kind not in ("narrative", "analysis") or len(evidence) != 1:
+            self.errors.append(
+                f"claim {index}: a negative scan conclusion needs one narrative/analysis claim "
+                "bound to exactly one negative_evidence record"
+            )
+            return
+        item = evidence[0]
+        if item.get("kind") != "negative_evidence" or item.get("scope") != NEGATIVE_SCAN_SCOPE:
+            self.errors.append(
+                f"claim {index}: negative conclusion requires a full_filing_keyword_scan record"
+            )
+            return
+        if int(item.get("passages_scanned") or 0) < MIN_NEGATIVE_SCAN_PASSAGES:
+            self.errors.append(
+                f"claim {index}: negative scan did not cover enough indexed passages"
+            )
+            return
+        if int((item.get("slot_hits") or {}).get("否定", -1)) != 0:
+            self.errors.append(
+                f"claim {index}: negative conclusion requires a zero explicit-negative slot; "
+                "the scan found matching wording"
+            )
+            return
+        statement = claim.statement.strip()
+        if (
+            not statement
+            or _NEGATIVE_ABSOLUTE.search(statement)
+            or not _NEGATIVE_MARKER.search(statement)
+            or not _NEGATIVE_SCOPE_MARKER.search(statement)
+        ):
+            self.errors.append(
+                f"claim {index}: negative conclusion must stay bounded to the indexed explicit "
+                "pattern; do not claim the entire filing never discusses the topic"
+            )
+            return
+        if _financial_number_tokens(statement) or re.search(
+            r"\d[\d,.]*\s*(?:%|％|美元|USD|dollars|元|倍)", statement, re.I
+        ):
+            self.errors.append(
+                f"claim {index}: negative scan conclusions must be qualitative; "
+                "submit requested amounts as typed facts"
+            )
+            return
+        companies = self.companies or ({self.focus_ticker.upper()} if self.focus_ticker else set())
+        if companies and item.get("ticker") not in companies:
+            self.errors.append(f"claim {index}: negative evidence does not match the company scope")
+            return
+        if self.requested_years and item.get("period_end"):
+            if int(str(item["period_end"])[:4]) not in self.requested_years:
+                self.errors.append(
+                    f"claim {index}: negative evidence does not match the requested fiscal year"
+                )
+                return
+        # The full-scan record is a deterministic observation. It is accepted
+        # here and deliberately not sent to the semantic reviewer: the reviewer
+        # cannot inspect the scan and would otherwise reject the bounded result
+        # as a selected-excerpt document-absence claim. It remains in the
+        # narrative context so the completeness/gap review can see that the
+        # bounded question is already answered.
+        self.accepted.append(
+            {
+                "index": index,
+                "kind": claim.kind,
+                "text": statement,
+                "evidence_ids": claim.evidence_ids,
+                "verification": "deterministic_full_scan",
+                "scan_scope": NEGATIVE_SCAN_SCOPE,
+            }
+        )
+        review_evidence = {
+            "kind": "negative_evidence",
+            "section": item.get("section"),
+            "ticker": item["ticker"],
+            "text": item["text"],
+            "comparison_periods": [],
+            "filings": item.get("filings")
+            or [
+                {
+                    "ticker": item["ticker"],
+                    "form": item.get("form"),
+                    "filed": item.get("filed"),
+                    "period_end": item.get("period_end"),
+                }
+            ],
+            "scan_scope": item["scope"],
+            "passages_scanned": item["passages_scanned"],
+            "slot_hits": item["slot_hits"],
+            "support_limit": item.get("support_limit"),
+        }
+        self.narratives.append(
+            {
+                "index": index,
+                "kind": claim.kind,
+                "statement": statement,
+                "evidence": [review_evidence],
+                "evidence_ids": claim.evidence_ids,
+                "source_quarter_labels": [],
+                "scan_scope": NEGATIVE_SCAN_SCOPE,
+                "deterministic": True,
+            }
+        )
 
     def _verify_external(self, index: int, claim: Claim, evidence: list[dict]) -> None:
         if len(evidence) != 1 or evidence[0]["kind"] != "external_update" or claim.kind not in ("excerpt", "narrative"):
@@ -903,11 +1048,13 @@ class _SubmissionVerifier:
             return False
         ranking = (
             r"最大|最小|最高|最低|最快|最慢|largest|smallest|highest|lowest|fastest|slowest"
+            r"|(?:快|慢|高|低)于(?:所有|其余|其他)|(?:超过|低于)所有"
+            r"|(?:faster|slower|higher|lower)\s+than\s+(?:all\s+)?(?:other|remaining)"
         )
         if (
             claim.kind in ("narrative", "analysis")
             and re.search(
-                r"(?:增长幅度|增速|营收|收入|利润|现金流|市盈率|growth|revenue|profit|income|cash flow).{0,14}(?:"
+                r"(?:增长幅度|增速|营收|收入|利润|费用|成本|现金流|市盈率|growth|revenue|profit|income|expenses?|costs?|cash flow).{0,30}(?:"
                 + ranking
                 + ")",
                 claim.statement,
@@ -928,7 +1075,7 @@ class _SubmissionVerifier:
 
     def _check_analysis(self, index: int, claim: Claim, evidence: list[dict]) -> bool:
         if not claim.statement or any(
-            e["kind"] not in ("fact", "calculation", "passage", "market", "valuation")
+            e["kind"] not in ("fact", "calculation", "passage", "statement_fact", "market", "valuation")
             for e in evidence
         ):
             self.errors.append(
@@ -942,7 +1089,7 @@ class _SubmissionVerifier:
             r"(?![A-Za-z0-9]|\s*(?:倍|%|％|美元|元|USD|dollars))"
             r"|20\d{2}年第?[1-4]季度(?!\s*(?:倍|%|％|美元|元|USD))",
             "",
-            _without_source_dates(claim.statement, evidence),
+            _without_source_identifiers(_without_source_dates(claim.statement, evidence), evidence),
             flags=re.I,
         )
         without_periods = re.sub(
@@ -1025,9 +1172,9 @@ class _SubmissionVerifier:
                 }
             )
             return
+        analysis_valid = True
         if claim.kind == "analysis":
-            if not self._check_analysis(index, claim, evidence):
-                return
+            analysis_valid = self._check_analysis(index, claim, evidence)
         elif not claim.statement or any(e["kind"] not in ("passage", "statement_fact") for e in evidence):
             self.errors.append(
                 f"claim {index}: narrative needs text and passage or structured-row evidence"
@@ -1038,11 +1185,30 @@ class _SubmissionVerifier:
             for e in evidence
             if e["kind"] in ("passage", "statement_fact")
         ]
-        amounts = _financial_number_tokens(claim.statement)
-        percent = re.search(
-            r"\d[\d,.]*\s*(?:%|％|[万亿]?美元|USD|dollars|百分)", claim.statement, re.I
-        )
-        if amounts or percent:
+        # Independent local errors belong in one repair request, instead of
+        # consuming a separate model round for each newly revealed failure.
+        classification_error = expense_classification_conflict(claim.statement, source_texts)
+        if classification_error:
+            self.errors.append(f"claim {index}: {classification_error}")
+        occurrence_error = nonoccurrence_conflict(claim.statement, source_texts)
+        if occurrence_error:
+            self.errors.append(f"claim {index}: {occurrence_error}")
+        concentration_error = customer_diversification_conflict(claim.statement, source_texts)
+        if concentration_error:
+            self.errors.append(f"claim {index}: {concentration_error}")
+        currency_error = currency_bridge_conflict(claim.statement, source_texts)
+        if currency_error:
+            self.errors.append(f"claim {index}: {currency_error}")
+        precision_error = ratio_precision_conflict(claim.statement, source_texts)
+        if precision_error:
+            self.errors.append(f"claim {index}: {precision_error}")
+        arithmetic_error = arithmetic_scope_conflict(claim.statement, evidence)
+        if arithmetic_error:
+            self.errors.append(f"claim {index}: {arithmetic_error}")
+        if not analysis_valid or classification_error or occurrence_error or concentration_error or currency_error or precision_error or arithmetic_error:
+            return
+        amounts = _quoted_financial_tokens(claim.statement)
+        if amounts:
             if any(e["kind"] == "statement_fact" for e in evidence):
                 self.errors.append(
                     f"claim {index}: structured statement rows may support a qualitative narrative, "
@@ -1055,19 +1221,26 @@ class _SubmissionVerifier:
             # receivables"), so requiring a typed fact made those disclosures
             # impossible to deliver at all.
             def spoken(value: str) -> str:
-                return re.sub(r"\s+", "", value)
+                return re.sub(r"\s+", "", value).replace("％", "%").replace("−", "-").casefold()
 
-            quoted = spoken(" ".join(source_texts))
-            unquoted = [token for token in amounts if spoken(token) not in quoted]
-            if percent and spoken(percent.group(0)) not in quoted:
-                unquoted.append(percent.group(0))
+            # Tokenize each source separately: neither substring matches nor
+            # concatenating the end of one passage with another proves a quote.
+            quoted = {spoken(token) for source in source_texts
+                      for token in _quoted_financial_tokens(source)}
+            unquoted = [token.strip() for token in amounts if spoken(token) not in quoted]
             if unquoted:
                 self.errors.append(
                     f"claim {index}: financial amounts and percentages need typed "
                     "fact/calculation claims or a verbatim quote from a cited passage; "
-                    "rewrite this narrative qualitatively"
+                    f"unquoted tokens: {', '.join(token[:80] for token in unquoted[:6])}. "
+                    "Retain the causal explanation in qualitative prose; submit requested "
+                    "figures as typed claims. A table's bare value does not establish its unit."
                 )
                 return
+        conflict = causal_attribution_conflict(claim.statement, source_texts) if claim.kind == "narrative" else None
+        if conflict:
+            self.errors.append(f"claim {index}: {conflict}")
+            return
         conflict = investment_cash_conflict(claim.statement, source_texts)
         if conflict:
             self.errors.append(f"claim {index}: {conflict}")
@@ -1101,11 +1274,18 @@ class _SubmissionVerifier:
                 "evidence": [
                     {
                         "kind": e["kind"],
+                        "section": e.get("section"),
                         "text": e["text"]
                         if e["kind"] == "passage"
                         else render_numeric(e, self.tools.domain),
                         "ticker": e["ticker"],
                         "comparison_periods": comparison_context(e),
+                        **({"statement_row": {
+                            key: e.get(key) for key in (
+                                "concept", "metric", "dimensions", "dimension_labels",
+                                "start", "end", "fiscal_year", "value", "unit",
+                            )
+                        }} if e["kind"] == "statement_fact" else {}),
                         "filings": []
                         if e["kind"] in ("market", "valuation")
                         else [e["filing"]]
@@ -1116,11 +1296,13 @@ class _SubmissionVerifier:
                 ],
                 "evidence_ids": claim.evidence_ids,
                 "source_quarter_labels": source_quarter_labels(evidence),
+                "profitability_reconciliation": profitability_context(evidence),
             }
         )
 
     def _review_narratives(self) -> None:
-        if self.narratives:
+        reviewable = [n for n in self.narratives if not n.get("deterministic")]
+        if reviewable:
             if self.semantic_review is None:
                 self.errors.append("Narrative verification unavailable; descriptive claims were withheld")
             else:
@@ -1134,7 +1316,7 @@ class _SubmissionVerifier:
                             self.semantic_review(self.question, self.narratives)
                         )
                         indexes = [v.index for v in candidate.verdicts]
-                        if sorted(indexes) != sorted(n["index"] for n in self.narratives):
+                        if sorted(indexes) != sorted(n["index"] for n in reviewable):
                             raise ValueError("Reviewer must return every claim exactly once")
                         batch = candidate
                         break
@@ -1144,7 +1326,7 @@ class _SubmissionVerifier:
                     self.errors.append("Narrative verifier failed; descriptive claims were withheld")
                 else:
                     verdicts = {v.index: v for v in batch.verdicts}
-                    for narrative in self.narratives:
+                    for narrative in reviewable:
                         verdict = verdicts[narrative["index"]]
                         if verdict.supported:
                             self.accepted.append(
@@ -1177,13 +1359,23 @@ def numeric_completeness_errors(
     if not companies and focus_ticker:
         companies = {focus_ticker.upper()}
     direct_metrics, requested_ratios = tools.domain.requests(question)
+    # A mixed request can ask for an amount AND an explanation. Without any
+    # numeric claims, the old `if numeric` guard silently dropped that amount.
+    # Keep pure "why did revenue change" requests qualitative; identify the
+    # explicit amount clause rather than treating every metric mention as one.
+    amount_metrics = set()
+    for clause in re.split(r"[,，;；?？]|\band\s+(?=why\b|explain\b|how\b)|并(?:说明|解释)", question, flags=re.I):
+        if re.search(r"\bwhat (?:was|were|is|are)\b|\bhow much\b|多少|金额|数值", clause, re.I) and not re.search(
+            r"\bwhy\b|\breason\b|\bcause\b|\bdriver\b|原因|为何|为什么", clause, re.I,
+        ):
+            amount_metrics.update(tools.domain.requests(clause)[0])
     if accepted:
         numeric = [
             tools.ledger[c["evidence_ids"][0]]
             for c in accepted
             if c["kind"] in ("fact", "calculation", "valuation")
         ]
-        growth_requested = wants_growth(question)
+        growth_requested = requests_growth_calculation(question)
         if growth_requested and not any(
             e["kind"] == "calculation" and e["operation"] == "growth" for e in numeric
         ):
@@ -1211,7 +1403,7 @@ def numeric_completeness_errors(
                             else any(i.get("metric") == metric for i in e["inputs"])
                         )
                     ]
-                    if numeric and not matching:
+                    if (numeric or metric in amount_metrics) and not matching:
                         errors.append(f"Requested metric missing for {scope}: {metric}")
                     if growth_requested and not any(
                         e["kind"] == "calculation" and e["operation"] == "growth" for e in matching
@@ -1237,14 +1429,35 @@ def numeric_completeness_errors(
 REVIEW_SYSTEM = """You independently check financial research claims against their cited passages.
 Check each supplied sentences_to_check against the actual claim wording, not just its topic.
 First look for a mismatched subject, reversed direction, omitted qualification or scope jump.
+Check literal qualifiers before the overall interpretation: preserve inclusive versus strict
+boundaries (>= is not >; exactly a threshold does not exceed it), the percentage's denominator,
+and balance versus flow. Accounts receivable measures money owed, not cash collections.
+For a dated event, compare its source date with the cited filing's period_end. An annual report
+can disclose a subsequent event; its inclusion does not make it an event during that fiscal year.
+Reject "during the reporting period" when the cited event is after period_end. A correctly
+qualified subsequent-event disclosure remains relevant to a question about that annual report.
 Then decide whether EVERY sentence is supported. A correct source paraphrase in your reason
 cannot justify approving a claim that says the opposite. For exchange rates, identify both
 currencies: weaker foreign currencies against USD means stronger USD, not weaker USD.
 For proposed negatives, distinguish explicit support, a matching counterexample, and insufficient
 evidence. Possible future material harm is not realized material harm; an adverse effect is not
 necessarily material. Effects of several combined causes cannot establish materiality of one.
+A nonzero effect or percentage does not establish materiality or refute immateriality. Favorable
+and adverse line-item effects can coexist with no material impact. Reject any added materiality
+assessment unless it is explicitly supported, rather than inferred from the direction or amount.
 Revenue decline alone does not prove demand decline; growth in one segment does not rule out
-declines elsewhere. Selected excerpts cannot establish what an entire filing never or only says.
+declines elsewhere. Revenue growth also cannot establish no underlying demand decline, even
+when phrased as "consistent with" such an absence. Preserve the period and measurement dimension
+of quantitative descriptions, including verbal ranges. Selected excerpts cannot establish what an entire filing never or only says.
+A negative_evidence record with scope=full_filing_keyword_scan is a deterministic scan of the
+indexed filing, not a selected excerpt: a claim that no indexed passage matched the explicit
+negative pattern, limited to that scan, may be supported; set document_absence=false and do not
+require a positive passage. Reject it if it says the filing never discusses the topic or
+generalizes to paraphrases.
+"Against a blanket denial", "inconsistent with" and "与否认并不一致" add a refutation, not just
+an observation. A historical or product-specific decline cannot refute a different-period or
+company-wide proposition. Reject that added inference while allowing a separately stated,
+properly scoped observation. A later unresolved conclusion does not cure an earlier overclaim.
 Qualify such findings to the cited passages and do not convert an unsuccessful search into denial.
 If a compound claim contains one unsupported inference, return false and identify that part.
 External_update evidence is separately labeled issuer transcript, issuer news or third-party news.
@@ -1259,7 +1472,9 @@ or total investment; matching growth direction does not reconcile definitions. E
 comparison needs its own matching inputs. Noncash assets, financing lease principal, acquisitions
 and other investments are outside both narrow PP&E purchase calculations.
 Review EVERY factual premise and each reporting period separately. comparison_periods gives exact
-bound inputs and whether the calculation is annual, quarter, YTD or TTM. An annual margin pair
+bound inputs. Use the source section heading to determine the business scope of each paragraph;
+a segment disclosure cannot establish consolidated results. comparison_periods also identifies
+whether the calculation is annual, quarter, YTD or TTM. An annual margin pair
 cannot support quarterly margin improvement; quarter earnings growth cannot establish a TTM
 growth trend. A supplier TTM EPS snapshot does not prove a quarterly earnings jump. If a compound
 claim mentions both periods, each assertion needs its own cited matching calculation or explicit
@@ -1282,13 +1497,47 @@ Read all cited paragraph parts together; historical permission does not establis
 Instrument classifications (short/medium/long-term, senior/subordinated, secured/unsecured)
 are factual qualifiers. For narrative claims, require the passage to explicitly establish
 the classification; do not invent it from a maturity date or a generic word like Notes.
-A generic risk disclosure cannot prove the cause of this year's result. Reject invented figures,
+Likewise, a settlement, severance or impairment charge is not automatically one-time or
+nonrecurring. Preserve the source's classification; do not add recurrence labels or imply
+future expenses will disappear unless the cited disclosure explicitly supports that claim.
+Check every member of a compound assertion, not just its overall conclusion. In particular,
+map each charge to its stated accounting line before approving an expense-driver explanation.
+A charge reducing operating income is not automatically part of Other operating expense.
+Reject the entire claim if even one expense is assigned to an unproved or conflicting line;
+the author may split the claim or retain only the supported aggregate effect during repair.
+A generic risk disclosure cannot prove the cause of this year's result.
+Likewise, a conditional risk does not prove the event has not occurred. Unless the source
+explicitly establishes nonoccurrence, say the excerpt does not establish whether it occurred.
 In SEC terminology, gross margin followed by dollar amounts means gross profit (毛利金额/毛利润),
 not gross margin percentage (毛利率). Reject claims that confuse those or reverse their directions.
-unsupported causal claims and predictions. Being plausible is insufficient.
+Reject invented figures, unsupported causal claims and predictions. Being plausible is insufficient.
+Two facts joined by 'and' or appearing in the same paragraph do not establish causation.
+For narrative claims, a connective such as 'therefore', 'because' or '因此' needs a source-supported
+causal link; otherwise preserve the source's observational relationship without adding a cause.
 For kind=analysis, check a reasoned interpretation rather than requiring the filing to state
 the analyst's conclusion verbatim. It must follow from the cited facts, computed ratios or passages,
 be relevant to the stock/business question, and clearly distinguish assessment from disclosure.
+profitability_reconciliation uses the exact cited statement amounts, before display rounding.
+Use it to check margin/spread direction and offsets. Equal rounded percentages do not establish
+an unchanged underlying expense ratio or absence of its contribution. The gross-to-operating
+spread alone does not identify its line-item composition. Any classification as operating expenses
+or other operating items requires a cited statement identity. Rate ordering does not establish
+absolute amount increments. A net margin bridge needs both components, not just gross-margin improvement or absolute
+expense growth. For these qualitative comparisons cite both periods' relevant calculation IDs.
+Structured statement_row evidence binds one value to its exact period and XBRL dimensions.
+Preserve those dimensions; a segment/product row is not a consolidated company total. Other
+dimensions are not interchangeable either: geographic revenue, product lines and receivable
+categories (customers/vendors/sellers) do not prove low customer concentration or absence of
+a dominant customer. Those conclusions need individual-customer concentration evidence.
+A statement that no customer exceeds a disclosure threshold does not establish no concentration
+risk, nor rank receivable risk above revenue risk. Keep the threshold and dimensions explicit.
+A generic concentration-risk question may be answered with the disclosed geographic, supplier,
+customer or other relevant dimension. Do not require an unrequested individual-customer breakdown.
+In constant-currency tables, distinguish the adjustment to prior-year rates from the effect on
+reported results: their signs can be opposite. Do not infer an income or margin headwind from an
+unbound table adjustment; use an explicit source explanation or a typed calculation.
+Numbers copied into a row label do not establish their dates or units. A comparative inference
+requires evidence for both periods, or an explicit source explanation, not a guessed table order.
 Growth and better profitability can support an improving operating assessment; they cannot alone
 establish that the stock is undervalued, will rise, or should be bought at today's price. Approve
 conditional implications when their premises are observed and uncertainty is preserved. Reject

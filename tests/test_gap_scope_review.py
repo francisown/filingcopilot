@@ -105,10 +105,16 @@ def test_gap_scope_review_uses_existing_review_without_weakening_claims(tools, c
                 return {"message": {"role": "assistant", "tool_calls": [{"id": "submit", "type": "function", "function": {
                     "name": "submit_answer", "arguments": json.dumps({"claims": [{"kind": "narrative", "evidence_ids": ["p1"],
                     "statement": "The company warns that supply disruptions could adversely affect operations."}], "gaps": [gap]})}}]}, "model": "author"}
-            payload = {"verdicts": [{"index": 0, "supported": case != "claim_rejected", "reason": "fixture"}],
+            context = json.loads(messages[-1]["content"])
+            payload = {"verdicts": [{"index": c["index"],
+                                    "supported": case != "claim_rejected" and not (c["kind"] == "answer_coverage" and case == "required"),
+                                    "reason": "A necessary point is missing." if case == "required" else "fixture"}
+                                    for c in context["claims"]],
                        "gap_verdicts": [{"index": 99 if case == "malformed" else 0,
                                          "required_missing": case == "required",
                                          "reason": "The cited warning directly addresses the proposed absence of risk."}]}
+            if not context.get("gap_candidates"):
+                payload.pop("gap_verdicts")
             result = {"message": {"content": json.dumps(payload)}, "model": "judge"}
             if case == "non_independent":
                 result["review_independence"] = "not_independent"
@@ -127,7 +133,7 @@ def test_gap_scope_review_uses_existing_review_without_weakening_claims(tools, c
         assert not answer.answer
     else:
         assert answer.answer, "Malformed optional gap review must not erase valid claim review"
-    assert gateway.calls == 2
+    assert gateway.calls == (2 if case == "claim_rejected" else 3)
 
 
 def test_missing_concentration_number_is_not_a_missing_risk_answer():

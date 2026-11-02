@@ -82,6 +82,25 @@ def _optional_int(name: str) -> int | None:
         return None
 
 
+def _flag(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _forms(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    forms = []
+    for item in raw.split(","):
+        form = item.strip().upper()
+        if form and form not in forms:
+            forms.append(form)
+    return tuple(forms[:8]) or default
+
+
 @dataclass(frozen=True)
 class Settings:
     home: Path
@@ -103,16 +122,16 @@ class Settings:
     max_rounds: int = 8
     max_tool_calls: int = 20
     model_max_tokens: int = 8192
-    # Keep the library default generous enough for a complete independent
-    # review. Deployments that want the lower-latency bounded review can opt
-    # into FC_REVIEW_MAX_TOKENS=4096 explicitly (the example environment does
-    # so); direct Settings() users should retain the historical safety margin.
-    review_max_tokens: int = 8192
+    # The provider counts reasoning against this ceiling too. Reserve enough
+    # output for the structured verdict after that reasoning completes.
+    review_max_tokens: int = 16384
     # Four keeps the usual narrative review within one bounded provider call;
     # explicit smaller values remain available for controlled experiments.
     review_batch_size: int = 4
     min_model_interval: float = 21.0
     model_timeout: float = 60.0
+    # Semantic review can take longer than an author tool-selection turn.
+    review_timeout: float = 300.0
     # Omitted by default because provider support is not uniform.
     model_temperature: float | None = None
     model_top_p: float | None = None
@@ -127,6 +146,12 @@ class Settings:
     # remains research_timeout.
     review_reserve_seconds: float = 30.0
     refresh_timeout: float = 20.0
+    # Watchlist triggers are an explicit local scan, not an always-on daemon.
+    # Enqueueing is opt-in so a saved list alone cannot spend model budget.
+    watchlist_triggers_enabled: bool = False
+    watchlist_trigger_forms: tuple[str, ...] = ("10-K", "10-Q", "8-K")
+    watchlist_trigger_lookback_days: int = 30
+    watchlist_trigger_max_per_scan: int = 3
     model_attempts: int = 3
     retry_base_delay: float = 1.0
     retry_max_delay: float = 60.0
@@ -197,16 +222,27 @@ class Settings:
             max_rounds=max(1, min(12, int(os.getenv("FC_MAX_ROUNDS", "8")))),
             max_tool_calls=max(1, min(30, int(os.getenv("FC_MAX_TOOL_CALLS", "20")))),
             model_max_tokens=max(512, min(8192, int(os.getenv("FC_MODEL_MAX_TOKENS", "8192")))),
-            review_max_tokens=max(1024, min(8192, int(os.getenv("FC_REVIEW_MAX_TOKENS", "8192")))),
+            review_max_tokens=max(1024, min(32768, int(os.getenv("FC_REVIEW_MAX_TOKENS", "16384")))),
             review_batch_size=max(1, min(8, int(os.getenv("FC_REVIEW_BATCH_SIZE", "4")))),
             min_model_interval=max(0.0, min(60.0, float(os.getenv("FC_MIN_MODEL_INTERVAL", "21")))),
             model_timeout=max(1.0, min(180.0, float(os.getenv("FC_MODEL_TIMEOUT", "60")))),
+            review_timeout=max(1.0, min(600.0, float(os.getenv("FC_REVIEW_TIMEOUT", "300")))),
             model_temperature=_optional_float("FC_MODEL_TEMPERATURE", minimum=0.0, maximum=2.0),
             model_top_p=_optional_float("FC_MODEL_TOP_P", minimum=0.0, maximum=1.0),
             model_seed=_optional_int("FC_MODEL_SEED"),
             research_timeout=_optional_timeout("FC_RESEARCH_TIMEOUT", 3000.0),
             review_reserve_seconds=max(0.0, min(300.0, float(os.getenv("FC_REVIEW_RESERVE_SECONDS", "30")))),
             refresh_timeout=max(1.0, min(60.0, float(os.getenv("FC_REFRESH_TIMEOUT", "20")))),
+            watchlist_triggers_enabled=_flag("FC_WATCHLIST_TRIGGERS_ENABLED"),
+            watchlist_trigger_forms=_forms(
+                "FC_WATCHLIST_TRIGGER_FORMS", ("10-K", "10-Q", "8-K")
+            ),
+            watchlist_trigger_lookback_days=max(
+                1, min(365, int(os.getenv("FC_WATCHLIST_TRIGGER_LOOKBACK_DAYS", "30")))
+            ),
+            watchlist_trigger_max_per_scan=max(
+                1, min(10, int(os.getenv("FC_WATCHLIST_TRIGGER_MAX_PER_SCAN", "3")))
+            ),
             model_attempts=max(1, min(5, int(os.getenv("FC_MODEL_ATTEMPTS", "3")))),
             retry_base_delay=max(0.0, min(10.0, float(os.getenv("FC_RETRY_BASE_DELAY", "1")))),
             retry_max_delay=max(1.0, min(120.0, float(os.getenv("FC_RETRY_MAX_DELAY", "60")))),

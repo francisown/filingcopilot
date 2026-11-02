@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 import time
 from decimal import Decimal
 
 from .execution import ResearchStopped, checkpoint
+from .retrieval_query import negation_queries, proposition_topics, question_shape
+from .semantic_boundaries import sentences
 from .ttm import TTM_NOTE, trailing_window
 
 STOCK_GAPS = [
@@ -192,8 +196,12 @@ def stock_source_context(tools, ticker, overview, quarterly=None, max_searches=3
         )
         if not result["hits"]:
             missing.append(f"{purpose}预检未取得原文，可换关键词继续检索所选申报。")
-        for hit in selected:
-            item = tools.ledger[hit["passage"]["id"]]
+        expanded_ids = list(dict.fromkeys(
+            key for hit in selected
+            for key in [hit["passage"]["id"], *hit.get("context_ids", []), *hit.get("adjacent_ids", [])]
+        ))
+        for key in expanded_ids:
+            item = tools.ledger[key]
             # Full immutable source metadata stays in the ledger and trace.
             entry = observed.setdefault(
                 item["id"],
@@ -248,6 +256,21 @@ def _segment_labels(text: str) -> set[str]:
     return labels
 
 
+def _business_driver_labels(text: str, *, margin: bool) -> set[str]:
+    """A business mention is coverage only when its metric actually changes."""
+    measure = (r"income|profit|margin|利润|利润率" if margin else r"revenue|sales|收入|营收|销售")
+    movement = r"increas\w*|decreas\w*|grew|growth|declin\w*|增长|下降|增加|减少"
+    labels = set()
+    for sentence in sentences(text):
+        if not re.search(movement, sentence, re.I):
+            continue
+        for label in _segment_labels(sentence):
+            if re.search(re.escape(label) + rf"\s+(?:segment\s+)?(?:net\s+)?(?:{measure})\b",
+                         sentence, re.I):
+                labels.add(label)
+    return labels
+
+
 _CONCENTRATION_SIGNAL = re.compile(
     r"(?:no|cannot|one|\d+)\s*(?:single\s+)?customer|major customer|"
     r"significant customer|ten (?:largest )?customers?|客户集中",
@@ -277,6 +300,47 @@ def _concentration_bonus(slot: str, text: str) -> int:
     return 0
 
 
+def _negative_evidence(ticker: str, filing: dict, question: str, all_passages, slot_counts: dict) -> dict:
+    """Build the deterministic full-filing scan record for a negation question."""
+    negative_hits = int(slot_counts.get("否定", 0))
+    digest = hashlib.sha256(f"{filing['id']}|{question}".encode()).hexdigest()[:16]
+    return {
+        "id": f"negative-{digest}",
+        "kind": "negative_evidence",
+        "ticker": ticker,
+        "filing_id": filing["id"],
+        "section": "Full-filing keyword scan",
+        "text": (
+            f"Full-filing keyword scan of {len(all_passages)} indexed passages from "
+            f"{filing['form']} (period end {filing['period_end']}): the explicit-negative "
+            f"pattern matched {negative_hits} passages. Slot hits: "
+            f"{json.dumps(slot_counts, ensure_ascii=False)}. This is a bounded scan of "
+            "indexed wording, not a semantic proof that the filing never discusses the "
+            "topic in other words."
+        ),
+        "source_url": filing["source_url"],
+        "form": filing["form"],
+        "filed": filing["filed"],
+        "period_end": filing["period_end"],
+        "scope": "full_filing_keyword_scan",
+        "passages_scanned": len(all_passages),
+        "slot_hits": dict(slot_counts),
+        "proposition": question,
+        "support_limit": (
+            "Exact keyword pattern only; paraphrases and semantic absence are not assessed."
+        ),
+        "purposes": ["negative_evidence"],
+        "filings": [
+            {
+                "ticker": ticker,
+                "form": filing["form"],
+                "filed": filing["filed"],
+                "period_end": filing["period_end"],
+            }
+        ],
+    }
+
+
 def narrative_source_context(tools, ticker: str, question: str, max_searches: int = 3):
     """Preselect filing passages for narrative questions before model drafting.
 
@@ -291,14 +355,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
     ticker = ticker.upper()
     text = str(question)
     folded = text.casefold()
-    negative = bool(
-        re.search(
-            r"否认|没有重大|无重大|是否明确|是否披露没有|\bdeny\w*\b|\bno material\b|"
-            r"\b(?:supply[- ]chain|demand)\b.{0,30}\b(?:declin\w*|impact)\b",
-            folded,
-            re.I,
-        )
-    )
+    negative = question_shape(question) == "negation"
     risk = bool(
         re.search(
             r"风险|\brisk\w*\b|监管|\bregulat\w*\b|集中度|\bconcentrat\w*\b|"
@@ -317,11 +374,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
     )
     if negative:
         category = "negation"
-        plans = [
-            ("否定原文", "no material supply chain impact demand decline denied"),
-            ("反向证据", "supply chain disruption demand decline affected results"),
-            ("管理层表述", "management discussion demand supply chain impact"),
-        ]
+        plans = []  # Resolve company identity from the selected filing first.
     elif risk:
         category = "risk"
         plans = [
@@ -341,7 +394,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             )
     elif cause:
         category = "causality"
-        margin = bool(re.search(r"利润率|\bmargin\b|gross margin|operating margin", folded, re.I))
+        margin = bool(re.search(r"利润率|\bmargins?\b|gross margin|operating margin", folded, re.I))
         plans = [
             (
                 "经营变化原因",
@@ -352,7 +405,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                 (
                     "MD&A gross margin operating margin change mix volume price cost foreign exchange"
                     if margin
-                    else "segment revenue net sales increase decrease mainly came from primarily due to demand products",
+                    else "segment revenue net sales increase decrease mainly came from primarily due to demand products"
                 ),
             ),
             ("现金与费用原因", "MD&A operating income expenses cost of sales research development selling general administrative"),
@@ -388,6 +441,9 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             "searches_performed": 0,
         }, []
 
+    if negative:
+        subjects = proposition_topics(text, tools.domain, ticker, requested_year, company_name=filing.get("company"))
+        plans = list(zip(("否定原文", "反向证据", "管理层表述"), negation_queries(subjects), strict=True))
     records, observed, missing = [], {}, []
     budget = max(0, min(3, int(max_searches)))
     section_patterns = {
@@ -415,6 +471,12 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
         hits = list(result.get("hits", []))
         ranked = []
         for rank, hit in enumerate(hits):
+            if category == "negation" and subjects:
+                related = [hit["passage"], *[tools.ledger.get(key, {}) for key in
+                           [*hit.get("context_ids", []), *hit.get("adjacent_ids", [])]]]
+                if not any(term in (p.get("section", "") + " " + p.get("text", "")).casefold()
+                           for p in related for term in subjects):
+                    continue
             section = re.sub(r"\s+", "", hit["passage"].get("section", "")).casefold()
             preferred = bool(re.search(section_pattern, section, re.I))
             ranked.append((0 if preferred else 1, rank, hit))
@@ -447,8 +509,12 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             missing.append(
                 f"{purpose}关键词检索未命中；是否在整份申报中出现，以下方 scan_scope 的全文扫描为准。"
             )
-        for hit in selected:
-            item = tools.ledger[hit["passage"]["id"]]
+        expanded_ids = list(dict.fromkeys(
+            key for hit in selected
+            for key in [hit["passage"]["id"], *hit.get("context_ids", []), *hit.get("adjacent_ids", [])]
+        ))
+        for key in expanded_ids:
+            item = tools.ledger[key]
             entry = observed.setdefault(
                 item["id"],
                 {
@@ -519,11 +585,10 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             )
     else:
         slots = [
-            ("否定", r"no material|not materially|did not|has not|without material|没有重大|未造成重大|未受到重大|否认", ["supply", "demand", "impact"]),
-            ("反证", r"supply[- ]chain|供应链|demand|需求", ["impact", "disrupt", "interrupt", "declin", "affected", "影响", "中断", "下降"]),
+            ("否定", r"\b(?:no material|not material(?:ly)?|did not|has not|have not|without material)\b|没有重大|未造成重大|未受到重大|否认", subjects),
+            ("反证", "|".join(re.escape(term) for term in subjects) or r"(?!)", subjects),
         ]
-    slot_counts = {}
-    seen_segment_names = set()
+    slot_counts = {name: 0 for name, _, _ in slots}
     # Anchor the scan to entities the question actually names.  The filing can
     # contain many capitalized labels ("Other", "Fixed", table headers, and
     # accounting concepts) that look like segments to a surface matcher.  A
@@ -540,6 +605,20 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
         for passage in all_passages:
             text_value = passage.text.casefold()
             phrase_hits = len(re.findall(pattern, text_value, re.I))
+            realized_bonus = 0
+            if category == "negation":
+                matching = [s for s in sentences(text_value)
+                            if re.search(pattern, s, re.I)
+                            and any(term in s for term in subjects)]
+                if not matching:
+                    continue
+                phrase_hits = min(3, len(matching))
+                if slot == "反证" and any(
+                    re.search(r"\b(?:affected|experienced|reduced|increased|decreased|declined|resulted|caused)\b|已|造成|导致", s, re.I)
+                    and not re.search(r"\b(?:may|could|might|would|if)\b|可能|假如", s, re.I)
+                    for s in matching
+                ):
+                    realized_bonus = 18
             if slot == "分部" and not re.search(
                 r"mainly|primarily|driven by|due to|reflecting|attributed|came from|influenced by|led by|reflects|主要|由于|驱动|归因",
                 text_value,
@@ -555,13 +634,7 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             segment_names = set()
             if slot == "分部":
                 segment_names = _segment_labels(passage.text)
-                specific_direct = bool(
-                    re.search(
-                        segment_direct_pattern,
-                        passage.text,
-                    )
-                )
-                if not segment_names or (segment_names <= seen_segment_names and not specific_direct):
+                if not segment_names:
                     continue
             if not phrase_hits:
                 continue
@@ -606,12 +679,29 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
                     + specific_segment_bonus
                     + question_segment_bonus
                     + causal_segment_bonus
-                    + _concentration_bonus(slot, passage.text),
+                    + _concentration_bonus(slot, passage.text)
+                    + realized_bonus,
                     passage,
                 )
             )
         ranked.sort(key=lambda item: (-item[0], item[1].id))
-        candidate_rows = ranked[:20] if slot == "分部" else ranked[:2]
+        candidate_rows = ranked[:2]
+        if slot == "分部":
+            # Preserve distinct business drivers before filling spare slots.
+            # Diversity must run before truncation: repeated long paragraphs
+            # can otherwise exclude a short business disclosure entirely.
+            driver_labels = {p.id: _business_driver_labels(p.text, margin=margin) for _, p in ranked}
+            ranked.sort(key=lambda row: (not bool(driver_labels[row[1].id]), -row[0], row[1].id))
+            covered = set().union(*(_business_driver_labels(p["text"], margin=margin) for p in observed.values()))
+            diverse, remaining = [], []
+            for row in ranked:
+                labels = driver_labels[row[1].id]
+                if labels - covered:
+                    diverse.append(row)
+                    covered.update(labels)
+                else:
+                    remaining.append(row)
+            candidate_rows = (diverse + remaining)[:8]
         for _, passage in candidate_rows:
             item = tools.ledger.setdefault(passage.id, tools.corpus.evidence(passage.id, tools.as_of))
             if not item:
@@ -633,13 +723,16 @@ def narrative_source_context(tools, ticker: str, question: str, max_searches: in
             if purpose not in entry["purposes"]:
                 entry["purposes"].append(purpose)
             slot_counts[slot] = slot_counts.get(slot, 0) + 1
-            seen_segment_names.update(segment_names)
             if slot != "分部" and slot_counts[slot] >= 2:
                 break
             if slot == "分部" and slot_counts[slot] >= 8:
                 break
         if len(observed) >= 8 and all(slot_counts.get(name, 0) for name, _, _ in slots):
             break
+    if category == "negation" and all_passages:
+        negative = _negative_evidence(ticker, filing, question, all_passages, slot_counts)
+        tools.ledger[negative["id"]] = negative
+        observed[negative["id"]] = negative
     structured_evidence = []
     if category == "risk" and concentration_requested:
         # Customer concentration is frequently disclosed in a dimensional

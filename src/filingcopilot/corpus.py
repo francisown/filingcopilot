@@ -67,10 +67,53 @@ class Corpus:
                     ticker TEXT PRIMARY KEY, payload TEXT NOT NULL,
                     added TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
                 );
+                CREATE TABLE IF NOT EXISTS watchlist_triggers (
+                    ticker TEXT NOT NULL,
+                    filing_id TEXT NOT NULL,
+                    form TEXT,
+                    filed TEXT,
+                    question TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    job_id TEXT,
+                    note TEXT,
+                    created_at REAL NOT NULL,
+                    updated_at REAL NOT NULL,
+                    PRIMARY KEY (ticker,filing_id)
+                );
+                CREATE INDEX IF NOT EXISTS watchlist_triggers_status
+                    ON watchlist_triggers(status,updated_at);
                 CREATE TABLE IF NOT EXISTS external_updates (
                     id TEXT PRIMARY KEY, ticker TEXT NOT NULL, published_at TEXT NOT NULL,
                     source_type TEXT NOT NULL, payload TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS research_jobs (
+                    id TEXT PRIMARY KEY,
+                    request_key TEXT,
+                    owner TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    started_at REAL NOT NULL,
+                    finished_at REAL,
+                    elapsed_ms INTEGER,
+                    heartbeat_at REAL NOT NULL,
+                    request TEXT NOT NULL,
+                    result TEXT,
+                    preview TEXT,
+                    error TEXT,
+                    event_sequence INTEGER NOT NULL DEFAULT 0
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS research_jobs_request_key
+                    ON research_jobs(request_key) WHERE request_key IS NOT NULL;
+                CREATE INDEX IF NOT EXISTS research_jobs_active
+                    ON research_jobs(status,heartbeat_at);
+                CREATE TABLE IF NOT EXISTS research_events (
+                    job_id TEXT NOT NULL,
+                    sequence INTEGER NOT NULL,
+                    created_at REAL NOT NULL,
+                    payload TEXT NOT NULL,
+                    PRIMARY KEY (job_id,sequence)
+                );
+                CREATE INDEX IF NOT EXISTS research_events_job
+                    ON research_events(job_id,sequence);
             """)
             # Serialize schema upgrades across web/CLI/MCP processes. Existing snapshots
             # and run history remain untouched; JSON is parsed only during this backfill.
@@ -210,6 +253,27 @@ class Corpus:
             "statement_facts": len(statement_facts),
             "passages": len(passages),
         }
+
+    def replace_passages(self, filing: Filing, passages: list[Passage]) -> dict:
+        """Upgrade narrative extraction without replacing typed financial facts."""
+        if not passages or any(p.filing_id != filing.id or p.ticker != filing.ticker for p in passages):
+            raise ValueError("A parser upgrade requires passages from the same filing")
+        with self._write_connect() as db:
+            row = db.execute("SELECT payload FROM filings WHERE id=?", (filing.id,)).fetchone()
+            if not row or not Filing.model_validate_json(row["payload"]).source_equals(filing):
+                raise ValueError("Only an unchanged local filing can be reparsed")
+            db.execute("DELETE FROM passages_fts WHERE id IN (SELECT id FROM passages WHERE filing_id=?)", (filing.id,))
+            db.execute("DELETE FROM passages WHERE filing_id=?", (filing.id,))
+            db.executemany("INSERT INTO passages VALUES (?,?,?,?)", [
+                (p.id, p.filing_id, p.ticker, p.model_dump_json()) for p in passages
+            ])
+            db.executemany("INSERT INTO passages_fts VALUES (?,?,?)", [
+                (p.id, p.text, p.section) for p in passages
+            ])
+            db.execute("UPDATE filings SET payload=? WHERE id=?", (
+                filing.model_copy(update={"parser_version": PARSER_VERSION}).model_dump_json(), filing.id,
+            ))
+        return {"filing": filing.id, "passages": len(passages), "reparsed": True}
 
     def register_company(self, ticker: str, company) -> None:
         from .domain import Company

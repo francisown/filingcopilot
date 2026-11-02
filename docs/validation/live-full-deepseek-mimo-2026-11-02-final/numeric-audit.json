@@ -1,0 +1,795 @@
+{
+  "scope": "Raw SEC typed source/value check only; not narrative accuracy",
+  "counts": {
+    "unassessed": 27,
+    "matched": 104
+  },
+  "rows": [
+    {
+      "question": "semantic-causality-001",
+      "evidence_id": "ifrs-fact-0cff6225ad63e7423734",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-causality-001",
+      "evidence_id": "calc-52774170313e9fed95ff",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-causality-002",
+      "evidence_id": "calc-78f68cc7dacf62aca56f",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-003",
+      "evidence_id": "calc-44f86be4236060442696",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-003",
+      "evidence_id": "calc-ab9890ff59b2d84aea26",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-004",
+      "evidence_id": "calc-f932624984af13daab9e",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-005",
+      "evidence_id": "calc-f69bd71c99843caf8964",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-006",
+      "evidence_id": "ifrs-fact-57f213335e8c61c96b05",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-causality-006",
+      "evidence_id": "calc-8a0e7337dabc8f82e953",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-causality-007",
+      "evidence_id": "calc-4944c7c1eab8fcd26260",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-007",
+      "evidence_id": "calc-2213d9f32e2d294d5d27",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-008",
+      "evidence_id": "calc-c7e59c054cdcf61ee5bc",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-009",
+      "evidence_id": "fact-61f054fc5a812a72670e",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-causality-009",
+      "evidence_id": "calc-c088270d81d189d5498e",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-010",
+      "evidence_id": "fact-db5985e0dcd5e259a2e3",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-causality-010",
+      "evidence_id": "calc-714789cb49e23be755af",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-011",
+      "evidence_id": "calc-9c91ba55bc883384cab9",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-causality-011",
+      "evidence_id": "calc-8de7fe1420235e60babd",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-causality-012",
+      "evidence_id": "calc-802aac571d39c382c670",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-013",
+      "evidence_id": "fact-d58d204256ecfcab4274",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-causality-013",
+      "evidence_id": "calc-28f0150cc5e96701c6cc",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-014",
+      "evidence_id": "calc-9fe9923024858884c0cf",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-015",
+      "evidence_id": "calc-3b5ac841fb6cd23a9a65",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-015",
+      "evidence_id": "calc-7f5b98dd68aa3b2f4b5c",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-016",
+      "evidence_id": "calc-3eb23bb0303f8e6eef72",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-causality-017",
+      "evidence_id": "calc-cbc47e8c4d12cd40d9b2",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-018",
+      "evidence_id": "fact-053d1ff915250131b1ec",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-causality-018",
+      "evidence_id": "calc-2340f744cc9c26dc8e13",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-019",
+      "evidence_id": "calc-b5130d69b0566ba163cf",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-019",
+      "evidence_id": "calc-e9a1f8eb1b79a9f67679",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-causality-020",
+      "evidence_id": "calc-59c11fe77af9e1d03432",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-001",
+      "evidence_id": "fact-be036a4920d40c771b12",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-001",
+      "evidence_id": "fact-6668b3905db0fa1fb8a1",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-001",
+      "evidence_id": "calc-f932624984af13daab9e",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-002",
+      "evidence_id": "fact-00348d85ba0caef5ba7b",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-002",
+      "evidence_id": "fact-60242daf8f76de3d60cf",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-002",
+      "evidence_id": "calc-f69bd71c99843caf8964",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-003",
+      "evidence_id": "ifrs-fact-164f612f44794bffd95e",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-003",
+      "evidence_id": "ifrs-fact-3ee824f1ccd662bdfc84",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-003",
+      "evidence_id": "calc-edd4c529d55b1eeca561",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-cross_period-004",
+      "evidence_id": "fact-0ed2f9b67cc876d0df66",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-004",
+      "evidence_id": "fact-cc6d4872a008bb0dc1e3",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-004",
+      "evidence_id": "calc-b864d87e7489860c28a6",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-005",
+      "evidence_id": "fact-2d87763a7efbabedb1db",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-005",
+      "evidence_id": "fact-f0c2699abcf88999dfde",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-005",
+      "evidence_id": "calc-c7e59c054cdcf61ee5bc",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-006",
+      "evidence_id": "fact-6668b3905db0fa1fb8a1",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-006",
+      "evidence_id": "fact-61f054fc5a812a72670e",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-006",
+      "evidence_id": "calc-c088270d81d189d5498e",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-007",
+      "evidence_id": "fact-0e2e33bcb34d379e6bab",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-007",
+      "evidence_id": "fact-04f4851d98c271f2147f",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-007",
+      "evidence_id": "calc-3cfd8ee1f259b895b8b8",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-008",
+      "evidence_id": "ifrs-fact-3ee824f1ccd662bdfc84",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-008",
+      "evidence_id": "ifrs-fact-3ce0402b49ed4fd8aaa7",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-008",
+      "evidence_id": "calc-3edf2adee8b46c7dba86",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-cross_period-009",
+      "evidence_id": "fact-af28fa6f5eae898a8eeb",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-009",
+      "evidence_id": "fact-00d34e6d1dcef70c8fb3",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-009",
+      "evidence_id": "calc-802aac571d39c382c670",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-010",
+      "evidence_id": "fact-f0c2699abcf88999dfde",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-010",
+      "evidence_id": "fact-d58d204256ecfcab4274",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-010",
+      "evidence_id": "calc-28f0150cc5e96701c6cc",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-011",
+      "evidence_id": "fact-d30acf3e0d62c84d2f91",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-011",
+      "evidence_id": "fact-26155baae10984eb3de5",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-011",
+      "evidence_id": "calc-2f2b103657335264ad18",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-012",
+      "evidence_id": "fact-04f4851d98c271f2147f",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-012",
+      "evidence_id": "fact-8516953d405a4a575f2e",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-012",
+      "evidence_id": "calc-d138b30be6cfa94b4d01",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-013",
+      "evidence_id": "ifrs-fact-373441eb530bcbba3b8c",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-013",
+      "evidence_id": "ifrs-fact-cc12e37f96664a1593ee",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-013",
+      "evidence_id": "calc-3eb23bb0303f8e6eef72",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-cross_period-014",
+      "evidence_id": "fact-00d34e6d1dcef70c8fb3",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-014",
+      "evidence_id": "fact-591c8a451c08ac0232f9",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-014",
+      "evidence_id": "calc-cbc47e8c4d12cd40d9b2",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-015",
+      "evidence_id": "fact-5d986e5c6232fe70eefc",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-015",
+      "evidence_id": "fact-a98ba192a4d59cab582b",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-015",
+      "evidence_id": "calc-c29a1cb252e6f35a4616",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-016",
+      "evidence_id": "fact-26155baae10984eb3de5",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-016",
+      "evidence_id": "fact-f59d3f4ddc3f64c5070d",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-016",
+      "evidence_id": "calc-292a953ab87d0a86975b",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-017",
+      "evidence_id": "fact-1d3499e35fbf08ce6cfd",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-017",
+      "evidence_id": "fact-00348d85ba0caef5ba7b",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-017",
+      "evidence_id": "calc-59c11fe77af9e1d03432",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-018",
+      "evidence_id": "ifrs-fact-cc12e37f96664a1593ee",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-018",
+      "evidence_id": "ifrs-fact-0cff6225ad63e7423734",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-cross_period-018",
+      "evidence_id": "calc-52774170313e9fed95ff",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-cross_period-019",
+      "evidence_id": "fact-7a3a19ebacf9c52887ae",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-019",
+      "evidence_id": "fact-0ed2f9b67cc876d0df66",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-019",
+      "evidence_id": "calc-6529431393e470ca0d3c",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-cross_period-020",
+      "evidence_id": "fact-a98ba192a4d59cab582b",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-020",
+      "evidence_id": "fact-7a2044d2d6d610fe9887",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-cross_period-020",
+      "evidence_id": "calc-803d5fa18bad5841f3d5",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-numeric-001",
+      "evidence_id": "fact-c154515c1d3d12d81086",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-001",
+      "evidence_id": "fact-39d5c0255fe88601ada1",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-002",
+      "evidence_id": "fact-979b5e472a1f46aaeb7f",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-002",
+      "evidence_id": "fact-00348d85ba0caef5ba7b",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-003",
+      "evidence_id": "ifrs-fact-164f612f44794bffd95e",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-004",
+      "evidence_id": "fact-bff0617a20c7963116d7",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-004",
+      "evidence_id": "fact-ab2b0a61d9cf561f719e",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-004",
+      "evidence_id": "calc-2213d9f32e2d294d5d27",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-numeric-005",
+      "evidence_id": "fact-27da7d80f3fb3b7fa6ee",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-005",
+      "evidence_id": "fact-890a5936f9a14a33e3d4",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-006",
+      "evidence_id": "fact-e147e2e68ee038f9554d",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-006",
+      "evidence_id": "fact-6668b3905db0fa1fb8a1",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-007",
+      "evidence_id": "fact-0e2e33bcb34d379e6bab",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-008",
+      "evidence_id": "ifrs-fact-66084167549cff295872",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-008",
+      "evidence_id": "ifrs-fact-57f213335e8c61c96b05",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-008",
+      "evidence_id": "calc-8de7fe1420235e60babd",
+      "status": "unassessed",
+      "reason": "input source is unassessed"
+    },
+    {
+      "question": "semantic-numeric-009",
+      "evidence_id": "fact-f20649fbfea0da964d17",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-009",
+      "evidence_id": "fact-613c64b9ff6e8488edd0",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-010",
+      "evidence_id": "fact-dacd406cc5b6038c01ab",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-010",
+      "evidence_id": "fact-f0c2699abcf88999dfde",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-011",
+      "evidence_id": "fact-d30acf3e0d62c84d2f91",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-012",
+      "evidence_id": "fact-e281d6bd88ef0bb3cf9b",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-012",
+      "evidence_id": "fact-db5985e0dcd5e259a2e3",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-012",
+      "evidence_id": "calc-7f5b98dd68aa3b2f4b5c",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-numeric-013",
+      "evidence_id": "ifrs-fact-e07cbb3510aaa485e254",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-013",
+      "evidence_id": "ifrs-fact-06405b67f821e26990a7",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-014",
+      "evidence_id": "fact-5693ac4c2a5a84dd2d64",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-014",
+      "evidence_id": "fact-00d34e6d1dcef70c8fb3",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-015",
+      "evidence_id": "fact-5d986e5c6232fe70eefc",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-016",
+      "evidence_id": "fact-5f67ad2346c3e3079e59",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-016",
+      "evidence_id": "fact-0e384ff84f18d3f33e00",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-016",
+      "evidence_id": "calc-e9a1f8eb1b79a9f67679",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    },
+    {
+      "question": "semantic-numeric-017",
+      "evidence_id": "fact-f4b23cb17d491c49182f",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-017",
+      "evidence_id": "fact-ce28d7ee5b00dd07cc90",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-018",
+      "evidence_id": "ifrs-fact-e559bb81546ddb93c7e9",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-018",
+      "evidence_id": "ifrs-fact-cc12e37f96664a1593ee",
+      "status": "unassessed",
+      "reason": "raw companyfacts unavailable"
+    },
+    {
+      "question": "semantic-numeric-019",
+      "evidence_id": "fact-7a3a19ebacf9c52887ae",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-020",
+      "evidence_id": "fact-3e9a52cfb17ad0af07d4",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-020",
+      "evidence_id": "fact-053d1ff915250131b1ec",
+      "status": "matched",
+      "reason": "exact SEC row"
+    },
+    {
+      "question": "semantic-numeric-020",
+      "evidence_id": "calc-44f86be4236060442696",
+      "status": "matched",
+      "reason": "raw inputs and recomputed arithmetic"
+    }
+  ]
+}

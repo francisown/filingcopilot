@@ -308,6 +308,64 @@ def _content_sentence(text: str) -> bool:
     return True
 
 
+def _structural_heading(node, text: str) -> bool:
+    """Short styled titles carry scope even when they are only one or two words."""
+    if not 2 <= len(text) <= 160 or len(text.split()) > 18:
+        return False
+    if re.search(r"[.!?。！？$€£¥%]", text) or not any(c.isalpha() for c in text):
+        return False
+    if node.name in ("h1", "h2", "h3", "h4", "h5", "h6"):
+        return True
+    for candidate in [node, *node.find_all(["span", "b", "strong", "i", "em"])]:
+        if re.sub(r"\s+", " ", candidate.get_text(" ", strip=True)).strip() != text:
+            continue
+        if candidate.name in ("b", "strong", "i", "em") or re.search(
+            r"font-weight\s*:\s*(?:bold|[6-9]00)|font-style\s*:\s*italic",
+            str(candidate.get("style", "")), re.I,
+        ):
+            return True
+    return False
+
+
+def _inline_heading(node) -> str | None:
+    """Recognize a bold title followed by normal body text in the same block."""
+    fragments = []
+    has_body = False
+    for text in node.strings:
+        if not str(text).strip():
+            continue
+        bold = False
+        for parent in text.parents:
+            weight = re.search(r"font-weight\s*:\s*([^;]+)", str(parent.get("style", "")), re.I)
+            if weight:
+                bold = bool(re.fullmatch(r"(?:bold|[6-9]00)(?:\s*!important)?", weight[1].strip(), re.I))
+                break
+            if parent.name in ("b", "strong"):
+                bold = True
+                break
+            if parent is node:
+                break
+        if not bold:
+            has_body = True
+            break
+        fragments.append(str(text))
+    title = re.sub(r"\s+", " ", " ".join(fragments)).strip()
+    if (has_body and 5 <= len(title) <= 160 and 2 <= len(title.split()) <= 24
+            and not re.search(r"[$€£¥%]", title) and any(c.isalpha() for c in title)):
+        return title
+    return None
+
+
+def _layout_item_heading(table) -> str | None:
+    """Small SEC Item title tables are headings, unlike navigation/data tables."""
+    if (table.find_parent("table") or table.find("table") or table.find("a", href=True)
+            or len(table.find_all("tr")) > 2):
+        return None
+    text = re.sub(r"\s+", " ", table.get_text(" ", strip=True)).strip()
+    match = re.fullmatch(r"Item\s+\d+[A-Z]?[.\s]+([A-Z][A-Z &,/()–—-]+)", text, re.I)
+    return text if match and len(text) <= 180 else None
+
+
 def _join_positioned_lines(soup: BeautifulSoup) -> None:
     """Reconstruct adjacent visible lines in paginated foreign annual HTML.
 
@@ -436,7 +494,7 @@ def _table_passages(
     return result
 
 
-def _merge_blocks(blocks: list, max_chars: int) -> list:
+def _merge_blocks(blocks: list, max_chars: int, *, boundaries: set[int] | None = None) -> list:
     """Join consecutive same-section blocks before chunking.
 
     Each leaf ``<p>``/``<div>`` became its own passage, so the median passage was
@@ -446,8 +504,18 @@ def _merge_blocks(blocks: list, max_chars: int) -> list:
     with a 4,000-character parent and reaches page@5 0.850.
     """
     merged: list = []
-    for text, section, anchor, page in blocks:
-        if merged and merged[-1][1] == section and len(merged[-1][0]) + 1 + len(text) <= max_chars:
+    for index, (text, section, anchor, page) in enumerate(blocks):
+        # Printed page breaks can split a sentence before its condition. Join
+        # that continuation before sentence-aware chunking, with a bounded
+        # parent size and without crossing an explicit heading. Ordinary
+        # complete paragraphs still obey max_chars.
+        continuation = bool(
+            merged and merged[-1][3] is not None and page == merged[-1][3] + 1
+            and merged[-1][0][-1:].isalnum() and text[:1].islower()
+            and len(merged[-1][0]) + 1 + len(text) <= max_chars * 2
+        )
+        if (merged and index not in (boundaries or ()) and merged[-1][1] == section
+                and (len(merged[-1][0]) + 1 + len(text) <= max_chars or continuation)):
             previous = merged[-1]
             merged[-1] = (previous[0] + " " + text, section, previous[2] or anchor, previous[3])
         else:
@@ -521,17 +589,25 @@ def _extract_passages(
     )
     page_numbers = _page_numbers(soup)
     seen = set()
-    for node in soup.find_all(["p", "div"]):
+    seen_headings, boundaries = set(), set()
+    block_tags = ["p", "div", "h1", "h2", "h3", "h4", "h5", "h6"]
+    for node in soup.find_all([*block_tags, "table"]):
+        if node.name == "table":
+            if title := _layout_item_heading(node):
+                section = title[:160]
+                seen_headings.add(title)
+                boundaries.add(len(blocks))
+                seen.clear()
+            continue
         if (
             node.find_parent("table")
-            or node.find(["p", "div"])
+            or node.find(block_tags)
             or (filing.form.startswith("6-K") and node.find("table"))
         ):
             continue
         text = re.sub(r"\s+", " ", node.get_text(" ", strip=True)).strip()
-        if not text or text in seen:
+        if not text:
             continue
-        seen.add(text)
         heading = (
             _foreign_heading(text)
             if filing.form in ("20-F", "20-F/A")
@@ -542,17 +618,27 @@ def _extract_passages(
                 )
                 or _section_heading(text)
             )
-        )
-        if heading:
-            section = text[:160]
+        ) or _structural_heading(node, text)
+        inline_title = _inline_heading(node) if not heading else None
+        if heading or inline_title:
+            if text in seen_headings and _NAVIGATION_ONLY.match(text):
+                continue
+            section = inline_title or text[:160]
+            seen_headings.add(text)
+            boundaries.add(len(blocks))
+            seen.clear()
+        if text in seen:
+            continue
+        seen.add(text)
         if len(text) < 130 and not _content_sentence(text):
             continue
         anchor = node.get("id") or (node.find_parent(id=True) or {}).get("id", "")
         blocks.append((text, section, anchor, page_numbers.get(id(node))))
-    blocks = _merge_blocks(blocks, max_chars)
+    blocks = _merge_blocks(blocks, max_chars, boundaries=boundaries)
     result = (
         _table_passages(soup, filing, max_chars, page_numbers) if include_tables else []
     )
+    used_ids = {p.id for p in result}
     for offset, (text, section, anchor, page) in enumerate(blocks):
         sentences = re.split(r"(?<=[.!?])\s+", text)
         chunks, current = [], ""
@@ -572,11 +658,18 @@ def _extract_passages(
         if current:
             chunks.append(current)
         for index, chunk in enumerate(chunks):
+            passage_id = (
+                stable_id("passage", filing.id, offset, index, chunk)
+                if filing.form in ("20-F", "20-F/A")
+                else stable_id("passage", filing.id, chunk)
+            )
+            if passage_id in used_ids:
+                # Identical wording in two sections still has two source scopes.
+                passage_id = stable_id("passage", filing.id, section, offset, index, chunk)
+            used_ids.add(passage_id)
             result.append(
                 Passage(
-                    id=stable_id("passage", filing.id, offset, index, chunk)
-                    if filing.form in ("20-F", "20-F/A")
-                    else stable_id("passage", filing.id, chunk),
+                    id=passage_id,
                     filing_id=filing.id,
                     ticker=filing.ticker,
                     section=section,

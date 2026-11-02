@@ -1,64 +1,45 @@
 # Evaluation
 
-This page records the release-facing measurements. Raw intermediate runs and
-provider request logs stay local; only the latest full report and the small
-retrieval snapshot are kept as public validation records.
+This page records the latest full workflow measurement. Raw intermediate runs and
+provider request logs stay local; the full report, results, failures and numeric
+audit are kept as the machine-readable validation record.
 
 ## Latest full workflow record
 
-The [machine-readable report](validation/live-full-deepseek-mimo-2026-10-30-rerun/report.json)
-contains the configuration fingerprint, denominators and run metadata. It used
-the 140-question bilingual set, a 2026-10-08 knowledge date, DeepSeek for
-research, Mimo for review, the diversity reranker, one worker and a 3,000-second
-cooperative research ceiling.
+The [machine-readable report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json)
+contains the configuration fingerprint, denominators and run metadata. It used the
+140-question bilingual set, a 2026-10-08 knowledge date, DeepSeek for research,
+Mimo for review, the diversity reranker, four workers, a 3,000-second cooperative
+research ceiling, a 300-second review timeout and a 16,384-token review budget.
 
 | Metric | Result |
 |---|---:|
 | Captured / eligible rows | 140 / 140 |
-| Answerable coverage | **90 / 100** |
+| Answerable coverage | **95 / 100** |
 | Expected insufficient-evidence refusals | **20 / 20** |
 | Market-source policy cases | **20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Citation binding on delivered rows | **1.000** |
-| Model-backed P50 / P95 | **85.5 s / 218.3 s** |
-| Reported tokens | **3,647,712** |
+| Citation binding across all rows | **0.857** |
+| Model-backed P50 / P95 | **226.4 s / 1,051.1 s** |
+| Reported tokens | **4,044,735** |
 | Runner errors / deadline timeouts | **0 / 0** |
+| Raw SEC numeric | **104 matched / 0 mismatched / 27 unassessed** |
+| Regression suite | **2,305 passed** |
 
-The previous public run recorded 91/100 with two workers. This complete one-worker
-run records 90/100 on the same frozen questions, date and model pairing; the
-difference is within the observed stochastic variation. A separate placeholder-gap
-fix was verified on `semantic-risk-014` (1/1 answered, zero unsupported or numeric
-errors) after the full run and is deliberately not mixed into this population score.
+Five answerable rows delivered partial answers: `semantic-causality-002`,
+`semantic-causality-008`, `semantic-causality-019`, `semantic-negation-001` and
+`semantic-negation-006`. They retain explicit gaps rather than unverified
+completion. The two negation rows contain explicit-negative wording that does
+not match the requested subject/period; the causality rows are coverage-review
+outcomes in this run.
 
 The 100 answerable rows cover numeric, cross-period, causality, negation and risk
 questions. The remaining 40 rows are designed refusals or market-source policy
-cases and are reported separately. `citation_binding_rate` means that an
-evidence ID was observed and bound; it is not an independent human judgment of
-semantic entailment.
-
-## Targeted post-change check
-
-After the narrative requirement, reviewer-context and bounded synthesis-retry
-changes, the eight previously incomplete narrative rows were rerun together
-with one previously answered control row. This was a single stochastic,
-single-worker DeepSeek research / Mimo review run; it is a diagnostic and does
-not replace the 140-question population result above.
-
-| Metric | Result |
-|---|---:|
-| Captured rows | **9 / 9** |
-| Answered / partial | **4 / 5** |
-| Previously partial rows that became answered | **4 / 8** |
-| Unsupported claims / numeric errors | **0 / 0** |
-| Runner errors / deadline timeouts | **0 / 0** |
-| Model-backed P50 / P95 | **168.0 s / 331.4 s** |
-| Reported tokens | **607,852** |
-
-One previously answered control row became partial in this run, so the result
-shows a promising failure-path improvement but is not sufficient to claim a
-global accuracy increase. The remaining partial rows were limited by missing
-direct filing attribution, document-wide negative evidence, or another
-unfinished model synthesis.
+cases and are reported separately. `citation_binding_rate` means that an evidence
+ID was observed and bound; it is not an independent human judgment of semantic
+entailment. These are engineering and workflow measurements, not an independent
+human accuracy study.
 
 ## Retrieval
 
@@ -106,7 +87,7 @@ answer and is therefore not a model-accuracy estimate.
 
 ## Known limitations
 
-The latest full run is a model-assisted workflow measurement, not an independent
+The published full run is a model-assisted workflow measurement, not an independent
 human gold standard. Causality questions can remain partial when a filing names
 several drivers but does not disclose each driver's contribution to a consolidated
 margin change. Negation questions remain conservative when a selected passage

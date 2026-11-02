@@ -694,8 +694,9 @@ def test_review_batches_and_deduplicates_shared_evidence(tools, batch_size, expe
 
 
 @pytest.mark.parametrize("failure", ["malformed_json", "wrong_indexes", "connection_error"])
+@pytest.mark.parametrize("language", ["zh", "en"])
 def test_failed_review_batch_preserves_other_approved_claims_and_withholds_unreviewed(
-    tools, failure
+    tools, failure, language
 ):
     class FailedBatchGateway(StockGateway):
         review_count = 0
@@ -729,11 +730,12 @@ def test_failed_review_batch_preserves_other_approved_claims_and_withholds_unrev
             home=tools.corpus.home, max_rounds=1, review_batch_size=2
         ),
         FailedBatchGateway(),
-    ).run(ResearchRequest(question="苹果股票怎么样？", ticker="AAPL"), tools)
+    ).run(ResearchRequest(question="苹果股票怎么样？", ticker="AAPL", language=language), tools)
     assert answer.status == "partial"
     assert [c["index"] for c in answer.answer] == [0, 1]
     assert any(t["stage"] == "semantic_review_error" for t in answer.trace)
-    assert any("未通过" in gap for gap in answer.gaps)
+    expected_note = "未通过" if language == "zh" else "failed evidence checks"
+    assert any(expected_note in gap for gap in answer.gaps)
     assert audit_package(create_package(answer, tools.domain, "AAPL"))["status"] == "consistent"
 
 
@@ -962,6 +964,21 @@ def test_unavailable_rewritten_draft_keeps_previous_coherent_verified_partial(to
     assert [c["text"] for c in second["verified"]] == [original.statement]
     assert second["errors"]
     assert any(t["stage"] == "retained_verified_partial" for t in second["trace"])
+
+
+@pytest.mark.parametrize("coverage", ["current", "stale", "absent"])
+def test_complete_verified_revision_beats_an_earlier_analysis_sentence(tools, coverage):
+    reviewer = UnavailableRepairReviewer()
+    agent = ResearchAgent(Settings(home=tools.corpus.home, max_rounds=2), reviewer)
+    original = Claim(kind="analysis", evidence_ids=["rev25"],
+                     statement="已披露年度营收，为经营规模提供依据。")
+    first = agent.verify(verification_state(tools, [original, Claim(kind="fact", evidence_ids=["missing"])]))
+    revised = [{"index": 0, "kind": "narrative", "text": "The requested categories are covered by the revised disclosure summary.",
+                "evidence_ids": ["rev25"], "verification": "semantic_review"}]
+    first["answer_coverage_key"] = (agent._coverage_key(revised) if coverage == "current"
+                                    else agent._coverage_key(first["verified"]) if coverage == "stale" else None)
+    retained = agent._retain_verified_partial(first, revised, incomplete=True)
+    assert retained == (revised if coverage == "current" else first["verified"])
 
 
 def test_explicit_rejection_of_reworded_claim_invalidates_old_shared_evidence_approval(tools):

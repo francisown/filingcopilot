@@ -39,5 +39,5 @@ disagreement; do not average it away.
 ## Current status
 
 **Pending.** No independent domain reviewer has completed this protocol. The
-README's 95% self-review and FinanceBench retrieval numbers are not a substitute
+README's self-review and FinanceBench retrieval numbers are not a substitute
 for it.

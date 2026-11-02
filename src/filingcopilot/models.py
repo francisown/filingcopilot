@@ -84,7 +84,7 @@ class StatementFact(StrictModel):
 
 # Bump whenever extraction changes (chunking, filters, tables). Stored on every
 # filing record so a stale parse is detectable and self-heals on next use.
-PARSER_VERSION = "2026-10-28.1"
+PARSER_VERSION = "2026-11-01.2"
 
 
 class Passage(StrictModel):

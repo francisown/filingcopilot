@@ -125,6 +125,11 @@ class ResearchControl:
     def remaining(self):
         return max(0.0, self._deadline - time.monotonic()) if self._deadline is not None else None
 
+    @property
+    def deadline(self):
+        """Monotonic deadline for a deterministic supervisor; ``None`` means unbounded."""
+        return self._deadline
+
     def cancel(self):
         with self._lock:
             if self._sealed or self.expired:

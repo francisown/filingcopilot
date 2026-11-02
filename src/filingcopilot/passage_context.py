@@ -3,6 +3,31 @@
 import re
 
 
+def adjacent_members(item: dict, candidates: list[dict]) -> list[dict]:
+    """Immediate narrative neighbors, with original source and section bounds."""
+    def position(value):
+        match = re.fullmatch(r"narrative block (\d+), chunk (\d+)(?:/\d+)?; exact text retained", value.get("locator", ""))
+        return tuple(map(int, match.groups())) if match else None
+
+    origin = position(item)
+    if origin is None or not item.get("section"):
+        return []
+    ordered = sorted(
+        [(position(c), c) for c in candidates if c.get("filing_id") == item.get("filing_id") and position(c) is not None],
+        key=lambda pair: (pair[0], pair[1]["id"]),
+    )
+    index = next((i for i, (_, c) in enumerate(ordered) if c["id"] == item["id"]), None)
+    if index is None:
+        return []
+    result = []
+    for neighbor in (index + 1, index - 1):
+        if 0 <= neighbor < len(ordered):
+            pos, value = ordered[neighbor]
+            if value.get("section") == item["section"] and abs(pos[0] - origin[0]) <= 1:
+                result.append(value)
+    return result
+
+
 def context_part(item: dict) -> tuple[str, int, int, int] | None:
     match = re.fullmatch(
         r"narrative block (\d+), chunk (\d+)/(\d+); exact text retained",

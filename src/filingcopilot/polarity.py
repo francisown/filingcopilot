@@ -12,6 +12,24 @@ DOWN = r"\b(?:decreas\w*|declin\w*|fell|fall\w*|drop\w*|reduc\w*|contract\w*)\b|
 UNCERTAIN = r"\b(?:not|no|never|could|may|might|would|expected|expect|potential|whether)\b|没有|并未|未能|可能|预计|有望|是否|尚需|待核|有待|不[会曾]?"
 
 
+def margin_amount(term: str, segment: str) -> bool:
+    """'Gross margin increased $X or Y%' describes profit amount growth.
+
+    The growth percentage after a currency amount does not turn that amount
+    into a margin percentage. An explicit percentage noun keeps ratio scope.
+    """
+    currency = re.search(r"[$€£¥]|\b(?:USD|dollars|EUR|euros|TWD|JPY)\b|美元|欧元|新台币|日元", segment, re.I)
+    return bool(currency and not re.search(r"percentage|percent|%|率", term + segment[:currency.start()], re.I))
+
+
+def metric_share(prefix: str, segment: str) -> bool:
+    """A share/denominator mention does not assert the amount's direction."""
+    return bool(re.match(
+        r"\s*(?:的)?(?:占比|比重|比例|比(?=下降|上升|降低|增加|减少|提高)|"
+        r"\b(?:ratio|share|proportion)\b)", segment, re.I,
+    ) or re.search(r"\b(?:proportion|percentage|share)\s+of\s+(?:net\s+|total\s+)?$", prefix, re.I))
+
+
 def directions(text: str, domain: Domain, years: set[int]) -> dict[str, set[int]]:
     terms = [
         (term, key, None)
@@ -44,21 +62,20 @@ def directions(text: str, domain: Domain, years: set[int]) -> dict[str, set[int]
         for idx, (start, end, key, ratio, term) in enumerate(anchors):
             stop = anchors[idx + 1][0] if idx + 1 < len(anchors) else len(clause)
             if re.search(
-                r"\bwhether\s*$|是否\s*$|(?:尚需|待核|有待).{0,20}$",
+                r"\bwhether\s*$|是否\s*$|(?:尚需|待核|有待).{0,20}$|(?:而非|并非|不是|rather than|not)\s*$",
                 clause[max(0, start - 25) : start],
                 re.I,
             ):
                 continue
-            segment = clause[end:stop][:90]
-            if ratio and re.search(r"\$|\b(?:USD|dollars|EUR|euros)\b|美元|欧元", segment, re.I):
-                # Currency-qualified ratios describe their numerator amount, e.g.
-                # SEC gross margin dollars. A percentage qualifier takes precedence.
-                if not re.search(r"percentage|percent|%|率", term + segment, re.I):
-                    key = ratio.numerator
+            segment = re.split(r"[,，、]", clause[end:stop], maxsplit=1)[0][:90]
+            if ratio is None and metric_share(clause[max(0, start - 40):start], segment):
+                continue  # A metric's share or a denominator is not its absolute direction.
+            if ratio and margin_amount(term, segment):
+                key = ratio.numerator
             up, down = re.search(UP, segment, re.I), re.search(DOWN, segment, re.I)
             if not up and not down:
                 previous_end = anchors[idx - 1][1] if idx else 0
-                segment = clause[max(previous_end, start - 25) : start]
+                segment = re.split(r"[,，、]", clause[max(previous_end, start - 25) : start])[-1]
                 up, down = re.search(UP, segment, re.I), re.search(DOWN, segment, re.I)
             if re.search(UNCERTAIN, segment, re.I) or bool(up) == bool(down):
                 continue

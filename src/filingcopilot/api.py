@@ -194,6 +194,7 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             "valuation_scenarios": True,
             "historical_valuation": True,
             "watchlist": True,
+            "watchlist_triggers": service.settings.watchlist_triggers_enabled,
             "research_jobs": True,
             "research_time_budget_seconds": service.settings.research_timeout,
             "sec_acquisition_ready": bool(
@@ -222,6 +223,17 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
     def remove_watchlist(ticker: str):
         try:
             return service.watchlist.remove(ticker)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.get("/api/watchlist/triggers")
+    def watchlist_triggers():
+        return service.watchlist.triggers()
+
+    @app.post("/api/watchlist/scan")
+    def scan_watchlist():
+        try:
+            return service.watchlist.scan(jobs)
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
 
@@ -525,6 +537,8 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
     def cancel_research(job_id: str):
         try:
             return jobs.cancel(job_id)
+        except ResearchJobConflict as exc:
+            raise HTTPException(409, str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from exc
 
