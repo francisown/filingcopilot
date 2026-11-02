@@ -12,16 +12,18 @@
 
 **Ask a question about a U.S. company filing. Get an answer you can check.**
 
-FilingCopilot is a local-first research workspace for SEC filings. It finds the relevant annual or quarterly report, pulls the exact passages, calculates the financial numbers, and shows the source behind every claim. When the filing does not support an answer, it says so instead of guessing.
+FilingCopilot is a research workspace for SEC filings that runs on your machine. It finds the relevant annual or quarterly report, pulls the exact passages, calculates the financial figures, and shows the source behind every claim. If the filing does not support an answer, it says so instead of guessing.
 
-![FilingCopilot workspace](docs/images/workspace.png)
+![FilingCopilot workspace with an AAPL price chart](docs/images/workspace-chart.png)
+
+*The workspace: price history, filing research and source checks in one place.*
 
 ## What it does
 
-- Answers questions about revenue, profit, margins, cash flow, risks and filing language.
-- Handles numbers deterministically; uses an AI research agent only when narrative evidence or multi-step research is needed.
-- Returns a short answer, cited source passages, code-calculated figures and explicit gaps.
-- Can export a frozen research package that a standalone verifier checks offline.
+- Answers questions about revenue, profit, margins, cash flow, risks and the wording of a filing.
+- Numbers are handled by fixed rules and calculations; an AI research agent is used only when a question needs narrative evidence or multi-step reasoning.
+- Returns a short answer, the cited passages, code-calculated figures and explicit gaps.
+- Can export a complete research package that a standalone verifier checks offline.
 
 ## What you can ask
 
@@ -32,13 +34,13 @@ FilingCopilot is a local-first research workspace for SEC filings. It finds the 
 
 ## Why it is different
 
-- **Answers with receipts.** Every delivered claim points to a filing passage or a code calculation.
-- **Honest about gaps.** Missing evidence becomes a visible gap or refusal, not a fluent guess.
-- **Re-checkable offline.** An exported research package can be verified without the research model or network.
+- **Every answer shows its sources.** Each delivered claim points to a filing passage or a code calculation.
+- **It says when evidence is missing.** No fluent guess; the answer carries a visible gap or a refusal.
+- **You can re-check it offline.** The exported package can be verified without the research model or network.
 
 ## Latest snapshot
 
-Latest local run: 2026-11-02, 140 questions, DeepSeek research and Mimo review, four workers. The 100 answerable questions and 40 boundary/policy questions are reported separately.
+Latest local run: 2026-11-02, 140 questions, DeepSeek research and Mimo review, four questions processed in parallel. The 100 answerable questions and 40 boundary/policy questions are reported separately.
 
 | What | Result |
 |---|---:|
@@ -48,9 +50,9 @@ Latest local run: 2026-11-02, 140 questions, DeepSeek research and Mimo review, 
 | Delivered claims with a source citation | **100%** |
 | Regression tests | **2,307 passed** |
 
-Three answerable questions delivered partial answers with explicit gaps; the rest were complete. Latency, tokens, the numeric audit and the exact rows are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
+Three of the 100 answerable questions returned partial answers with explicit gaps; the rest returned complete answers. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
 
-**Speed:** deterministic numeric questions are usually sub-second; long narrative questions call the model and independent reviewer, so they can take minutes. The latest model-backed P95 was 842 seconds; see Evaluation for the full breakdown.
+**Speed:** numeric questions are usually answered in under a second; long narrative questions call the model and an independent reviewer, so they can take minutes. The latest model-backed P95 was 842 seconds; see Evaluation for the full breakdown.
 
 ## Try it in 60 seconds
 
@@ -87,9 +89,9 @@ The complete setup and troubleshooting steps are in [docs/installation.md](docs/
 For every answer:
 
 - a short conclusion;
-- exact cited passages and/or code-calculated figures;
-- explicit gaps when a requested part is missing;
-- an optional exportable research package and an offline verifier.
+- the cited filing passages and/or code-calculated figures;
+- explicit gaps for requested parts that are missing;
+- an optional research package that can be exported and checked offline.
 
 ## How it works
 
@@ -102,14 +104,14 @@ Browser / CLI / REST / MCP
             |
    hybrid retrieval and reranking
             |
- facts, passages and calculations in the evidence ledger
+ facts, passages and calculations stored with their sources
             |
- deterministic checks + independent review
+ fixed checks + independent review
             |
- answer, citations, explicit gaps and optional frozen package
+ answer, citations, explicit gaps and an optional research package
 ```
 
-Deterministic routes handle annual figures, growth, margins and trends without a model. Research routes use a tool-calling agent for questions that need narrative evidence or multi-step calculations. The service is available through the browser workspace, CLI, REST API and 30 MCP tools.
+Fixed rules handle annual figures, growth, margins and trends without a model. Research questions use a tool-calling agent when they need narrative evidence or multi-step calculations. The service is available through the browser workspace, CLI, REST API and 30 MCP tools.
 
 ## Who it is for
 
@@ -128,8 +130,8 @@ Copy `.env.example` to `.env` and set values locally. Never commit `.env`.
 | `FC_API_BASE` / `FC_API_KEY` | OpenAI-compatible provider endpoint and private key |
 | `FC_MODEL` | Research model; the checked-in example uses DeepSeek |
 | `FC_REVIEW_MODEL` | Separate review model; the checked-in example uses Mimo |
-| `FC_RESEARCH_TIMEOUT` | Cooperative research ceiling; the public example is 3,000 seconds |
-| `FC_WATCHLIST_TRIGGERS_ENABLED` | Opt-in local watchlist scans; false reports candidates without starting jobs |
+| `FC_RESEARCH_TIMEOUT` | Overall time limit for one research run; the public example is 3,000 seconds |
+| `FC_WATCHLIST_TRIGGERS_ENABLED` | Optional: scan saved tickers and queue research only when enabled |
 | `FC_EMBEDDING_MODE` | `off` for keyword retrieval or `local` for optional local embeddings |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata |
 | `FC_MAX_COST_USD` | Optional ceiling; requires both token prices and is rejected otherwise |
@@ -140,7 +142,7 @@ Model requests may incur provider charges. The application does not place trades
 
 - [Architecture](docs/architecture.md)
 - [Evaluation and denominators](docs/evaluation.md)
-- [Case study](docs/case-study.md) · [案例研究](docs/case-study.zh-CN.md)
+- [Case study](docs/case-study.md)
 - [Installation](docs/installation.md)
 - [User guide](docs/user-guide.md)
 - [Research package protocol](docs/research-package-protocol.md)

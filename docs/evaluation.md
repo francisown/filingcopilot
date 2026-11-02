@@ -9,7 +9,7 @@ audit are kept as the machine-readable validation record.
 The [machine-readable report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json)
 contains the configuration fingerprint, denominators and run metadata. It used the
 140-question bilingual set, a 2026-10-08 knowledge date, DeepSeek for research,
-Mimo for review, the diversity reranker, four workers, a 3,000-second cooperative
+Mimo for review, the diversity reranker, four workers (four concurrent question runs), a 3,000-second cooperative
 research ceiling, a 300-second review timeout and a 16,384-token review budget.
 
 | Metric | Result |
