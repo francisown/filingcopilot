@@ -135,10 +135,9 @@ Copy `.env.example` to `.env` and set values locally. Never commit `.env`.
 | `FC_EMBEDDING_MODE` | `off` for keyword retrieval or `local` for optional local embeddings |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata. OpenCode Go requires a stable `FC_SESSION_ID` (`x-opencode-session`) and its own base URL. |
 | `FC_MAX_COST_USD` | Optional ceiling; requires both token prices and is rejected otherwise |
-| `FC_MONITORING_SCAN_INTERVAL_MINUTES` | Background scan interval; 0 disables it |
-| `FC_MONITORING_DIGEST_*` | Daily digest enable/hour/channel (`local`/`webhook`/`slack`/`smtp`) |
-| `FC_SMTP_*` / `FC_SLACK_WEBHOOK_URL` | Email or native Slack delivery configuration |
-| `FC_MONITORING_BRIEF_*` | Per-brief model timeout, token and optional cost ceiling |
+
+Monitoring, digest, SMTP/Slack and brief-budget variables are documented in
+[Monitor v1](docs/monitoring-v1.md).
 
 Model requests may incur provider charges. The application does not place trades. New filing preparation requires network access and a compliant SEC user agent; existing local data can be queried offline.
 
@@ -150,81 +149,26 @@ accept a Go key from an external client. See [OpenCode Go](docs/opencode-go.md).
 
 ## Disclosure monitoring (Monitor v1)
 
-Monitor v1 turns saved companies into an evidence-first review queue. It scans
-US 10-K / 10-Q / 8-K filings, compares structured facts and four targeted
-sections, classifies 8-K items deterministically, and creates one filing-level
-case with a fixed-format brief. Every fact and calculation carries an evidence
-ID; “why it may matter” is labelled as inference.
+Monitor v1 turns saved companies into an evidence-first review queue: SEC
+10-K / 10-Q / 8-K discovery, structured and section-level diffs, deterministic
+8-K item classification, one-page cited briefs, and human review with versioned
+approvals.
 
 ```powershell
-# One-off local scan of saved companies (or pass tickers explicitly)
 .\.venv\Scripts\python.exe -m filingcopilot monitor-scan AAPL MSFT
-
-# Review queue and one case
 .\.venv\Scripts\python.exe -m filingcopilot monitor-cases
-.\.venv\Scripts\python.exe -m filingcopilot monitor-case <case-id>
-
-# Approve / dismiss / reopen (version is required; query the case first)
-.\.venv\Scripts\python.exe -m filingcopilot monitor-review <case-id> approve `
-  --brief-version 1 --comment "checked"
-
-# Historical replay for a date interval
-.\.venv\Scripts\python.exe -m filingcopilot monitor-replay AAPL MSFT `
+.\.venv\Scripts\python.exe -m filingcopilot monitor-review <case-id> approve --brief-version 1
+.\.venv\Scripts\python.exe -m filingcopilot monitor-replay AAPL `
   --start 2025-01-01 --end 2025-12-31
-
-# Daily digest (markdown) and optional PDF / delivery
-.\.venv\Scripts\python.exe -m filingcopilot monitor-digest
 .\.venv\Scripts\python.exe -m filingcopilot monitor-digest --pdf digest.pdf
-.\.venv\Scripts\python.exe -m filingcopilot monitor-digest --channel smtp
-
-# Offline package verification and delivery
-# Verify the exact exported file; do not re-serialize it with ConvertTo-Json.
 .\.venv\Scripts\python.exe -m filingcopilot monitor-verify case-package.json
-.\.venv\Scripts\python.exe -m filingcopilot monitor-deliver <case-id> --channel local
 ```
 
-The web case view has a full-text brief editor (headline, narrative, numbers,
-inferences, gaps and next checks). Approved versions remain preserved; an edit
-creates a new review version. Section changes include character offsets and quote
-hashes, and the model polish path is capped to one request by
-`FC_MONITORING_BRIEF_TIMEOUT`, `FC_MONITORING_BRIEF_MAX_TOKENS` and optional
-`FC_MONITORING_BRIEF_MAX_COST_USD`.
-
-Set `FC_MONITORING_DIGEST_ENABLED=true` and `FC_MONITORING_DIGEST_HOUR=7` for the
-daily digest. The next window starts from the cutoff captured before the previous
-query (so a previous afternoon's case is included next morning). Channels:
-`local`, `webhook` (`FC_MONITORING_WEBHOOK_URL`), `slack`
-(`FC_SLACK_WEBHOOK_URL`) and `smtp`
-(`FC_SMTP_HOST/PORT/USER/PASSWORD/FROM/TO`). A digest is claimed atomically so a
-manual send cannot race the scheduled send. Policies with `notify=false` or
-`enabled=false` are excluded. PDF generation uses the bundled ReportLab
-dependency.
-
-The first scan is a bootstrap that processes the latest 10-K / 10-Q and the
-recent 8-K batch per ticker (last 7 days relative to the newest SEC acceptance).
-Later scans use a per-ticker `last_accepted` watermark and process only newer
-filings. Every accession has a `pending` / `processed` / `suppressed`
-/ `failed` status; a failed accession is retried on the next scan. Use
-`--reprocess` only when you intentionally want to rebuild cases that already
-exist.
-
-Set `FC_MONITORING_SCAN_INTERVAL_MINUTES=60` to enable the optional background
-scan loop in `serve` (0 disables it). Event scoring is available through
-`scripts/evaluate_monitor_events.py`; the checked-in seed is synthetic and is
-not a substitute for an analyst-labelled pilot set.
-
-```powershell
-.\.venv\Scripts\python.exe .\scripts\evaluate_monitor_events.py `
-  --gold evaluation\monitor_events_v1.json `
-  --predicted monitor-events.json
-```
-
-In the browser workspace, open **披露监控**. Live discovery requires
-`FC_SEC_USER_AGENT` with a real contact email. Briefs are deterministic by
-default; set `FC_MONITORING_USE_MODEL=true` to permit at most one model polish
-call per brief (the model may rewrite only the headline and inference bullets).
-The full scope, event taxonomy, materiality rules and acceptance gates are in
-[Monitor v1](docs/monitoring-v1.md).
+Open **Disclosure monitor** in the browser workspace to review, edit, approve or
+dismiss cases. Live discovery requires `FC_SEC_USER_AGENT`. Replay, digest,
+SMTP/Slack, brief-budget and scoring details are in
+[Monitor v1](docs/monitoring-v1.md); OpenCode Go setup is in
+[OpenCode Go](docs/opencode-go.md).
 
 ## Documentation
 

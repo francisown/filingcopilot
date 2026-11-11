@@ -135,10 +135,8 @@ FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 | `FC_EMBEDDING_MODE` | `off` 使用关键词检索，`local` 使用可选本地向量 |
 | `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 可选的供应商请求元数据；OpenCode Go 需要稳定的 `FC_SESSION_ID` |
 | `FC_MAX_COST_USD` | 单次费用上限；必须同时配置两项 token 单价，否则启动时拒绝 |
-| `FC_MONITORING_SCAN_INTERVAL_MINUTES` | 后台扫描间隔；0 关闭 |
-| `FC_MONITORING_DIGEST_*` | 每日早报开关、小时和渠道（local/webhook/slack/smtp） |
-| `FC_SMTP_*` / `FC_SLACK_WEBHOOK_URL` | 邮件或原生 Slack 投递配置 |
-| `FC_MONITORING_BRIEF_*` | 简报单次模型请求的时间、token 和费用上限 |
+
+监控、早报、SMTP/Slack 和简报预算变量见[披露监控规格](docs/monitoring-v1.md)。
 
 模型请求可能产生供应商费用，应用不会执行交易。准备新的财报需要网络和合规的 SEC 用户代理；已有本地资料可以离线查询。
 
@@ -149,25 +147,16 @@ OpenCode Go 的接口地址是 `https://opencode.ai/inference/go/openai/v1`，�
 把自选公司变成可审核的披露队列：扫描美国 10-K / 10-Q / 8-K，比较财务事实和重点章节，按 8-K Item 分类事件，生成带证据的一页简报，并记录人工确认、修改、忽略和反馈。
 
 ```powershell
-# 实时扫描与案件
 .\.venv\Scripts\python.exe -m filingcopilot monitor-scan AAPL MSFT
 .\.venv\Scripts\python.exe -m filingcopilot monitor-cases
-.\.venv\Scripts\python.exe -m filingcopilot monitor-case <case-id>
 .\.venv\Scripts\python.exe -m filingcopilot monitor-review <case-id> approve --brief-version 1
-
-# 指定历史区间回放
 .\.venv\Scripts\python.exe -m filingcopilot monitor-replay AAPL `
   --start 2025-01-01 --end 2025-12-31
-
-# 早报 / PDF / 投递
-.\.venv\Scripts\python.exe -m filingcopilot monitor-digest
 .\.venv\Scripts\python.exe -m filingcopilot monitor-digest --pdf digest.pdf
-
-# 离线包核验
 .\.venv\Scripts\python.exe -m filingcopilot monitor-verify case-package.json
 ```
 
-网页左侧打开 **披露监控**，可以查看队列、编辑全文、审核和导出。早报默认按“上次成功投递到的截止时间”续接，并遵守 `notify=false` / `enabled=false`。完整的范围、事件分类、证据定位、修订链和评测口径见 [披露监控规格](docs/monitoring-v1.md)。
+网页左侧打开 **披露监控**，可以查看队列、编辑全文、审核和导出。完整的扫描、早报、SMTP/Slack、回放、证据定位和评测口径见[披露监控规格](docs/monitoring-v1.md)；OpenCode Go 配置见[接口说明](docs/opencode-go.md)。
 
 ## 文档
 
