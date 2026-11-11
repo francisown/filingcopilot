@@ -82,6 +82,20 @@ def _optional_int(name: str) -> int | None:
         return None
 
 
+def _api_base(value: str) -> str:
+    """Accept a pasted chat-completions URL as a provider base URL.
+
+    Providers commonly document the full ``/chat/completions`` endpoint while
+    the OpenAI SDK appends that path itself. Stripping it avoids a confusing
+    404 without changing any other path or provider.
+    """
+    base = str(value or "").strip().rstrip("/")
+    for suffix in ("/chat/completions", "/chat/completion"):
+        if base.endswith(suffix):
+            return base[: -len(suffix)]
+    return base
+
+
 def _flag(name: str, default: bool = False) -> bool:
     raw = os.getenv(name)
     if raw is None or not raw.strip():
@@ -152,6 +166,25 @@ class Settings:
     watchlist_trigger_forms: tuple[str, ...] = ("10-K", "10-Q", "8-K")
     watchlist_trigger_lookback_days: int = 30
     watchlist_trigger_max_per_scan: int = 3
+    monitoring_enabled: bool = True
+    monitoring_use_model: bool = False
+    monitoring_webhook_url: str = ""
+    # 0 disables the optional background scan loop.
+    monitoring_scan_interval_minutes: int = 0
+    monitoring_digest_enabled: bool = False
+    monitoring_digest_hour: int = 7
+    monitoring_digest_channel: str = "local"
+    monitoring_brief_timeout: float = 30.0
+    monitoring_brief_max_tokens: int = 2048
+    monitoring_brief_max_cost_usd: float | None = None
+    slack_webhook_url: str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_to: str = ""
+    smtp_starttls: bool = True
     model_attempts: int = 3
     retry_base_delay: float = 1.0
     retry_max_delay: float = 60.0
@@ -170,6 +203,15 @@ class Settings:
             raise ValueError(
                 "max_cost_usd requires both model_input_price_per_million "
                 "and model_output_price_per_million"
+            )
+        if (
+            self.monitoring_brief_max_cost_usd is not None
+            and self.monitoring_brief_max_cost_usd > 0
+            and not self.pricing_configured
+        ):
+            raise ValueError(
+                "monitoring_brief_max_cost_usd requires both model prices; "
+                "leave it unset to disable the brief cost cap"
             )
 
     @property
@@ -208,7 +250,7 @@ class Settings:
         os.environ.setdefault("NO_PROXY", "127.0.0.1,localhost")
         return cls(
             home=Path(os.getenv("FC_HOME", ".filingcopilot")).resolve(),
-            api_base=os.getenv("FC_API_BASE", "").strip(),
+            api_base=_api_base(os.getenv("FC_API_BASE", "")),
             api_key=os.getenv("FC_API_KEY", "").strip(),
             auth_token=os.getenv("FC_AUTH_TOKEN", "").strip() or None,
             model=os.getenv("FC_MODEL", "").strip(),
@@ -232,7 +274,9 @@ class Settings:
             model_seed=_optional_int("FC_MODEL_SEED"),
             research_timeout=_optional_timeout("FC_RESEARCH_TIMEOUT", 3000.0),
             review_reserve_seconds=max(0.0, min(300.0, float(os.getenv("FC_REVIEW_RESERVE_SECONDS", "30")))),
-            refresh_timeout=max(1.0, min(60.0, float(os.getenv("FC_REFRESH_TIMEOUT", "20")))),
+            # A first-time quarterly refresh can need several SEC documents.
+            # Keep an upper bound but allow a realistic acquisition budget.
+            refresh_timeout=max(1.0, min(300.0, float(os.getenv("FC_REFRESH_TIMEOUT", "20")))),
             watchlist_triggers_enabled=_flag("FC_WATCHLIST_TRIGGERS_ENABLED"),
             watchlist_trigger_forms=_forms(
                 "FC_WATCHLIST_TRIGGER_FORMS", ("10-K", "10-Q", "8-K")
@@ -243,6 +287,45 @@ class Settings:
             watchlist_trigger_max_per_scan=max(
                 1, min(10, int(os.getenv("FC_WATCHLIST_TRIGGER_MAX_PER_SCAN", "3")))
             ),
+            monitoring_enabled=_flag("FC_MONITORING_ENABLED", True),
+            monitoring_use_model=_flag("FC_MONITORING_USE_MODEL", False),
+            monitoring_webhook_url=os.getenv("FC_MONITORING_WEBHOOK_URL", "").strip(),
+            monitoring_scan_interval_minutes=max(
+                0,
+                min(
+                    1440,
+                    int(os.getenv("FC_MONITORING_SCAN_INTERVAL_MINUTES", "0") or "0"),
+                ),
+            ),
+            monitoring_digest_enabled=_flag("FC_MONITORING_DIGEST_ENABLED", False),
+            monitoring_digest_hour=max(
+                0, min(23, int(os.getenv("FC_MONITORING_DIGEST_HOUR", "7") or "7"))
+            ),
+            monitoring_digest_channel=os.getenv(
+                "FC_MONITORING_DIGEST_CHANNEL", "local"
+            ).strip().lower(),
+            monitoring_brief_timeout=max(
+                1.0,
+                min(120.0, float(os.getenv("FC_MONITORING_BRIEF_TIMEOUT", "30") or "30")),
+            ),
+            monitoring_brief_max_tokens=max(
+                256,
+                min(
+                    8192,
+                    int(os.getenv("FC_MONITORING_BRIEF_MAX_TOKENS", "2048") or "2048"),
+                ),
+            ),
+            monitoring_brief_max_cost_usd=_optional_cost(
+                "FC_MONITORING_BRIEF_MAX_COST_USD"
+            ),
+            slack_webhook_url=os.getenv("FC_SLACK_WEBHOOK_URL", "").strip(),
+            smtp_host=os.getenv("FC_SMTP_HOST", "").strip(),
+            smtp_port=max(1, min(65535, int(os.getenv("FC_SMTP_PORT", "587") or "587"))),
+            smtp_user=os.getenv("FC_SMTP_USER", "").strip(),
+            smtp_password=os.getenv("FC_SMTP_PASSWORD", "").strip(),
+            smtp_from=os.getenv("FC_SMTP_FROM", "").strip(),
+            smtp_to=os.getenv("FC_SMTP_TO", "").strip(),
+            smtp_starttls=_flag("FC_SMTP_STARTTLS", True),
             model_attempts=max(1, min(5, int(os.getenv("FC_MODEL_ATTEMPTS", "3")))),
             retry_base_delay=max(0.0, min(10.0, float(os.getenv("FC_RETRY_BASE_DELAY", "1")))),
             retry_max_delay=max(1.0, min(120.0, float(os.getenv("FC_RETRY_MAX_DELAY", "60")))),

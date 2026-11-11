@@ -152,6 +152,72 @@ def main():
     )
     prepare.add_argument("ticker", type=str.upper)
     prepare.add_argument("--as-of", default=date.today().isoformat())
+    monitor_scan = commands.add_parser(
+        "monitor-scan", help="Scan saved companies and build disclosure briefs"
+    )
+    monitor_scan.add_argument("tickers", nargs="*")
+    monitor_scan.add_argument("--as-of", default=date.today().isoformat())
+    monitor_scan.add_argument("--no-bootstrap", action="store_true")
+    monitor_scan.add_argument("--no-brief", action="store_true")
+    monitor_scan.add_argument("--reprocess", action="store_true")
+    monitor_scan.add_argument("--use-model", action="store_true", default=None)
+    monitor_scan.add_argument("--output", type=Path)
+    monitor_replay = commands.add_parser(
+        "monitor-replay", help="Import and review a historical date interval"
+    )
+    monitor_replay.add_argument("tickers", nargs="*")
+    monitor_replay.add_argument("--start", required=True)
+    monitor_replay.add_argument("--end", required=True)
+    monitor_replay.add_argument("--use-model", action="store_true", default=None)
+    monitor_replay.add_argument("--no-brief", action="store_true")
+    monitor_replay.add_argument("--output", type=Path)
+    monitor_cases = commands.add_parser(
+        "monitor-cases", help="List disclosure monitoring review cases"
+    )
+    monitor_cases.add_argument("--status")
+    monitor_cases.add_argument("--ticker")
+    monitor_cases.add_argument("--limit", type=int, default=100)
+    monitor_case = commands.add_parser(
+        "monitor-case", help="Show one disclosure monitoring case"
+    )
+    monitor_case.add_argument("case_id")
+    monitor_review = commands.add_parser(
+        "monitor-review", help="Approve, dismiss or reopen a monitoring case"
+    )
+    monitor_review.add_argument("case_id")
+    monitor_review.add_argument("action", choices=["approve", "dismiss", "reopen", "feedback"])
+    monitor_review.add_argument("--actor", default="cli")
+    monitor_review.add_argument("--reason", default="")
+    monitor_review.add_argument("--comment", default="")
+    monitor_review.add_argument("--brief-version", type=int)
+    monitor_runs = commands.add_parser(
+        "monitor-runs", help="Show recent monitoring scan runs"
+    )
+    monitor_runs.add_argument("--limit", type=int, default=20)
+    monitor_digest = commands.add_parser(
+        "monitor-digest", help="Build or deliver the daily monitoring digest"
+    )
+    monitor_digest.add_argument("--start")
+    monitor_digest.add_argument("--end")
+    monitor_digest.add_argument(
+        "--channel",
+        choices=["local", "webhook", "slack", "smtp"],
+        default="local",
+    )
+    monitor_digest.add_argument("--force", action="store_true")
+    monitor_digest.add_argument("--pdf", type=Path)
+    monitor_digest.add_argument("--output", type=Path)
+    monitor_verify = commands.add_parser(
+        "monitor-verify", help="Verify an exported monitoring case package offline"
+    )
+    monitor_verify.add_argument("path", type=Path)
+    monitor_deliver = commands.add_parser(
+        "monitor-deliver", help="Record or send a monitoring case brief"
+    )
+    monitor_deliver.add_argument("case_id")
+    monitor_deliver.add_argument(
+        "--channel", choices=["local", "webhook"], default="local"
+    )
     prepare.add_argument("--years", type=int, choices=[1, 2, 3], default=2)
     ingest = commands.add_parser("ingest")
     ingest.add_argument("ticker", type=str.upper, help="Ticker registered in FC_DOMAIN_CONFIG")
@@ -321,7 +387,35 @@ def main():
 
         from .api import create_app
 
-        uvicorn.run(create_app(service), host=args.host, port=args.port)
+        scheduler = None
+        settings = getattr(service, "settings", None)
+        interval = int(getattr(settings, "monitoring_scan_interval_minutes", 0) or 0)
+        digest_enabled = bool(
+            getattr(settings, "monitoring_digest_enabled", False)
+        )
+        if settings is not None and getattr(settings, "monitoring_enabled", False) and (
+            interval > 0 or digest_enabled
+        ):
+            from .monitoring.scheduler import MonitoringScheduler
+
+            scheduler = MonitoringScheduler(
+                service,
+                interval,
+                digest_enabled=digest_enabled,
+                digest_hour=int(
+                    getattr(settings, "monitoring_digest_hour", 7) or 7
+                ),
+                digest_channel=str(
+                    getattr(settings, "monitoring_digest_channel", "local")
+                    or "local"
+                ),
+            )
+            scheduler.start()
+        try:
+            uvicorn.run(create_app(service), host=args.host, port=args.port)
+        finally:
+            if scheduler is not None:
+                scheduler.stop()
     elif args.command == "mcp":
         from .mcp_server import create_mcp
 
@@ -335,6 +429,126 @@ def main():
                     "non-loopback MCP HTTP requires FC_AUTH_TOKEN; use an authenticated TLS proxy for stronger identity controls"
                 )
         create_mcp(service, args.port, host=args.host).run(transport=args.transport)
+    elif args.command == "monitor-scan":
+        from .monitoring.models import ScanRequest
+
+        result = service.monitoring.scan(
+            ScanRequest(
+                tickers=args.tickers or None,
+                as_of=date.fromisoformat(args.as_of),
+                bootstrap=not args.no_bootstrap,
+                generate_brief=not args.no_brief,
+                reprocess=args.reprocess,
+                use_model=args.use_model,
+            )
+        )
+        content = json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(content, encoding="utf-8")
+        print(content)
+    elif args.command == "monitor-replay":
+        from .monitoring.models import ReplayRequest
+
+        result = service.monitoring.replay(
+            ReplayRequest(
+                tickers=args.tickers or None,
+                start=date.fromisoformat(args.start),
+                end=date.fromisoformat(args.end),
+                generate_brief=not args.no_brief,
+                use_model=args.use_model,
+            )
+        )
+        content = json.dumps(result.model_dump(mode="json"), ensure_ascii=False, indent=2)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(content, encoding="utf-8")
+        print(content)
+    elif args.command == "monitor-cases":
+        print(
+            json.dumps(
+                {
+                    "cases": service.monitoring.list_cases(
+                        status=args.status, ticker=args.ticker, limit=args.limit
+                    )
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    elif args.command == "monitor-case":
+        print(json.dumps(service.monitoring.get_case(args.case_id), ensure_ascii=False, indent=2))
+    elif args.command == "monitor-review":
+        from .monitoring.models import ReviewRequest
+
+        print(
+            json.dumps(
+                service.monitoring.review_case(
+                    args.case_id,
+                    ReviewRequest(
+                        action=args.action,
+                        actor=args.actor,
+                        reason_code=args.reason,
+                        comment=args.comment,
+                        brief_version=args.brief_version,
+                    ),
+                ),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    elif args.command == "monitor-runs":
+        print(
+            json.dumps(
+                {"runs": service.monitoring.runs(args.limit)},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    elif args.command == "monitor-digest":
+        from datetime import date as date_type
+
+        from .monitoring.models import DigestRequest
+
+        request = DigestRequest(
+            start=date_type.fromisoformat(args.start) if args.start else None,
+            end=date_type.fromisoformat(args.end) if args.end else None,
+            channel=args.channel,
+            force=args.force,
+        )
+        if args.pdf:
+            content = service.monitoring.digest_pdf(request)
+            args.pdf.parent.mkdir(parents=True, exist_ok=True)
+            args.pdf.write_bytes(content)
+            print(str(args.pdf))
+        elif args.output:
+            result = service.monitoring.deliver_digest(request)
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(result["markdown"], encoding="utf-8")
+            print(json.dumps({key: value for key, value in result.items() if key != "markdown"}, ensure_ascii=False, indent=2))
+        else:
+            result = service.monitoring.digest(request)
+            print(result["markdown"])
+    elif args.command == "monitor-verify":
+        from .monitoring.verify import verify_case_package
+
+        try:
+            package = json.loads(args.path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"status": "invalid", "error": str(exc)}, ensure_ascii=False))
+            raise SystemExit(1) from exc
+        report = verify_case_package(package)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        if report["status"] != "consistent":
+            raise SystemExit(1)
+    elif args.command == "monitor-deliver":
+        print(
+            json.dumps(
+                service.monitoring.deliver(args.case_id, args.channel),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
     elif args.command == "ask":
         result = service.research(
             ResearchRequest(

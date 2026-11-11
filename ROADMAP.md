@@ -21,7 +21,8 @@ numeric accuracy, citation support, completeness, latency and model use. The
 ## Planned extensions
 
 - Deterministic company screening.
-- Watchlist disclosure monitoring.
+- Watchlist disclosure monitoring (Monitor v1: 10-K/10-Q/8-K facts diff, 8-K
+  item classification, evidence brief, case review and offline export).
 - Authentication and operational checks for hosted deployment.
 
 These extensions are not included in the current local application.

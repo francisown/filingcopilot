@@ -504,7 +504,7 @@ def _merge_blocks(blocks: list, max_chars: int, *, boundaries: set[int] | None =
     with a 4,000-character parent and reaches page@5 0.850.
     """
     merged: list = []
-    for index, (text, section, anchor, page) in enumerate(blocks):
+    for index, (text, section, anchor, page, parent_section) in enumerate(blocks):
         # Printed page breaks can split a sentence before its condition. Join
         # that continuation before sentence-aware chunking, with a bounded
         # parent size and without crossing an explicit heading. Ordinary
@@ -514,12 +514,23 @@ def _merge_blocks(blocks: list, max_chars: int, *, boundaries: set[int] | None =
             and merged[-1][0][-1:].isalnum() and text[:1].islower()
             and len(merged[-1][0]) + 1 + len(text) <= max_chars * 2
         )
-        if (merged and index not in (boundaries or ()) and merged[-1][1] == section
-                and (len(merged[-1][0]) + 1 + len(text) <= max_chars or continuation)):
+        if (
+            merged
+            and index not in (boundaries or ())
+            and merged[-1][1] == section
+            and merged[-1][4] == parent_section
+            and (len(merged[-1][0]) + 1 + len(text) <= max_chars or continuation)
+        ):
             previous = merged[-1]
-            merged[-1] = (previous[0] + " " + text, section, previous[2] or anchor, previous[3])
+            merged[-1] = (
+                previous[0] + " " + text,
+                section,
+                previous[2] or anchor,
+                previous[3],
+                previous[4] or parent_section,
+            )
         else:
-            merged.append((text, section, anchor, page))
+            merged.append((text, section, anchor, page, parent_section))
     return merged
 
 
@@ -590,11 +601,14 @@ def _extract_passages(
     page_numbers = _page_numbers(soup)
     seen = set()
     seen_headings, boundaries = set(), set()
+    parent_section = None
     block_tags = ["p", "div", "h1", "h2", "h3", "h4", "h5", "h6"]
     for node in soup.find_all([*block_tags, "table"]):
         if node.name == "table":
             if title := _layout_item_heading(node):
                 section = title[:160]
+                if re.search(r"\bItem\s+\d", title, re.I):
+                    parent_section = title[:160]
                 seen_headings.add(title)
                 boundaries.add(len(blocks))
                 seen.clear()
@@ -623,6 +637,8 @@ def _extract_passages(
         if heading or inline_title:
             if text in seen_headings and _NAVIGATION_ONLY.match(text):
                 continue
+            if re.search(r"\bItem\s+\d", text, re.I):
+                parent_section = text[:160]
             section = inline_title or text[:160]
             seen_headings.add(text)
             boundaries.add(len(blocks))
@@ -633,13 +649,15 @@ def _extract_passages(
         if len(text) < 130 and not _content_sentence(text):
             continue
         anchor = node.get("id") or (node.find_parent(id=True) or {}).get("id", "")
-        blocks.append((text, section, anchor, page_numbers.get(id(node))))
+        blocks.append(
+            (text, section, anchor, page_numbers.get(id(node)), parent_section)
+        )
     blocks = _merge_blocks(blocks, max_chars, boundaries=boundaries)
     result = (
         _table_passages(soup, filing, max_chars, page_numbers) if include_tables else []
     )
     used_ids = {p.id for p in result}
-    for offset, (text, section, anchor, page) in enumerate(blocks):
+    for offset, (text, section, anchor, page, parent_section) in enumerate(blocks):
         sentences = re.split(r"(?<=[.!?])\s+", text)
         chunks, current = [], ""
         for sentence in sentences:
@@ -673,6 +691,7 @@ def _extract_passages(
                     filing_id=filing.id,
                     ticker=filing.ticker,
                     section=section,
+                    parent_section=parent_section,
                     text=chunk,
                     source_url=filing.source_url + ("#" + anchor if anchor else ""),
                     locator=f"narrative block {offset}, chunk {index}/{len(chunks)}; exact text retained"

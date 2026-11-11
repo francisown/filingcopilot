@@ -1941,5 +1941,14 @@ globalThis.FilingLocaleEnglish = {
   "本轮未在预算内形成通过核验的完整结论；已保留可用证据。下一步：": "No complete, verified conclusion was produced within the budget. Available evidence is retained. Next step:",
   " 份近期公告未完成可交付的中文摘要，已保留通过来源匹配的原文摘录；可单独查询“近期公司公告中文摘要”继续。": " recent announcements lack completed summaries. Source-matched excerpts are retained; ask \"Summarize recent company updates\" to continue.",
   "问题要求的原因或风险解释尚未完成；已展示的数字仅供参考，不能替代该解释。": "The requested cause or risk explanation is still missing. The verified figures are supporting information, not a substitute for that explanation.",
-  "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。": "Some details remain unresolved in the retrieved evidence; document-wide absence has not been established."
+  "所检索证据尚不足以确认部分细节；不能据此认定整份文件没有相关披露。": "Some details remain unresolved in the retrieved evidence; document-wide absence has not been established.",
+  "????": "Brief version",
+  "??????": "Risk factor change",
+  "??????????????????": "Polish briefs with a model (one call per brief)",
+  "???": "Needs follow-up",
+  "?????": "Approved version",
+  "?": "Low",
+  "???????": "Risks and operating factors",
+  "???????????": "Why it may matter (inference)",
+  "??": "Gaps"
 };

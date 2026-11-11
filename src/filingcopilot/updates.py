@@ -95,8 +95,8 @@ def summary_events(overview: dict, question: str, limit: int = 5) -> list[dict]:
 
 
 def _scope(as_of: date, days: int, limit: int):
-    if as_of > date.today() or days != 90 or not 1 <= limit <= 5:
-        raise ValueError("公告查询支持知悉日期前 90 天、最多五次申报。")
+    if as_of > date.today() or not 1 <= days <= 730 or not 1 <= limit <= 20:
+        raise ValueError("公告查询支持知悉日期前最多 730 天、最多二十次申报。")
     return (as_of - timedelta(days=days - 1)).isoformat(), as_of.isoformat()
 
 
@@ -109,9 +109,13 @@ def _rows(
         raise ValueError("SEC 公告元数据列不完整。")
     if any(not isinstance(value, str) for key in columns for value in payload[key]):
         raise ValueError("SEC 公告元数据类型无效。")
+    items = payload.get("items")
+    if not isinstance(items, list) or len(items) != count:
+        items = [""] * count
     return [
         {
             **{key: payload[key][idx] for key in columns},
+            "items": str(items[idx] or ""),
             "metadata_url": metadata_url,
             "metadata_sha": metadata_sha,
         }
@@ -146,8 +150,20 @@ def _exhibit(html: bytes, primary_url: str) -> str | None:
 
 
 def acquire_updates(
-    fetcher, ticker, domain, as_of: date, days=90, limit=5, forms=("8-K", "8-K/A"), on_entry=None
+    fetcher,
+    ticker,
+    domain,
+    as_of: date,
+    days=90,
+    limit=5,
+    forms=("8-K", "8-K/A"),
+    on_entry=None,
+    accessions: list[str] | None = None,
 ) -> dict:
+    wanted = {str(item) for item in accessions or () if item}
+    if wanted:
+        # A pending queue is not limited to the five newest notices.
+        limit = max(limit, min(20, len(wanted)))
     start, end = _scope(as_of, days, limit)
     company = domain.companies[ticker]
     metadata_url = f"https://data.sec.gov/submissions/CIK{company.cik}.json"
@@ -180,7 +196,7 @@ def acquire_updates(
             "历史公告索引超过单次检查预算，窗口覆盖可能不完整；可调整知悉日期或直接查看 SEC 申报列表。"
         )
     for archive in archives[:20]:
-        if len(candidates) >= limit:
+        if not wanted and len(candidates) >= limit:
             oldest = sorted(r["filingDate"] for r in candidates)[-limit]
             if archive.get("filingTo", "") < oldest:
                 continue
@@ -203,7 +219,18 @@ def acquire_updates(
         {r["accessionNumber"]: r for r in candidates}.values(),
         key=lambda r: (r["filingDate"], r["accessionNumber"]),
         reverse=True,
-    )[:limit]
+    )
+    if wanted:
+        found = {r["accessionNumber"] for r in candidates}
+        missing = sorted(wanted - found)
+        if missing:
+            warnings.append(
+                "以下待处理公告不在当前 90 天索引内，无法补抓："
+                + ", ".join(missing[:5])
+            )
+        candidates = [r for r in candidates if r["accessionNumber"] in wanted]
+    else:
+        candidates = candidates[:limit]
     entries = []
     for row in candidates:
         accession, document = row["accessionNumber"], row["primaryDocument"]
@@ -235,6 +262,7 @@ def acquire_updates(
                     period_end=event,
                     source_url=source_url,
                     content_sha256=hashlib.sha256(html).hexdigest(),
+                    items=row.get("items") or "",
                 )
                 passages = extract_passages(html, filing)
                 if source_url == url:

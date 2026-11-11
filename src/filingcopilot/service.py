@@ -13,6 +13,7 @@ from .discovery import CompanyDiscovery
 from .domain import Domain
 from .market import MarketData
 from .models import ResearchAnswer
+from .monitoring import MonitoringService
 from .retrieval import Retriever
 from .service_comparison import ComparisonMixin
 from .service_execution import ExecutionMixin
@@ -46,6 +47,7 @@ class FilingCopilot(PlanningMixin, ResearchMixin, ExecutionMixin, ReferencesMixi
         self.refresh_domain()
         self.enriched: set[str] = set()
         self.watchlist = Watchlist(self.corpus, self.find_stock, self.capabilities, self.settings)
+        self.monitoring = MonitoringService(self)
 
     def refresh_domain(self):
         with self.domain_lock:

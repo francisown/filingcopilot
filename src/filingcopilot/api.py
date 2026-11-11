@@ -10,7 +10,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -32,6 +32,15 @@ from .models import (
     ResearchRequest,
     TranslationRequest,
 )
+from .monitoring.models import (
+    DeliveryRequest,
+    DigestRequest,
+    PolicyPayload,
+    ReplayRequest,
+    ReviewRequest,
+    ScanRequest,
+)
+from .monitoring.verify import verify_case_package
 from .runtime_identity import RuntimeIdentity
 from .scenarios import ScenarioRequest
 from .service import FilingCopilot
@@ -195,6 +204,12 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             "historical_valuation": True,
             "watchlist": True,
             "watchlist_triggers": service.settings.watchlist_triggers_enabled,
+            "monitoring_enabled": service.settings.monitoring_enabled,
+            "monitoring_use_model": service.settings.monitoring_use_model,
+            "monitoring_scan_interval_minutes": service.settings.monitoring_scan_interval_minutes,
+            "monitoring_digest_enabled": service.settings.monitoring_digest_enabled,
+            "monitoring_digest_hour": service.settings.monitoring_digest_hour,
+            "monitoring_digest_channel": service.settings.monitoring_digest_channel,
             "research_jobs": True,
             "research_time_budget_seconds": service.settings.research_timeout,
             "sec_acquisition_ready": bool(
@@ -236,6 +251,176 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             return service.watchlist.scan(jobs)
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
+
+    # Monitoring v1 ---------------------------------------------------------
+    @app.get("/api/monitoring/policies")
+    def monitoring_policies():
+        return {"policies": service.monitoring.policies()}
+
+    @app.post("/api/monitoring/policies")
+    def set_monitoring_policy(request: PolicyPayload):
+        try:
+            return service.monitoring.set_policy(request)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/scan")
+    def monitoring_scan(request: ScanRequest):
+        try:
+            return service.monitoring.scan(request).model_dump(mode="json")
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/replay")
+    def monitoring_replay(request: ReplayRequest):
+        try:
+            return service.monitoring.replay(request).model_dump(mode="json")
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.get("/api/monitoring/events")
+    def monitoring_events(
+        ticker: str | None = None,
+        filing_id: str | None = None,
+        event_type: str | None = None,
+        materiality: str | None = None,
+        limit: int = 100,
+    ):
+        return {
+            "events": service.monitoring.list_events(
+                ticker=ticker,
+                filing_id=filing_id,
+                event_type=event_type,
+                materiality=materiality,
+                limit=limit,
+            )
+        }
+
+    @app.get("/api/monitoring/cases")
+    def monitoring_cases(
+        status: str | None = None,
+        ticker: str | None = None,
+        limit: int = 100,
+    ):
+        return {
+            "cases": service.monitoring.list_cases(
+                status=status, ticker=ticker, limit=limit
+            )
+        }
+
+    @app.get("/api/monitoring/cases/{case_id}")
+    def monitoring_case(case_id: str):
+        try:
+            return service.monitoring.get_case(case_id)
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from exc
+
+    @app.post("/api/monitoring/cases/{case_id}/approve")
+    def monitoring_approve(case_id: str, request: ReviewRequest | None = None):
+        payload = (request or ReviewRequest(action="approve")).model_copy(
+            update={"action": "approve"}
+        )
+        try:
+            return service.monitoring.review_case(case_id, payload)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/cases/{case_id}/dismiss")
+    def monitoring_dismiss(case_id: str, request: ReviewRequest | None = None):
+        payload = (request or ReviewRequest(action="dismiss")).model_copy(
+            update={"action": "dismiss"}
+        )
+        try:
+            return service.monitoring.review_case(case_id, payload)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/cases/{case_id}/edit")
+    def monitoring_edit(case_id: str, request: ReviewRequest):
+        payload = request.model_copy(update={"action": "edit"})
+        try:
+            return service.monitoring.review_case(case_id, payload)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/cases/{case_id}/feedback")
+    def monitoring_feedback(case_id: str, request: ReviewRequest):
+        payload = request.model_copy(update={"action": "feedback"})
+        try:
+            return service.monitoring.review_case(case_id, payload)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/cases/{case_id}/reopen")
+    def monitoring_reopen(case_id: str, request: ReviewRequest | None = None):
+        payload = (request or ReviewRequest(action="reopen")).model_copy(
+            update={"action": "reopen"}
+        )
+        try:
+            return service.monitoring.review_case(case_id, payload)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.get("/api/monitoring/runs")
+    def monitoring_runs(limit: int = 20):
+        return {"runs": service.monitoring.runs(limit)}
+
+    @app.get("/api/monitoring/cases/{case_id}/package")
+    def monitoring_case_package(case_id: str):
+        try:
+            return service.monitoring.export_case(case_id)
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from exc
+
+    @app.get("/api/monitoring/digest")
+    def monitoring_digest(start: date | None = None, end: date | None = None):
+        try:
+            return service.monitoring.digest(
+                DigestRequest(start=start, end=end)
+            )
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/digest/deliver")
+    def monitoring_digest_deliver(request: DigestRequest):
+        try:
+            return service.monitoring.deliver_digest(request)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.get("/api/monitoring/digest.pdf")
+    def monitoring_digest_pdf(start: date | None = None, end: date | None = None):
+        try:
+            content = service.monitoring.digest_pdf(
+                DigestRequest(start=start, end=end)
+            )
+            return Response(
+                content=content,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": 'attachment; filename="filingcopilot-digest.pdf"'
+                },
+            )
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.post("/api/monitoring/verify")
+    def monitoring_verify(package: dict):
+        return verify_case_package(package)
+
+    @app.post("/api/monitoring/cases/{case_id}/deliver")
+    def monitoring_deliver(case_id: str, request: DeliveryRequest):
+        try:
+            return service.monitoring.deliver(case_id, request.channel)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+    @app.get("/api/monitoring/cases/{case_id}/markdown")
+    def monitoring_case_markdown(case_id: str):
+        try:
+            return {"markdown": service.monitoring.render_markdown(case_id)}
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from exc
 
     @app.post("/api/financial/trend")
     def financial_trend(request: TrendRequest, accept_language: str | None = Header(default=None)):

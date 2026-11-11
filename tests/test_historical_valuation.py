@@ -1,5 +1,5 @@
 from copy import deepcopy
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
@@ -71,7 +71,9 @@ def _eps(value="5"):
         "unit": "USD/shares",
         "start": "2024-01-01",
         "end": "2024-12-31",
-        "filing": {"form": "10-K", "filed": "2025-05-01"},
+        # Keep the fixture within the 550-day stale-EPS guard; a fixed 2025
+        # filing date makes this test expire as the wall clock advances.
+        "filing": {"form": "10-K", "filed": (DAY - timedelta(days=200)).isoformat()},
     }
 
 
@@ -93,7 +95,11 @@ def test_historical_reference_retains_reasons_for_unmatched_points(mutation):
     if mutation == "currency":
         eps["unit"] = "EUR/shares"
     if mutation == "split":
-        market["snapshot"]["split_dates"] = [date.fromisoformat("2025-06-01").isoformat()]
+        # Must be after the EPS filing date in the fixture, while still before
+        # the market points, so the split-basis guard is exercised.
+        market["snapshot"]["split_dates"] = [
+            (DAY - timedelta(days=100)).isoformat()
+        ]
     if mutation == "stale":
         eps["filing"]["filed"] = "2023-01-01"
     result = historical_reference(request, market, [eps])

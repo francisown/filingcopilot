@@ -1,0 +1,35 @@
+{
+  "schema": "monitor-events-gold-v1",
+  "label_source": "synthetic_regression_seed",
+  "notes": "Small deterministic seed for the scorer and CI. It is not an independent human-labelled pilot set. Replace/extend with 150-200 analyst-labelled events, including no-event controls, before publishing accuracy.",
+  "events": [
+    {
+      "ticker": "AAPL",
+      "filing_id": "AAPL:0000320193-25-000079",
+      "event_type": "financial_results",
+      "subtype": "periodic_results",
+      "materiality": "high"
+    },
+    {
+      "ticker": "MSFT",
+      "filing_id": "MSFT:0000789019-26-000020",
+      "event_type": "financial_results",
+      "subtype": "periodic_results",
+      "materiality": "high"
+    },
+    {
+      "ticker": "NVDA",
+      "filing_id": "NVDA:0001045810-26-000021",
+      "event_type": "financial_results",
+      "subtype": "periodic_results",
+      "materiality": "high"
+    }
+  ],
+  "no_event": [
+    {
+      "ticker": "AAPL",
+      "filing_id": "AAPL:0000320193-24-000123",
+      "reason": "routine annual filing with no material change in the seed scope"
+    }
+  ]
+}

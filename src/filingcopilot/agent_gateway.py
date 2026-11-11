@@ -50,9 +50,10 @@ class OpenAIGateway:
         session_id = os.getenv("FC_SESSION_ID", "").strip()
         if session_id:
             extra_headers.setdefault("x-opencode-session", session_id)
-        http_client = http_client or (
-            DefaultHttpxClient(headers=extra_headers) if extra_headers else DefaultHttpxClient()
-        )
+        # OpenCode Go asks clients to identify themselves with their own user
+        # agent instead of a generic SDK/HTTP-library name.
+        extra_headers.setdefault("User-Agent", "FilingCopilot/1.0")
+        http_client = http_client or DefaultHttpxClient(headers=extra_headers)
         http_client.event_hooks["request"].append(self._limit_request)
         self.client = OpenAI(
             api_key=settings.api_key,
@@ -193,8 +194,34 @@ class OpenAIGateway:
                 raise
         raise last_exc  # pragma: no cover
 
+    def complete_once(
+        self,
+        messages: list,
+        *,
+        timeout: float = 30.0,
+        max_tokens: int = 2048,
+    ) -> dict:
+        """One model request with no retries, failover or capability downgrade."""
+        return self._complete_once(
+            self.settings.model,
+            messages,
+            None,
+            False,
+            max_attempts=1,
+            timeout=timeout,
+            max_tokens=max_tokens,
+        )
+
     def _complete_once(
-        self, model: str, messages: list, tools: list | None, review: bool
+        self,
+        model: str,
+        messages: list,
+        tools: list | None,
+        review: bool,
+        *,
+        max_attempts: int | None = None,
+        timeout: float | None = None,
+        max_tokens: int | None = None,
     ) -> dict:
         # Reviews return data, not executable actions. Some provider tool
         # adapters corrupt nested arguments or leak tool markup into content.
@@ -215,9 +242,12 @@ class OpenAIGateway:
         kwargs = {
             "model": model,
             "messages": messages,
-            "max_tokens": self.settings.review_max_tokens
-            if review
-            else self.settings.model_max_tokens,
+            "max_tokens": max_tokens
+            or (
+                self.settings.review_max_tokens
+                if review
+                else self.settings.model_max_tokens
+            ),
         }
         # Send optional sampling controls only when explicitly configured.
         # This keeps reasoning-model compatibility while allowing reproducible
@@ -261,7 +291,14 @@ class OpenAIGateway:
                         }
                 response = self.client.chat.completions.create(
                     **call_kwargs,
-                    timeout=bounded_timeout(self.settings.review_timeout if review else self.settings.model_timeout),
+                    timeout=bounded_timeout(
+                        timeout
+                        or (
+                            self.settings.review_timeout
+                            if review
+                            else self.settings.model_timeout
+                        )
+                    ),
                 )
                 break
             except (APIConnectionError, APIStatusError) as exc:
@@ -320,7 +357,9 @@ class OpenAIGateway:
                 ):
                     event["stopped"] = "server cooldown exceeds retry budget"
                     raise
-                if not retryable or failures >= self.settings.model_attempts:
+                if not retryable or failures >= (
+                    max_attempts or self.settings.model_attempts
+                ):
                     raise
                 base = (
                     max(30.0, self.settings.retry_base_delay)

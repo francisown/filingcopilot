@@ -48,7 +48,7 @@ Latest local run: 2026-11-02, 140 questions, DeepSeek research and Mimo review, 
 | Expected refusals / market-policy cases | **20 / 20 · 20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Delivered claims with a source citation | **100%** |
-| Regression tests | **2,307 passed** |
+| Regression tests | **2,327 passed** |
 
 Three of the 100 answerable questions returned partial answers with explicit gaps; the rest returned complete answers. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
 
@@ -133,10 +133,98 @@ Copy `.env.example` to `.env` and set values locally. Never commit `.env`.
 | `FC_RESEARCH_TIMEOUT` | Overall time limit for one research run; the public example is 3,000 seconds |
 | `FC_WATCHLIST_TRIGGERS_ENABLED` | Optional: scan saved tickers and queue research only when enabled |
 | `FC_EMBEDDING_MODE` | `off` for keyword retrieval or `local` for optional local embeddings |
-| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata |
+| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | Optional provider-specific request metadata. OpenCode Go requires a stable `FC_SESSION_ID` (`x-opencode-session`) and its own base URL. |
 | `FC_MAX_COST_USD` | Optional ceiling; requires both token prices and is rejected otherwise |
+| `FC_MONITORING_SCAN_INTERVAL_MINUTES` | Background scan interval; 0 disables it |
+| `FC_MONITORING_DIGEST_*` | Daily digest enable/hour/channel (`local`/`webhook`/`slack`/`smtp`) |
+| `FC_SMTP_*` / `FC_SLACK_WEBHOOK_URL` | Email or native Slack delivery configuration |
+| `FC_MONITORING_BRIEF_*` | Per-brief model timeout, token and optional cost ceiling |
 
 Model requests may incur provider charges. The application does not place trades. New filing preparation requires network access and a compliant SEC user agent; existing local data can be queried offline.
+
+For an OpenCode Go subscription, use
+`FC_API_BASE=https://opencode.ai/inference/go/openai/v1`, a stable
+`FC_SESSION_ID`, and the HTTP model ids (`deepseek-v4.1-flash`,
+`mimo-v2.6-flash`). The pay-as-you-go base URL and the free-tier models do not
+accept a Go key from an external client. See [OpenCode Go](docs/opencode-go.md).
+
+## Disclosure monitoring (Monitor v1)
+
+Monitor v1 turns saved companies into an evidence-first review queue. It scans
+US 10-K / 10-Q / 8-K filings, compares structured facts and four targeted
+sections, classifies 8-K items deterministically, and creates one filing-level
+case with a fixed-format brief. Every fact and calculation carries an evidence
+ID; “why it may matter” is labelled as inference.
+
+```powershell
+# One-off local scan of saved companies (or pass tickers explicitly)
+.\.venv\Scripts\python.exe -m filingcopilot monitor-scan AAPL MSFT
+
+# Review queue and one case
+.\.venv\Scripts\python.exe -m filingcopilot monitor-cases
+.\.venv\Scripts\python.exe -m filingcopilot monitor-case <case-id>
+
+# Approve / dismiss / reopen (version is required; query the case first)
+.\.venv\Scripts\python.exe -m filingcopilot monitor-review <case-id> approve `
+  --brief-version 1 --comment "checked"
+
+# Historical replay for a date interval
+.\.venv\Scripts\python.exe -m filingcopilot monitor-replay AAPL MSFT `
+  --start 2025-01-01 --end 2025-12-31
+
+# Daily digest (markdown) and optional PDF / delivery
+.\.venv\Scripts\python.exe -m filingcopilot monitor-digest
+.\.venv\Scripts\python.exe -m filingcopilot monitor-digest --pdf digest.pdf
+.\.venv\Scripts\python.exe -m filingcopilot monitor-digest --channel smtp
+
+# Offline package verification and delivery
+# Verify the exact exported file; do not re-serialize it with ConvertTo-Json.
+.\.venv\Scripts\python.exe -m filingcopilot monitor-verify case-package.json
+.\.venv\Scripts\python.exe -m filingcopilot monitor-deliver <case-id> --channel local
+```
+
+The web case view has a full-text brief editor (headline, narrative, numbers,
+inferences, gaps and next checks). Approved versions remain preserved; an edit
+creates a new review version. Section changes include character offsets and quote
+hashes, and the model polish path is capped to one request by
+`FC_MONITORING_BRIEF_TIMEOUT`, `FC_MONITORING_BRIEF_MAX_TOKENS` and optional
+`FC_MONITORING_BRIEF_MAX_COST_USD`.
+
+Set `FC_MONITORING_DIGEST_ENABLED=true` and `FC_MONITORING_DIGEST_HOUR=7` for the
+daily digest. The next window starts from the cutoff captured before the previous
+query (so a previous afternoon's case is included next morning). Channels:
+`local`, `webhook` (`FC_MONITORING_WEBHOOK_URL`), `slack`
+(`FC_SLACK_WEBHOOK_URL`) and `smtp`
+(`FC_SMTP_HOST/PORT/USER/PASSWORD/FROM/TO`). A digest is claimed atomically so a
+manual send cannot race the scheduled send. Policies with `notify=false` or
+`enabled=false` are excluded. PDF generation uses the bundled ReportLab
+dependency.
+
+The first scan is a bootstrap that processes the latest 10-K / 10-Q and the
+recent 8-K batch per ticker (last 7 days relative to the newest SEC acceptance).
+Later scans use a per-ticker `last_accepted` watermark and process only newer
+filings. Every accession has a `pending` / `processed` / `suppressed`
+/ `failed` status; a failed accession is retried on the next scan. Use
+`--reprocess` only when you intentionally want to rebuild cases that already
+exist.
+
+Set `FC_MONITORING_SCAN_INTERVAL_MINUTES=60` to enable the optional background
+scan loop in `serve` (0 disables it). Event scoring is available through
+`scripts/evaluate_monitor_events.py`; the checked-in seed is synthetic and is
+not a substitute for an analyst-labelled pilot set.
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\evaluate_monitor_events.py `
+  --gold evaluation\monitor_events_v1.json `
+  --predicted monitor-events.json
+```
+
+In the browser workspace, open **披露监控**. Live discovery requires
+`FC_SEC_USER_AGENT` with a real contact email. Briefs are deterministic by
+default; set `FC_MONITORING_USE_MODEL=true` to permit at most one model polish
+call per brief (the model may rewrite only the headline and inference bullets).
+The full scope, event taxonomy, materiality rules and acceptance gates are in
+[Monitor v1](docs/monitoring-v1.md).
 
 ## Documentation
 
@@ -148,6 +236,8 @@ Model requests may incur provider charges. The application does not place trades
 - [Research package protocol](docs/research-package-protocol.md)
 - [Independent verifier](docs/independent-verifier.md)
 - [Security and threat model](docs/security-threat-model.md)
+- [Disclosure monitoring specification](docs/monitoring-v1.md)
+- [OpenCode Go API](docs/opencode-go.md)
 - [External evaluation datasets](evaluation/external/README.md)
 - [Contributing](CONTRIBUTING.md)
 

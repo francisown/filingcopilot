@@ -388,19 +388,41 @@ class CompanyDiscovery:
         form = listing.annual_form if listing and listing.filings_supported else "10-K"
         return form, form + "/A"
 
-    def prepare_updates(self, ticker: str, as_of: date) -> dict:
+    def prepare_updates(
+        self,
+        ticker: str,
+        as_of: date,
+        accessions=None,
+        days: int = 90,
+        limit: int = 5,
+    ) -> dict:
         from .updates import update_forms, update_scope
 
         retained = []
         try:
             with refresh_scope(self.service.settings.refresh_timeout):
-                result, reused = self._prepare_updates(ticker, as_of, retained)
+                result, reused = self._prepare_updates(
+                    ticker,
+                    as_of,
+                    retained,
+                    accessions=accessions,
+                    days=days,
+                    limit=limit,
+                )
             # Commit freshness only after the refresh scope accepts completion.
             # A cache hit must retain its original check time rather than renew TTL.
             if not reused and result["checked"] and not result["warnings"]:
                 with self.lock:
                     checks = getattr(self, "update_checks", {})
-                    checks[self._update_key(result["ticker"], as_of)] = (time.monotonic(), result)
+                    checks[
+                        self._update_key(
+                            result["ticker"],
+                            as_of,
+                            accessions=accessions,
+                            days=days,
+                            limit=limit,
+                        )
+                    ] = (time.monotonic(), result)
                     self.update_checks = checks
             return deepcopy(result)
         except RefreshBudgetExceeded:
@@ -508,13 +530,36 @@ class CompanyDiscovery:
                 ),
             }
 
-    def _update_key(self, ticker: str, as_of: date):
+    def _update_key(
+        self,
+        ticker: str,
+        as_of: date,
+        accessions=None,
+        days: int = 90,
+        limit: int = 5,
+    ):
         from .updates import update_forms
 
         forms = update_forms(self.service.market.directory.listing(ticker))
-        return ticker, as_of.isoformat() + (":6-K" if forms and forms[0] == "6-K" else "")
+        base = ticker, as_of.isoformat() + (
+            ":6-K" if forms and forms[0] == "6-K" else ""
+        )
+        parts = [base]
+        if accessions:
+            parts.append(tuple(sorted(str(item) for item in accessions)))
+        if days != 90 or limit != 5:
+            parts.append((days, limit))
+        return tuple(parts) if len(parts) > 1 else base
 
-    def _prepare_updates(self, ticker: str, as_of: date, retained=None) -> dict:
+    def _prepare_updates(
+        self,
+        ticker: str,
+        as_of: date,
+        retained=None,
+        accessions=None,
+        days: int = 90,
+        limit: int = 5,
+    ) -> dict:
         from .updates import acquire_updates, update_forms, update_scope
 
         ticker = ticker.strip().upper()
@@ -536,7 +581,9 @@ class CompanyDiscovery:
         with self.lock:
             company_lock = self.company_locks.setdefault(ticker, threading.Lock())
         with cancellable_lock(company_lock):
-            key = self._update_key(ticker, as_of)
+            key = self._update_key(
+                ticker, as_of, accessions=accessions, days=days, limit=limit
+            )
             checks = getattr(self, "update_checks", {})
             previous = checks.get(key)
             if previous and time.monotonic() - previous[0] < 3600:
@@ -555,7 +602,15 @@ class CompanyDiscovery:
 
             try:
                 result = acquire_updates(
-                    self.fetcher, ticker, domain, as_of, forms=forms, on_entry=retain
+                    self.fetcher,
+                    ticker,
+                    domain,
+                    as_of,
+                    days=days,
+                    limit=limit,
+                    forms=forms,
+                    on_entry=retain,
+                    accessions=accessions,
                 )
                 warnings = result["warnings"]
                 checked = True

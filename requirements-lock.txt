@@ -69,6 +69,7 @@ python-multipart==0.0.32
 pywin32==312; sys_platform == "win32"
 PyYAML==6.0.3
 referencing==0.37.0
+reportlab==4.5.1
 requests==2.34.2
 requests-toolbelt==1.0.0
 rpds-py==0.30.0

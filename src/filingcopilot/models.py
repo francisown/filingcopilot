@@ -24,6 +24,11 @@ class Filing(StrictModel):
     period_end: date
     source_url: str
     content_sha256: str
+    # 8-K item codes from the SEC submissions index, retained for event
+    # classification after archive ingestion.
+    items: str = ""
+    # Set when this filing is an amendment and its original filing is known.
+    amends_filing_id: str | None = None
     # Set by the corpus at ingest time. A stored parse whose version predates
     # the current PARSER_VERSION is re-extracted on next use, so parser fixes
     # reach old filings without anyone remembering to re-ingest.
@@ -84,7 +89,7 @@ class StatementFact(StrictModel):
 
 # Bump whenever extraction changes (chunking, filters, tables). Stored on every
 # filing record so a stale parse is detectable and self-heals on next use.
-PARSER_VERSION = "2026-11-01.2"
+PARSER_VERSION = "2026-11-11.1"
 
 
 class Passage(StrictModel):
@@ -92,6 +97,9 @@ class Passage(StrictModel):
     filing_id: str
     ticker: str
     section: str
+    # Parent Item heading when a paragraph sits under a sub-heading. Optional
+    # for old records; monitoring uses it to keep nested Risk Factors/MD&A text.
+    parent_section: str | None = None
     text: str
     source_url: str
     locator: str

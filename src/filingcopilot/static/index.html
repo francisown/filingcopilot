@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="application-version" content="1.0.0"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
-  <title>FilingCopilot · Stock and Filing Research</title><link rel="stylesheet" href="/static/style.css?v=1.0.0-5b29c94cb4">
-<script src="/static/locale-en.js?v=1.0.0-92b82e2f68"></script><script src="/static/i18n.js?v=1.0.0-eabcd7a13a"></script>
+  <title>FilingCopilot · Stock and Filing Research</title><link rel="stylesheet" href="/static/style.css?v=1.0.0-monitor4">
+<script src="/static/locale-en.js?v=1.0.0-monitor4"></script><script src="/static/i18n.js?v=1.0.0-eabcd7a13a"></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -13,6 +13,7 @@
       <button class="nav active" data-view="desk" aria-label="研究工作台"><span class="nav-icon">▦</span><span class="nav-label">研究工作台</span></button>
       <button class="nav" data-view="company" aria-label="公司研究"><span class="nav-icon">▧</span><span class="nav-label">公司研究</span></button>
       <button class="nav" data-view="watchlist" aria-label="自选观察列表"><span class="nav-icon">☆</span><span class="nav-label">自选观察列表</span></button>
+      <button class="nav" data-view="monitoring" aria-label="披露监控"><span class="nav-icon">▣</span><span class="nav-label">披露监控</span></button>
       <button class="nav" data-view="trend" aria-label="财务趋势"><span class="nav-icon">▥</span><span class="nav-label">财务趋势</span></button>
       <button class="nav" data-view="comparison" aria-label="公司对比"><span class="nav-icon">⇄</span><span class="nav-label">公司对比</span></button>
       <button class="nav" data-view="library" aria-label="财报资料库"><span class="nav-icon">▤</span><span class="nav-label">财报资料库</span></button>
@@ -89,6 +90,33 @@
       <section class="comparison-controls" aria-label="添加自选证券"><label for="watch-query" class="field-label">查找股票或公司</label><div class="company-search-row comparison-search"><input id="watch-query" maxlength="120" placeholder="公司名称或代码，如 亚马逊 / AMZN" autocomplete="off"><button id="watch-search" class="secondary">查找并添加</button></div><div id="watch-matches"></div><p id="watch-status" class="company-help" role="status">正在读取本机自选列表…</p></section>
       <section class="watch-card"><div class="market-heading"><div><div class="eyebrow">MARKET WATCH</div><h2>观察中的证券 <span id="watch-count" class="small-tag">0 / 30</span></h2></div><div class="watch-toolbar"><button id="watch-compare" class="secondary" disabled>对比所选（0）</button><button id="watch-refresh" class="primary" disabled>刷新行情</button></div></div><p class="company-help">报价可能延迟。近一个月表现按供应商日线计算；各币种独立显示，报价日期与日线范围分别标注。打开行情无需准备年报。</p><div id="watch-empty" class="watch-empty">还没有自选证券。查找公司并选择明确的上市代码，或在行情卡片点击“加入自选”。</div><div class="comparison-table-wrap"><table id="watch-table"><caption class="sr-only">自选证券、当前报价、一个月日线表现、来源时间与研究入口</caption><thead><tr><th scope="col">对比</th><th scope="col">证券 / 市场</th><th scope="col">报价 / 币种</th><th scope="col">近一个月表现</th><th scope="col">数据时间与状态</th><th scope="col">研究入口</th></tr></thead><tbody id="watch-rows"></tbody></table></div></section>
     </section>
+    <section id="monitoring-view" class="view hidden">
+      <div class="desk-heading"><div><div class="eyebrow">DISCLOSURE MONITOR</div><h1>披露监控</h1><p class="intro">关注公司的申报变化、重大事件和可复核的一页简报。先审阅，再决定。</p></div><span class="desk-tag">本机监控 · 证据绑定 · 人工审核</span></div>
+      <section class="comparison-controls" aria-label="监控扫描控制">
+        <div class="watch-toolbar">
+          <button id="monitor-scan" class="primary">扫描自选公司</button>
+          <button id="monitor-refresh" class="secondary">刷新队列</button>
+          <label class="comparison-check"><input id="monitor-use-model" type="checkbox" checked> 使用模型润色简报（每份最多一次调用）</label>
+          <label>状态<select id="monitor-status-filter"><option value="">全部</option><option value="pending_review">待审核</option><option value="approved">已确认</option><option value="edited">已修改</option><option value="dismissed">已忽略</option><option value="needs_followup">需跟进</option></select></label>
+        </div>
+        <p id="monitor-status" class="company-help" role="status">尚未扫描。扫描会读取自选公司的最新 10-K / 10-Q / 8-K，并生成待审简报。</p>
+        <p class="company-help">v1 仅覆盖美国本土发行人的 10-K、10-Q、8-K。简报中的事实和数字带证据；“为什么重要”单独标记为推断，不当作披露事实。</p>
+        <details class="monitor-policy">
+          <summary>关注项与表单</summary>
+          <div class="comparison-options">
+            <label>代码<input id="monitor-policy-ticker" maxlength="15" placeholder="AAPL"></label>
+            <label>关注项<input id="monitor-policy-watch" value="revenue,margin,cash_flow,liquidity,debt,legal" maxlength="240"></label>
+            <label>最低重要性<select id="monitor-policy-floor"><option value="low">低</option><option value="medium" selected>中</option><option value="high">高</option></select></label>
+            <button id="monitor-policy-save" class="secondary">保存关注项</button>
+          </div>
+          <p id="monitor-policy-status" class="company-help"></p>
+        </details>
+      </section>
+      <div class="monitor-layout">
+        <section class="watch-card"><div class="market-heading"><div><div class="eyebrow">REVIEW QUEUE</div><h2>待审队列 <span id="monitor-count" class="small-tag">0</span></h2></div></div><div id="monitor-cases" class="monitor-cases"></div><div id="monitor-runs" class="monitor-runs"></div></section>
+        <section class="watch-card"><div class="market-heading"><div><div class="eyebrow">CASE BRIEF</div><h2>案件详情</h2></div></div><div id="monitor-detail" class="monitor-detail" data-i18n-skip><p class="company-help">选择左侧案件查看简报。每条事实和计算都会显示证据 ID。</p></div></section>
+      </div>
+    </section>
     <section id="trend-view" class="view hidden">
       <div class="desk-heading"><div><div class="eyebrow">ANNUAL FINANCIAL TRENDS</div><h1>多年财务趋势</h1><p class="intro">从一个年度数字，走向多年的营收、盈利与现金生成。</p></div><span class="desk-tag">完整财年 · 原件引用</span></div>
       <section class="comparison-controls" aria-label="选择财务趋势公司">
@@ -128,8 +156,9 @@
     <section id="connect-view" class="view hidden"><div class="eyebrow">CONNECTED RESEARCH</div><h1 class="page-title">接入其他助手</h1><p class="intro">通过 MCP，共享财报检索、财务计算与研究能力。</p><div class="connect-card"><h2>可用能力</h2><div class="capabilities"><span>财报资料检索</span><span>年度与季度财务</span><span>TTM 与利润率</span><span>行情与估值口径</span><span>公司对比</span><span>公司公告</span><span>Agent 研究</span><span>导出与离线复核</span></div><h2>本机 MCP 配置</h2><p>将配置加入支持 MCP 的客户端。Agent 研究使用已配置模型；无模型查询通过工具生成数字。</p><pre id="mcp-config">正在加载配置…</pre><button class="secondary" id="copy-mcp">复制配置</button><p class="fine">本地 stdio 连接。网页与 MCP 共用证据库及核验规则。</p></div></section>
   </main>
   <div id="drawer-overlay" class="drawer-overlay hidden"></div><aside id="drawer" class="drawer hidden" role="dialog" aria-modal="true" aria-label="原始证据"><button id="close-drawer" aria-label="关闭证据">×</button><div class="eyebrow">EVIDENCE RECORD</div><div id="drawer-content"></div></aside>
-  <script src="/static/format.js?v=1.0.0-692a83255e"></script><script src="/static/app.js?v=1.0.0-d95256ee00"></script><script src="/static/company.js?v=1.0.0-fbe7ff9391"></script><script src="/static/market.js?v=1.0.0-95c2cc2b55"></script><script src="/static/comparison.js?v=1.0.0-869dd177d3"></script><script src="/static/trend.js?v=1.0.0-9ddbfb8ff9"></script>
+  <script src="/static/format.js?v=1.0.0-692a83255e"></script><script src="/static/app.js?v=1.0.0-monitor4"></script><script src="/static/company.js?v=1.0.0-fbe7ff9391"></script><script src="/static/market.js?v=1.0.0-95c2cc2b55"></script><script src="/static/comparison.js?v=1.0.0-869dd177d3"></script><script src="/static/trend.js?v=1.0.0-9ddbfb8ff9"></script>
 <script src="/static/watchlist.js?v=1.0.0-1ac3c00950"></script>
+<script src="/static/monitoring.js?v=1.0.0-monitor4"></script>
 <script src="/static/research-extra.js?v=1.0.0-14f3790e23"></script>
 <script src="/static/company-workspace.js?v=1.0.0-496f7d0afb"></script>
 </body>

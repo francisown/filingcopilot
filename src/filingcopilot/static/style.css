@@ -111,3 +111,51 @@ main{margin-left:216px;padding:0 28px 26px;max-width:1900px}header{height:64px;d
 @media(max-width:700px){.inline-translation-panel{top:64px;right:12px;width:calc(100vw - 24px);max-height:calc(100vh - 80px);padding:17px}.inline-translation-button{font-size:11px}}
 
 .answer-item>.citations{display:none}.claim-footnote-mark{font-size:.72em;line-height:0;vertical-align:super;margin-left:4px;color:#315b95;font-weight:600}.evidence-footnotes{margin-top:20px;padding-top:13px}.evidence-footnote-list{margin:10px 0 0;padding-left:26px}.evidence-footnote{padding:9px 0;border-bottom:1px solid #e8edf4;font-size:12px;line-height:1.8}.evidence-footnote-number{margin-right:7px;color:#315b95}.evidence-footnote-label{color:#52647d}.evidence-footnote-text{margin:4px 0;color:#43566e;white-space:pre-wrap}.evidence-footnote .cite{margin-top:3px}
+
+/* Disclosure monitoring v1 */
+.monitor-layout{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.6fr);gap:18px;align-items:start}
+.monitor-cases{display:flex;flex-direction:column;gap:10px;max-height:72vh;overflow:auto;padding-right:4px}
+.monitor-case{display:flex;flex-direction:column;gap:6px;width:100%;text-align:left;border:1px solid var(--line,#d8dde5);border-radius:12px;background:var(--surface,#fff);padding:12px 14px;cursor:pointer;color:inherit;font:inherit}
+.monitor-case:hover,.monitor-case.active{border-color:var(--accent,#2f6fed);box-shadow:0 2px 10px rgba(47,111,237,.12)}
+.monitor-case-head{display:flex;align-items:center;gap:8px}
+.monitor-case-title{font-weight:600;line-height:1.35}
+.monitor-case-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted,#667085)}
+.monitor-status{padding:2px 7px;border-radius:999px;background:#eef2f7;color:#344054}
+.monitor-status.pending_review{background:#fff4e5;color:#9a5b00}
+.monitor-status.approved{background:#e8f7ee;color:#17663a}
+.monitor-status.edited{background:#eaf0ff;color:#2449a8}
+.monitor-status.dismissed{background:#f2f4f7;color:#667085}
+.monitor-priority{font-size:11px;padding:2px 6px;border-radius:999px;background:#f2f4f7;color:#475467}
+.monitor-priority.high{background:#fee4e2;color:#b42318}
+.monitor-priority.medium{background:#fef0c7;color:#93370d}
+.monitor-detail{min-width:0}
+.monitor-detail-head h2{margin:.25rem 0}
+
+.monitor-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.monitor-actions a.secondary{display:inline-flex;align-items:center;text-decoration:none}
+.monitor-brief{display:flex;flex-direction:column;gap:16px}
+.monitor-brief-section{border-top:1px solid var(--line,#e4e7ec);padding-top:10px}
+.monitor-brief-section h3{margin:.2rem 0 .5rem;font-size:1rem}
+.monitor-brief-section p{margin:.35rem 0;line-height:1.55}
+.monitor-number-table{display:flex;flex-direction:column;gap:6px}
+.monitor-number-row{display:grid;grid-template-columns:minmax(120px,1.4fr) minmax(100px,1fr) 80px;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line,#eaecf0)}
+.monitor-number-row small{grid-column:1/-1;color:var(--muted,#667085)}
+.monitor-number-row .positive{color:#067647}
+.monitor-number-row .negative{color:#b42318}
+.monitor-source{display:block;padding:8px 10px;border-radius:8px;background:#f8fafc;margin:.4rem 0;line-height:1.5;overflow-wrap:anywhere}
+.monitor-source code{font-size:11px}
+.monitor-source a{margin-left:6px}
+.monitor-runs{margin-top:14px}
+.monitor-run-details summary{cursor:pointer;color:var(--muted,#667085)}
+@media(max-width:900px){.monitor-layout{grid-template-columns:1fr}.monitor-cases{max-height:none}}
+
+/* Monitor policy editor */
+.monitor-policy{margin:10px 0 0;border:1px solid var(--line,#e4e7ec);border-radius:10px;padding:10px 12px;background:#fbfcfe}
+.monitor-policy summary{cursor:pointer;color:var(--muted,#667085)}
+.monitor-policy .comparison-options{margin-top:8px}
+
+/* Monitor full brief editor */
+.monitor-edit-panel{margin-top:16px;padding:12px;border:1px solid var(--line,#e4e7ec);border-radius:10px;background:#fbfcfe}
+.monitor-edit-field{display:flex;flex-direction:column;gap:4px;margin:8px 0;font-size:12px;color:var(--muted,#667085)}
+.monitor-edit-input{width:100%;min-height:38px;padding:8px;border:1px solid var(--line,#d0d5dd);border-radius:8px;font:inherit;color:inherit;background:#fff}
+textarea.monitor-edit-input{min-height:90px;resize:vertical}

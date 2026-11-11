@@ -48,7 +48,7 @@ FilingCopilot 是一个在本地运行的 SEC 财报研究工作台。它会找�
 | 预期拒答 / 行情源策略题 | **20 / 20 · 20 / 20** |
 | 无来源支持的结论 / 数值错误 | **0 / 0** |
 | 给出的结论都带来源引用 | **100%** |
-| 回归测试 | **2,307 passed** |
+| 回归测试 | **2,327 passed** |
 
 100 道本应能回答的题中，3 道给出了带明确缺口的部分回答，其余为完整回答。完整延迟数据、token 数、数值审计和具体题目见[评测记录](docs/evaluation.md)。这些是工程和工作流层面的测量，不是独立的人工准确率评估。
 
@@ -133,10 +133,41 @@ FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 | `FC_RESEARCH_TIMEOUT` | 单次研究的总体时间上限；公开示例为 3,000 秒 |
 | `FC_WATCHLIST_TRIGGERS_ENABLED` | 自选列表：开启后才会扫描并创建研究任务；关闭时只报告候选 |
 | `FC_EMBEDDING_MODE` | `off` 使用关键词检索，`local` 使用可选本地向量 |
-| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 可选的供应商请求元数据 |
+| `FC_EXTRA_HEADERS` / `FC_SESSION_ID` | 可选的供应商请求元数据；OpenCode Go 需要稳定的 `FC_SESSION_ID` |
 | `FC_MAX_COST_USD` | 单次费用上限；必须同时配置两项 token 单价，否则启动时拒绝 |
+| `FC_MONITORING_SCAN_INTERVAL_MINUTES` | 后台扫描间隔；0 关闭 |
+| `FC_MONITORING_DIGEST_*` | 每日早报开关、小时和渠道（local/webhook/slack/smtp） |
+| `FC_SMTP_*` / `FC_SLACK_WEBHOOK_URL` | 邮件或原生 Slack 投递配置 |
+| `FC_MONITORING_BRIEF_*` | 简报单次模型请求的时间、token 和费用上限 |
 
 模型请求可能产生供应商费用，应用不会执行交易。准备新的财报需要网络和合规的 SEC 用户代理；已有本地资料可以离线查询。
+
+OpenCode Go 的接口地址是 `https://opencode.ai/inference/go/openai/v1`，模型 ID 用 `deepseek-v4.1-flash`、`mimo-v2.6-flash`，并需要稳定的 `FC_SESSION_ID`。详见 [OpenCode Go 接口](docs/opencode-go.md)。
+
+## 披露监控（Monitor v1）
+
+把自选公司变成可审核的披露队列：扫描美国 10-K / 10-Q / 8-K，比较财务事实和重点章节，按 8-K Item 分类事件，生成带证据的一页简报，并记录人工确认、修改、忽略和反馈。
+
+```powershell
+# 实时扫描与案件
+.\.venv\Scripts\python.exe -m filingcopilot monitor-scan AAPL MSFT
+.\.venv\Scripts\python.exe -m filingcopilot monitor-cases
+.\.venv\Scripts\python.exe -m filingcopilot monitor-case <case-id>
+.\.venv\Scripts\python.exe -m filingcopilot monitor-review <case-id> approve --brief-version 1
+
+# 指定历史区间回放
+.\.venv\Scripts\python.exe -m filingcopilot monitor-replay AAPL `
+  --start 2025-01-01 --end 2025-12-31
+
+# 早报 / PDF / 投递
+.\.venv\Scripts\python.exe -m filingcopilot monitor-digest
+.\.venv\Scripts\python.exe -m filingcopilot monitor-digest --pdf digest.pdf
+
+# 离线包核验
+.\.venv\Scripts\python.exe -m filingcopilot monitor-verify case-package.json
+```
+
+网页左侧打开 **披露监控**，可以查看队列、编辑全文、审核和导出。早报默认按“上次成功投递到的截止时间”续接，并遵守 `notify=false` / `enabled=false`。完整的范围、事件分类、证据定位、修订链和评测口径见 [披露监控规格](docs/monitoring-v1.md)。
 
 ## 文档
 
@@ -148,6 +179,8 @@ FC_EMBEDDING_MODE=off .venv/bin/python -m filingcopilot serve --port 8159
 - [研究包协议](docs/research-package-protocol.md)
 - [独立验证器](docs/independent-verifier.md)
 - [安全与威胁模型](docs/security-threat-model.md)
+- [披露监控规格](docs/monitoring-v1.md)
+- [OpenCode Go 接口](docs/opencode-go.md)
 - [外部评测数据集](evaluation/external/README.md)
 - [参与贡献](CONTRIBUTING.md)
 

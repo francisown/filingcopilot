@@ -29,7 +29,8 @@ def test_resume_rejects_different_model_or_budget_without_calls(change):
 def test_missing_case_is_recreated_but_changed_sources_are_not_overwritten(tmp_path):
     filing = {'id':'PDD:fixture','ticker':'PDD','company':'Public fixture','cik':'0001737806',
               'accession':'fixture','form':'20-F','filed':'2026-04-29','period_end':'2025-12-31',
-              'source_url':'https://www.sec.gov/Archives/fixture.htm','content_sha256':'a'*64}
+              'source_url':'https://www.sec.gov/Archives/fixture.htm','content_sha256':'a'*64,
+              'items':''}
     passage = {'id':'p1','filing_id':filing['id'],'ticker':'PDD','section':'Business',
                'text':'Frozen public material','source_url':filing['source_url'],
                'locator':'paragraph 1','table_context':None}
