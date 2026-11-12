@@ -26,7 +26,7 @@ Those review limits are the pre-optimization configuration recorded by that run.
 | Reported tokens | **4,868,227** |
 | Runner errors / deadline timeouts | **0 / 0** |
 | Raw SEC numeric | **100 matched / 0 mismatched / 27 unassessed** |
-| Regression suite | **2,356 passed** |
+| Regression suite | **2,358 passed** |
 
 Three answerable rows delivered partial answers: `semantic-causality-015`,
 `semantic-causality-019` and `semantic-risk-018`. They retain explicit gaps
@@ -76,6 +76,21 @@ the diversity reranker.
 The reranker changes only the top near-duplicate candidates. It improves page and
 numeric-nugget recall over the anchor ordering without adding a model call. This
 is a retrieval measurement, not an answer-accuracy score.
+
+A 2026-11-12 local rerun on the current corpus used the lexical fallback because
+the optional dense model could not be downloaded in that environment. With the
+tuned diversity section penalty and multi-query off it measured **span@5 0.475 /
+page@5 0.500 / nugget@5 0.556 / exact-ID recall@5 0.410**, with
+**equivalence recall@5 0.995** and P50/P95 **65 / 104 ms**. The untuned diversity
+setting measured 0.460 / 0.475 / 0.551; multi-query on produced the same recall
+but P95 **199 ms**. Of the 200 gold items, 146 expected passage IDs were rebound
+to the current corpus by quote overlap; quote/page labels were unchanged. The
+current corpus has a median of 31 equivalent passages per question (the snapshot
+had 17), so compare equivalence recall and page-set semantics, not raw exact IDs,
+across corpus versions. A BGE hybrid and a MiniLM top-20 cross-encoder were also
+tested; neither improved the page/span/nugget trade-off, so lexical diversity
+remains the default. A dense pilot is not reported as a win until a
+domain-specific model is cached and validated.
 
 ## External reference sets
 

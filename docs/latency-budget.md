@@ -50,10 +50,13 @@ a timed-out review never approves a claim.
 
 ## Retrieval versus generation
 
-The current retrieval snapshot is **66 ms P50 / 168 ms P95**. External checks are
-also much faster than model-backed research: FinDER retrieval is in the hundreds
-of milliseconds and full-filing reranking is in the low seconds. The main latency
-problem is therefore serial model/tool orchestration, not passage lookup.
+The frozen retrieval snapshot is **66 ms P50 / 168 ms P95**. A 2026-11-12 local
+lexical rerun with the tuned diversity section penalty and multi-query off
+measured **65 ms P50 / 104 ms P95** with page@5 0.500 and equivalence
+recall@5 0.995. External checks are also much faster than model-backed research:
+FinDER retrieval is in the hundreds of milliseconds and full-filing reranking is
+in the low seconds. The main latency problem is therefore serial model/tool
+orchestration, not passage lookup.
 
 ## Cost controls
 

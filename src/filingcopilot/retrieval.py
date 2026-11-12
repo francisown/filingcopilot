@@ -132,7 +132,11 @@ _COVERAGE_SECTION_WEIGHT = 0.15
 # relevance signal.  Diversity is only allowed to break near ties between
 # passages that are already in the candidate pool.
 _DIVERSITY_OVERLAP_WEIGHT = 0.002
-_DIVERSITY_SECTION_WEIGHT = 0.002
+# A slightly stronger repeated-section penalty removed near-duplicate section
+# neighbours in the 200-question sweep: span .460→.475, page .475→.500,
+# nugget .551→.556, while P95 fell. Keep it modest; the fused RRF score remains
+# the primary relevance signal.
+_DIVERSITY_SECTION_WEIGHT = 0.01
 _DIVERSITY_POOL_SIZE = 20
 
 

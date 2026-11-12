@@ -56,7 +56,7 @@ Latest local run: 2026-11-11, 140 questions, DeepSeek research and Mimo review, 
 | Expected refusals / market-policy cases | **20 / 20 · 20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Delivered claims with a source citation | **100%** |
-| Regression tests | **2,356 passed** |
+| Regression tests | **2,358 passed** |
 
 Four of the 100 answerable questions returned partial answers with explicit gaps (`causality-012/015/019`, `negation-001`); the rest returned complete answers. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
 

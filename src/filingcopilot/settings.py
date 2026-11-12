@@ -269,6 +269,7 @@ class Settings:
             embedding_model=os.getenv("FC_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"),
             embedding_threads=max(1, min(8, int(os.getenv("FC_EMBEDDING_THREADS", str(cls.embedding_threads))))),
             rerank_mode=os.getenv("FC_RERANK_MODE", "diversity").strip().lower(),
+            retrieval_multi_query=_flag("FC_RETRIEVAL_MULTI_QUERY", True),
             max_rounds=max(1, min(12, int(os.getenv("FC_MAX_ROUNDS", "8")))),
             max_tool_calls=max(1, min(30, int(os.getenv("FC_MAX_TOOL_CALLS", "20")))),
             model_max_tokens=max(512, min(8192, int(os.getenv("FC_MODEL_MAX_TOKENS", "8192")))),
