@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from filingcopilot.execution import progress, research_scope
+from filingcopilot.agent import ResearchAgent, evidence_preview
+from filingcopilot.execution import ResearchControl, progress, research_scope
 from filingcopilot.jobs import ResearchJobs
 from filingcopilot.models import ResearchRequest
 from filingcopilot.preview import cached_financial_preview
@@ -79,3 +80,68 @@ def test_real_service_publishes_preview_before_source_work(tmp_path, monkeypatch
 
     monkeypatch.setattr(service, '_research', source_work)
     service.research(request, control=control)
+
+
+def test_evidence_preview_helper_is_bounded_and_claim_free():
+    narrative = {
+        'evidence': [
+            {
+                'id': 'n1', 'kind': 'passage', 'ticker': 'AAPL', 'section': 'MD&A',
+                'text': 'narrative ' + 'x' * 700, 'form': '10-K', 'filed': '2025-10-31',
+            },
+            {'id': 'negative-1', 'kind': 'negative_evidence', 'ticker': 'AAPL', 'text': 'no'},
+        ]
+    }
+    ledger = {}
+    for index in range(5):
+        ledger[f'p{index}'] = {
+            'id': f'p{index}', 'kind': 'passage', 'ticker': 'AAPL', 'section': 'Risk factors',
+            'text': 'passage ' + 'y' * 700,
+            'filing': {'form': '10-K', 'filed': '2025-10-31', 'period_end': '2025-09-27'},
+        }
+    ledger['n1'] = narrative['evidence'][0]
+    for index in range(5):
+        ledger[f'c{index}'] = {
+            'id': f'c{index}', 'kind': 'calculation', 'label': f'计算 {index}',
+            'value': str(index), 'unit': '%', 'formula': 'x', 'inputs': [],
+        }
+
+    preview = evidence_preview(ledger, narrative, 'AAPL')
+
+    assert preview['schema'] == 'filingcopilot.evidence-preview/v1'
+    assert preview['ticker'] == 'AAPL'
+    assert [item['id'] for item in preview['evidence']] == ['n1', 'p0', 'p1']
+    assert all(item['id'] in ledger for item in preview['evidence'])
+    assert all(len(item['text']) <= 600 for item in preview['evidence'])
+    assert preview['evidence'][0]['text'] == ('narrative ' + 'x' * 700)[:600]
+    assert preview['evidence'][0]['filing'] == {'form': '10-K', 'filed': '2025-10-31'}
+    assert len(preview['calculations']) == 3
+    assert all(set(item) <= {'id', 'label', 'value', 'unit'} for item in preview['calculations'])
+    assert 'claims' not in preview
+    assert all('claims' not in item and 'summary' not in item for item in preview['evidence'])
+    assert evidence_preview({}, None, 'AAPL') is None
+
+
+def test_research_emits_evidence_preview_before_model_loop(tools):
+    class FailingGateway:
+        def complete(self, messages, schemas, review=False):
+            raise RuntimeError('model unavailable')
+
+    events = []
+    control = ResearchControl(events.append)
+    agent = ResearchAgent(
+        Settings(home=tools.corpus.home, embedding_mode='off', max_rounds=1),
+        FailingGateway(),
+    )
+    with research_scope(control):
+        agent.run(ResearchRequest(question='苹果有哪些供应链风险？', ticker='AAPL'), tools)
+
+    previews = [event['preview'] for event in events if event.get('stage') == 'evidence_preview']
+    assert previews, [event.get('stage') for event in events]
+    preview = previews[0]
+    assert preview['schema'] == 'filingcopilot.evidence-preview/v1'
+    assert preview['ticker'] == 'AAPL'
+    assert preview['evidence'] and len(preview['evidence']) <= 3
+    assert all(item['id'] in tools.ledger and item['text'] for item in preview['evidence'])
+    assert len(preview['calculations']) <= 3
+    assert 'claims' not in preview

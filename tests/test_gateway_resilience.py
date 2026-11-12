@@ -153,6 +153,83 @@ def test_failover_is_skipped_when_budget_cannot_absorb_it(tmp_path):
     assert models == ["test", "test", "test"]
 
 
+def test_review_attempts_are_capped_separately_from_author_attempts(tmp_path):
+    models = []
+
+    def handler(request):
+        models.append(json.loads(request.read())["model"])
+        return httpx.Response(500, json={"error": {"message": "boom"}})
+
+    # Author calls still get the full model_attempts budget.
+    author = gateway(tmp_path, handler, model="author", model_attempts=3)
+    with pytest.raises(Exception):
+        author.complete([], None)
+    assert models == ["author", "author", "author"]
+
+    # A review makes only review_attempts calls even though the author budget
+    # is larger; it must fail fast so the caller can withhold claims.
+    models.clear()
+    reviewer = gateway(
+        tmp_path,
+        handler,
+        model="author",
+        review_model="judge",
+        model_attempts=3,
+        review_attempts=1,
+    )
+    with pytest.raises(Exception):
+        reviewer.complete([], None, review=True)
+    assert models == ["judge"]
+
+
+def test_retry_wait_is_recorded_separately_from_generation_time(tmp_path):
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        if len(calls) == 1:
+            return httpx.Response(500, json={"error": {"message": "boom"}})
+        return response()
+
+    client = gateway(
+        tmp_path, handler, model="author", model_attempts=2, retry_base_delay=0.02
+    )
+    result = client.complete([], None)
+    assert result["attempts"] == 2
+    assert result["retry_wait_ms"] > 0
+    assert result["retries"][0]["retry_wait_ms"] > 0
+
+
+def test_first_attempt_success_reports_zero_retry_wait(tmp_path):
+    result = gateway(
+        tmp_path, lambda request: response(), model="author"
+    ).complete([], None)
+    assert result["retry_wait_ms"] == 0
+
+
+def test_failover_result_includes_prior_attempt_retry_wait(tmp_path):
+    models = []
+
+    def handler(request):
+        model = json.loads(request.read())["model"]
+        models.append(model)
+        if model == "author":
+            return httpx.Response(500, json={"error": {"message": "boom"}})
+        return response(model)
+
+    result = gateway(
+        tmp_path,
+        handler,
+        model="author",
+        review_model="judge",
+        model_attempts=2,
+        retry_base_delay=0.02,
+    ).complete([], None)
+    assert models == ["author", "author", "judge"]
+    assert result["attempts"] == 3
+    assert result["retry_wait_ms"] > 0
+
+
 def test_review_prefers_a_model_that_did_not_produce_the_answer(tmp_path):
     review_tools = [
         {

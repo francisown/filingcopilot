@@ -108,7 +108,14 @@ class OpenAIGateway:
         except (TypeError, ValueError, OverflowError):
             return None
 
-    def complete(self, messages: list, tools: list | None, review: bool = False) -> dict:
+    def complete(
+        self,
+        messages: list,
+        tools: list | None,
+        review: bool = False,
+        *,
+        max_tokens: int | None = None,
+    ) -> dict:
         """Complete a request, failing over to the other configured model.
 
         Research and review normally use different models for independence.
@@ -121,6 +128,7 @@ class OpenAIGateway:
         """
         started = time.perf_counter()
         prior_retries = []
+        prior_retry_wait_ms = 0.0
         prior_attempts = 0
         primary = (
             self.settings.review_model if review else self.settings.model
@@ -143,12 +151,24 @@ class OpenAIGateway:
         last_exc: Exception | None = None
         for index, model in enumerate(models):
             try:
-                result = self._complete_once(model, messages, tools, review)
+                result = self._complete_once(
+                    model,
+                    messages,
+                    tools,
+                    review,
+                    max_attempts=self.settings.review_attempts if review else None,
+                    max_tokens=max_tokens,
+                )
                 # The receipt covers the whole request, including a failed
                 # primary. Otherwise successful failover hides its latency and
                 # attempts from the saved answer's usage/trace.
                 result["duration_ms"] = round((time.perf_counter() - started) * 1000)
                 result["attempts"] += prior_attempts
+                # Retry/backoff sleep is not model generation. Carry failed
+                # primary attempts' waits into the failover receipt too.
+                result["retry_wait_ms"] = round(
+                    float(result.get("retry_wait_ms", 0.0)) + prior_retry_wait_ms, 3
+                )
                 if prior_retries:
                     result["retries"] = prior_retries + [
                         {**event, "model": model} for event in result["retries"]
@@ -162,6 +182,9 @@ class OpenAIGateway:
             except (APIConnectionError, APIStatusError) as exc:
                 last_exc = exc
                 retries = getattr(exc, "gateway_retries", [])
+                prior_retry_wait_ms += sum(
+                    float(event.get("retry_wait_ms", 0.0)) for event in retries
+                )
                 prior_attempts += max(1, len(retries))
                 prior_retries.extend({**event, "model": model} for event in retries)
                 exc.gateway_retries = list(prior_retries)
@@ -267,6 +290,7 @@ class OpenAIGateway:
         ) if json_review else None
         started = time.perf_counter()
         retries = []
+        retry_wait_ms = 0.0
         # A capability downgrade is allowed once in addition to the bounded
         # transient attempts, even when rejection arrives on the last attempt.
         attempt, failures = 0, 0
@@ -386,11 +410,15 @@ class OpenAIGateway:
                     status=status,
                 )
                 try:
+                    wait_started = time.monotonic()
                     wait(delay)
                 except ResearchStopped as stop:
                     event["stopped"] = type(stop).__name__
                     stop.gateway_retries = retries
                     raise
+                waited_ms = max(0.0, (time.monotonic() - wait_started) * 1000.0)
+                retry_wait_ms += waited_ms
+                event["retry_wait_ms"] = round(waited_ms, 3)
         message = response.choices[0].message
         control = current_control()
         if control:
@@ -412,5 +440,6 @@ class OpenAIGateway:
             "model": model,
             "attempts": attempt,
             "retries": retries,
+            "retry_wait_ms": round(retry_wait_ms, 3),
             "finish_reason": response.choices[0].finish_reason,
         }

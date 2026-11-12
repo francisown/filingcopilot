@@ -1949,5 +1949,13 @@
   "?": "Low",
   "???????": "Risks and operating factors",
   "???????????": "Why it may matter (inference)",
-  "??": "Gaps"
+  "??": "Gaps",
+  " · 先看已找到的证据": " · Start with the evidence found",
+  "先看已找到的证据": "Start with the evidence found",
+  "已找到可用于回答的原文和计算；解释仍在生成。": "Source passages and calculations for the answer are available; the explanation is still being generated.",
+  "已找到 ": "Found ",
+  " 项计算；数值随解释一并给出。": " calculations; the figures are given with the explanation.",
+  "查看原文": "View source",
+  "原文共 ": "In total, ",
+  " 项，此处显示前 3 项。": " source excerpts; the first 3 are shown here."
 }

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import inspect
 import json
+import time
 from hashlib import sha256
 from typing import TYPE_CHECKING
 
@@ -130,13 +132,76 @@ class ReviewMixin:
             state["review_failed"] = True
             state["trace"].append({"stage": "answer_coverage_review_error", "error_type": type(exc).__name__})
 
+    def _review_complete(self, messages, schema, *, max_tokens=None):
+        """Call the gateway without breaking test doubles that predate max_tokens."""
+        kwargs = {"review": True}
+        if (
+            max_tokens is not None
+            and "max_tokens" in inspect.signature(self.gateway.complete).parameters
+        ):
+            kwargs["max_tokens"] = max_tokens
+        return self.gateway.complete(messages, [schema], **kwargs)
+
     def _request_semantic_review(self, state, messages, schema, indexes, gap_indexes, assess_resolution=False):
         """Retry invalid wire format once without sending authors a false rejection."""
         messages = list(messages)
+        escalated = False
         for attempt in range(2):
             checkpoint()
-            result = self.gateway.complete(messages, [schema], review=True)
+            started = time.perf_counter()
+            try:
+                result = self._review_complete(messages, schema)
+            except Exception as exc:
+                # Preserve the failure receipt before the caller withholds the
+                # batch: transport time and retry pacing otherwise vanish.
+                retries = getattr(exc, "gateway_retries", None) or []
+                attempts = getattr(exc, "attempts", None)
+                if attempts is None:
+                    attempts = max(1, len(retries))
+                retry_wait_ms = getattr(exc, "retry_wait_ms", None)
+                if retry_wait_ms is None:
+                    retry_wait_ms = sum(
+                        float(event.get("retry_wait_ms", 0.0)) for event in retries
+                    )
+                state["trace"].append(
+                    {
+                        "step": len(state["trace"]) + 1,
+                        "stage": "semantic_review_error",
+                        "claim_indexes": indexes,
+                        "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                        "error_type": type(exc).__name__,
+                        "attempts": int(attempts),
+                        "retry_wait_ms": round(float(retry_wait_ms), 3),
+                    }
+                )
+                raise
             self._record_model(state, result, "semantic_review")
+            if result.get("finish_reason") == "length":
+                state["trace"].append(
+                    {
+                        "step": len(state["trace"]) + 1,
+                        "stage": "semantic_review_truncated",
+                        "claim_indexes": indexes,
+                        "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                        "model": result.get("model"),
+                    }
+                )
+                ceiling = min(
+                    32768, max(16384, self.settings.review_max_tokens)
+                )
+                if not escalated and ceiling > self.settings.review_max_tokens:
+                    escalated = True
+                    checkpoint()
+                    result = self._review_complete(
+                        messages, schema, max_tokens=ceiling
+                    )
+                    self._record_model(state, result, "semantic_review")
+                    if result.get("finish_reason") == "length":
+                        raise RuntimeError(
+                            "Reviewer output remained truncated at the escalated token ceiling"
+                        )
+                else:
+                    raise RuntimeError("Reviewer output was truncated")
             independence = result.get("review_independence", "independent")
             state["review_independence"] = independence
             if independence in {"not_independent", "unknown"}:
@@ -379,6 +444,7 @@ class ReviewMixin:
     def verify(self, state: AgentState) -> dict:
         progress("verify", "正在核对数值、期间、证据归属与叙述支持。")
         state["review_failed"] = False
+        state["review_rejected"] = False
         cache = state.setdefault("review_cache", {})
         conflicts = state.setdefault("review_conflicts", set())
         operations = {"completed_tools": sorted({
@@ -435,6 +501,7 @@ class ReviewMixin:
         def semantic_review(question, narratives):
             nonlocal gap_assessment
             verdicts, pending = [], []
+            rejected = False
             reviewable = [claim for claim in narratives if not claim.get("deterministic")]
             for claim in reviewable:
                 key = self._review_key(state, claim)
@@ -444,6 +511,8 @@ class ReviewMixin:
                 ):
                     verdict = {**cache[key], "index": claim["index"]}
                     verdicts.append(verdict)
+                    if not verdict.get("supported"):
+                        rejected = True
                     state["trace"].append(
                         {
                             "step": len(state["trace"]) + 1,
@@ -665,6 +734,7 @@ class ReviewMixin:
                         if verdict["supported"]:
                             cache[self._review_key(state, claim)] = verdict
                         else:
+                            rejected = True
                             # Rewording a claim must not let an earlier approval of this
                             # exact evidence basis outlive an explicit later rejection.
                             # Network/malformed review failures do not enter this set.
@@ -682,20 +752,39 @@ class ReviewMixin:
                         }
                         for index in indexes
                     ]
-                    state["trace"].append(
-                        {
-                            "step": len(state["trace"]) + 1,
-                            "stage": "semantic_review_error",
-                            "claim_indexes": indexes,
-                            "error_type": type(exc).__name__,
-                            "review_diagnostic": getattr(exc, "review_diagnostic", None),
-                            "retries": getattr(exc, "gateway_retries", []),
-                            "verdicts": failed,
-                        }
-                    )
+                    last = state["trace"][-1] if state["trace"] else None
+                    if (
+                        isinstance(last, dict)
+                        and last.get("stage") == "semantic_review_error"
+                        and last.get("error_type") == type(exc).__name__
+                        and "duration_ms" in last
+                    ):
+                        # The request layer already recorded timing and retry
+                        # pacing for this exact failure; enrich that receipt
+                        # instead of emitting a second noisy entry.
+                        last.update(
+                            claim_indexes=indexes,
+                            review_diagnostic=getattr(exc, "review_diagnostic", None),
+                            retries=getattr(exc, "gateway_retries", []),
+                            verdicts=failed,
+                        )
+                    else:
+                        state["trace"].append(
+                            {
+                                "step": len(state["trace"]) + 1,
+                                "stage": "semantic_review_error",
+                                "claim_indexes": indexes,
+                                "error_type": type(exc).__name__,
+                                "review_diagnostic": getattr(exc, "review_diagnostic", None),
+                                "retries": getattr(exc, "gateway_retries", []),
+                                "verdicts": failed,
+                            }
+                        )
                     if state.get("review_independence", "not_run") == "not_run":
                         state["review_independence"] = "unknown"
                     verdicts.extend(failed)
+            if rejected:
+                state["review_rejected"] = True
             return {"verdicts": verdicts}
 
         verified, errors = verify_submission(
@@ -706,7 +795,10 @@ class ReviewMixin:
             state["focus_ticker"],
         )
         if question_shape(state["question"]) in {"cause", "risk"}:
-            self._review_answer_coverage(state, verified, scope_key)
+            # When the source review already failed, a coverage review could not
+            # change the outcome and would only add a second review call.
+            if not state.get("review_failed"):
+                self._review_answer_coverage(state, verified, scope_key)
             if state["review_failed"]:
                 errors.append("Independent answer completeness review unavailable; coverage remains unconfirmed.")
             elif (state["answer_coverage_review"]["supported"]
@@ -820,6 +912,7 @@ class ReviewMixin:
         # shared search/round budgets still apply; nothing is approved here.
         if (retrieval_gaps and not stopped() and not state["review_failed"]
                 and state["repairs"] < 2
+                and (not state.get("review_rejected") or state.get("review_repairs", 0) < 1)
                 and state["rounds"] < state.get("round_limit", self.settings.max_rounds)):
             gap_evidence = self._retrieve_gap_evidence(state, retrieval_gaps, search_query=retrieval_query)
             if gap_evidence:
@@ -883,6 +976,7 @@ class ReviewMixin:
             and errors
             and not state["review_failed"]
             and state["repairs"] < 2
+            and (not state.get("review_rejected") or state.get("review_repairs", 0) < 1)
             and state["rounds"] < state.get("round_limit", self.settings.max_rounds)
         ):
             state["messages"].append(
@@ -950,6 +1044,8 @@ class ReviewMixin:
                 "verified": verified,
                 "errors": errors,
                 "repairs": state["repairs"] + 1,
+                "review_repairs": state.get("review_repairs", 0)
+                + (1 if state.get("review_rejected") else 0),
                 "action": "reason",
             }
         verified = self._retain_verified_partial(state, verified, incomplete=bool(errors))

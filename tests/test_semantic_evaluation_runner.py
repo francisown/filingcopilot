@@ -166,3 +166,23 @@ def test_runner_passes_gold_output_language_to_research(monkeypatch, tmp_path):
     rows, _ = runner.run(gold, settings=settings, workers=1)
     assert rows[0]["status"] == "answered"
     assert seen == ["zh"]
+
+
+def test_direct_text_rounds_exclude_review_and_tool_steps():
+    """Only an author reason step without tools counts as a direct text round."""
+    result = SimpleNamespace(
+        id="r-rounds",
+        status="answered",
+        evidence=[],
+        answer=[],
+        gaps=[],
+        usage={},
+        trace=[
+            {"stage": "reason", "finish_reason": "stop", "tool_calls": []},
+            {"stage": "reason", "finish_reason": "tool_calls"},
+            {"stage": "semantic_review", "finish_reason": "stop"},
+            {"stage": "review", "finish_reason": "stop"},
+            {"stage": "model", "finish_reason": "stop"},
+        ],
+    )
+    assert runner._row(_item(), result, 10)["trace_summary"]["direct_text_rounds"] == 1

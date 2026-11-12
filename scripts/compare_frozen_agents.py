@@ -54,6 +54,8 @@ def frozen_budgets(settings):
     return {'seconds': settings.research_timeout, 'max_tokens': settings.model_max_tokens,
             'min_interval': settings.min_model_interval, 'model_timeout': settings.model_timeout,
             'attempts': settings.model_attempts, 'review_max_tokens': settings.review_max_tokens,
+            'review_attempts': settings.review_attempts,
+            'review_reserve_seconds': settings.review_reserve_seconds,
             'max_rounds': settings.max_rounds, 'max_tool_calls': settings.max_tool_calls}
 
 

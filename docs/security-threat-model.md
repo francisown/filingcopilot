@@ -21,7 +21,9 @@ remote deployments still need TLS, an authenticated proxy and rate limits.
   CSRF token.
 - The browser UI and the API share the same local process. A remote deployment
   requires an external reverse proxy, TLS, authentication, authorization,
-  request-size limits, and per-user rate limits.
+  request-size limits, and per-user rate limits. The
+  [hosted demo boundary](hosted-demo.md) lists the minimum controls, including
+  request IDs, an audit log, per-user budgets and a kill switch.
 - SEC filings, PDFs, web pages, provider responses, and model output are
   **untrusted input**. They can contain instructions aimed at the agent or
   HTML/script aimed at a browser.

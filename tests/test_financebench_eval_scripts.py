@@ -11,6 +11,9 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("fastembed", reason="full-filing evaluation extras are optional")
+pytest.importorskip("pypdf", reason="full-filing evaluation extras are optional")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

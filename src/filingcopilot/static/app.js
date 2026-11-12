@@ -482,7 +482,9 @@ async function startResearchJob(request){
 function renderResearchPreview(job){
   const root=$('#research-preview');if(!root)return;
   const preview=job.preview;
-  if(['completed','cancelled','timed_out','failed'].includes(job.status)||preview?.schema!=='filingcopilot.financial-preview/v1'||!preview.claims?.length){root.replaceChildren();root.classList.add('hidden');return;}
+  if(['completed','cancelled','timed_out','failed'].includes(job.status)){root.replaceChildren();root.classList.add('hidden');return;}
+  if(preview?.schema==='filingcopilot.evidence-preview/v1'){renderEvidencePreview(root,preview);return;}
+  if(preview?.schema!=='filingcopilot.financial-preview/v1'||!preview.claims?.length){root.replaceChildren();root.classList.add('hidden');return;}
   const evidence=new Map((preview.evidence||[]).map(item=>[item.id,item]));
   root.replaceChildren(el('h3','',preview.ticker+' · 先看已核验的年度数字'),el('p','company-help',preview.note));
   const figures=el('div','preview-figures');
@@ -497,6 +499,44 @@ function renderResearchPreview(job){
   }
   const usage=job.usage||{};
   root.append(figures,el('p','company-help','本轮已完成模型调用 '+(usage.model_calls||0)+' 次 · 已记录 '+new Intl.NumberFormat('zh-CN').format(usage.total_tokens||0)+' tokens。最终解释与复核状态将在研究完成后显示。'));
+  root.classList.remove('hidden');
+}
+function previewExcerpt(value,limit=280){
+  const text=String(value??'').replace(/\s+/g,' ').trim();
+  return text.length>limit?text.slice(0,limit).trimEnd()+'…':text;
+}
+// Evidence-first preview: while the model is still writing the explanation, show
+// the passages and calculations it already found. Source text stays verbatim and
+// opens the normal evidence drawer with the full object.
+function renderEvidencePreview(root,preview){
+  const evidence=(preview.evidence||[]).filter(item=>item&&typeof item==='object');
+  const calculations=(preview.calculations||[]).filter(Boolean);
+  if(!evidence.length&&!calculations.length){root.replaceChildren();root.classList.add('hidden');return;}
+  root.replaceChildren(
+    el('h3','',(preview.ticker?preview.ticker+' · ':'')+'先看已找到的证据'),
+    el('p','company-help',preview.note||'已找到可用于回答的原文和计算；解释仍在生成。')
+  );
+  if(evidence.length){
+    const list=el('div','preview-sources');
+    evidence.slice(0,3).forEach(source=>{
+      const card=el('article','preview-source');
+      const meta=el('p','preview-source-meta');
+      meta.append(el('strong','',source.ticker||preview.ticker||'证据'),el('span','',source.section||'原文'));
+      card.append(meta);
+      const text=previewExcerpt(source.text);
+      if(text)card.append(el('blockquote','source-text preview-source-text',text));
+      const filing=source.filing||{};
+      const label=[filing.form,filing.filed?'公开于 '+filing.filed:''].filter(Boolean).join(' · ')||'查看原文';
+      const button=el('button','cite',label);
+      button.type='button';
+      button.addEventListener('click',()=>showEvidence(source));
+      card.append(button);
+      list.append(card);
+    });
+    root.append(list);
+    if(evidence.length>3)root.append(el('p','company-help preview-evidence-more','原文共 '+evidence.length+' 项，此处显示前 3 项。'));
+  }
+  if(calculations.length)root.append(el('p','company-help preview-calculation-note','已找到 '+calculations.length+' 项计算；数值随解释一并给出。'));
   root.classList.remove('hidden');
 }
 function showResearchJob(job){

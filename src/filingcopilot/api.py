@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import hmac
+import json
+import logging
 import re
 import sys
+import time
+import uuid
 from contextlib import asynccontextmanager
 from datetime import date
 from importlib.resources import files
@@ -49,6 +53,9 @@ from .trends import TrendRequest
 from .watchlist import WatchlistSelection
 
 _CJK = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+_REQUEST_ID = re.compile(r"[A-Za-z0-9._:-]{1,128}")
+
+logger = logging.getLogger("filingcopilot.access")
 
 
 def _endpoint_budget(configured: float | None, cap: float) -> float | None:
@@ -156,6 +163,39 @@ def create_app(service: FilingCopilot | None = None) -> FastAPI:
             'Permissions-Policy', 'camera=(), geolocation=(), microphone=()'
         )
         return response
+
+    @app.middleware('http')
+    async def request_observability(request, call_next):
+        supplied = request.headers.get('x-request-id', '')
+        request_id = (
+            supplied if _REQUEST_ID.fullmatch(supplied) else uuid.uuid4().hex
+        )
+        request.state.request_id = request_id
+        started = time.perf_counter()
+        try:
+            response = await call_next(request)
+        finally:
+            duration_ms = (time.perf_counter() - started) * 1000.0
+        response.headers['X-Request-ID'] = request_id
+        settings = getattr(service, 'settings', None)
+        if (
+            getattr(settings, 'access_log', False)
+            and not request.url.path.startswith('/static')
+        ):
+            logger.info(
+                json.dumps(
+                    {
+                        'event': 'http_request',
+                        'request_id': request_id,
+                        'method': request.method,
+                        'path': request.url.path,
+                        'status': response.status_code,
+                        'duration_ms': round(duration_ms, 3),
+                    }
+                )
+            )
+        return response
+
     app.state.service = service
     app.state.research_jobs = jobs
     static = str(files("filingcopilot").joinpath("static"))

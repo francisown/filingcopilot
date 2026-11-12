@@ -80,6 +80,90 @@ def module_round_limit(module: str | None, max_rounds: int) -> int:
     return min(max_rounds, 4) if contract and contract.kind == "factual" else max_rounds
 
 
+EVIDENCE_PREVIEW_SCHEMA = "filingcopilot.evidence-preview/v1"
+EVIDENCE_PREVIEW_NOTE = "已找到可用于回答的原文和计算；解释仍在生成。"
+PREVIEW_TEXT_LIMIT = 600
+
+
+def _preview_passage(item: dict) -> dict | None:
+    """Keep only the observed passage fields the preview UI needs."""
+    if not isinstance(item, dict):
+        return None
+    item_id = str(item.get("id") or "").strip()
+    text = str(item.get("text") or "").strip()
+    if not item_id or not text:
+        return None
+    row = {
+        "id": item_id,
+        "ticker": item.get("ticker") or "",
+        "section": item.get("section") or "",
+        "text": text[:PREVIEW_TEXT_LIMIT],
+    }
+    filing = item.get("filing") if isinstance(item.get("filing"), dict) else {}
+    form = filing.get("form") or item.get("form")
+    filed = filing.get("filed") or item.get("filed")
+    if form or filed:
+        row["filing"] = {
+            key: value for key, value in (("form", form), ("filed", filed)) if value
+        }
+    return row
+
+
+def evidence_preview(ledger: dict, narrative_context: dict | None, ticker: str | None) -> dict | None:
+    """Build a bounded preview from observed passages and calculations only.
+
+    Narrative prefetch evidence is preferred because it was selected for the
+    question; the ledger fills the remaining slots. Nothing here is model
+    output, a claim, or a summary, and the preview is omitted when there is
+    nothing observed to show.
+    """
+    evidence, seen = [], set()
+
+    def append_passage(item):
+        if len(evidence) >= 3:
+            return
+        row = _preview_passage(item)
+        if row is None or row["id"] in seen:
+            return
+        seen.add(row["id"])
+        evidence.append(row)
+
+    for item in (narrative_context or {}).get("evidence") or []:
+        if isinstance(item, dict) and item.get("kind") == "passage":
+            append_passage(item)
+    for item in (ledger or {}).values():
+        if len(evidence) >= 3:
+            break
+        if isinstance(item, dict) and item.get("kind") == "passage":
+            append_passage(item)
+
+    calculations, seen_calculations = [], set()
+    for item in (ledger or {}).values():
+        if not isinstance(item, dict) or item.get("kind") != "calculation":
+            continue
+        item_id = str(item.get("id") or "").strip()
+        if not item_id or item_id in seen_calculations:
+            continue
+        seen_calculations.add(item_id)
+        row = {"id": item_id}
+        for key in ("label", "value", "unit"):
+            if item.get(key) is not None:
+                row[key] = item[key]
+        calculations.append(row)
+        if len(calculations) >= 3:
+            break
+
+    if not evidence and not calculations:
+        return None
+    return {
+        "schema": EVIDENCE_PREVIEW_SCHEMA,
+        "ticker": ticker or "",
+        "note": EVIDENCE_PREVIEW_NOTE,
+        "evidence": evidence,
+        "calculations": calculations,
+    }
+
+
 SYSTEM = """You are FilingCopilot, a careful financial filing researcher. Answer in Chinese.
 For an explanation, lead with the disclosed cause; figures alone do not answer why.
 For a risk question, address each requested risk category. Generic concentration includes
@@ -286,6 +370,8 @@ class AgentState(TypedDict):
     review_source_ids: list[str]
     answer_resolution_review: dict | None
     review_failed: bool
+    review_rejected: bool
+    review_repairs: int
     review_conflicts: set
     verified_candidate: Submission | None
     retained_gaps: list
@@ -427,6 +513,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
         for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
             state["usage"][key] += int(usage.get(key) or 0)
         state["usage"]["model_calls"] += 1
+        if stage in {"review", "semantic_review"}:
+            state["usage"]["review_calls"] = state["usage"].get("review_calls", 0) + 1
         state["trace"].append(
             {
                 "step": len(state["trace"]) + 1,
@@ -436,6 +524,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "usage": usage,
                 "attempts": result.get("attempts", 1),
                 "retries": result.get("retries", []),
+                "retry_wait_ms": result.get("retry_wait_ms", 0),
                 "finish_reason": result.get("finish_reason"),
             }
         )
@@ -453,18 +542,23 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
         if stopped():
             return {**state, "action": "end"}
         control = current_control()
+        # The final review owns one full request timeout. Stopping research
+        # earlier than that would leave the review no time to answer at all.
+        review_reserve = max(
+            self.settings.review_reserve_seconds, self.settings.review_timeout
+        )
         if (
             control
             and control.remaining is not None
             and control.time_budget is not None
-            and control.time_budget > self.settings.review_reserve_seconds * 2
-            and control.remaining <= self.settings.review_reserve_seconds
+            and control.time_budget > review_reserve * 2
+            and control.remaining <= review_reserve
         ):
             state["trace"].append(
                 {
                     "stage": "review_reserve",
                     "remaining_seconds": round(control.remaining, 3),
-                    "reserve_seconds": self.settings.review_reserve_seconds,
+                    "reserve_seconds": review_reserve,
                     "reason": "stop new research before final review reserve",
                 }
             )
@@ -1001,6 +1095,9 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     "reason": "factual restatement section uses a bounded drafting/repair budget",
                 }
             )
+        preview = evidence_preview(tools.ledger, narrative_context, focus)
+        if preview:
+            progress("evidence_preview", EVIDENCE_PREVIEW_NOTE, preview=preview)
         initial_context = {
             "question": request.question,
             **({"requested_scope": requested_scope} if stock_question else {}),
@@ -1114,6 +1211,8 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                 "review_scope_cache": {},
                 "answer_resolution_review": None,
                 "review_failed": False,
+                "review_rejected": False,
+                "review_repairs": 0,
                 "review_conflicts": set(),
                 "verified_candidate": None,
                 "retained_gaps": [],
@@ -1126,6 +1225,7 @@ class ResearchAgent(ExecutionMixin, ReviewMixin):
                     "completion_tokens": 0,
                     "total_tokens": 0,
                     "model_calls": 0,
+                    "review_calls": 0,
                     "tool_calls": len(comparison_trace) if annual_comparison else 0,
                 },
                 "action": "reason",

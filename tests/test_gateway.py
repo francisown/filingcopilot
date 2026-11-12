@@ -82,7 +82,7 @@ def test_default_allowance_prevents_reasoning_only_stock_result(tools, budget_st
         )
         if review == (budget_stage == "review"):
             budgets.append(body["max_tokens"])
-            if body["max_tokens"] < 8192:
+            if body["max_tokens"] < 6144:
                 return httpx.Response(
                     200,
                     json={

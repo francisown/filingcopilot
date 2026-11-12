@@ -48,6 +48,7 @@ def _manifest(gold: dict, settings: Settings, workers: int, limit: int | None, a
         for name in (
             "model", "review_model", "research_timeout", "model_timeout", "review_timeout", "min_model_interval",
             "max_rounds", "max_tool_calls", "model_max_tokens", "review_max_tokens",
+            "review_attempts", "review_batch_size", "review_reserve_seconds",
             "model_temperature", "model_top_p", "model_seed",
             "model_attempts", "retry_base_delay", "retry_max_delay", "refresh_timeout",
             "embedding_mode", "embedding_model", "rerank_mode",
@@ -185,15 +186,23 @@ def _row(item: dict, result, elapsed_ms: int, review_model: str = "") -> dict:
     direct_text_rounds = sum(
         1
         for step in model_steps
-        if step.get("finish_reason") == "stop" and not step.get("tool_calls")
+        if step.get("stage") == "reason"
+        and step.get("finish_reason") == "stop"
+        and not step.get("tool_calls")
     )
     author_ms = round(
         sum(float(step.get("duration_ms") or 0) for step in trace if step.get("stage") in {"reason", "model"}),
         3,
     )
-    review_ms = round(
-        sum(float(step.get("duration_ms") or 0) for step in trace if step.get("stage") in {"review", "semantic_review"}),
-        3,
+    review_steps = [
+        step for step in trace if step.get("stage") in {"review", "semantic_review"}
+    ]
+    review_ms = round(sum(float(step.get("duration_ms") or 0) for step in review_steps), 3)
+    retry_wait_ms = round(
+        sum(float(step.get("retry_wait_ms") or 0) for step in model_steps), 3
+    )
+    tool_ms = round(
+        sum(float(step.get("duration_ms") or 0) for step in tool_steps), 3
     )
     return {
         "id": item["id"],
@@ -226,9 +235,12 @@ def _row(item: dict, result, elapsed_ms: int, review_model: str = "") -> dict:
             "tool_calls": len(tool_steps),
             "tool_names": tool_names,
             "model_steps": len(model_steps),
+            "review_calls": len(review_steps),
             "direct_text_rounds": direct_text_rounds,
             "author_ms": author_ms,
             "review_ms": review_ms,
+            "retry_wait_ms": retry_wait_ms,
+            "tool_ms": tool_ms,
             "finish_reasons": [
                 step.get("finish_reason")
                 for step in model_steps
@@ -419,6 +431,9 @@ def main() -> None:
             "research_timeout_seconds": settings.research_timeout,
             "model_timeout_seconds": settings.model_timeout,
             "review_timeout_seconds": settings.review_timeout,
+            "review_attempts": settings.review_attempts,
+            "review_batch_size": settings.review_batch_size,
+            "review_reserve_seconds": settings.review_reserve_seconds,
             "min_model_interval_seconds": settings.min_model_interval,
             "max_rounds": settings.max_rounds,
             "max_tool_calls": settings.max_tool_calls,

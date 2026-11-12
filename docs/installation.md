@@ -69,10 +69,28 @@ The host port remains bound to `127.0.0.1`. The image uses an explicit
 the container interface. Compose requires `FC_AUTH_TOKEN` before it starts the
 container; the built-in single-user web/API and streamable MCP HTTP guard use
 that token. Still add TLS, an authenticated reverse proxy and per-user limits
-before any remote publication.
+before any remote publication. Set `FC_ACCESS_LOG=true` to emit one JSON access
+line per request with request ID, method, path, status and duration; it does not
+log bodies, prompts, query strings or keys.
 
 See the [README](../README.md#try-it-before-configuring-a-model) for the first question and
 [configuration example](../.env.example) for optional providers. Install local
 embeddings only when needed with `pip install -e '.[semantic]'` in the active
 environment. Reproducible historical environment measurements are documented
 separately from this installation path.
+
+## Development and tests
+
+Match CI when running the full suite:
+
+```bash
+python -m pip install -e '.[dev,semantic,evaluation]'
+python -m pytest -q
+python -m ruff check src tests scripts
+python -m compileall -q src scripts
+```
+
+A core `.[dev]` install is enough for most tests. Test modules that need pandas,
+fastembed or pypdf call `pytest.importorskip`, so a clean environment reports a
+skip instead of failing during collection. Use the full extras when changing
+evaluation scripts or the optional embedding path.

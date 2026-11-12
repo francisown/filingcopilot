@@ -11,6 +11,7 @@ contains the configuration fingerprint, denominators and run metadata. It used t
 140-question bilingual set, a 2026-10-08 knowledge date, DeepSeek for research,
 Mimo for review, the diversity reranker, four workers (four concurrent question runs), a 3,000-second cooperative
 research ceiling, a 300-second review timeout and a 16,384-token review budget.
+Those review limits are the pre-optimization configuration recorded by that run.
 
 | Metric | Result |
 |---|---:|
@@ -25,13 +26,32 @@ research ceiling, a 300-second review timeout and a 16,384-token review budget.
 | Reported tokens | **4,868,227** |
 | Runner errors / deadline timeouts | **0 / 0** |
 | Raw SEC numeric | **100 matched / 0 mismatched / 27 unassessed** |
-| Regression suite | **2,307 passed** |
+| Regression suite | **2,356 passed** |
 
 Three answerable rows delivered partial answers: `semantic-causality-015`,
 `semantic-causality-019` and `semantic-risk-018`. They retain explicit gaps
 rather than unverified completion; all three are coverage-review outcomes in
 this run. The negation rows are answered, including the explicit-negative
 subject/period mismatch case.
+
+### Post-optimization rerun
+
+A 140-question rerun with the review changes and a 16,384-token review ceiling
+produced model-backed **P50 155.1 s / P95 586.7 s**, **96/100 answerable rows**,
+**406 claims**, no review `length` rows, and zero unsupported or numeric errors.
+It is faster than the frozen baseline (237.7 s / 842.1 s) but not a clean quality
+win: the baseline answered 97/100 with 407 claims, and the rerun has four partial
+answerable rows. A faster 8,192-only run (P95 618.3 s, 98/100) was rejected
+because it silently dropped four claims from each of two negation answers; an
+8,192-plus-escalation run was also slower and had lower coverage. See the
+[latency budget](latency-budget.md) for the per-configuration comparison.
+
+The latency tail is concentrated in the independent review stage, not retrieval:
+review accounts for 78.0% of model-backed row latency at P50. See the
+[latency budget](latency-budget.md) for the stage breakdown and the optimization
+sequence. Future runs also record `review_calls`, `retry_wait_ms` and `tool_ms`
+in `trace_summary`, so review retries and pacing can be separated from model
+generation.
 
 The 100 answerable rows cover numeric, cross-period, causality, negation and risk
 questions. The remaining 40 rows are designed refusals or market-source policy
@@ -96,11 +116,14 @@ strict and should not be compared with older any-number-match figures.
 ## Reproduce the local checks
 
 ```powershell
+python -m pip install -e ".[dev,semantic,evaluation]"
 python -m pytest -q
 python -m ruff check src tests scripts
 python -m compileall -q src scripts
 ```
 
-The full live evaluation requires the caller's own provider configuration and is
-intentionally not run as part of CI. API keys and local corpora are excluded by
+The full extras match CI. A core `.[dev]` install still collects the suite;
+optional evaluation and embedding tests skip explicitly when their packages are
+absent. The full live evaluation requires the caller's own provider
+configuration and is intentionally not run as part of CI. API keys and local corpora are excluded by
 `.gitignore`.

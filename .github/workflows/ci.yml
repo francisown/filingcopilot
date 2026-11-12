@@ -53,6 +53,7 @@ jobs:
       - run: node scripts/check_comparison_questions_ui.cjs
       - run: node scripts/check_research_ui.cjs
       - run: node scripts/check_preview_ui.cjs
+      - run: node scripts/check_evidence_preview_ui.cjs
       - run: node scripts/check_financial_ui.cjs
       - run: node scripts/check_reporting_currency_ui.cjs
       - run: node scripts/check_package_export.cjs

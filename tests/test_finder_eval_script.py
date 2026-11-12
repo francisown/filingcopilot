@@ -5,6 +5,10 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip("pandas", reason="FinDER evaluation extras are optional")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

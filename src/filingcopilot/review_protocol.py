@@ -7,8 +7,8 @@ def review_tool(indexes: list[int], gap_indexes: list[int], *, resolution: bool 
     for index in indexes:
         properties[f"claim_{index}_scope_check"] = {
             "type": "string",
-            "maxLength": 800,
-            "description": "Check EACH assertion's actor, geography, segment, accounting line, period and qualifiers. Bind product/segment directions to their own source rows, never to a consolidated growth calculation. For listed charges, map each to its stated accounting line; existence of all charges does not prove their allocation. Operating-income impact does not imply Other operating expense. An effect alone does not prove materiality; no material impact does not mean no harm or no incident. Report conflicting/unproved bindings first; omit irrelevant matching background. Use at most 600 characters.",
+            "maxLength": 320,
+            "description": "Check EACH assertion's actor, geography, segment, accounting line, period and qualifiers. Bind product/segment directions to their own source rows, never to a consolidated growth calculation. For listed charges, map each to its stated accounting line; existence of all charges does not prove their allocation. Operating-income impact does not imply Other operating expense. An effect alone does not prove materiality; no material impact does not mean no harm or no incident. Report conflicting/unproved bindings first; omit irrelevant matching background. Use at most 240 characters.",
         }
         properties[f"claim_{index}_scope_supported"] = {
             "type": "boolean", "description": "Every asserted scope and accounting classification matches its source. If any listed charge is assigned to an unproved or wrong expense line, return false for the entire claim. A regional/segment fact does not establish a company-wide fact.",
@@ -23,7 +23,10 @@ def review_tool(indexes: list[int], gap_indexes: list[int], *, resolution: bool 
             "type": "boolean",
             "description": "True if ANY sentence asserts that a statement is absent across an entire filing based only on selected passages, even if another sentence limits scope. False for a directly reported negative financial fact, an observation limited to the cited passages, or a bounded negative_evidence scan result stating that no indexed passage matched the explicit pattern, including a reviewed subject/period mismatch in the scan's matching passages, without generalizing beyond it.",
         }
-        properties[f"claim_{index}_reason"] = {"type": "string", "maxLength": 800}
+        properties[f"claim_{index}_reason"] = {
+            "type": "string", "maxLength": 240,
+            "description": "One short sentence, at most 200 characters. Do not restate the evidence.",
+        }
         if index == coverage_index:
             properties[f"claim_{index}_scope_check"]["description"] = (
                 "This is an INTERNAL whole-answer completeness check, not a financial assertion. "
@@ -34,7 +37,7 @@ def review_tool(indexes: list[int], gap_indexes: list[int], *, resolution: bool 
                 "an exhaustive risk catalogue, a full dollar bridge or a single management quote "
                 "when supported component synthesis answers the question. Name the missing point "
                 "and a useful source-language retrieval phrase if incomplete; otherwise explain "
-                "briefly how the supported answer covers the request. At most 600 characters."
+                "briefly how the supported answer covers the request. At most 240 characters."
             )
             for suffix in ("source_supported", "inference_supported", "scope_supported"):
                 properties[f"claim_{index}_{suffix}"]["description"] = (
@@ -61,7 +64,7 @@ def review_tool(indexes: list[int], gap_indexes: list[int], *, resolution: bool 
             "type": "string", "maxLength": 180,
             "description": "If a required point is missing, give a short focused retrieval query in the language of the SOURCE passages (usually English), even when the question is Chinese. Name the missing subject and metric, not the whole question or a guessed answer. Company/filing/year filters are enforced separately. Empty when no follow-up evidence is needed.",
         }
-        properties[f"gap_{index}_reason"] = {"type": "string"}
+        properties[f"gap_{index}_reason"] = {"type": "string", "maxLength": 240}
     if resolution:
         properties.update({
             "answer_resolution_evidence_id": {"type": "string"},

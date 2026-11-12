@@ -18,6 +18,14 @@ FilingCopilot is a research workspace for SEC filings that runs on your machine.
 
 *The workspace: price history, filing research and source checks in one place.*
 
+## Five-minute reading path
+
+1. [Architecture](docs/architecture.md) — data flow, evidence ledger and trust boundaries.
+2. [`agent_execution.py`](src/filingcopilot/agent_execution.py) — tool loop, budgets and stop conditions.
+3. [`verification.py`](src/filingcopilot/verification.py) — claim binding, numeric gates and withholding.
+4. [Evaluation](docs/evaluation.md) — measured coverage, latency, tokens and limitations.
+5. [Demo script](docs/demo-script.md) — a three-minute walkthrough; [human-review protocol](docs/human-evaluation-protocol.md) for the still-pending independent study.
+
 ## What it does
 
 - Answers questions about revenue, profit, margins, cash flow, risks and the wording of a filing.
@@ -40,19 +48,19 @@ FilingCopilot is a research workspace for SEC filings that runs on your machine.
 
 ## Latest snapshot
 
-Latest local run: 2026-11-02, 140 questions, DeepSeek research and Mimo review, four questions processed in parallel. The 100 answerable questions and 40 boundary/policy questions are reported separately.
+Latest local run: 2026-11-11, 140 questions, DeepSeek research and Mimo review, four questions processed in parallel. The 100 answerable questions and 40 boundary/policy questions are reported separately.
 
 | What | Result |
 |---|---:|
-| Answerable questions with a complete answer | **97 / 100** |
+| Answerable questions with a complete answer | **96 / 100** |
 | Expected refusals / market-policy cases | **20 / 20 · 20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Delivered claims with a source citation | **100%** |
-| Regression tests | **2,327 passed** |
+| Regression tests | **2,356 passed** |
 
-Three of the 100 answerable questions returned partial answers with explicit gaps; the rest returned complete answers. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
+Four of the 100 answerable questions returned partial answers with explicit gaps (`causality-012/015/019`, `negation-001`); the rest returned complete answers. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
 
-**Speed:** numeric questions are usually answered in under a second; long narrative questions call the model and an independent reviewer, so they can take minutes. The latest model-backed P95 was 842 seconds; see Evaluation for the full breakdown.
+**Speed:** numeric questions are usually answered in under a second; long narrative questions call the model and an independent reviewer, so they can take minutes. The pre-change full run had a model-backed P95 of 842 seconds. The post-change 140-question rerun reached **P50 155 s / P95 587 s** with 96/100 answerable rows and no review truncation; the faster 8,192-only variant was rejected because it silently dropped claims. See [Latency budget](docs/latency-budget.md) for the trade-off.
 
 ## Try it in 60 seconds
 
@@ -174,12 +182,16 @@ SMTP/Slack, brief-budget and scoring details are in
 
 - [Architecture](docs/architecture.md)
 - [Evaluation and denominators](docs/evaluation.md)
+- [Latency and cost budget](docs/latency-budget.md)
 - [Case study](docs/case-study.md)
 - [Installation](docs/installation.md)
 - [User guide](docs/user-guide.md)
 - [Research package protocol](docs/research-package-protocol.md)
 - [Independent verifier](docs/independent-verifier.md)
 - [Security and threat model](docs/security-threat-model.md)
+- [Hosted demo boundary](docs/hosted-demo.md)
+- [Demo script](docs/demo-script.md)
+- [Human evaluation and pilot protocol](docs/human-evaluation-protocol.md)
 - [Disclosure monitoring specification](docs/monitoring-v1.md)
 - [OpenCode Go API](docs/opencode-go.md)
 - [External evaluation datasets](evaluation/external/README.md)
@@ -188,12 +200,16 @@ SMTP/Slack, brief-budget and scoring details are in
 ## Development
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,semantic,evaluation]"
 python -m pytest -q
 python -m ruff check src tests scripts
 python -m compileall -q src scripts
 ```
 
-The external benchmark data and local filing cache are not committed. Review the licenses in [evaluation/external/README.md](evaluation/external/README.md) before fetching non-commercial datasets.
+The full extras match CI. A core `.[dev]` install also collects the suite; tests
+that need pandas, fastembed or pypdf skip explicitly when those extras are absent.
+After changing the suite, keep the published count in sync with
+`python scripts/update_validation_counts.py <count> --write` and verify it with
+`--check`. The external benchmark data and local filing cache are not committed. Review the licenses in [evaluation/external/README.md](evaluation/external/README.md) before fetching non-commercial datasets.
 
 FilingCopilot is an independent engineering project. It is not investment advice, a production credit-decision system, or a certified model.

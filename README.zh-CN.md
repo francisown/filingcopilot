@@ -18,6 +18,14 @@ FilingCopilot 是一个在本地运行的 SEC 财报研究工作台。它会找�
 
 *工作台：价格历史、财报研究和来源核对放在同一个页面。*
 
+## 五分钟阅读路径
+
+1. [架构说明](docs/architecture.md)：数据流、证据账本和信任边界。
+2. [`agent_execution.py`](src/filingcopilot/agent_execution.py)：工具循环、预算和停止条件。
+3. [`verification.py`](src/filingcopilot/verification.py)：声明绑定、数字检查和拒答。
+4. [评测](docs/evaluation.md)：覆盖率、延迟、token 和已知限制。
+5. [演示脚本](docs/demo-script.md)：三分钟演示；独立人工评测仍待完成，见[人工评测协议](docs/human-evaluation-protocol.md)。
+
 ## 它能做什么
 
 - 回答营收、利润、利润率、现金流、风险，以及财报中的具体表述。
@@ -40,19 +48,19 @@ FilingCopilot 是一个在本地运行的 SEC 财报研究工作台。它会找�
 
 ## 最新快照
 
-最新本地运行：2026-11-02，140 题，DeepSeek 研究、Mimo 审查，同时并行处理 4 道题。100 道本应能回答的研究题和 40 道边界/策略题分开统计。
+最新本地运行：2026-11-11，140 题，DeepSeek 研究、Mimo 审查，同时并行处理 4 道题。100 道本应能回答的研究题和 40 道边界/策略题分开统计。
 
 | 项目 | 结果 |
 |---|---:|
-| 本应能回答的题中，给出完整答案 | **97 / 100** |
+| 本应能回答的题中，给出完整答案 | **96 / 100** |
 | 预期拒答 / 行情源策略题 | **20 / 20 · 20 / 20** |
 | 无来源支持的结论 / 数值错误 | **0 / 0** |
 | 给出的结论都带来源引用 | **100%** |
-| 回归测试 | **2,327 passed** |
+| 回归测试 | **2,356 passed** |
 
-100 道本应能回答的题中，3 道给出了带明确缺口的部分回答，其余为完整回答。完整延迟数据、token 数、数值审计和具体题目见[评测记录](docs/evaluation.md)。这些是工程和工作流层面的测量，不是独立的人工准确率评估。
+100 道本应能回答的题中，4 道给出了带明确缺口的部分回答（`causality-012/015/019`、`negation-001`），其余为完整回答。完整延迟数据、token 数、数值审计和具体题目见[评测记录](docs/evaluation.md)。这些是工程和工作流层面的测量，不是独立的人工准确率评估。
 
-**速度：** 数字类问题通常不到一秒；需要阅读大段原文的叙述题会调用模型和独立审查，可能要几分钟。最新模型题 P95 为 842.1 秒，完整拆分见评测记录。
+**速度：** 数字类问题通常不到一秒；需要阅读大段原文的叙述题会调用模型和独立审查，可能要几分钟。优化前全量模型题 P95 为 842 秒；优化后 140 题重跑为 **P50 155 秒 / P95 587 秒**，可答问题 96/100，review 无截断。更快的 8,192-only 版本因静默丢 claim 被拒绝，取舍见[延迟预算](docs/latency-budget.md)。
 
 ## 60 秒试用
 
@@ -162,12 +170,16 @@ OpenCode Go 的接口地址是 `https://opencode.ai/inference/go/openai/v1`，�
 
 - [架构说明](docs/architecture.md)
 - [评测与分母口径](docs/evaluation.md)
+- [延迟与成本预算](docs/latency-budget.md)
 - [案例研究](docs/case-study.zh-CN.md)
 - [安装说明](docs/installation.md)
 - [用户指南](docs/user-guide.md)
 - [研究包协议](docs/research-package-protocol.md)
 - [独立验证器](docs/independent-verifier.md)
 - [安全与威胁模型](docs/security-threat-model.md)
+- [远程演示边界](docs/hosted-demo.md)
+- [演示脚本](docs/demo-script.md)
+- [人工评测与试点协议](docs/human-evaluation-protocol.md)
 - [披露监控规格](docs/monitoring-v1.md)
 - [OpenCode Go 接口](docs/opencode-go.md)
 - [外部评测数据集](evaluation/external/README.md)
@@ -176,12 +188,15 @@ OpenCode Go 的接口地址是 `https://opencode.ai/inference/go/openai/v1`，�
 ## 开发检查
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,semantic,evaluation]"
 python -m pytest -q
 python -m ruff check src tests scripts
 python -m compileall -q src scripts
 ```
 
-外部评测数据和本地财报缓存不会提交到仓库。获取非商业数据集前，请先阅读[evaluation/external/README.md](evaluation/external/README.md)中的许可说明。
+完整 extras 与 CI 一致。只安装 `.[dev]` 也会正常收集测试；缺少 pandas、fastembed
+或 pypdf 时，依赖这些可选包的测试会显式跳过。修改测试后，用
+`python scripts/update_validation_counts.py <count> --write` 同步文档中的数字，并用
+`--check` 校验。外部评测数据和本地财报缓存不会提交到仓库。获取非商业数据集前，请先阅读[evaluation/external/README.md](evaluation/external/README.md)中的许可说明。
 
 FilingCopilot 是独立工程项目，不构成投资建议，不是生产级信贷决策系统，也不是经过认证的模型。

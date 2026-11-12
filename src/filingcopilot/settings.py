@@ -123,6 +123,9 @@ class Settings:
     # Optional single-user API guard. It is not a tenant or role system;
     # remote deployments still need TLS and an authenticated proxy.
     auth_token: str | None = None
+    # Optional hosted-demo access log: request ID, route, status and duration
+    # only. Off by default so local use stays quiet.
+    access_log: bool = False
     model: str = ""
     review_model: str = ""
     sec_user_agent: str = ""
@@ -136,8 +139,9 @@ class Settings:
     max_rounds: int = 8
     max_tool_calls: int = 20
     model_max_tokens: int = 8192
-    # The provider counts reasoning against this ceiling too. Reserve enough
-    # output for the structured verdict after that reasoning completes.
+    # The provider counts reasoning against this ceiling too. 6,144 and 8,192
+    # produced finish_reason=length and dropped claims in full runs; 16,384
+    # completed the full 140-question run without a length row.
     review_max_tokens: int = 16384
     # Four keeps the usual narrative review within one bounded provider call;
     # explicit smaller values remain available for controlled experiments.
@@ -146,6 +150,9 @@ class Settings:
     model_timeout: float = 60.0
     # Semantic review can take longer than an author tool-selection turn.
     review_timeout: float = 300.0
+    # Review gets one bounded retry: enough to survive a transient provider
+    # failure, without spending the whole research budget on retries.
+    review_attempts: int = 2
     # Omitted by default because provider support is not uniform.
     model_temperature: float | None = None
     model_top_p: float | None = None
@@ -253,6 +260,7 @@ class Settings:
             api_base=_api_base(os.getenv("FC_API_BASE", "")),
             api_key=os.getenv("FC_API_KEY", "").strip(),
             auth_token=os.getenv("FC_AUTH_TOKEN", "").strip() or None,
+            access_log=_flag("FC_ACCESS_LOG", False),
             model=os.getenv("FC_MODEL", "").strip(),
             review_model=os.getenv("FC_REVIEW_MODEL", "").strip(),
             sec_user_agent=os.getenv("FC_SEC_USER_AGENT", "").strip(),
@@ -269,6 +277,7 @@ class Settings:
             min_model_interval=max(0.0, min(60.0, float(os.getenv("FC_MIN_MODEL_INTERVAL", "21")))),
             model_timeout=max(1.0, min(180.0, float(os.getenv("FC_MODEL_TIMEOUT", "60")))),
             review_timeout=max(1.0, min(600.0, float(os.getenv("FC_REVIEW_TIMEOUT", "300")))),
+            review_attempts=max(1, min(3, int(os.getenv("FC_REVIEW_ATTEMPTS", "2")))),
             model_temperature=_optional_float("FC_MODEL_TEMPERATURE", minimum=0.0, maximum=2.0),
             model_top_p=_optional_float("FC_MODEL_TOP_P", minimum=0.0, maximum=1.0),
             model_seed=_optional_int("FC_MODEL_SEED"),

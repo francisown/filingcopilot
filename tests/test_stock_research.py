@@ -805,7 +805,9 @@ class UnavailableRepairReviewer:
         assert review
         self.calls += 1
         if self.calls > 1:
-            return {"message": {"content": ""}, "finish_reason": "length"}
+            # A malformed review, not token truncation: exercise the format
+            # retry path rather than the truncation-escalation path.
+            return {"message": {"content": ""}, "finish_reason": "stop"}
         return {
             "message": {
                 "content": json.dumps(approve("", json.loads(messages[1]["content"])["claims"]))

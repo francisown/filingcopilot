@@ -4,6 +4,14 @@ FilingCopilot searches company filings, calculates financial indicators and save
 the evidence behind each answer. The browser, CLI, REST API and MCP server use the
 same research service.
 
+## Five-minute reading path
+
+1. [Architecture](architecture.md): data flow, evidence ledger and trust boundaries.
+2. [`agent_execution.py`](../src/filingcopilot/agent_execution.py): tool loop, budgets and stop conditions.
+3. [`verification.py`](../src/filingcopilot/verification.py): claim binding, numeric checks and withholding.
+4. [Evaluation](evaluation.md): measured coverage, latency, tokens and limitations.
+5. [Demo script](demo-script.md): a three-minute walkthrough for a reviewer.
+
 ## Try the offline example
 
 Install the project using the [installation guide](installation.md), then run:

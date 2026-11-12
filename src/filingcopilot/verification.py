@@ -1371,9 +1371,11 @@ class _SubmissionVerifier:
             if self.semantic_review is None:
                 self.errors.append("Narrative verification unavailable; descriptive claims were withheld")
             else:
-                # One reviewer call is one network hop. A single failure used to
-                # withhold every narrative claim at once, so retry before deciding
-                # the whole answer cannot be verified.
+                # One retry is the bounded safety net for a transient reviewer
+                # failure; without it a single network hop would withhold every
+                # narrative claim. The gateway uses one review attempt and the
+                # transport retries a malformed payload once, so the total is
+                # bounded rather than multiplied by every layer.
                 batch = None
                 for _attempt in range(2):
                     try:

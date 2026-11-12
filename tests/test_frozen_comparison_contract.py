@@ -15,6 +15,7 @@ from scripts.compare_frozen_agents import (
 @pytest.mark.parametrize('change', [
     {'model': 'different'}, {'review_model': 'different'}, {'research_timeout': 30},
     {'min_model_interval': 0}, {'review_max_tokens': 20}, {'max_rounds': 1},
+    {'review_attempts': 3},
 ])
 def test_resume_rejects_different_model_or_budget_without_calls(change):
     settings = Settings(home=Path('unused-test-only'), model='frozen', review_model='frozen-review')
