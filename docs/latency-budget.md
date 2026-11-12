@@ -178,41 +178,41 @@ final full run selected 16,384 after the 8,192 variants were measured.
 
 ### Full 140-question rerun
 
-Three full configurations were recorded after the review changes:
+Four full configurations were recorded after the review changes:
 
-| 140 questions | Baseline | 8,192, no escalation | 8,192 + length escalation | 16,384 final |
-|---|---:|---:|---:|---:|
-| Model-backed P50 | 237.7 s | 191.0 s | 187.0 s | **155.1 s** |
-| Model-backed P95 | 842.1 s | **618.3 s** | 682.5 s | 586.7 s |
-| Answerable answered | 97 / 100 | **98 / 100** | 96 / 100 | 96 / 100 |
-| Claims | 407 | 400 | 405 | **406** |
-| Unsupported / numeric errors | 0 / 0 | 0 / 0 | 0 / 0 | **0 / 0** |
-| Review `finish_reason=length` rows | — | 6 | 5 | **0** |
-| One-claim negation answers | 0 | 2 | 0 | **0** |
+| 140 questions | Baseline | 8,192, no escalation | 8,192 + length escalation | 16,384 pre-coverage | 16,384 + coverage-skip |
+|---|---:|---:|---:|---:|---:|
+| Model-backed P50 | 237.7 s | 191.0 s | 187.0 s | 155.1 s | **121.3 s** |
+| Model-backed P95 | 842.1 s | 618.3 s | 682.5 s | 586.7 s | **464.6 s** |
+| Answerable answered | 97 / 100 | 98 / 100 | 96 / 100 | 96 / 100 | **98 / 100** |
+| Claims | 407 | 400 | 405 | 406 | **394** |
+| Unsupported / numeric errors | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | **0 / 0** |
+| Review `finish_reason=length` rows | — | 6 | 5 | 0 | **2** |
+| One-claim negation answers | 0 | 2 | 0 | 0 | **2** |
 
 The 8,192-only run is faster and answers one more row, but it silently drops
 four claims from each of two negation answers. The 8,192-plus-escalation run
 prevents the one-claim truncation but is slower and has lower coverage. The
 16,384 run has no review truncation, 406 claims (one below the baseline), and
-the best P50/P95 of the three. It still has four partial answerable rows versus
-three in the baseline, so it is faster but not a clean quality win.
+good P50/P95. The final coverage-skip run skips answer-coverage review when a
+repair is already pending; it reaches **98/100 and P50 121.3 s / P95 464.6 s**,
+but claims fall to 394 and two negation answers are one claim each. That is a
+real speed/coverage trade-off, not a free win.
 
-The remaining partials are causality-012/015/019 and negation-001. They are
-review rejection/coverage outcomes, not retrieval or token truncation. The next
-step is a repair-policy change (or a second bounded repair for those cases),
-not split-on-timeout; a split only helps a timed-out or truncated batch.
-
-The 16,384 configuration is retained. Do not use the 8,192-only 618.3 s P95 or
-the six-row 349.6 s result as the product number.
+The two remaining partials are `negation-013` and `negation-018`; two other
+negation rows are intentionally short. They are answer-shaping/review outcomes,
+not retrieval or token truncation. Do not use the 8,192-only 618.3 s P95 or the
+six-row 349.6 s result as the product number.
 
 ## Current status
 
 Landed: a bounded review attempt cap, one verifier retry, compact scalar verdict
-fields, one review-driven repair, request IDs and an optional access log, plus
-the evidence-preview UI and backend event. The final 16,384-token full run is
-P50 155.1 s / P95 586.7 s, 96/100 answerable rows, 406 claims, zero unsupported
-claims and no review `length` rows. Pending: a repair-policy change for the four
-remaining partial answerable rows (`causality-012/015/019`, `negation-001`).
+fields, one review-driven repair, coverage review skipped on non-final repair
+passes, request IDs and an optional access log, plus the evidence-preview UI and
+backend event. The final coverage-skip full run is P50 121.3 s / P95 464.6 s,
+98/100 answerable rows, 394 claims, zero unsupported claims, two review `length`
+turns and two intentionally short negation answers. Remaining work is independent
+human review and a repair-policy pass for the two partials (`negation-013/018`).
 Do not present the six-row 349.6 s check as a full-population P50/P95.
 
 ## What this optimization will not do

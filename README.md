@@ -48,19 +48,19 @@ FilingCopilot is a research workspace for SEC filings that runs on your machine.
 
 ## Latest snapshot
 
-Latest local run: 2026-11-11, 140 questions, DeepSeek research and Mimo review, four questions processed in parallel. The 100 answerable questions and 40 boundary/policy questions are reported separately.
+Latest local run: 2026-11-12, 140 questions, DeepSeek research and Mimo review, four questions processed in parallel. The 100 answerable questions and 40 boundary/policy questions are reported separately.
 
 | What | Result |
 |---|---:|
-| Answerable questions with a complete answer | **96 / 100** |
+| Answerable questions with a complete answer | **98 / 100** |
 | Expected refusals / market-policy cases | **20 / 20 · 20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Delivered claims with a source citation | **100%** |
-| Regression tests | **2,358 passed** |
+| Regression tests | **2,360 passed** |
 
-Four of the 100 answerable questions returned partial answers with explicit gaps (`causality-012/015/019`, `negation-001`); the rest returned complete answers. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
+Two of the 100 answerable questions returned partial answers with explicit gaps (`negation-013/018`); the rest returned complete answers. Two negation answers are intentionally short and remain visible as a quality caveat. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
 
-**Speed:** numeric questions are usually answered in under a second; long narrative questions call the model and an independent reviewer, so they can take minutes. The pre-change full run had a model-backed P95 of 842 seconds. The post-change 140-question rerun reached **P50 155 s / P95 587 s** with 96/100 answerable rows and no review truncation; the faster 8,192-only variant was rejected because it silently dropped claims. See [Latency budget](docs/latency-budget.md) for the trade-off.
+**Speed:** numeric questions are usually answered in under a second; long narrative questions call the model and an independent reviewer, so they can take minutes. The pre-change full run had a model-backed P95 of 842 seconds. The post-change 140-question rerun reached **P50 121 s / P95 465 s** with 98/100 answerable rows; coverage review is skipped on non-final repair passes. Two review `length` turns remain and two negation answers are short, so this is a speed/coverage trade-off rather than a free win. See [Latency budget](docs/latency-budget.md).
 
 ## Try it in 60 seconds
 

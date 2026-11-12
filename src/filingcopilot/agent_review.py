@@ -794,14 +794,39 @@ class ReviewMixin:
             semantic_review,
             state["focus_ticker"],
         )
+        # This pass will repair and re-review, so a coverage judgment of the
+        # current draft would be stale before it could influence delivery. The
+        # claim errors already drive the repair; coverage runs again once the
+        # repair budget is exhausted or no repair is needed.
+        repair_possible = bool(
+            not stopped()
+            and errors
+            and not state["review_failed"]
+            and state["repairs"] < 2
+            and (not state.get("review_rejected") or state.get("review_repairs", 0) < 1)
+            and state["rounds"] < state.get("round_limit", self.settings.max_rounds)
+        )
         if question_shape(state["question"]) in {"cause", "risk"}:
             # When the source review already failed, a coverage review could not
             # change the outcome and would only add a second review call.
-            if not state.get("review_failed"):
+            if state.get("review_failed"):
+                pass
+            elif repair_possible:
+                # Drop any prior pass's verdict/key so it cannot be reused for
+                # a draft this pass is about to replace.
+                state["answer_coverage_review"] = None
+                state["answer_coverage_key"] = None
+                state["trace"].append({
+                    "step": len(state["trace"]) + 1,
+                    "stage": "coverage_review_skipped",
+                    "reason": "repair_pending",
+                })
+            else:
                 self._review_answer_coverage(state, verified, scope_key)
             if state["review_failed"]:
                 errors.append("Independent answer completeness review unavailable; coverage remains unconfirmed.")
-            elif (state["answer_coverage_review"]["supported"]
+            elif (state.get("answer_coverage_review")
+                  and state["answer_coverage_review"]["supported"]
                   and not state.get("review_independence_warning")):
                 # The final coverage pass explicitly considered every declared
                 # gap using only the delivered answer. It owns completeness;

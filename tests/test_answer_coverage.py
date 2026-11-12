@@ -110,13 +110,16 @@ def test_final_coverage_cannot_read_omitted_source_content(tools):
     assert any("coverage" in e for e in result["errors"])
 
 
-@pytest.mark.parametrize("question,claim,missing", [
+@pytest.mark.parametrize("question,claim,missing,repairs,action,searched", [
     ("Why did FY2025 operating margin improve?", "Gross margin declined and operating expenses increased.",
-     "Explain how operating expenses grew more slowly than revenue and offset the gross-margin decline."),
+     "Explain how operating expenses grew more slowly than revenue and offset the gross-margin decline.",
+     2, "end", False),
     ("What supply and regulatory risks are disclosed?", "Supply disruptions could harm operations.",
-     "The requested regulatory risk is missing from the answer."),
+     "The requested regulatory risk is missing from the answer.", 0, "reason", True),
 ])
-def test_whole_answer_coverage_is_checked_even_without_author_gaps(tools, monkeypatch, question, claim, missing):
+def test_whole_answer_coverage_is_checked_even_without_author_gaps(
+        tools, monkeypatch, question, claim, missing, repairs, action, searched
+):
     tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": (
         "Supply disruptions could harm operations. Regulatory restrictions may limit sales. "
         "Gross margin declined. Revenue grew faster than operating expenses, improving operating margin."
@@ -139,15 +142,17 @@ def test_whole_answer_coverage_is_checked_even_without_author_gaps(tools, monkey
             ]})}}
 
     state = dict(submission=Submission(claims=[Claim(kind="narrative", statement=claim, evidence_ids=["p1"])]),
-                 tools=tools, question=question, focus_ticker="AAPL", rounds=1, repairs=0,
+                 tools=tools, question=question, focus_ticker="AAPL", rounds=1, repairs=repairs,
                  messages=[], verified=[], errors=[], trace=[], tool_count=0, action="",
                  usage=dict(model_calls=0, prompt_tokens=0, completion_tokens=0, total_tokens=0))
     result = ResearchAgent(Settings(home=tools.corpus.home, max_rounds=4), Gateway()).verify(state)
     assert any(c["kind"] == "answer_coverage" for c in contexts[-1]["claims"])
     assert len(result["verified"]) == 1, "Incomplete coverage must not erase a supported sentence"
-    assert result["action"] == "reason"
+    assert result["action"] == action
     assert any("coverage" in error.casefold() for error in result["errors"])
-    assert searches and searches[0]["ticker"] == "AAPL"
+    assert bool(searches) is searched
+    if searched:
+        assert searches[0]["ticker"] == "AAPL"
     assert result["submission"].gaps, "A required omission stays visible if repair ends here"
 
 
@@ -255,6 +260,83 @@ def test_optional_withheld_clause_needs_exact_independent_coverage(tools, covera
     assert len(answer.answer) == 1
     assert answer.status == expected
     assert all("largest" not in c["text"] for c in answer.answer)
+
+
+def test_repair_possible_skips_cause_coverage_review(tools):
+    """A cause/risk pass that will repair must not spend a serial coverage call."""
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    contexts = []
+
+    class Gateway:
+        def complete(self, messages, schemas, review=False):
+            context = json.loads(messages[-1]["content"])
+            contexts.append(context)
+            return {
+                "model": "reviewer",
+                "review_independence": "independent",
+                "message": {"content": json.dumps({"verdicts": [
+                    {"index": c["index"], "supported": False,
+                     "reason": "The cited passage does not explain the net change."}
+                    for c in context["claims"]
+                ]})},
+            }
+
+    state = dict(submission=Submission(claims=[Claim(kind="narrative", evidence_ids=["p1"],
+                 statement="Gross margin declined and operating expenses increased.")]), tools=tools,
+                 question="Why did FY2025 gross margin change?", focus_ticker="AAPL",
+                 rounds=1, repairs=0, messages=[], verified=[], errors=[], trace=[],
+                 usage=dict(model_calls=0, prompt_tokens=0, completion_tokens=0, total_tokens=0), action="")
+    result = ResearchAgent(Settings(home=tools.corpus.home), Gateway()).verify(state)
+
+    assert contexts, "The claim still needs its source review"
+    assert all(c["claims"][0]["kind"] != "answer_coverage" for c in contexts), (
+        "The stale coverage pass must be skipped when a repair is pending"
+    )
+    assert result["answer_coverage_review"] is None
+    assert result["answer_coverage_key"] is None
+    assert result["action"] == "reason"
+    assert any(
+        step.get("stage") == "coverage_review_skipped" and step.get("reason") == "repair_pending"
+        for step in result["trace"]
+    )
+
+
+def test_exhausted_repair_budget_runs_final_coverage_review(tools):
+    """The last pass still makes the coverage call that governs delivery."""
+    tools.ledger["p1"] = tools.corpus.evidence("p1", tools.as_of)
+    contexts = []
+
+    class Gateway:
+        def complete(self, messages, schemas, review=False):
+            context = json.loads(messages[-1]["content"])
+            contexts.append(context)
+            coverage = context["claims"][0]["kind"] == "answer_coverage"
+            return {
+                "model": "reviewer",
+                "review_independence": "independent",
+                "message": {"content": json.dumps({"verdicts": [
+                    {"index": c["index"], "supported": coverage or c["index"] == 0,
+                     "reason": "Coverage judged on the delivered answer."
+                     if coverage else "Only the first claim is supported."}
+                    for c in context["claims"]
+                ]})},
+            }
+
+    state = dict(submission=Submission(claims=[
+                     Claim(kind="narrative", evidence_ids=["p1"],
+                           statement="Supply disruptions could harm operations."),
+                     Claim(kind="narrative", evidence_ids=["p1"],
+                           statement="Management expects no impact at all."),
+                 ]), tools=tools,
+                 question="What supply risks are disclosed?", focus_ticker="AAPL",
+                 rounds=1, repairs=2, messages=[], verified=[], errors=[], trace=[],
+                 usage=dict(model_calls=0, prompt_tokens=0, completion_tokens=0, total_tokens=0), action="")
+    result = ResearchAgent(Settings(home=tools.corpus.home), Gateway()).verify(state)
+
+    assert any(c["claims"][0]["kind"] == "answer_coverage" for c in contexts)
+    assert not any(step.get("stage") == "coverage_review_skipped" for step in result["trace"])
+    assert result["action"] == "end"
+    assert result["answer_coverage_key"] is not None
 
 
 @pytest.mark.parametrize("question", [

@@ -26,7 +26,7 @@ Those review limits are the pre-optimization configuration recorded by that run.
 | Reported tokens | **4,868,227** |
 | Runner errors / deadline timeouts | **0 / 0** |
 | Raw SEC numeric | **100 matched / 0 mismatched / 27 unassessed** |
-| Regression suite | **2,358 passed** |
+| Regression suite | **2,360 passed** |
 
 Three answerable rows delivered partial answers: `semantic-causality-015`,
 `semantic-causality-019` and `semantic-risk-018`. They retain explicit gaps
@@ -40,10 +40,17 @@ A 140-question rerun with the review changes and a 16,384-token review ceiling
 produced model-backed **P50 155.1 s / P95 586.7 s**, **96/100 answerable rows**,
 **406 claims**, no review `length` rows, and zero unsupported or numeric errors.
 It is faster than the frozen baseline (237.7 s / 842.1 s) but not a clean quality
-win: the baseline answered 97/100 with 407 claims, and the rerun has four partial
-answerable rows. A faster 8,192-only run (P95 618.3 s, 98/100) was rejected
-because it silently dropped four claims from each of two negation answers; an
-8,192-plus-escalation run was also slower and had lower coverage. See the
+win: the baseline answered 97/100 with 407 claims, and the rerun had four partial
+answerable rows.
+
+A further rerun skipped answer-coverage review on non-final repair passes. It
+produced **P50 121.3 s / P95 464.6 s**, **98/100 answerable rows**, **394 claims**,
+two review `length` turns, and zero unsupported or numeric errors. Coverage and
+speed improved, but claims fell by 12 and two negation answers are intentionally
+short (one claim each); this is a speed/coverage trade-off, not a free win. The
+faster 8,192-only run (P95 618.3 s, 98/100) was rejected because it silently
+dropped four claims from each of two negation answers; an 8,192-plus-escalation
+run was slower and had lower coverage. See the
 [latency budget](latency-budget.md) for the per-configuration comparison.
 
 The latency tail is concentrated in the independent review stage, not retrieval:
