@@ -21,7 +21,7 @@ TARGETS = {
     ROOT / "README.md": re.compile(r"(\| Regression tests \| \*\*)([0-9][0-9,]*)( passed\*\* \|)"),
     ROOT / "README.zh-CN.md": re.compile(r"(\| 回归测试 \| \*\*)([0-9][0-9,]*)( passed\*\* \|)"),
     ROOT / "docs" / "evaluation.md": re.compile(
-        r"(\| Regression suite \| \*\*)([0-9][0-9,]*)( passed\*\* \|)"
+        r"(\| (?:Regression suite|Current regression suite) \| \*\*)([0-9][0-9,]*)( passed\*\* \|)"
     ),
     ROOT / "docs" / "case-study.md": re.compile(r"(\*\*)([0-9][0-9,]*)( tests\*\*)"),
     ROOT / "docs" / "case-study.zh-CN.md": re.compile(r"(\*\*)([0-9][0-9,]*)( 个测试\*\*)"),

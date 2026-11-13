@@ -5,18 +5,18 @@ effective wall-clock limit for every question shape; narrative routes do not
 silently extend it. Set `FC_RESEARCH_TIMEOUT=0` or `none` only for an explicitly
 unlimited local run.
 
-## Latest measured workflow
+## Frozen pre-optimization baseline
 
-The latest full record used DeepSeek for research and Mimo for review. Its
-model-backed latency was **237.7 seconds P50 / 842.1 seconds P95** across the
+The frozen baseline full record used DeepSeek for research and Mimo for review.
+Its model-backed latency was **237.7 seconds P50 / 842.1 seconds P95** across the
 model-using questions. The overall median is much lower because deterministic
 numeric, cross-period, refusal and policy rows do not call the model.
 
 The run had no runner errors or deadline timeouts. This does not mean that every
 question is fast: model sampling can change the tail between runs. The complete
-measured values are in the [latest workflow report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json).
-These numbers describe the pre-optimization configuration; a new paired run is
-required before quoting any improved latency.
+measured values are in the [frozen baseline report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json).
+These numbers describe the pre-optimization configuration; the latest
+coverage-skip result is in the full-rerun table below.
 
 ## Where the time goes
 
@@ -116,8 +116,9 @@ serial review work first, then author rounds, and only then tune retrieval.
    The compact contract shortens those fields. The token ceiling is a
    truncation guard, not a latency target; the field `maxLength` values are the
    output contract. Keep the safety ceiling at 16,384: 6,144 and 8,192 both
-   produced `finish_reason=length` in full runs and dropped claims. The final
-   16,384 full run had no length rows. If a batch still truncates, split it
+   produced `finish_reason=length` in full runs and dropped claims. The
+   pre-coverage 16,384 run had no length rows; the coverage-skip run has two.
+   If a batch still truncates, split it
    rather than re-sending the same oversized request. Do not reduce the evidence
    set to make the prompt smaller.
 3. **One repair round.** A rejected claim already has a deterministic fallback:
@@ -193,9 +194,9 @@ Four full configurations were recorded after the review changes:
 The 8,192-only run is faster and answers one more row, but it silently drops
 four claims from each of two negation answers. The 8,192-plus-escalation run
 prevents the one-claim truncation but is slower and has lower coverage. The
-16,384 run has no review truncation, 406 claims (one below the baseline), and
-good P50/P95. The final coverage-skip run skips answer-coverage review when a
-repair is already pending; it reaches **98/100 and P50 121.3 s / P95 464.6 s**,
+pre-coverage 16,384 run has no review truncation, 406 claims (one below the
+baseline), and good P50/P95. The final coverage-skip run skips answer-coverage
+review when a repair is already pending; it reaches **98/100 and P50 121.3 s / P95 464.6 s**,
 but claims fall to 394 and two negation answers are one claim each. That is a
 real speed/coverage trade-off, not a free win.
 

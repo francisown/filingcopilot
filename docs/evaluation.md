@@ -1,10 +1,11 @@
 # Evaluation
 
-This page records the latest full workflow measurement. Raw intermediate runs and
-provider request logs stay local; the full report, results, failures and numeric
-audit are kept as the machine-readable validation record.
+This page records the frozen pre-optimization baseline and the latest
+post-optimization reruns. Raw intermediate runs and provider request logs stay
+local; the full report, results, failures and numeric audit are kept as the
+machine-readable validation record.
 
-## Latest full workflow record
+## Frozen pre-optimization baseline (2026-11-02)
 
 The [machine-readable report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json)
 contains the configuration fingerprint, denominators and run metadata. It used the
@@ -26,7 +27,7 @@ Those review limits are the pre-optimization configuration recorded by that run.
 | Reported tokens | **4,868,227** |
 | Runner errors / deadline timeouts | **0 / 0** |
 | Raw SEC numeric | **100 matched / 0 mismatched / 27 unassessed** |
-| Regression suite | **2,360 passed** |
+| Current regression suite | **2,360 passed** |
 
 Three answerable rows delivered partial answers: `semantic-causality-015`,
 `semantic-causality-019` and `semantic-risk-018`. They retain explicit gaps
@@ -69,7 +70,7 @@ human accuracy study.
 
 ## Retrieval
 
-The [latest retrieval snapshot](validation/retrieval-diversity-2026-10-29.json)
+The [2026-10-29 frozen retrieval snapshot](validation/retrieval-diversity-2026-10-29.json)
 uses 200 bilingual questions with exact passage gold data, embedding disabled and
 the diversity reranker.
 
