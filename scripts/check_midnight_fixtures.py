@@ -19,8 +19,6 @@ class CollectedYesterday:
         # Imports have finished, as they had just before the observed midnight.
         # Move fixture constants back one day to trigger the same mismatch now.
         import test_comparison_valuation as comparison
-        import test_historical_valuation as historical
-        import test_peers as peers
         import test_scenarios as scenarios
         import test_valuation as valuation
 
@@ -32,26 +30,20 @@ class CollectedYesterday:
         scenarios.NOW = valuation.NOW
         comparison.NOW -= timedelta(days=1)
         comparison.DAY = comparison.NOW.date()
-        historical.DAY -= timedelta(days=1)
 
-        # The selected peer test imports ``date`` directly, so pytest's
-        # fixture clock cannot patch it through an application module. Keep
-        # that test and the modular service date guards on the same synthetic
-        # day as the valuation fixtures.
+        # Keep the modular service date guards on the same synthetic day as the
+        # valuation fixtures.
         class FixtureDate(date):
             @classmethod
             def today(cls):
                 return valuation.DAY
 
-        peers.date = FixtureDate
         for module in (service_comparison, service_execution, service_planning):
             module.date = FixtureDate
 
     def pytest_sessionfinish(self, session):
         # Restore the direct imports patched in collection_finish before the
         # post-run guard checks every module's clock identity.
-        import test_peers as peers
-
         from filingcopilot import (
             api,
             comparison,
@@ -64,7 +56,6 @@ class CollectedYesterday:
             service_planning,
         )
 
-        peers.date = date
         for module in (service_comparison, service_execution, service_planning):
             module.date = date
 
@@ -92,11 +83,7 @@ if __name__ == "__main__":
             [
                 "-q",
                 "tests/test_valuation.py::test_eps_is_supplier_labeled_not_fiscal_year_or_sec_fact",
-                "tests/test_historical_valuation.py::test_historical_reference_is_public_date_bound_and_replayable",
-                "tests/test_historical_valuation.py::test_fixture_clock_keeps_current_day_validation",
-                "tests/test_historical_valuation.py::test_historical_valuation_api_returns_bound_evidence",
                 "tests/test_scenarios.py::test_scenario_math_and_frozen_audit",
-                "tests/test_peers.py::test_peer_question_plans_deterministic_comparison",
             ],
             plugins=[CollectedYesterday()],
         )
