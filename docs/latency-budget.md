@@ -14,7 +14,7 @@ numeric, cross-period, refusal and policy rows do not call the model.
 
 The run had no runner errors or deadline timeouts. This does not mean that every
 question is fast: model sampling can change the tail between runs. The complete
-measured values are in the [frozen baseline report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json).
+measured values are in the tables below.
 These numbers describe the pre-optimization configuration; the latest
 coverage-skip result is in the full-rerun table below.
 

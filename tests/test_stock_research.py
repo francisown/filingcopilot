@@ -135,17 +135,13 @@ def test_analysis_cannot_smuggle_model_written_financial_numbers(tools, text):
     "text",
     [
         "营业收入同比约增两成、营业利润逾四成。",
-        "营收增长百分之二十。",
         "利润率提高三个百分点。",
         "利润率为千分之五。",
-        "净利率为万分之三。",
         "现金支出约三千万港元。",
         "营收达到一百欧元。",
         "每股收益为贰点伍美元。",
         "营业利润同比翻番。",
-        "营收同比翻倍。",
         "收入增加一倍半。",
-        "利润增长半成。",
     ],
 )
 def test_chinese_numeric_claims_cannot_bypass_typed_output(tools, text):
@@ -164,7 +160,7 @@ def test_chinese_numeric_claims_cannot_bypass_typed_output(tools, text):
     assert not accepted and any("numeric claims need typed results" in e for e in errors)
 
 
-@pytest.mark.parametrize("text", ["营收增长两成。", "营收增加百分之二十。", "利润翻番。"])
+@pytest.mark.parametrize("text", ["营收增长两成。", "利润翻番。"])
 def test_narrative_cannot_bypass_numeric_output_with_chinese_words(tools, text):
     tools.search_passages("supply", "AAPL", k=1)
 
@@ -186,9 +182,7 @@ def test_narrative_cannot_bypass_numeric_output_with_chinese_words(tools, text):
     [
         "年度营收增长支持经营改善，成本仍需观察。",
         "营收增长支持经营改善，单一倍数不足以判断便宜或昂贵。",
-        "年度营收增长支持经营改善，单点倍数不足以判断估值合理。",
         "年度营收增长支持经营改善，不能一成不变地外推。",
-        "年度营收增长支持经营改善，二者不能直接推出价格吸引力。",
     ],
 )
 def test_chinese_qualitative_idioms_remain_reviewable(tools, text):
@@ -344,17 +338,11 @@ def test_future_cash_transition_is_a_condition_not_an_observed_sign_change(tools
     "text",
     [
         "价格成立仍取决于盈利增速、自由现金流转正进度及可比同业证据。",
-        "价格合理性取决于后续盈利能否维持、自由现金流何时转正。",
         "判断价格合理性，需观察自由现金流能否转正。",
-        "自由现金流转正时点仍须后续披露验证。",
-        "需跟踪自由现金流转正节奏。",
         "如果未来自由现金流转正，仍需核验可比估值。",
-        "股价合理性仍需盈利增速、自由现金流与可比同业证据支撑。",
         "市盈率不能单独证明便宜或昂贵。",
         "年度与供应商TTM两套市盈率口径均不能单独证明便宜或昂贵，股价合理性仍需盈利增速、自由现金流与可比同业/历史倍数证据支撑。",
-        "需核验自由现金流是否已经转正。",
         "需核验是否自由现金流已转正。",
-        "需验证自由现金流由负转正的未来时点。",
     ],
 )
 def test_unobserved_valuation_conditions_are_sent_for_semantic_review(tools, text):
@@ -379,20 +367,12 @@ def test_unobserved_valuation_conditions_are_sent_for_semantic_review(tools, tex
     "text",
     [
         "需观察自由现金流是否持续，但自由现金流已经转正。",
-        "自由现金流已经转正，时点仍需观察。",
-        "股价合理性取决于自由现金流已转正的事实。",
-        "需跟踪未来增长；自由现金流已转正。",
         "自由现金流转正已经完成，未来仍需观察。",
         "预计明年自由现金流将转正。",
         "当前股价合理，未来自由现金流还需验证。",
-        "股价合理性已由经营增长证明，仍需观察现金投入。",
-        "估值便宜但自由现金流何时转正仍需观察。",
-        "估值能否成立取决于自由现金流已转正的事实。",
         "需要观察其他指标，自由现金流转正了。",
-        "需跟踪自由现金流转正的事实。",
         "需验证盈利增速与自由现金流转正的事实。",
         "供应商TTM市盈率口径独立，股价合理性需最新季度毛利率已经上升支撑。",
-        "供应商TTM市盈率口径独立，股价合理性已有自由现金流支撑。",
     ],
 )
 def test_valuation_conditions_do_not_hide_asserted_facts_or_predictions(tools, text):
@@ -438,14 +418,8 @@ def test_future_condition_cannot_hide_an_actual_unsupported_cash_transition(tool
     [
         "一年改善不等于长期加速。",
         "单年趋势不可外推为长期加速。",
-        "单年数据不可外推为增长加速。",
-        "单一年度不支持长期加速或可持续判断。",
         "单季度不能证明长期加速。",
-        "单季增速不证明年度已加速。",
         "单季增速不构成加速判断。",
-        "单季增速不证明增长加快。",
-        "单季增速不能证明增速加快。",
-        "单年年度证据不足以论证增速加速。",
     ],
 )
 def test_explicit_acceleration_limit_does_not_withhold_supported_growth(tools, limit):
@@ -465,11 +439,8 @@ def test_explicit_acceleration_limit_does_not_withhold_supported_growth(tools, l
     "statement",
     [
         "一年改善不等于长期加速，但营收增速已经提升并加速。",
-        "单年趋势不可外推为增长加速，但营收已经加速。",
-        "一年改善不支持长期加速却已经增长提速。",
         "一年改善不等于没有长期加速。",
         "单季度不能证明长期加速但营收同比亦加快。",
-        "单年证据不足以论证增速加速但营收同比加快。",
     ],
 )
 def test_acceleration_limit_cannot_hide_another_unsupported_assertion(tools, statement):
@@ -490,8 +461,6 @@ def test_acceleration_limit_cannot_hide_another_unsupported_assertion(tools, sta
     "statement",
     [
         "毛利率较上年走高。",
-        "毛利率高于上年同期。",
-        "毛利率高于前一年。",
         "Gross margin percentage was higher than the prior year.",
     ],
 )

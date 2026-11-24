@@ -1,14 +1,12 @@
 # Evaluation
 
 This page records the frozen pre-optimization baseline and the latest
-post-optimization reruns. Raw intermediate runs and provider request logs stay
-local; the full report, results, failures and numeric audit are kept as the
-machine-readable validation record.
+post-optimization reruns. Raw intermediate runs, provider request logs and the
+full machine-readable result files stay local; they are not committed.
 
 ## Frozen pre-optimization baseline (2026-11-02)
 
-The [machine-readable report](validation/live-full-deepseek-mimo-2026-11-02-final/report.json)
-contains the configuration fingerprint, denominators and run metadata. It used the
+The recorded baseline used the
 140-question bilingual set, a 2026-10-08 knowledge date, DeepSeek for research,
 Mimo for review, the diversity reranker, four workers (four concurrent question runs), a 3,000-second cooperative
 research ceiling, a 300-second review timeout and a 16,384-token review budget.
@@ -27,7 +25,6 @@ Those review limits are the pre-optimization configuration recorded by that run.
 | Reported tokens | **4,868,227** |
 | Runner errors / deadline timeouts | **0 / 0** |
 | Raw SEC numeric | **100 matched / 0 mismatched / 27 unassessed** |
-| Current regression suite | **2,360 passed** |
 
 Three answerable rows delivered partial answers: `semantic-causality-015`,
 `semantic-causality-019` and `semantic-risk-018`. They retain explicit gaps
@@ -70,7 +67,7 @@ human accuracy study.
 
 ## Retrieval
 
-The [2026-10-29 frozen retrieval snapshot](validation/retrieval-diversity-2026-10-29.json)
+The 2026-10-29 frozen retrieval measurement (kept locally, not committed)
 uses 200 bilingual questions with exact passage gold data, embedding disabled and
 the diversity reranker.
 
@@ -102,11 +99,10 @@ domain-specific model is cached and validated.
 
 ## External reference sets
 
-These records are separate from the live workflow and use their own gold data:
-
-- [FinanceBench full-filing retrieval](validation/financebench-full-2026-10-26.json)
-- [FinanceBench answer support](validation/financebench-support-2026-10-26.json)
-- [FinDER answer support](validation/finder-support-2026-10-26.json)
+These records are separate from the live workflow and use their own gold data.
+The FinanceBench full-filing, FinanceBench answer-support and FinDER
+answer-support records are produced locally by the evaluator and are not
+committed.
 
 For answer support, `full / partial / unsupported` is the strict classification.
 The evaluable subset is the only denominator that can be interpreted as answer
@@ -147,6 +143,27 @@ python -m compileall -q src scripts
 
 The full extras match CI. A core `.[dev]` install still collects the suite;
 optional evaluation and embedding tests skip explicitly when their packages are
-absent. The full live evaluation requires the caller's own provider
-configuration and is intentionally not run as part of CI. API keys and local corpora are excluded by
-`.gitignore`.
+absent.
+
+The external retrieval checks are opt-in. Datasets, PDFs and model weights are
+gitignored, and upstream files can change the parsed-document set:
+
+```powershell
+# FinanceBench JSONL + manifest; PDFs are cached under evaluation/external/data/
+python scripts/fetch_financebench.py
+
+# Optional BGE reranker (570 MB ONNX); skip for the lexical default
+python scripts/fetch_bge_reranker.py
+
+# Evidence-page evaluation (150 rows) and FinDER (1,085 rows)
+python scripts/evaluate_financebench.py --scope company_year --chunk-strategy section `
+  --chunk-size 3000 --parent-chars 4000 --top1-rerank title --rerank off `
+  --output artifacts/financebench-eval.json
+python scripts/evaluate_finder.py --scope company --rerank flashrank `
+  --output artifacts/finder-eval.json
+```
+
+The estimates in the tables above are recorded development measurements, not a
+byte-for-byte guarantee. The live 140-question model run is not reproduced by
+these commands; it needs provider credentials and is intentionally not part of
+CI. API keys, local corpora and raw run reports are excluded by `.gitignore`.

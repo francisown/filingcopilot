@@ -56,9 +56,8 @@ Latest local run: 2026-11-12, 140 questions, DeepSeek research and Mimo review, 
 | Expected refusals / market-policy cases | **20 / 20 · 20 / 20** |
 | Unsupported claims / numeric errors | **0 / 0** |
 | Delivered claims with a source citation | **100%** |
-| Regression tests | **2,360 passed** |
 
-Two of the 100 answerable questions returned partial answers with explicit gaps (`negation-013/018`); the rest returned complete answers. Two negation answers are intentionally short and remain visible as a quality caveat. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md). These are engineering measurements, not an independent human accuracy study.
+Two of the 100 answerable questions returned partial answers with explicit gaps (`negation-013/018`); the rest returned complete answers. Two negation answers are intentionally short and remain visible as a quality caveat. Latency, token counts, the numeric audit and the exact question IDs are in [Evaluation](docs/evaluation.md); raw run records stay local and are not committed. These are engineering measurements, not an independent human accuracy study.
 
 **Speed:** numeric questions are usually answered in under a second; long narrative questions call the model and an independent reviewer, so they can take minutes. The pre-change full run had a model-backed P95 of 842 seconds. The post-change 140-question rerun reached **P50 121 s / P95 465 s** with 98/100 answerable rows; coverage review is skipped on non-final repair passes. Two review `length` turns remain and two negation answers are short, so this is a speed/coverage trade-off rather than a free win. See [Latency budget](docs/latency-budget.md).
 
@@ -208,8 +207,11 @@ python -m compileall -q src scripts
 
 The full extras match CI. A core `.[dev]` install also collects the suite; tests
 that need pandas, fastembed or pypdf skip explicitly when those extras are absent.
-After changing the suite, keep the published count in sync with
-`python scripts/update_validation_counts.py <count> --write` and verify it with
-`--check`. The external benchmark data and local filing cache are not committed. Review the licenses in [evaluation/external/README.md](evaluation/external/README.md) before fetching non-commercial datasets.
+`python -m pytest -q -m "not slow"` runs only the fast rule subset, and
+`python scripts/run_quality_checks.py --profile frontend` runs the JavaScript and
+UI harness checks. The external benchmark data, local filing cache and raw run
+reports are not committed. Review the licenses in
+[evaluation/external/README.md](evaluation/external/README.md) before fetching
+non-commercial datasets.
 
 FilingCopilot is an independent engineering project. It is not investment advice, a production credit-decision system, or a certified model.

@@ -69,10 +69,13 @@ claim is misleading, not partial.
 
    ```powershell
    .\.venv\Scripts\python.exe .\scripts\export_semantic_blind_sample.py `
-     docs\validation\live-full-deepseek-mimo-2026-11-02-final\results.json `
+     artifacts\live-run\results.json `
      --size 60 `
      --output artifacts\human\blind-sample.json
    ```
+
+   The first argument is the `results.json` from one of your own local runs;
+   raw run records are not committed.
 
 2. Build the offline review page. It has no network calls and does not contain
    the private decision key.
@@ -102,6 +105,30 @@ claim is misleading, not partial.
 5. Publish the protocol, the sample hash, the reviewer count, the label
    distribution, the disagreement rate and the adjudicated result. Do not
    publish reviewer identities without consent.
+
+## Minimum independent-review protocol
+
+The automated review pass is self-review and does not satisfy this protocol.
+Before any claim of human relevance or financial correctness:
+
+- Draw from delivered answers, rejected drafts, refusals and numeric-only answers,
+  not only successful claims. A minimum practical target is 60 questions with at
+  least 10 from each stratum (metrics-generated, annual comparison,
+  risk/qualitative, negation, and refusal).
+- Reviewers see the question, answer, cited evidence and package; they do not see
+  the model name or the author's intended verdict.
+- For each answer record separately: claim support, period/unit/currency/subject
+  correctness, arithmetic from cited inputs, disclosed assumptions and missing
+  evidence, overconfidence or investment-advice wording, and whether the reviewer
+  would trust it as a research draft.
+- Resolve disagreement with a third reviewer or retain it as a reported
+  disagreement; do not average it away.
+- Report raw counts and 95% intervals, the reviewer identity class, and
+  false-support examples, not only aggregate percentages. Keep self-review and
+  independent review in separate columns.
+
+**Status: pending.** No independent domain reviewer has completed this protocol.
+The self-review and retrieval measurements are not a substitute for it.
 
 ## User-value pilot
 

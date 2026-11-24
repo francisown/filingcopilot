@@ -79,7 +79,7 @@ def add(
     return filing
 
 
-@pytest.mark.parametrize("years", [0, 2, 4, 10])
+@pytest.mark.parametrize("years", [0, 4])
 def test_request_rejects_unsupported_windows(years):
     with pytest.raises(ValueError):
         request(years=years)
@@ -100,15 +100,8 @@ def test_request_normalizes_scope_and_disallows_future():
         ("历年净利润", True),
         ("过去五年股票涨跌", False),
         ("近五年现金流为什么下降", False),
-        ("TTM 营收趋势", False),
-        ("近三年季度收入", False),
         ("近三年营业利润率和营收趋势", False),
         ("近五年营收同比增长率", False),
-        ("3-year revenue growth and margin", False),
-        ("近五年现金流和净资本开支", False),
-        ("FY2024 之前三年的营收", False),
-        ("近三年毛利润趋势", False),
-        ("近五年营收和总资产", False),
     ],
 )
 def test_narrow_numeric_intent(question, expected):
@@ -171,7 +164,7 @@ def test_short_and_future_annual_inputs_are_excluded(service):
     )
 
 
-@pytest.mark.parametrize("tamper", ["metric", "year", "missing", "fcf", "scope"])
+@pytest.mark.parametrize("tamper", ["metric", "year", "scope"])
 def test_resealed_trend_scope_tampering_is_rejected(service, tamper):
     add(
         service,

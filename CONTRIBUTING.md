@@ -40,16 +40,17 @@ path; on Windows, use `.\.venv\Scripts\python.exe`.
 .venv/bin/python scripts/check_retrieval_gold.py
 ```
 
-UI checks also require Node.js:
+UI checks also require Node.js. Run the whole frontend profile in one command:
 
 ```bash
-node scripts/check_i18n_ui.cjs
-node scripts/check_research_ui.cjs
+python scripts/run_quality_checks.py --profile frontend
 ```
 
-The [CI workflow](.github/workflows/ci.yml) contains the complete list. Tests use isolated
-fixtures; live provider and model experiments are separate. For test profiles and recorded
-commands, see [test-profiles.md](docs/test-profiles.md).
+Tests use isolated fixtures; live provider and model experiments are separate.
+Use `pytest -q -m "not slow"` for the fast rule subset and plain `pytest -q` for
+the complete suite. The `slow` marker covers databases, services, concurrency,
+subprocesses and expensive indexing. CI runs the complete suite once per
+platform, the frontend profile, and the packaging checks.
 
 ## Working with sources and languages
 

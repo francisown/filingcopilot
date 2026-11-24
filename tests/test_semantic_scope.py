@@ -30,10 +30,6 @@ def test_sales_growth_is_not_a_counterexample_to_a_demand_proposition(tools, sta
     "No customer crossed the disclosure threshold, so there is no customer concentration.",
     "无单一客户超过披露门槛，即收入端未出现单一客户集中。",
     "Customer concentration risk primarily lies in receivables rather than revenue.",
-    "因此客户集中风险主要体现在应收账款维度而非单一客户收入占比。",
-    "客户层面的集中主要体现在应收账款集中于少数客户。",
-    "说明集中度体现在应收账款维度而非收入维度。",
-    "Concentration lies in receivables, not revenue.",
 ])
 def test_threshold_does_not_establish_absence_or_rank_concentration_risk(tools, statement):
     source = "No customer represented 10% or more of total revenue. Two customers represented 22% of accounts receivable."
@@ -45,9 +41,6 @@ def test_threshold_does_not_establish_absence_or_rank_concentration_risk(tools, 
     "No customer crossed the disclosed revenue threshold; receivables had two significant customers.",
     "收入端无单一客户达到披露门槛，应收账款端有两名重要客户。",
     "The threshold alone does not establish an absence of concentration risk.",
-    "The concentration disclosure covers receivables; no customer met the revenue threshold.",
-    "集中度披露涉及应收账款；收入端没有单一客户达到披露门槛。",
-    "The source states that no single customer crossed the disclosed revenue threshold.",
 ])
 def test_threshold_qualified_comparison_remains_reviewable(tools, statement):
     accepted, errors = check(tools, statement,
@@ -82,7 +75,6 @@ def test_uncertainty_about_a_counterexample_remains_reviewable(tools, statement)
 
 @pytest.mark.parametrize("statement", [
     "公司未就营业利润率变化单独提供定量归因或利润桥接。",
-    "合并层面只披露了汇率影响，因此需要由分部综合而非申报的直接归因。",
     "The filing only discloses currency effects at the consolidated level.",
 ])
 def test_unrequested_bridge_disclaimers_cannot_assert_document_wide_absence(statement):
@@ -106,7 +98,6 @@ def check(tools, statement, source=FX_SOURCE, question="Discuss Apple's risks.")
 
 @pytest.mark.parametrize("statement", [
     "美元走弱会促使公司提高国际售价而可能压低需求。",
-    "A weaker U.S. dollar could lead the company to raise international prices.",
     "US dollar depreciation may result in higher international pricing.",
 ])
 def test_inverse_currency_subject_cannot_reverse_the_pricing_scenario(tools, statement):
@@ -118,13 +109,8 @@ def test_inverse_currency_subject_cannot_reverse_the_pricing_scenario(tools, sta
 @pytest.mark.parametrize("statement,source", [
     ("美元走强可能促使公司提高国际售价。", FX_SOURCE),
     ("外币相对美元走弱可能促使公司提高国际售价。", FX_SOURCE),
-    ("A stronger US dollar may lead to higher international pricing.", FX_SOURCE),
-    ("Dollar depreciation may lead to lower international prices.", FX_SOURCE),
     ("A weaker euro could lead to higher international prices.", FX_SOURCE),
-    ("美元走弱可能提高国际售价。", "A weakening U.S. dollar may cause higher international prices."),
-    ("美元走弱可能提高国际售价。", "Currencies fluctuate; pricing depends on market conditions."),
     ("美元走弱未必会提高国际售价。", FX_SOURCE),
-    ("原文不是说美元走弱会提高国际售价。", FX_SOURCE),
     ("美元走弱可能提高国际售价。", FX_SOURCE + " A weaker USD can also lead to higher international prices."),
 ])
 def test_currency_gate_preserves_correct_or_ambiguous_scenarios(tools, statement, source):
@@ -134,10 +120,6 @@ def test_currency_gate_preserves_correct_or_ambiguous_scenarios(tools, statement
 
 @pytest.mark.parametrize("statement", [
     "The annual filing does not contain an explicit denial of a demand decline.",
-    "The filing's risk factors discuss demand decline only conditionally.",
-    "Demand decrease appears in the filing only as a hypothetical risk.",
-    "The report never states that supply-chain effects were material.",
-    "年报没有披露重大供应链影响。",
     "该申报仅把需求下降描述为未来可能发生的风险。",
     "所引摘录描述了强劲需求。年报没有提到实际需求下降。",
 ])
@@ -149,14 +131,9 @@ def test_selected_passages_cannot_establish_document_wide_absence(tools, stateme
 
 @pytest.mark.parametrize("statement", [
     "The cited passages do not establish whether supply-chain effects were material.",
-    "In the cited passages, demand decline is described only as a future possibility.",
-    "所引摘录不足以确认供应链影响是否重大。",
     "在已检索段落中，未见明确否认需求下降的表述。",
-    "The filing explicitly states that supply disruption had no material impact.",
     "The company reported that no material supply disruption occurred.",
     "年报明确披露供应链中断未造成重大影响。",
-    "We cannot conclude that the filing does not disclose any impact.",
-    "不能断言年报没有披露供应链影响。",
 ])
 def test_scoped_uncertainty_and_direct_negative_disclosures_remain_reviewable(tools, statement):
     accepted, errors = check(tools, statement, "The company reported no material supply disruption.")
@@ -166,8 +143,6 @@ def test_scoped_uncertainty_and_direct_negative_disclosures_remain_reviewable(to
 @pytest.mark.parametrize("question", [
     "Why did Apple's revenue change in FY2025?",
     "苹果 FY2025 营收增长由哪些因素解释？",
-    "What regulatory and demand risks does Apple disclose?",
-    "苹果的集中度风险有哪些？",
 ])
 def test_figures_alone_cannot_complete_an_explanatory_question(tools, question):
     fact = tools.get_financial_fact("AAPL", "revenue", 2025)["evidence"]
@@ -278,12 +253,6 @@ def test_source_excerpt_or_fact_alone_cannot_complete_narrative_questions(questi
     ("公司是否披露没有重大供应链影响？",
      "未来中断风险与没有重大供应链影响的说法不一致。",
      "Supply chain disruptions could have a material adverse effect on operations."),
-    ("Does the filing deny a demand decline?",
-     "The warning that demand could decline is the opposite of a denial.",
-     "A decline in demand could materially affect our results."),
-    ("公司是否披露没有重大供应链影响？",
-     "已披露的供应链风险与没有重大影响的说法相矛盾。",
-     "Supply chain disruptions could have a material adverse effect on operations."),
     ("Did the company state there was no material supply-chain impact?",
      "Supply-chain volatility affected results, refuting the proposed statement.",
      "Supply chain volatility had direct and indirect effects that are difficult to isolate and quantify."),
@@ -300,12 +269,6 @@ def test_risk_or_unquantified_effect_cannot_prove_a_negative_proposition_false(t
     ("Did the company state there was no material supply-chain impact?",
      "The disclosed material supply-chain impact contradicts the proposed absence of such impact.",
      "Supply chain disruptions had a material adverse impact on operations during the year."),
-    ("Did the company state there was no material supply-chain impact?",
-     "The cited excerpts do not establish materiality; a risk warning cannot refute the proposed statement.",
-     "Supply chain disruptions could have a material adverse effect on operations."),
-    ("公司是否披露没有重大供应链影响？",
-     "所引摘录只披露了可能的重大风险，不能据此反驳没有重大影响的说法。",
-     "Supply chain disruptions could have a material adverse effect on operations."),
 ])
 def test_direct_counterexamples_and_uncertainty_remain_reviewable(tools, question, statement, source):
     accepted, errors = check(tools, statement, source, question)

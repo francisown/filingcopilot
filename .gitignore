@@ -9,12 +9,8 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-artifacts/local/
 %SystemDrive%/
 artifacts/*
-!artifacts/README.md
-!artifacts/third-round-cold-*.json
-!artifacts/retrieval-frozen-diagnosis-*.json
 # Local optimization receipts and one-off analysis are retained on this machine.
 /LOCAL-OPTIMIZATIONS.md
 /OPTIMIZATION-STATUS.md
@@ -22,10 +18,6 @@ artifacts/*
 /scripts/fc_gold_facts.py
 /scripts/fc_report.py
 /docs/research/
-/docs/validation/live-*/
-/docs/validation/model-control-*/
-/docs/validation/progress-log.md
-/docs/validation/retrieval-*.json
 /evaluation/evidence_annotations.json
 .financebench-eval*/
 

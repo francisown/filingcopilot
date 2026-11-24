@@ -56,9 +56,8 @@ FilingCopilot 是一个在本地运行的 SEC 财报研究工作台。它会找�
 | 预期拒答 / 行情源策略题 | **20 / 20 · 20 / 20** |
 | 无来源支持的结论 / 数值错误 | **0 / 0** |
 | 给出的结论都带来源引用 | **100%** |
-| 回归测试 | **2,360 passed** |
 
-100 道本应能回答的题中，2 道给出了带明确缺口的部分回答（`negation-013/018`），其余为完整回答；另有 2 条否定题答案偏短，作为质量 caveat 保留。完整延迟数据、token 数、数值审计和具体题目见[评测记录](docs/evaluation.md)。这些是工程和工作流层面的测量，不是独立的人工准确率评估。
+100 道本应能回答的题中，2 道给出了带明确缺口的部分回答（`negation-013/018`），其余为完整回答；另有 2 条否定题答案偏短，作为质量 caveat 保留。完整延迟数据、token 数、数值审计和具体题目见[评测记录](docs/evaluation.md)；原始运行记录保留在本地，不提交到仓库。这些是工程和工作流层面的测量，不是独立的人工准确率评估。
 
 **速度：** 数字类问题通常不到一秒；需要阅读大段原文的叙述题会调用模型和独立审查，可能要几分钟。优化前全量模型题 P95 为 842 秒；优化后 140 题重跑为 **P50 121 秒 / P95 465 秒**，可答问题 98/100；非最终 repair 轮跳过 coverage review。仍有 2 条 review `length`、2 条偏短的否定题答案，所以这是速度/coverage 取舍，不是无代价提升。详见[延迟预算](docs/latency-budget.md)。
 
@@ -195,8 +194,9 @@ python -m compileall -q src scripts
 ```
 
 完整 extras 与 CI 一致。只安装 `.[dev]` 也会正常收集测试；缺少 pandas、fastembed
-或 pypdf 时，依赖这些可选包的测试会显式跳过。修改测试后，用
-`python scripts/update_validation_counts.py <count> --write` 同步文档中的数字，并用
-`--check` 校验。外部评测数据和本地财报缓存不会提交到仓库。获取非商业数据集前，请先阅读[evaluation/external/README.md](evaluation/external/README.md)中的许可说明。
+或 pypdf 时，依赖这些可选包的测试会显式跳过。`python -m pytest -q -m "not slow"`
+只跑快速规则子集，`python scripts/run_quality_checks.py --profile frontend`
+运行 JavaScript 与界面脚本检查。外部评测数据、本地财报缓存和原始运行报告不会提交到仓库。
+获取非商业数据集前，请先阅读[evaluation/external/README.md](evaluation/external/README.md)中的许可说明。
 
 FilingCopilot 是独立工程项目，不构成投资建议，不是生产级信贷决策系统，也不是经过认证的模型。

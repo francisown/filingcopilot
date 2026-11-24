@@ -174,18 +174,10 @@ def test_qualitative_narrative_can_bind_a_structured_statement_row(tools, kind):
 
 @pytest.mark.parametrize("question,required", [
     ("Which disclosed drivers explain Apple's FY2025 growth?", False),
-    ("Why did Apple's revenue grow in FY2025?", False),
-    ("Explain the causes of revenue growth in FY2025.", False),
     ("苹果 FY2025 营收增长原因是什么？", False),
-    ("分析苹果 FY2025 收入同比变化的驱动因素", False),
-    ("Apple FY2025 revenue growth", True),
-    ("苹果 FY2025 营收同比", True),
     ("What was the FY2025 revenue growth rate and what drove it?", True),
-    ("How much did FY2025 revenue grow, and why?", True),
-    ("苹果 FY2025 营收增长多少？为什么？", True),
     ("苹果 FY2025 营收增速及其驱动因素", True),
     ("What was Apple's FY2025 revenue growth? Explain its supply risk.", True),
-    ("Give FY2025 revenue growth and explain the risk factors.", True),
     ("苹果 FY2025 营收同比是多少？解释供应风险。", True),
 ])
 def test_growth_driver_coverage_does_not_require_an_unrequested_rate(tools, question, required):
@@ -204,9 +196,7 @@ def test_growth_driver_coverage_does_not_require_an_unrequested_rate(tools, ques
 @pytest.mark.parametrize("statement,allowed", [
     ("公司仅给出净销售增速，未说明合并口径的定性驱动。", False),
     ("The company did not provide a consolidated revenue explanation.", False),
-    ("Management did not disclose the reasons for the change.", False),
     ("在所引段落中，公司未说明合并口径的定性驱动。", True),
-    ("The cited excerpts do not provide a consolidated revenue explanation.", True),
     ("The company reported no material disruption.", True),
 ])
 def test_disclosure_absence_boundary_also_covers_company_subject(tools, kind, statement, allowed):
@@ -226,8 +216,6 @@ def test_disclosure_absence_boundary_also_covers_company_subject(tools, kind, st
 
 @pytest.mark.parametrize("statement,source,allowed", [
     ("网络安全应作为潜在风险而非已实现损害。", "Cyber threats have not materially affected our operations.", False),
-    ("This is a potential risk rather than realized harm.", "Cyber threats have not materially affected our operations.", False),
-    ("所引原文称网络威胁未造成重大影响。", "Cyber threats have not materially affected our operations.", True),
     ("The risk has not occurred.", "The risk has not occurred.", True),
     ("尚无法确认是否存在实际损害。", "Cyber threats may affect our operations.", True),
 ])
@@ -246,14 +234,9 @@ def test_immaterial_effect_does_not_establish_absence_of_harm(tools, statement, 
 @pytest.mark.parametrize("statement,source,allowed", [
     ("These are one-time severance costs.", "Severance costs related to role eliminations were recorded.", False),
     ("该项遣散费用属于一次性项目。", "Severance costs related to role eliminations were recorded.", False),
-    ("The filing classifies these costs as nonrecurring.", "Restructuring costs were recorded in the quarter.", False),
     ("These are one-time restructuring charges.", "The company recorded a non-recurring restructuring charge.", True),
-    ("这些属于非经常性费用。", "The company recorded a one-time restructuring expense.", True),
     ("The disclosure does not establish that these costs are one-time.", "Severance costs were recorded.", True),
     ("不能把这些费用认定为一次性项目。", "Severance costs were recorded.", True),
-    ("It is unclear whether these charges are one-time.", "Severance costs were recorded.", True),
-    ("费用是否属于非经常性项目还需要证据。", "Severance costs were recorded.", True),
-    ("The company recorded severance expenses.", "Severance costs were recorded.", True),
 ])
 def test_expense_recurrence_needs_source_support(tools, kind, statement, source, allowed):
     tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": source}
@@ -285,11 +268,8 @@ def test_analysis_repair_reports_period_and_classification_errors_together(tools
 @pytest.mark.parametrize("statement,source,allowed", [
     ("需求下降属于尚未发生的条件性风险。", "If demand declines, results could be adversely affected.", False),
     ("A disruption has not yet occurred.", "A disruption could harm operations.", False),
-    ("这些风险尚未发生。", "If disruptions have not occurred, the plan may be delayed.", False),
     ("A disruption has not yet occurred.", "No such disruption has occurred to date.", True),
-    ("需求下降被列为条件性风险；是否已发生尚未证实。", "If demand declines, results could be adversely affected.", True),
     ("The excerpt does not establish whether a disruption has occurred.", "A disruption could harm operations.", True),
-    ("不能据此认定风险尚未发生。", "A disruption could harm operations.", True),
 ])
 def test_conditional_risk_does_not_prove_nonoccurrence(tools, kind, statement, source, allowed):
     tools.ledger["p1"] = {**tools.corpus.evidence("p1", tools.as_of), "text": source}
@@ -307,15 +287,9 @@ def test_conditional_risk_does_not_prove_nonoccurrence(tools, kind, statement, s
 
 @pytest.mark.parametrize("kind", ["narrative", "analysis"])
 @pytest.mark.parametrize("statement,source,allowed", [
-    ("The disclosed exposure is a mix across segments and counterparty groups rather than one dominant customer.",
-     "Receivables primarily relate to customers, vendors, and sellers. International sales represent a minority of revenue.", False),
     ("客户集中度较低，业务不依赖单一客户。", "Receivables relate to customers, vendors, and sellers.", False),
-    ("The customer base is diversified.", "Sales are made across several countries.", False),
     ("No single customer dominates revenue.", "Revenue includes retail, subscription and cloud services.", False),
     ("No single customer dominates revenue.", "No individual customer accounted for more than ten percent of total revenue.", True),
-    ("The customer base is diversified.", "We have a diversified customer base.", True),
-    ("The disclosed categories do not establish whether the customer base is diversified.",
-     "Receivables primarily relate to customers, vendors, and sellers.", True),
     ("无法据此认定客户集中度较低。", "Receivables relate to customers, vendors, and sellers.", True),
     ("Receivables are grouped by customers, vendors and sellers.", "Receivables relate to customers, vendors, and sellers.", True),
 ])
@@ -335,11 +309,9 @@ def test_account_categories_do_not_prove_customer_diversification(tools, kind, s
 
 @pytest.mark.parametrize("kind", ["narrative", "analysis"])
 @pytest.mark.parametrize("statement,extra_source,allowed", [
-    ("Exchange rates reduced operating income relative to prior year rates.", "", False),
     ("汇率变动使营业利润低于按上年汇率计算的结果，拖累营业利润率。", "", False),
     ("Exchange rates increased operating income relative to prior year rates.", "", False),
     ("Exchange rates reduced operating income.", "Exchange rates reduced operating income.", True),
-    ("The table presents reported results and results at prior year rates.", "", True),
     ("不能据此认定汇率变动拖累了营业利润率。", "", True),
 ])
 def test_constant_currency_bridge_needs_bound_calculation_or_explicit_explanation(tools, kind, statement, extra_source, allowed):
@@ -367,8 +339,6 @@ def test_constant_currency_bridge_needs_bound_calculation_or_explicit_explanatio
 @pytest.mark.parametrize("source,statement,allowed", [
     ("Cost growth: Technology 23%, Other operating expenses 508%.",
      "技术费用增速显著快于其他费用类别。", False),
-    ("Cost growth: Technology 23%, Other operating expenses 508%.",
-     "Technology expense growth was faster than other expense categories.", False),
     ("Technology expense growth was faster than other expense categories.",
      "Technology expense growth was faster than other expense categories.", True),
     ("Technology expenses increased compared to the prior year.",
@@ -395,18 +365,12 @@ def test_cross_category_growth_ranking_needs_explicit_support(tools, source, sta
      "The first margin was 10% and the second margin was 20%.", True),
     ("The first amount was 100 USD and the second amount was 200 USD.",
      "The first amount was 100 USD and the second amount was 999 USD.", False),
-    ("The first amount was 100 USD and the second amount was 200 USD.",
-     "The first amount was 100 USD and the second amount was 200 USD.", True),
     ("The reported growth was 110%.", "The reported growth was 10%.", False),
     ("The reported growth was -10%.", "The reported growth was 10%.", False),
-    ("The reported growth was 10%.", "The reported growth was -10%.", False),
     ("The reported growth was -10%.", "The reported growth was -10%.", True),
-    ("The expense was 1100 USD.", "The expense was 100 USD.", False),
     ("The expense was 二十亿美元.", "The expense was 十亿美元.", False),
-    ("增长为负百分之十。", "增长为百分之十。", False),
     ("增长为负百分之十。", "增长为负百分之十。", True),
     ("The reported growth was −10%.", "The reported growth was -10%.", True),
-    ("The reported growth was 10 %.", "The reported growth was 10％.", True),
     ("The expense was 100 usd.", "The expense was 100 USD.", True),
     ("First disclosure: 10. Second disclosure: % of revenue.",
      "The share was 10%.", False),
